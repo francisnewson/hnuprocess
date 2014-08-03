@@ -11,19 +11,11 @@ env.Append( CPPFLAGS = ['-std=c++0x',
 '-Wno-error=deprecated-declarations'
 ] )
 
-my_libs = [
-'tools', 
-'subscriber', 
-#'event',
-'analyses',
-'factory',
-'reco', 
-'apps', 
-'parse',
-'shuffle',
-'testapps', 
-'unit', 
-'tmva'
+my_libs = [ 
+'reco',
+'tools',
+'apps',
+'gbase'
 ]
 
 #Call Sconscript for each library

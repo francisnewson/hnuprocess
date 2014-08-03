@@ -7,9 +7,10 @@ root_dir = ( '/afs/cern.ch/sw/lcg/app/releases/ROOT/5.34.14/'
 +'x86_64-slc6-gcc46-opt/root' )
 
 boost_dir =  ( '/afs/cern.ch/sw/lcg/external/Boost/'
-+'1.50.0_python2.7/x86_64-slc6-gcc46-opt' )
+        '1.55.0_python2.7/x86_64-slc6-gcc47-opt'
+        )
 
-boost_name = 'boost-1_50'
+boost_name = 'boost-1_55'
 
 yaml_dir = ( '/afs/cern.ch/user/f/fnewson/work/programs/'
         +'yaml-cpp/yaml-cpp-0.5.1' )
