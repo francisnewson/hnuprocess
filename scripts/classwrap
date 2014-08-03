@@ -1,0 +1,27 @@
+#!/bin/env python
+from pyfiglet import Figlet
+import argparse
+
+f = Figlet()
+
+def wrap( classname ):
+    strings = []
+    strings.append( '#ifndef ' + classname.upper() + '_HH' )
+    strings.append( '#define ' + classname.upper() + '_HH' )
+    strings.append( '#if 0' )
+    strings.append( '/*' )
+    figs = f.renderText( classname ).split('\n')
+    for line in figs:
+        strings.append( ' * ' + line )
+    strings.append( '*/' )
+    strings.append( '#endif')
+    strings.append( 'namespace fn\n{')
+    strings.append( 'class ' + classname + '\n{\n};\n}')
+    strings.append( '#endif')
+    return "\n".join( strings )
+
+parser = argparse.ArgumentParser()
+parser.add_argument( 'classname' )
+args = parser.parse_args()
+
+print( wrap( args.classname ) )
