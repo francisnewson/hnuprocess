@@ -62,5 +62,12 @@ namespace fn
                     std::make_pair(s, &create_subscriber<ST> ) );
         }
     };
+
+#define REG_DEC_SUB(NAME) \
+        static SubscriberRegister<NAME> reg_
+
+#define REG_DEF_SUB(NAME) \
+        SubscriberRegister<NAME> NAME::reg_(#NAME)
+
 }
 #endif

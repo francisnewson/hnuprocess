@@ -21,6 +21,17 @@ namespace fn
         return * log_;
     }
 
+    //reco interaction
+    Long64_t RecoFactory::get_max_events()
+    {
+        return reco_.max_events();
+    }
+
+    const fne::Event * RecoFactory::get_event_ptr()
+    {
+        return reco_.get_event_ptr();
+    }
+
     void RecoFactory::create_subscriber( std::string name, 
             std::string subscriber_type, YAML::Node instruct )
     {

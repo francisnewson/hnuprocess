@@ -46,11 +46,8 @@ int main()
     rf.set_log( slg );
     YAML::Node instruct;
 
-    auto announcer = 
-        SubscriberFactory::get_subscriber("Announcer", instruct, rf);
-
-    reco.add_event_subscriber( announcer );
-
+    rf.create_subscriber( "announcer", "Announcer", instruct );
+    rf.create_subscriber( "counter", "Counter", instruct );
     reco.status_report( std::cerr );
 
     int n = 0;

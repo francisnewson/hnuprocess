@@ -3,6 +3,7 @@
 #include "logging.hh"
 #include "Subscriber.hh"
 #include "yaml-cpp/yaml.h"
+#include "Rtypes.h"
 
 #if 0
 /*  ____
@@ -21,6 +22,11 @@
  */
 #endif
 
+namespace fne
+{
+    class Event;
+}
+
 namespace fn
 {
     class Reconstruction;
@@ -37,6 +43,10 @@ namespace fn
             //logger
             void set_log( logger& log );
             logger& get_log();
+
+            //reco interaction
+            Long64_t get_max_events();
+            const fne::Event * get_event_ptr();
 
             //subscribers
             void create_subscriber( std::string name, 
