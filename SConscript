@@ -15,7 +15,6 @@ my_libs = [
 'reco',
 'tools',
 'apps',
-'gbase'
 ]
 
 #Call Sconscript for each library
