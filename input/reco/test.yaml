@@ -1,0 +1,5 @@
+#TEST YAML
+---
+#General monitors
+- { name: announcer, type: Announcer }
+- { name: counter, type: Counter }
