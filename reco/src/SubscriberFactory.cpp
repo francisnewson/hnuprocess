@@ -6,11 +6,11 @@
 namespace fn
 {
 
-            UnknownSubscriber::UnknownSubscriber( std::string s )
-            :std::out_of_range( s ) {}
+    UnknownSubscriber::UnknownSubscriber( std::string s )
+        :std::out_of_range( s ) {}
 
-     Subscriber * SubscriberFactory::get_subscriber( std::string const& s,
-                YAML::Node& instruct, RecoFactory& rf )
+    Subscriber * SubscriberFactory::get_subscriber( std::string const& s,
+            YAML::Node& instruct, RecoFactory& rf )
     {
         map_type::iterator it =
             global_subscriber_map().find( s );
@@ -21,7 +21,14 @@ namespace fn
         }
         else
         {
-            return it->second( instruct, rf );
+            Subscriber * result =  it->second( instruct, rf );
+
+            if (YAML::Node level_node = instruct["log_level"]) {
+                result->set_log_level(
+                global_severity_map().at(level_node.as<std::string>()) );
+            }
+
+            return result;
         }
     }
 

@@ -22,6 +22,8 @@
 
 namespace fn
 {
+    struct NoLoggerSet;
+
     class Subscriber
     {
         public:
@@ -43,9 +45,18 @@ namespace fn
             void set_id( int id );
             int get_id();
 
+            static void set_log( logger& log);
+            static logger& get_log();
+
+            void set_log_level( severity_level sl ) ;
+            severity_level log_level() const;
+
         private:
             std::string name_;
             int id_;
+
+            static logger * log_;
+            severity_level log_level_;
     };
 
 

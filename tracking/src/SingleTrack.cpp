@@ -10,13 +10,23 @@ namespace fn
     void SingleTrack::new_event()
     {
         dirty_ = true;
+
+            BOOST_LOG_SEV( get_log() , log_level() )
+                << "In SingleTrack event";
+
+        if ( found_single_track() )
+        {
+            auto& st = get_single_track();
+            BOOST_LOG_SEV( get_log() , debug )
+                << "Momentum: " << st.get_mom();
+        }
     }
 
     bool SingleTrack::found_single_track()
     {
         if ( dirty_ )
         {
-            process_event();
+            found_ = process_event();
         }
         return found_;
     }
@@ -25,7 +35,7 @@ namespace fn
     {
         if ( dirty_ )
         {
-            process_event();
+          found_ =   process_event();
         }
         if ( !found_ )
         {
@@ -84,6 +94,8 @@ namespace fn
             throw ;
         }
 
+        set_log_level(  always_print  );
+
         //Set up result pointer of base class
         set_reco_track( &single_reco_track_ );
     }
@@ -97,6 +109,9 @@ namespace fn
         const double& alpha = event_->conditions.alpha;
         const double& beta = event_->conditions.beta;
 
+            BOOST_LOG_SEV( get_log() , log_level() )
+            << "BFST: ntracks " << ntracks;
+
         if ( ntracks < 1 )
         { return false; }
 
@@ -105,11 +120,14 @@ namespace fn
         processing_track pt;
 
         //Look for tracks within initial momentum range
-        for ( unsigned int itrk = 0 ; itrk != 0 ; ++itrk )
+        for ( unsigned int itrk = 0 ; itrk != ntracks ; ++itrk )
         {
             pt.rt =  static_cast<fne::RecoTrack*>( etracks[itrk] );
             pt.corr_mom = p_corr_ab( pt.rt->p, pt.rt->q, alpha, beta  );
             pt.good = true;
+
+            BOOST_LOG_SEV( get_log() , log_level() )
+            << "BFST:  corr_mom " << pt.corr_mom;
 
             if ( pt.corr_mom < init_min_mom_ ){ continue; }
             if ( pt.corr_mom > init_max_mom_ ){ continue; }
@@ -118,6 +136,9 @@ namespace fn
         }
 
         if ( proc_tracks_.size() < 1 ){ return false; }
+
+            BOOST_LOG_SEV( get_log() , log_level() )
+            << "BFST: passed init " << ntracks;
 
         //Loop over pairs of tracks
         for ( auto otrk = proc_tracks_.begin() ; 
@@ -167,6 +188,9 @@ namespace fn
                 { ot.good = false; }
             }
         } //End loop over pairs
+
+            BOOST_LOG_SEV( get_log() , log_level() )
+            << "BFST: passed pairs " << ntracks;
 
         auto& conditions = event_->conditions;
         auto& dch_toffst = conditions.dch_toffst ;
@@ -226,7 +250,13 @@ namespace fn
         single_reco_track_.update( &proc_tracks_[0], event_ );
         return true;
     }
+
+
     //--------------------------------------------------
+
+    BFSingleRecoTrack::BFSingleRecoTrack()
+        :bfc_( global_BFCorrection() )
+    {}
 
     void BFSingleRecoTrack::update(  
             const processing_track * proc_track, 
@@ -237,4 +267,28 @@ namespace fn
             ( event, proc_track_->rt, proc_track_->vert );
     }
 
+    int BFSingleRecoTrack::get_charge() const
+    {
+        return proc_track_->rt->q;
+    }
+
+    TVector3 BFSingleRecoTrack::get_3mom() const
+    {
+        return proc_track_->corr_mom * bf_track_.get_direction().Unit();
+    }
+
+    double BFSingleRecoTrack::get_mom() const
+    {
+        return proc_track_->corr_mom;
+    }
+
+    TVector3 BFSingleRecoTrack::get_vertex() const
+    {
+        return proc_track_->vert.point;
+    }
+
+    double BFSingleRecoTrack::get_cda() const
+    {
+        return proc_track_->vert.cda;
+    }
 }

@@ -1,5 +1,6 @@
 #include "Subscriber.hh"
 #include "RecoFactory.hh"
+#include "Xcept.hh"
 
 namespace fn
 {
@@ -17,5 +18,25 @@ namespace fn
 
     //--------------------------------------------------
 
+    void Subscriber::set_log( logger& log)
+    {
+        log_ =& log ;
+    }
 
+    logger& Subscriber::get_log()
+    {
+        if ( !log_ )
+        {
+            throw Xcept<NoLoggerSet>( LINE_STRING );
+        }
+        return * log_;
+    }
+
+    void Subscriber::set_log_level( severity_level sl ) 
+    { log_level_ = sl; }
+
+    severity_level Subscriber::log_level() const
+    { return log_level_; }
+
+    logger * Subscriber::log_ = 0;
 }

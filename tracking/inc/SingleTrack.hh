@@ -27,8 +27,15 @@ namespace fn
     class SingleRecoTrack
     {
         public:
-            int get_charge() const;
-            TVector3 get_momentum() const;
+            virtual int get_charge() const = 0;
+
+            virtual TVector3 get_3mom() const = 0;
+            virtual double get_mom() const = 0;
+
+            virtual TVector3 get_vertex() const = 0;
+            virtual double get_cda() const = 0;
+
+            virtual ~SingleRecoTrack(){}
     };
 
     class SingleTrack : public Subscriber
@@ -75,17 +82,25 @@ namespace fn
     class BFSingleRecoTrack : public SingleRecoTrack
     {
         public:
+            BFSingleRecoTrack();
             void update(  
                     const processing_track * proc_track, 
                     const fne::Event * event );
+
+            int get_charge() const;
+
+            TVector3 get_3mom() const;
+            double get_mom() const;
+
+            TVector3 get_vertex() const;
+            double get_cda() const;
 
             int get_charge();
             double momentum();
 
         private:
-            BFCorrection bfc_;
+            BFCorrection& bfc_;
             const processing_track * proc_track_;
-            double momentum_;
             Track bf_track_;
     };
 

@@ -3,6 +3,10 @@
 
 #include <stdexcept>
 
+#define STRINGIZE(x) STRINGIZE2(x)
+#define STRINGIZE2(x) #x
+#define LINE_STRING STRINGIZE(__LINE__)
+
 #if 0
 /*
  * __   __              _   

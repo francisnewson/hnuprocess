@@ -12,6 +12,9 @@
 #include <boost/log/expressions/keyword.hpp>
 #include <boost/log/expressions/predicates/is_in_range.hpp>
 
+#include <map>
+#include <string>
+
 #if 0
 /*
  *  _                   _             
@@ -36,9 +39,16 @@ namespace fn
         maximum
     };
 
-    BOOST_LOG_ATTRIBUTE_KEYWORD(severity, "Severity", severity_level)
+    BOOST_LOG_ATTRIBUTE_KEYWORD
+        (severity, "Severity", severity_level)
 
-        typedef boost::log::sources::severity_logger<severity_level> logger; 
+        typedef 
+        boost::log::sources::severity_logger<severity_level> 
+        logger; 
+
+    //Map between strings and severity_level's for runtime config
+    std::map<std::string, severity_level> generate_severity_map();
+    std::map<std::string, severity_level>& global_severity_map();
 }
 
 #endif

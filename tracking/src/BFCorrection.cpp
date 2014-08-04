@@ -40,4 +40,11 @@ namespace fn
         return Track( TVector3( Vpnt[0], Vpnt[1], na62const::bz_tracking),
                 TVector3( Vdir[0], Vdir[1], 1 ) );
     }
+
+
+    BFCorrection& global_BFCorrection()
+    {
+        static BFCorrection bfc;
+        return bfc;
+    }
 }
