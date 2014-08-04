@@ -1,3 +1,4 @@
+import os.path
 Import('env')
 Import('*')
 
@@ -13,7 +14,13 @@ lenv.AddEvent( event_dir, 'event' )
 lenv.SetYaml( yaml_dir )
 
 lenv.Append( CPPPATH = 'inc' )
+
+fenv = Environment( CPPFLAGS = '-I'+os.path.abspath( '../../tracking/finc' ), CPPPATH = 'tracking/finc' )
+fortran_tracking = fenv.SharedObject( target = 'fortran_tracking.os', source = 'fsrc/fuser_bluefield_2003.F')
+
+
+
 lenv.SharedLibrary(
         target = 'tracking',
-        source = Glob( 'src/*.cpp' )
+        source = [Glob( 'src/*.cpp' ) ,fortran_tracking]
         )

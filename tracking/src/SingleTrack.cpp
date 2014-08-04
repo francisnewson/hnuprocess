@@ -21,7 +21,7 @@ namespace fn
         return found_;
     }
 
-    SingleRecoTrack& SingleTrack::get_single_track()
+    const SingleRecoTrack& SingleTrack::get_single_track()
     {
         if ( dirty_ )
         {
@@ -31,7 +31,12 @@ namespace fn
         {
             throw Xcept<EventDoesNotContain>( "SingleTrack");
         }
-        return single_reco_track_;
+        return *single_reco_track_;
+    }
+
+    void SingleTrack::set_reco_track( const SingleRecoTrack * srt )
+    {
+        single_reco_track_ = srt;
     }
 
     REG_DEF_SUB( SingleTrack );
@@ -78,6 +83,9 @@ namespace fn
             std::cerr << e.what() << "\n";
             throw ;
         }
+
+        //Set up result pointer of base class
+        set_reco_track( &single_reco_track_ );
     }
 
     //Identify and calculate single track
@@ -215,15 +223,18 @@ namespace fn
         }
 
         //Compute details for selected track
-        single_reco_track_ = compute_track( proc_tracks_[0] );
+        single_reco_track_.update( &proc_tracks_[0], event_ );
         return true;
     }
     //--------------------------------------------------
 
-    SingleRecoTrack BFSingleTrack::compute_track
-        ( const processing_track& pt )
-        {
-            return SingleRecoTrack{};
+    void BFSingleRecoTrack::update(  
+            const processing_track * proc_track, 
+            const fne::Event * event )
+    {
+        proc_track_ = proc_track;
+        bf_track_ = bfc_.compute_bf_track
+            ( event, proc_track_->rt, proc_track_->vert );
+    }
 
-        }
 }

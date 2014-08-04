@@ -5,6 +5,7 @@
 #include "RecoFactory.hh"
 #include "Event.hh"
 #include "RecoTrack.hh"
+#include "BFCorrection.hh"
 #include "Track.hh"
 #if 0
 /*
@@ -26,8 +27,8 @@ namespace fn
     class SingleRecoTrack
     {
         public:
-            int get_charge();
-            TVector3 get_momentum();
+            int get_charge() const;
+            TVector3 get_momentum() const;
     };
 
     class SingleTrack : public Subscriber
@@ -38,16 +39,18 @@ namespace fn
 
             //SingleTrack interface
             bool found_single_track();
-            SingleRecoTrack& get_single_track();
+            const SingleRecoTrack& get_single_track();
 
         protected:
-            //Results cacheing
-            bool dirty_;
-            bool found_;
-            SingleRecoTrack single_reco_track_;
+            void set_reco_track( const SingleRecoTrack * srt );
 
         private:
             virtual bool process_event() = 0;
+            const SingleRecoTrack * single_reco_track_;
+
+            //Results cacheing
+            bool dirty_;
+            bool found_;
 
             REG_DEC_SUB( SingleTrack );
     };
@@ -59,26 +62,50 @@ namespace fn
     //--------------------------------------------------
 
     //BF
+
+    struct processing_track
+    {
+        double corr_mom;
+        Vertex vert;
+        bool good;
+
+        fne::RecoTrack * rt;
+    };
+
+    class BFSingleRecoTrack : public SingleRecoTrack
+    {
+        public:
+            void update(  
+                    const processing_track * proc_track, 
+                    const fne::Event * event );
+
+            int get_charge();
+            double momentum();
+
+        private:
+            BFCorrection bfc_;
+            const processing_track * proc_track_;
+            double momentum_;
+            Track bf_track_;
+    };
+
+
     class BFSingleTrack : public SingleTrack
     {
         public:
             BFSingleTrack( const fne::Event * event, 
                     YAML::Node& instruct );
 
+
         private:
             const fne::Event * event_;
             bool process_event();
 
-            struct processing_track
-            {
-                double corr_mom;
-                fne::RecoTrack * rt;
-                Vertex vert;;
-                bool good;
-            };
+            BFSingleRecoTrack single_reco_track_;
 
-            SingleRecoTrack compute_track
-                ( const processing_track& pt );
+            SingleRecoTrack load_computed_track
+                ( const processing_track& pt, 
+                  SingleRecoTrack& srt );
 
             //track monitoring
             std::vector<processing_track> proc_tracks_;
@@ -97,6 +124,7 @@ namespace fn
     };
 
     //--------------------------------------------------
+
 
 
 }
