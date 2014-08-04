@@ -3,3 +3,19 @@
 #General monitors
 - { name: announcer, type: Announcer }
 - { name: counter, type: Counter }
+
+  #SingleTrack
+- { 
+name : bf_st, type : SingleTrack, method : BF,
+
+init_min_mom: 3.0 , 
+init_max_mom: 75.0, 
+
+init_max_cda: 10.0 , 
+
+init_min_z: -2000.0 , 
+init_max_z:  9000.0 ,
+
+dch_merge_sep: 0.5,
+}
+

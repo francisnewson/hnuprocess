@@ -186,6 +186,7 @@ namespace fn
     bool EventChain::load_next_event_header()
     {
         //Does all the work.
+        event_->Clear("C");
 
         //Have we finished?
         if ( next_event_ == max_event_ )

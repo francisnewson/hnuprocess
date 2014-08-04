@@ -6,6 +6,7 @@
 #include "Selection.hh"
 #include "logging.hh"
 #include "Announcer.hh"
+#include "SingleTrack.hh"
 #include "yaml-cpp/yaml.h"
 
 using namespace fn;

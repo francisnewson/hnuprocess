@@ -60,6 +60,8 @@ namespace fn
         { 
             global_subscriber_map().insert(
                     std::make_pair(s, &create_subscriber<ST> ) );
+
+            std::cerr << "Registered " << s << std::endl;
         }
     };
 
