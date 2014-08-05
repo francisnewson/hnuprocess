@@ -37,19 +37,25 @@ int main( int argc, char * argv[])
         ( "log-level", po::value<std::string>(), "Set debug level")
         ;
 
-        po::options_description files("files");
+    po::options_description files("files");
 
     po::options_description data("data");
     data.add_options()
         ( "number,n", po::value<Long64_t>(), "Number of events")
         ;
 
-        po::options_description desc("Allowed options");
+    po::options_description desc("Allowed options");
     desc.add( general ).add( files ).add( data );
 
     //parse
     po::variables_map vm;
     po::store( po::parse_command_line(argc, argv, desc), vm);
+
+    if ( vm.count( "help" ) )
+    {
+        std::cerr << desc << std::endl;
+        exit(0);
+    }
 
     //required number of events
     Long64_t required_events  = 100;
@@ -68,7 +74,7 @@ int main( int argc, char * argv[])
     if ( vm.count( "log-level" ) )
     {
         min_sev = global_severity_map().at(
-                vm["log_level"].as<std::string>() );
+                vm["log-level"].as<std::string>() );
     }
 
 
@@ -95,8 +101,8 @@ int main( int argc, char * argv[])
     reco_factory.set_log( slg );
 
     //Create RecoParser
-    RecoParser reco_parser( reco_factory );
-    reco_parser.parse( "input/reco/test.yaml" );
+    RecoParser reco_parser( reco_factory, slg );
+    reco_parser.parse( "input/reco/test/test.yaml" );
 
     Subscriber::set_log( slg );
 

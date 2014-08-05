@@ -5,6 +5,7 @@
 #include <boost/filesystem/path.hpp>
 
 #include "yaml-cpp/yaml.h"
+#include "logging.hh"
 
 #if 0
 /*
@@ -31,11 +32,12 @@ namespace fn
     class RecoParser
     {
         public:
-            RecoParser( RecoFactory& rf );
+            RecoParser( RecoFactory& rf, logger& log );
             void parse( boost::filesystem::path config );
 
         private:
             RecoFactory& rf_;
+            logger& log_;
     };
 }
 #endif

@@ -20,9 +20,15 @@ dch_merge_sep: 0.5,
 log_level:  per_event
 }
 
+#MUV bursts
+- { cat: selection, name: gd_muv_brst, type: BadBurst,
+burst_list: "input/reco/conditions/bad_muv_burst.dat"  }
+
+- { cat: selection, name: gd_akl_brst, type: BadBurst,
+burst_list: "input/reco/conditions/bad_akl_burst.dat"  }
 
 #good burst
 - {
-    cat: Selection, name: gd_brst, type : CompositeSelection,
-    children: [ good_muv_burst , good_akl_burst ]
+    cat: selection, name: gd_brst, type : CompositeSelection,
+    children: [ gd_muv_brst , gd_akl_brst ]
 }
