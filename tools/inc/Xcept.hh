@@ -6,6 +6,7 @@
 #define STRINGIZE(x) STRINGIZE2(x)
 #define STRINGIZE2(x) #x
 #define LINE_STRING STRINGIZE(__LINE__)
+#define FILE_STRING std::string(__FILE__)
 
 #if 0
 /*

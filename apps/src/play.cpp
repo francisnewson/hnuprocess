@@ -6,6 +6,7 @@
 #include "RecoParser.hh"
 #include "Selection.hh"
 #include "logging.hh"
+#include "BadBurst.hh"
 #include "Announcer.hh"
 #include "SingleTrack.hh"
 #include "yaml-cpp/yaml.h"

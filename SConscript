@@ -15,7 +15,8 @@ my_libs = [
 'reco',
 'tools',
 'apps',
-'tracking'
+'tracking',
+'conditions'
 ]
 
 #Call Sconscript for each library
