@@ -3,58 +3,82 @@
 #-------------------------------------------------- 
 #
 #General monitors
-- { name: announcer, type: Announcer }
-- { name: counter, type: Counter }
+- monitor:
+    name: announcer
+    type: Announcer 
 
-  #SingleTrack
-- { 
-name : bf_st, type : SingleTrack, method : BF,
-#log_level: always_print,
+- monitor:
+    name: counter
+    type: Counter
 
-init_min_mom: 3.0 , 
-init_max_mom: 75.0, 
+#SingleTrack
+- input:
+    name : bf_st
+    type : SingleTrack
+    method : BF
 
-init_max_cda: 10.0 , 
+    #log_level: always_print
 
-init_min_z: -2000.0 , 
-init_max_z:  9000.0 ,
+    init_min_mom: 3.0 
+    init_max_mom: 75.0
 
-dch_merge_sep: 0.5,
-log_level:  per_event
-}
+    init_max_cda: 10.0
+
+    init_min_z: -2000.0
+    init_max_z:  9000.0
+
+    dch_merge_sep: 0.5
 
 #-------------------------------------------------- 
 
 #Autopass
-- { cat: selection, name: passer, type : auto_pass }
+- selection:
+    name: passer
+    type : auto_pass
 
-  #MUV bursts
-- { cat: selection, name: gd_muv_brst, type: BadBurst,
-burst_list: "input/reco/conditions/bad_muv_burst.dat"  }
+#MUV bursts
+- selection:
+    name: gd_muv_brst
+    type: BadBurst
+    burst_list: "input/reco/conditions/bad_muv_burst.dat"
 
-    #AKL bursts
-- { cat: selection, name: gd_akl_brst, type: BadBurst,
-burst_list: "input/reco/conditions/bad_akl_burst.dat"  }
+#AKL bursts
+- selection:
+    name: gd_akl_brst
+    type: BadBurst
+    burst_list: "input/reco/conditions/bad_akl_burst.dat"
 
-    #Found ogt
-- { cat: selection, name: gd_trk, type : FoundGoodTrack,
-inputs : { ogt: bf_st } }
+#Found ogt
+- selection:
+    name: gd_trk
+    type : FoundGoodTrack
 
-    #Track charge
-- { cat: selection, name: pos_trk, type : TrackCharge,
-charge: +1,
-inputs : { ogt: bf_st } }
+    inputs :
+        ogt: bf_st
 
-    #good events
-- {
-    cat: selection, name: gd_event, type : CompositeSelection,
-    children: [ gd_muv_brst , gd_akl_brst, gd_trk, pos_trk ]
-}
+#Track charge
+- selection:
+    name: pos_trk
+    type : TrackCharge
+    charge: +1
+    inputs :
+        ogt: bf_st
 
+#good events
+- selection:
+    name: gd_event
+    type : CompositeSelection
+    children:
+        - gd_muv_brst
+        - gd_akl_brst
+        - gd_trk
+        - pos_trk
+#
 #-------------------------------------------------- 
 
 #summary
-- { 
-name : test_summary, type: Summary,
-base : passer, source : gd_event 
-}
+- analysis : 
+    name : test_summary
+    type: Summary
+    base : passer
+    source : gd_event 

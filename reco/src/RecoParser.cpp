@@ -21,7 +21,13 @@ namespace fn
         for (YAML::const_iterator it=config_node.begin();
                 it!=config_node.end();++it)
         {
-            auto& instruct = * it;
+            assert(it->Type() == YAML::NodeType::Map);
+
+            YAML::const_iterator instruct_it  = it->begin();
+            assert(it->Type() == YAML::NodeType::Map);
+
+            const YAML::Node& instruct = instruct_it->second;
+            std::string cat = instruct_it->first.as<std::string>();
 
             std::string name =
                 instruct["name"].as<std::string>();
@@ -34,33 +40,28 @@ namespace fn
             Subscriber * s = rf_.create_subscriber( 
                     name, type, instruct );
 
-                    BOOST_LOG_SEV( log_, debug)
-                        << "RECOPARSER: Subscriber - " << name;
+            BOOST_LOG_SEV( log_, debug)
+                << "RECOPARSER: Subscriber - " << name;
 
-                    BOOST_LOG_SEV( log_, debug)
-                    << "\n" << instruct ;
+            BOOST_LOG_SEV( log_, debug)
+                << "\n" << instruct ;
 
-            //There are some special categories
-            if ( YAML::Node cat = instruct["cat"] )
+
+            //Selections need to be found by others
+            if ( cat == "selection" )
             {
-                    BOOST_LOG_SEV( log_, debug)
-                        << "RECOPARSER: cat - " << name;
+                BOOST_LOG_SEV( log_, debug)
+                    << "RECOPARSER: Selection - " << name;
 
-                //Selections need to be found by others
-                if ( cat.as<std::string>() == "selection" )
+                Selection * sel = dynamic_cast<Selection*>(s);
+                if ( !sel )
                 {
-                    BOOST_LOG_SEV( log_, debug)
-                        << "RECOPARSER: Selection - " << name;
+                    throw Xcept<BadCast>
+                        ( name + "is not a selection" );
 
-                    Selection * sel = dynamic_cast<Selection*>(s);
-                    if ( !sel )
-                    {
-                        throw Xcept<BadCast>
-                            ( name + "is not a selection" );
-
-                    }
-                    rf_.add_selection(name, sel );
                 }
+
+                rf_.add_selection(name, sel );
             }
         }
     }

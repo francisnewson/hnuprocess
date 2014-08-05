@@ -99,8 +99,6 @@ namespace fn
             throw ;
         }
 
-        set_log_level(  always_print  );
-
         //Set up result pointer of base class
         set_reco_track( &single_reco_track_ );
     }
