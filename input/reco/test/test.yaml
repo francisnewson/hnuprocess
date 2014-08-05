@@ -18,17 +18,24 @@ init_max_z:  9000.0 ,
 
 dch_merge_sep: 0.5,
 log_level:  per_event
-}
+  }
 
-#MUV bursts
+  #Autopass
+- { cat: selection, name: passer, type : auto_pass }
+
+  #MUV bursts
 - { cat: selection, name: gd_muv_brst, type: BadBurst,
 burst_list: "input/reco/conditions/bad_muv_burst.dat"  }
 
+    #AKL bursts
 - { cat: selection, name: gd_akl_brst, type: BadBurst,
 burst_list: "input/reco/conditions/bad_akl_burst.dat"  }
 
-#good burst
+    #good burst
 - {
     cat: selection, name: gd_brst, type : CompositeSelection,
     children: [ gd_muv_brst , gd_akl_brst ]
-}
+    }
+
+- { name : test_summary, type: Summary,
+base : passer, source : gd_brst }

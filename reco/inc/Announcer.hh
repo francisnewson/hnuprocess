@@ -24,6 +24,8 @@ namespace fn
             void new_run();
             void new_event();
 
+            void end_processing();
+
         private:
             logger& log_;
             severity_level sl_;

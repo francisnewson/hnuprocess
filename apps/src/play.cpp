@@ -116,4 +116,6 @@ int main( int argc, char * argv[])
         BOOST_LOG_SEV( slg, debug )
             << "Printing event " << n++;
     }
+
+    reco.end_processing();
 }

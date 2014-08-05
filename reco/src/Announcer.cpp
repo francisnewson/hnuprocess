@@ -49,5 +49,12 @@ namespace fn
             << "ANNOUNCEMNET: New event";
     }
 
+    void Announcer::end_processing()
+    { 
+
+        BOOST_LOG_SEV( log_, sl_ )
+            << "ANNOUNCEMNET: End processing";
+    }
+
 }
 

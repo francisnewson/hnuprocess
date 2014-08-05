@@ -85,9 +85,16 @@ namespace fn
 				//Forward lookup K in ranges
 				bool check_value( const K& key ) const
 				{
+                    if ( current_info_ == info_.begin() )
+                    { return false; }
+
 					while (  key >  *current_info_ )
 					{
 						++current_info_;
+
+                    if ( current_info_ == info_.begin() )
+                    { return false; }
+
 					}
 					return ( key == *current_info_ );
 				}
