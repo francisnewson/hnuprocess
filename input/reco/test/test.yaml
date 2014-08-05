@@ -1,5 +1,7 @@
 #TEST YAML
 ---
+#-------------------------------------------------- 
+#
 #General monitors
 - { name: announcer, type: Announcer }
 - { name: counter, type: Counter }
@@ -7,6 +9,7 @@
   #SingleTrack
 - { 
 name : bf_st, type : SingleTrack, method : BF,
+#log_level: always_print,
 
 init_min_mom: 3.0 , 
 init_max_mom: 75.0, 
@@ -18,9 +21,11 @@ init_max_z:  9000.0 ,
 
 dch_merge_sep: 0.5,
 log_level:  per_event
-  }
+}
 
-  #Autopass
+#-------------------------------------------------- 
+
+#Autopass
 - { cat: selection, name: passer, type : auto_pass }
 
   #MUV bursts
@@ -31,11 +36,25 @@ burst_list: "input/reco/conditions/bad_muv_burst.dat"  }
 - { cat: selection, name: gd_akl_brst, type: BadBurst,
 burst_list: "input/reco/conditions/bad_akl_burst.dat"  }
 
-    #good burst
-- {
-    cat: selection, name: gd_brst, type : CompositeSelection,
-    children: [ gd_muv_brst , gd_akl_brst ]
-    }
+    #Found ogt
+- { cat: selection, name: gd_trk, type : FoundGoodTrack,
+inputs : { ogt: bf_st } }
 
-- { name : test_summary, type: Summary,
-base : passer, source : gd_brst }
+    #Track charge
+- { cat: selection, name: pos_trk, type : TrackCharge,
+charge: +1,
+inputs : { ogt: bf_st } }
+
+    #good events
+- {
+    cat: selection, name: gd_event, type : CompositeSelection,
+    children: [ gd_muv_brst , gd_akl_brst, gd_trk, pos_trk ]
+}
+
+#-------------------------------------------------- 
+
+#summary
+- { 
+name : test_summary, type: Summary,
+base : passer, source : gd_event 
+}

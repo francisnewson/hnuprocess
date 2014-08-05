@@ -11,8 +11,8 @@ namespace fn
     {
         dirty_ = true;
 
-            BOOST_LOG_SEV( get_log() , log_level() )
-                << "In SingleTrack event";
+        BOOST_LOG_SEV( get_log() , log_level() )
+            << "In SingleTrack event";
 
         if ( found_single_track() )
         {
@@ -22,25 +22,30 @@ namespace fn
         }
     }
 
-    bool SingleTrack::found_single_track()
+    bool SingleTrack::found_single_track() const
     {
         if ( dirty_ )
         {
             found_ = process_event();
+            dirty_ = false;
         }
+        assert( !dirty_ );
         return found_;
     }
 
-    const SingleRecoTrack& SingleTrack::get_single_track()
+    const SingleRecoTrack& SingleTrack::get_single_track() const
     {
         if ( dirty_ )
         {
-          found_ =   process_event();
+            found_ =   process_event();
+            dirty_ = false;
         }
         if ( !found_ )
         {
             throw Xcept<EventDoesNotContain>( "SingleTrack");
         }
+        assert( !dirty_ );
+        assert( found_);
         return *single_reco_track_;
     }
 
@@ -101,7 +106,7 @@ namespace fn
     }
 
     //Identify and calculate single track
-    bool BFSingleTrack::process_event()
+    bool BFSingleTrack::process_event() const
     {
         int ntracks = event_->detector.ntracks;
         auto& etracks = event_->detector.tracks;
@@ -109,7 +114,7 @@ namespace fn
         const double& alpha = event_->conditions.alpha;
         const double& beta = event_->conditions.beta;
 
-            BOOST_LOG_SEV( get_log() , log_level() )
+        BOOST_LOG_SEV( get_log() , log_level() )
             << "BFST: ntracks " << ntracks;
 
         if ( ntracks < 1 )
@@ -127,7 +132,7 @@ namespace fn
             pt.good = true;
 
             BOOST_LOG_SEV( get_log() , log_level() )
-            << "BFST:  corr_mom " << pt.corr_mom;
+                << "BFST:  corr_mom " << pt.corr_mom;
 
             if ( pt.corr_mom < init_min_mom_ ){ continue; }
             if ( pt.corr_mom > init_max_mom_ ){ continue; }
@@ -137,7 +142,7 @@ namespace fn
 
         if ( proc_tracks_.size() < 1 ){ return false; }
 
-            BOOST_LOG_SEV( get_log() , log_level() )
+        BOOST_LOG_SEV( get_log() , log_level() )
             << "BFST: passed init " << ntracks;
 
         //Loop over pairs of tracks
@@ -147,7 +152,7 @@ namespace fn
             auto & ot = * otrk;
 
             for ( auto itrk = proc_tracks_.begin() ; 
-                    itrk != proc_tracks_.end() ; ++ itrk )
+                    itrk != otrk ; ++ itrk )
             {
                 auto & it = * itrk;
 
@@ -189,7 +194,7 @@ namespace fn
             }
         } //End loop over pairs
 
-            BOOST_LOG_SEV( get_log() , log_level() )
+        BOOST_LOG_SEV( get_log() , log_level() )
             << "BFST: passed pairs " << ntracks;
 
         auto& conditions = event_->conditions;
@@ -206,6 +211,8 @@ namespace fn
             //out of time tracks are bad
             if ( fabs( pt.rt->time - dch_toffst ) > 62.5 )
             {
+                BOOST_LOG_SEV( get_log() , log_level() )
+                    << "BFST: bad time ";
                 pt.good = false;
                 continue;
             }
@@ -218,22 +225,32 @@ namespace fn
                     pt_track, kaon_track );
 
             //raw cda requirement
-            if ( pt.vert.cda > init_min_cda_ )
+            if ( pt.vert.cda > init_max_cda_ )
             {
+                BOOST_LOG_SEV( get_log() , log_level() )
+                    << "BFST: bad cda " << pt.vert.cda  
+                    << " > " << init_max_cda_;
                 pt.good = false;
             }
 
             //raw vertex range
             if ( pt.vert.point.Z() < init_min_z_ )
             {
+                BOOST_LOG_SEV( get_log() , log_level() )
+                    << "BFST: bad min z ";
                 pt.good = false;
             }
 
             if ( pt.vert.point.Z() > init_max_z_ )
             {
+                BOOST_LOG_SEV( get_log() , log_level() )
+                    << "BFST: bad max z ";
                 pt.good = false;
             }
         }
+
+        BOOST_LOG_SEV( get_log() , log_level() )
+            << "BFST: done checks ";
 
         //remove bad tracks
         proc_tracks_.erase(
@@ -243,8 +260,13 @@ namespace fn
 
         if ( proc_tracks_.size() != 1 )
         {
+            BOOST_LOG_SEV( get_log() , log_level() )
+                << "BFST: BAD size " << proc_tracks_.size();
             return false;
         }
+
+        BOOST_LOG_SEV( get_log() , log_level() )
+            << "BFST: Passed! computing BF " << ntracks;
 
         //Compute details for selected track
         single_reco_track_.update( &proc_tracks_[0], event_ );

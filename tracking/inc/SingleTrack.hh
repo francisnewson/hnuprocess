@@ -45,19 +45,19 @@ namespace fn
             void new_event();
 
             //SingleTrack interface
-            bool found_single_track();
-            const SingleRecoTrack& get_single_track();
+            bool found_single_track() const;
+            const SingleRecoTrack& get_single_track() const;
 
         protected:
             void set_reco_track( const SingleRecoTrack * srt );
 
         private:
-            virtual bool process_event() = 0;
+            virtual bool process_event() const = 0;
             const SingleRecoTrack * single_reco_track_;
 
             //Results cacheing
-            bool dirty_;
-            bool found_;
+            mutable bool dirty_;
+            mutable bool found_;
 
             REG_DEC_SUB( SingleTrack );
     };
@@ -114,22 +114,21 @@ namespace fn
 
         private:
             const fne::Event * event_;
-            bool process_event();
+            bool process_event() const;
 
-            BFSingleRecoTrack single_reco_track_;
+            mutable BFSingleRecoTrack single_reco_track_;
 
             SingleRecoTrack load_computed_track
                 ( const processing_track& pt, 
-                  SingleRecoTrack& srt );
+                  SingleRecoTrack& srt ) const;
 
-            //track monitoring
-            std::vector<processing_track> proc_tracks_;
+                //track monitoring
+                mutable std::vector<processing_track> proc_tracks_;
 
             //tracking parameters
             double init_min_mom_;
             double init_max_mom_;
 
-            double init_min_cda_;
             double init_max_cda_;
 
             double init_min_z_;
