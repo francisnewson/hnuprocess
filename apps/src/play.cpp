@@ -86,7 +86,7 @@ int main( int argc, char * argv[])
     //Create Reconstruction
     Reconstruction reco(  slg );
     reco.set_filenames( filenames );
-    reco.set_required_events( 100 );
+    reco.set_required_events( required_events );
     reco.load_chain();
 
     //Create RecoFactory

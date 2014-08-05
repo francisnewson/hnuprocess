@@ -18,5 +18,11 @@ init_max_z:  9000.0 ,
 
 dch_merge_sep: 0.5,
 log_level:  per_event
-  }
+}
 
+
+#good burst
+- {
+    cat: Selection, name: gd_brst, type : CompositeSelection,
+    children: [ good_muv_burst , good_akl_burst ]
+}

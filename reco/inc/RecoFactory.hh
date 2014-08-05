@@ -2,6 +2,7 @@
 #define RECOFACTORY_HH
 #include "logging.hh"
 #include "Subscriber.hh"
+#include "Selection.hh"
 #include "yaml-cpp/yaml.h"
 #include "Rtypes.h"
 
@@ -33,7 +34,9 @@ namespace fn
 
     //exceptions
     struct DuplicateSubscriberName{};
+    struct DuplicateSelectionName{};
     struct UnknownSubscriberName{};
+    struct UnknownSelectionName{};
 
     class RecoFactory
     {
@@ -49,16 +52,21 @@ namespace fn
             const fne::Event * get_event_ptr();
 
             //subscribers
-            void create_subscriber( std::string name, 
+            Subscriber * create_subscriber( std::string name, 
                     std::string subscriber_type, YAML::Node instruct );
 
             Subscriber * get_subscriber ( std::string name );
+
+            //Selection management
+            void add_selection ( std::string name, Selection * s  );
+            Selection * get_selection ( std::string name);
 
         private:
             Reconstruction& reco_;
             logger * log_;
 
             std::map< std::string, Subscriber* > subscribers_;
+            std::map< std::string, Selection* > selections_;
             unsigned int next_sub_id_;
     };
 }

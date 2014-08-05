@@ -19,6 +19,15 @@
 #endif
 namespace fn
 {
+    /*****************************************************
+     * RECOPARSER
+     *
+     *  Takes a YAML file and builds the required 
+     *  reconstruction using a RecoFactory (stored
+     *  as a reference )
+     *****************************************************/
+    struct BadCast{};
+
     class RecoParser
     {
         public:

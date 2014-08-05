@@ -21,6 +21,15 @@ namespace fn
 
     int nice_mod_count ( int nEvents );
 
+    /*****************************************************
+     * COUNTER
+     *
+     * An example of how the subscriber mechanism works
+     * This class counts the number of events it sees
+     * and prints a message when an interesting number
+     * is reached
+     *
+     *****************************************************/
     class Counter : public Subscriber
     {
         public:

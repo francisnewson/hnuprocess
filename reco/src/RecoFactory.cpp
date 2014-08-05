@@ -32,7 +32,7 @@ namespace fn
         return reco_.get_event_ptr();
     }
 
-    void RecoFactory::create_subscriber( std::string name, 
+    Subscriber * RecoFactory::create_subscriber( std::string name, 
             std::string subscriber_type, YAML::Node instruct )
     {
         auto it = subscribers_.find( name );
@@ -50,18 +50,42 @@ namespace fn
 
         subscribers_.insert( std::make_pair( name, s ) );
 
+        return s;
     }
 
     Subscriber * RecoFactory::get_subscriber ( std::string name )
     {
         auto it = subscribers_.find( name );
-        if ( it != subscribers_.end() )
+        if ( it == subscribers_.end() )
         {
             throw Xcept<UnknownSubscriberName>( name );
         }
 
         return it->second;
     }
+
+    //Selection management
+    void RecoFactory::add_selection ( std::string name, Selection * s  )
+    {
+        auto it = selections_.find( name );
+        if ( it != selections_.end() )
+        {
+            throw Xcept<DuplicateSelectionName>( name );
+        }
+
+        selections_.insert( std::make_pair( name, s ) );
+    }
+
+    Selection * RecoFactory::get_selection ( std::string name)
+    {
+        auto it = selections_.find( name );
+        if ( it == selections_.end() )
+        {
+            throw Xcept<UnknownSelectionName>( name );
+        }
+        return it->second;
+    }
+
 
 
 }
