@@ -71,17 +71,20 @@ namespace fn
     class DefaultK2piRecoClusters : public K2piRecoClusters
     {
         public:
-            fne::RecoCluster& cluster1() const;
-            fne::RecoCluster& cluster2() const;
+            void update( fne::RecoCluster * c1, fne::RecoCluster * c2,
+                    bool found_track, fne::RecoCluster * tc );
 
-            bool found_charged_cluster() const;
-            fne::RecoCluster& charged_cluster() const;
+            const fne::RecoCluster& cluster1() const;
+            const fne::RecoCluster& cluster2() const;
+
+            bool found_track_cluster() const;
+            const fne::RecoCluster& track_cluster() const;
 
         private:
             fne::RecoCluster * c1_;
             fne::RecoCluster * c2_;
-            fne::RecoCluster * cc_;
-            bool found_charged_;
+            fne::RecoCluster * tc_;
+            bool found_track_;
     };
 
     //--------------------------------------------------
@@ -116,13 +119,27 @@ namespace fn
 
             //Processing functions
             void filter_clusters() const;
+            bool assign_clusters() const;
+
+            std::vector<processing_cluster>::iterator
+                find_track_cluster( 
+                        std::vector<processing_cluster> clusters) const;
+
+            bool check_track_cluster
+                ( const processing_cluster * pc ) const;
+
+            bool check_photon_clusters
+                ( const std::vector<processing_cluster>&  pcs ) const;
+
 
             //Corrections
             ClusterEnergyCorr cec_;
 
             //cluster parameters
             double min_track_cluster_time_;
-            double min_cluster_corr_energy_;
+            double min_cluster_energy_;
+
+            double max_track_cluster_distance_;
 
     };
 

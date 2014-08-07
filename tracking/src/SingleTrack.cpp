@@ -309,4 +309,19 @@ namespace fn
     {
         return proc_track_->rt->time;
     }
+
+    TVector3 BFSingleRecoTrack::extrapolate_ds( double z) const
+    {
+        return extrapolate_z( * proc_track_->rt, z );
+    }
+
+    TVector3 BFSingleRecoTrack::extrapolate_us( double z) const
+    {
+        return extrapolate_bz( * proc_track_->rt, z );
+    }
+
+    TVector3 BFSingleRecoTrack::extrapolate_bf( double z) const
+    {
+        return bf_track_.extrapolate( z );
+    }
 }

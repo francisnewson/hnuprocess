@@ -37,6 +37,15 @@ namespace fn
 
             virtual double get_time() const = 0;
 
+            //downstream
+            virtual TVector3 extrapolate_ds( double z) const = 0 ;
+
+            //raw upstream
+            virtual TVector3 extrapolate_us( double z) const = 0 ;
+            
+            //BF track
+            virtual TVector3 extrapolate_bf( double z) const = 0 ;
+
             virtual ~SingleRecoTrack(){}
     };
 
@@ -81,6 +90,8 @@ namespace fn
         fne::RecoTrack * rt;
     };
 
+    //--------------------------------------------------
+
     class BFSingleRecoTrack : public SingleRecoTrack
     {
         public:
@@ -102,11 +113,17 @@ namespace fn
 
             double get_time() const;
 
+            TVector3 extrapolate_ds( double z) const;
+            TVector3 extrapolate_us( double z) const;
+            TVector3 extrapolate_bf( double z) const;
+
         private:
             BFCorrection& bfc_;
             const processing_track * proc_track_;
             Track bf_track_;
     };
+
+    //--------------------------------------------------
 
 
     class BFSingleTrack : public SingleTrack
