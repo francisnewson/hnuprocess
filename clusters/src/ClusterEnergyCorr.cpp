@@ -109,7 +109,7 @@ namespace fn
 
         //get cell
         bool cellCheck =  GetCpdCellIndex( pos_x , pos_y, &cpd, &cell );
-        if ( !cellCheck)
+        if ( cellCheck)
         {
             throw std::runtime_error( 
                     std::string( "Couldn't find CpdCellIndex ") + __FILE__ );

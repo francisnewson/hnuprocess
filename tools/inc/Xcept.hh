@@ -23,6 +23,7 @@
 
 namespace fn
 {
+    struct BadCast{};
     template <typename T> 
         class Xcept : public std::runtime_error
         {

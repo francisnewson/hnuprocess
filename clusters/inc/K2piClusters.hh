@@ -71,8 +71,9 @@ namespace fn
     class DefaultK2piRecoClusters : public K2piRecoClusters
     {
         public:
-            void update( fne::RecoCluster * c1, fne::RecoCluster * c2,
-                    bool found_track, fne::RecoCluster * tc );
+            void update( const fne::RecoCluster * c1, 
+                    const fne::RecoCluster * c2,
+                    bool found_track, const fne::RecoCluster * tc );
 
             const fne::RecoCluster& cluster1() const;
             const fne::RecoCluster& cluster2() const;
@@ -81,9 +82,9 @@ namespace fn
             const fne::RecoCluster& track_cluster() const;
 
         private:
-            fne::RecoCluster * c1_;
-            fne::RecoCluster * c2_;
-            fne::RecoCluster * tc_;
+            const fne::RecoCluster * c1_;
+            const fne::RecoCluster * c2_;
+            const fne::RecoCluster * tc_;
             bool found_track_;
     };
 
@@ -93,6 +94,7 @@ namespace fn
     {
         double corr_energy;
         fne::RecoCluster *rc;
+        ~processing_cluster(){}
     };
 
     class ClusterEnergyCorr;
@@ -104,6 +106,13 @@ namespace fn
                     const fne::Event * event,
                     const SingleTrack * single_track,
                     YAML::Node & instruct );
+
+            enum failure
+            {
+                not_enough_clusters,
+                not_enough_good_clusters,
+                too_many_good_clusters,
+            };
 
         private:
             bool process_clusters() const;
@@ -123,14 +132,7 @@ namespace fn
 
             std::vector<processing_cluster>::iterator
                 find_track_cluster( 
-                        std::vector<processing_cluster> clusters) const;
-
-            bool check_track_cluster
-                ( const processing_cluster * pc ) const;
-
-            bool check_photon_clusters
-                ( const std::vector<processing_cluster>&  pcs ) const;
-
+                        std::vector<processing_cluster>& clusters) const;
 
             //Corrections
             ClusterEnergyCorr cec_;

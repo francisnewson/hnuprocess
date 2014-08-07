@@ -35,7 +35,6 @@ namespace fn
                 ( const fne::RecoCluster& rc );
 
             TVector3 get_pos() const;
-            double get_energy() const;
 
             static const double lkr_project_dist;
     };

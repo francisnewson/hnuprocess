@@ -88,7 +88,7 @@ int main( int argc, char * argv[])
     //RECONSTRUCTION
 
     std::vector<boost::filesystem::path> filenames
-    { "/afs/cern.ch/user/f/fnewson/work/hnu/gopher/code/reader/output/compact.root" };
+    { "/afs/cern.ch/user/f/fnewson/work/hnu/gopher/code/reader/output/k2pig.root" };
 
     //Create Reconstruction
     Reconstruction reco(  slg );

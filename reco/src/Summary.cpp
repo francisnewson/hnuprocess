@@ -58,17 +58,23 @@ namespace fn
     {
         //If selection passed, increment the vector
         //position corresponding to the selection id
+        //std::cerr <<"Checking" << std::endl;
         if ( s.check() )
         {
-            counts_[ s.get_id() ]++;
+            //std::cerr <<"passed" << std::endl;
+            counts_.at( s.get_id() )++;
+            //std::cerr <<"incremented" << std::endl;
             return true;
         }
+        //std::cerr <<"failed" << std::endl;
         return false;
     }
 
     bool SummaryVisitor::visit_leave( Selection& s )
     {
         //Do the composite count on the way out
+
+        //std::cerr <<"About to visit" << std::endl;
         return visit( s );
     } 
 
@@ -95,10 +101,11 @@ namespace fn
     void Summary::process_event()
     {
         source_.accept( sv_ );
+        //std::cerr << "Done processing" << std::endl;
     }
     void Summary::end_processing()
     {
-        std::cerr << "Collecting names" << std::endl;
+        //std::cerr << "Collecting names" << std::endl;
         NameVisitor nv{};
         source_.accept( nv );
 

@@ -17,6 +17,9 @@ namespace fn
     { return id_; }
 
     //--------------------------------------------------
+  
+            Subscriber::Subscriber()
+            :log_level_( per_event ){}
 
     void Subscriber::set_log( logger& log)
     {

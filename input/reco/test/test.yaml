@@ -11,6 +11,7 @@
     name: counter
     type: Counter
 
+
 #SingleTrack
 - input:
     name : bf_st
@@ -29,7 +30,22 @@
 
     dch_merge_sep: 0.5
 
-#-------------------------------------------------- 
+#K2piClusters
+- input:
+    name : k2pi_clus
+    type : K2piClusters
+    method : Default
+
+    #log_level: always_print
+
+    min_track_cluster_time: 12.0
+    min_cluster_energy: 5.0
+    max_track_cluster_distance: 5.0
+
+    inputs:
+        ogt: bf_st
+
+        #-------------------------------------------------- 
 
 #Autopass
 - selection:
@@ -55,6 +71,14 @@
 
     inputs :
         ogt: bf_st
+
+#Found k2pi clusters
+- selection:
+    name: gd_k2pic
+    type : FoundK2piClusters
+
+    inputs :
+        k2pic: k2pi_clus
 
 #Track charge
 - selection:
@@ -86,6 +110,14 @@
         - gd_brst
         - tracking_cuts
 
+- selection:
+    type : CompositeSelection
+    name: k2pi
+    children:
+        - gd_brst
+        - tracking_cuts
+        - gd_k2pic
+
 #-------------------------------------------------- 
 
 #summary
@@ -93,4 +125,4 @@
     name : test_summary
     type: Summary
     base : passer
-    source : km2 
+    source : k2pi 

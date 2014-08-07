@@ -17,7 +17,7 @@ namespace fn
 
         if ( it == global_subscriber_map().end() )
         {
-            throw UnknownSubscriber( s + __FILE__ );
+            throw UnknownSubscriber( s + " | "  __FILE__ );
         }
         else
         {

@@ -43,7 +43,16 @@ namespace fn
                 std::vector<S*> event_subs_;
 
             public:
-                Notifyer(){};
+                Notifyer()
+                    :new_burst_( false ),
+                    new_run_( false ),
+                    new_tree_( false ),
+                    started_burst_( false ),
+                    started_run_( false ),
+                    started_tree_( false ),
+                    current_burst_( -1 ),
+                    current_run_( -1 ),
+                    current_tree_( -1 ) { };
 
                 //Initializtation
                 void set_event_ptr( const fne::Event * e )

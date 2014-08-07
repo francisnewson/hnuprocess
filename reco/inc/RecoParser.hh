@@ -27,8 +27,6 @@ namespace fn
      *  reconstruction using a RecoFactory (stored
      *  as a reference )
      *****************************************************/
-    struct BadCast{};
-
     class RecoParser
     {
         public:

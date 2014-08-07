@@ -27,6 +27,8 @@ namespace fn
     class Subscriber
     {
         public:
+            Subscriber();
+
             virtual void new_file(){};
             virtual void new_run(){};
             virtual void new_burst(){};

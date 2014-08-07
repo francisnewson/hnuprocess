@@ -3,6 +3,7 @@
 #include "tracking_selections.hh"
 #include "CorrCluster.hh"
 #include "Xcept.hh"
+#include <iomanip>
 
 namespace fn
 {
@@ -73,8 +74,8 @@ namespace fn
     //--------------------------------------------------
 
     void DefaultK2piRecoClusters::update
-        ( fne::RecoCluster * c1, fne::RecoCluster * c2,
-          bool found_track, fne::RecoCluster * tc )
+        ( const fne::RecoCluster * c1, const fne::RecoCluster * c2,
+          bool found_track, const fne::RecoCluster * tc )
         {
             c1_ = c1;
             c2_ = c2;
@@ -103,6 +104,8 @@ namespace fn
 
         //Filter raw clusters
         filtered_clusters_.clear();
+        assert( filtered_clusters_.size() == 0 );
+
         filter_clusters();
 
         //assign clusters (photon / pi+ )
@@ -128,7 +131,14 @@ namespace fn
         //Loop over clusters - Ignore noise-like clusters
         for ( unsigned int iclus = 0 ; iclus != nclusters ; ++iclus )
         {
+            pc.rc = 0;
+
+
             pc.rc =  static_cast<fne::RecoCluster*>( eclusters[iclus] );
+            assert( pc.rc != 0 );
+
+            BOOST_LOG_SEV( get_log(), log_level() )
+                << pc.rc->energy;
 
             //Timing cut
             double track_cluster_time = pc.rc->time - srt.get_time();
@@ -151,15 +161,18 @@ namespace fn
     {
         int nclus = filtered_clusters_.size();
 
-        if ( ! (nclus ==3 ) || (nclus == 2 ) )
+        if ( ! ( (nclus ==3 ) || (nclus == 2 ) ) )
         {
             return false;
         }
 
+        assert( nclus > 1 );
+        assert( nclus < 4 );
+
         //--
 
         bool found_track = false;
-        const processing_cluster * track_cluster = 0;
+        const fne::RecoCluster * track_cluster = 0;
 
         if ( nclus == 3)
         {
@@ -170,28 +183,15 @@ namespace fn
                 return false;
             }
 
-            //It needs to pass some conditions
-            track_cluster = &*track_cluster_it;
-
-            bool good_track_cluster = check_track_cluster( track_cluster );
-            if ( !good_track_cluster )
-            {
-                return false;
-            }
-
             found_track = true;
+            assert( track_cluster_it->rc != 0 );
+            track_cluster = track_cluster_it->rc;
             filtered_clusters_.erase(  track_cluster_it  );
         }
 
         assert( filtered_clusters_.size() == 2 );
 
         //--
-
-        bool good_photon_clusters = check_photon_clusters( filtered_clusters_ );
-        if ( !good_photon_clusters )
-        {
-            return false;
-        }
 
         //sort by energy
         if ( filtered_clusters_[0].corr_energy > filtered_clusters_[1].corr_energy )
@@ -200,8 +200,26 @@ namespace fn
             swap( filtered_clusters_[0], filtered_clusters_[1] );
         }
 
+        BOOST_LOG_SEV( get_log(), log_level() )
+            << filtered_clusters_.size() ;
+
+        BOOST_LOG_SEV( get_log(), log_level() )
+            << std::setw(15) << filtered_clusters_[0].rc ;
+
+        BOOST_LOG_SEV( get_log(), log_level() )
+            << std::setw(15) << filtered_clusters_[1].rc ;
+
+        BOOST_LOG_SEV( get_log(), log_level() )
+            << std::setw(15) << found_track;
+
+        if ( found_track )
+        {
+            BOOST_LOG_SEV( get_log(), log_level() )
+                << std::setw(15) << track_cluster ;
+        }
+
         reco_clusters_.update( filtered_clusters_[0].rc, filtered_clusters_[1].rc,
-                found_track, found_track ? track_cluster->rc : 0 );
+                found_track, track_cluster  );
 
         return true;
     }
@@ -209,7 +227,7 @@ namespace fn
     //find track cluster
     std::vector<processing_cluster>::iterator
         DefaultK2piClusters::find_track_cluster( 
-                std::vector<processing_cluster> clusters) const
+                std::vector<processing_cluster>& clusters) const
         {
             //Get single track
             const SingleRecoTrack & srt = st_->get_single_track();
