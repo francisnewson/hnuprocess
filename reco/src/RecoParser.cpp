@@ -29,11 +29,19 @@ namespace fn
             const YAML::Node& instruct = instruct_it->second;
             std::string cat = instruct_it->first.as<std::string>();
 
-            std::string name =
-                instruct["name"].as<std::string>();
+                std::string name;
+                std::string type;
+            try
+            {
+                name = instruct["name"].as<std::string>();
+                type = instruct["type"].as<std::string>();
+            }
 
-            std::string type =
-                instruct["type"].as<std::string>();
+            catch( std::runtime_error& e )
+            {
+                std::cerr << "Trying to parse: " << *it ;
+                throw e;
+            }
 
             //All subscribers must be registered
             //to receive new_event's

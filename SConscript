@@ -16,7 +16,8 @@ my_libs = [
 'tools',
 'apps',
 'tracking',
-'conditions'
+'conditions',
+'clusters'
 ]
 
 #Call Sconscript for each library

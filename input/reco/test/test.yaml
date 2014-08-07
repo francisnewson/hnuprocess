@@ -64,16 +64,28 @@
     inputs :
         ogt: bf_st
 
-#good events
+#good bursts
 - selection:
-    name: gd_event
+    name: gd_brst
     type : CompositeSelection
     children:
         - gd_muv_brst
         - gd_akl_brst
+
+- selection:
+    type : CompositeSelection
+    name: tracking_cuts
+    children:
         - gd_trk
         - pos_trk
-#
+
+- selection:
+    type : CompositeSelection
+    name: km2
+    children:
+        - gd_brst
+        - tracking_cuts
+
 #-------------------------------------------------- 
 
 #summary
@@ -81,4 +93,4 @@
     name : test_summary
     type: Summary
     base : passer
-    source : gd_event 
+    source : km2 

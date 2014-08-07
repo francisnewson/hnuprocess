@@ -35,6 +35,8 @@ namespace fn
             virtual TVector3 get_vertex() const = 0;
             virtual double get_cda() const = 0;
 
+            virtual double get_time() const = 0;
+
             virtual ~SingleRecoTrack(){}
     };
 
@@ -98,6 +100,8 @@ namespace fn
             int get_charge();
             double momentum();
 
+            double get_time() const;
+
         private:
             BFCorrection& bfc_;
             const processing_track * proc_track_;
@@ -122,8 +126,8 @@ namespace fn
                 ( const processing_track& pt, 
                   SingleRecoTrack& srt ) const;
 
-                //track monitoring
-                mutable std::vector<processing_track> proc_tracks_;
+            //track monitoring
+            mutable std::vector<processing_track> proc_tracks_;
 
             //tracking parameters
             double init_min_mom_;

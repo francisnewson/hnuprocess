@@ -13,13 +13,6 @@ namespace fn
 
         BOOST_LOG_SEV( get_log() , log_level() )
             << "In SingleTrack event";
-
-        if ( found_single_track() )
-        {
-            auto& st = get_single_track();
-            BOOST_LOG_SEV( get_log() , debug )
-                << "Momentum: " << st.get_mom();
-        }
     }
 
     bool SingleTrack::found_single_track() const
@@ -310,5 +303,10 @@ namespace fn
     double BFSingleRecoTrack::get_cda() const
     {
         return proc_track_->vert.cda;
+    }
+
+    double BFSingleRecoTrack::get_time() const
+    {
+        return proc_track_->rt->time;
     }
 }
