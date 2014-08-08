@@ -189,4 +189,17 @@ namespace fn
     {
         return channel_;
     }
+
+    //--------------------------------------------------
+
+    //STOPPAGE
+    bool * RecoFactory::get_remote_stop() const
+    {
+        return remote_stop_;
+    }
+
+    void RecoFactory::set_remote_stop( bool * b )
+    {
+        remote_stop_ = b;
+    }
 }

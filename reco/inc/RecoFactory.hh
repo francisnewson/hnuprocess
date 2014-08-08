@@ -77,6 +77,10 @@ namespace fn
             void set_channel( const std::string& channel);
             std::string get_channel();
 
+            //stoppage
+            bool* get_remote_stop() const;
+            void set_remote_stop( bool * b );
+
         private:
             Reconstruction& reco_;
             logger * log_;
@@ -96,6 +100,9 @@ namespace fn
 
             //channel management
             std::string channel_;
+
+            //stoppage
+            bool * remote_stop_;
     };
 }
 #endif
