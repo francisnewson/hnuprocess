@@ -1,0 +1,4 @@
+#!/bin/bash
+./build_O3/apps/hnureco -c cmp --auto -i ../reader/output/rawcmp.root -m input/reco/akl/cmpcheck.yaml
+./build_O3/apps/hnureco -c scmp --auto -i ../reader/output/scmp.root -m input/reco/akl/cmpcheck.yaml
+paste output/* | head

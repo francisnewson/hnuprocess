@@ -1,0 +1,20 @@
+---
+- output:
+    name: log_os
+    type: ostream
+    filename: "comp.log"
+
+- selection:
+    name: passer
+    type: auto_pass
+
+- analysis:
+    name: cmp_check
+    type: ScmpVsCmp
+    selection: passer
+    inputs:
+        os: log_os
+
+- monitor:
+    name: counter
+    type: Counter

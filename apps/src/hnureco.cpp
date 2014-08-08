@@ -62,7 +62,7 @@ int main( int argc, char * argv[] )
         ( "channel,c", po::value<path>(),  "Define channel")
         ( "mission,m", po::value<path>(),  "Specify mission file")
         ( "auto,a", "Set automic variables from channel and mission")
-        ( "log-level", "Set logging level" )
+        ( "log-level", po::value<std::string>(), "Set logging level" )
         ;
 
     po::options_description files("files");
@@ -140,8 +140,17 @@ int main( int argc, char * argv[] )
 
     if ( vm.count( "log-level" ) )
     {
-        min_sev = global_severity_map().at(
-                vm["log-level"].as<std::string>() );
+        try
+        {
+            min_sev = global_severity_map().at(
+                    vm["log-level"].as<std::string>() );
+        }
+        catch( std::out_of_range & e )
+        {
+            std::cerr << "Unknown log-level: " 
+                << vm["log-level"].as<std::string>() << std::endl;
+            throw e;
+        }
     }
 
     // Set a global filter so that only error messages are logged
@@ -259,11 +268,12 @@ int main( int argc, char * argv[] )
     {
         reco_factory.set_output_prefix
             ( path{"output"} / ( channel + "_"
-              + mission_name + "_" ) );
+                                 + mission_name + "_" ) );
     }
 
     //Create RecoParser
     RecoParser reco_parser( reco_factory, slg );
+    BOOST_LOG_SEV( slg , startup) << "Parssing " << mission;
     reco_parser.parse( mission );
 
     Subscriber::set_log( slg );
@@ -275,7 +285,6 @@ int main( int argc, char * argv[] )
 
     while ( reco.auto_next_event() )
     {
-
     }
 
     reco.end_processing();

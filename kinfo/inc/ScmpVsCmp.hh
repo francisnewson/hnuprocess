@@ -1,6 +1,8 @@
 #ifndef SCMPVSCMP_HH
 #define SCMPVSCMP_HH
 #include "Analysis.hh"
+#include "Event.hh"
+#include <iosfwd>
 #if 0
 /*
  *  ____                    __     __    ____                 
@@ -24,12 +26,19 @@ namespace fn
     class ScmpVsCmp  : public Analysis
     {
         public :
-            ScmpVsCmp( const fne::Event* e, std:ostream& os );
-            void new_event() const;
+            ScmpVsCmp( const fn::Selection& sel, 
+                    const fne::Event* e, std::ostream& os );
+            void process_event();
 
         private:
             const fne::Event * e_;
-            std::ostream os_;
+            std::ostream& os_;
+            REG_DEC_SUB( ScmpVsCmp );
     };
+
+
+    template<>
+        Subscriber * create_subscriber<ScmpVsCmp>
+        (YAML::Node& instruct, RecoFactory& rf );
 }
 #endif

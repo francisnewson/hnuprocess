@@ -13,6 +13,9 @@ namespace fn
     //Process a YAML file
     void RecoParser::parse( boost::filesystem::path config )
     {
+            BOOST_LOG_SEV( log_, startup)
+                << "RECOPARSER: Parsing " << config;
+
         //Load file
         YAML::Node config_node = YAML::LoadFile( config.string() );
         assert(config_node.Type() == YAML::NodeType::Sequence);
@@ -23,7 +26,6 @@ namespace fn
         {
             assert(it->Type() == YAML::NodeType::Map);
 
-
             YAML::const_iterator instruct_it  = it->begin();
             assert(it->Type() == YAML::NodeType::Map);
 
@@ -33,7 +35,7 @@ namespace fn
             if( cat == "output" )
             {
                 parse_output( instruct );
-                return;
+                continue;
             }
 
             std::string name;
