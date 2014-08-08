@@ -11,6 +11,11 @@
     name: counter
     type: Counter
 
+- output:
+    name: os
+    type: ostream
+    filename: "comp.log"
+
 
 #SingleTrack
 - input:

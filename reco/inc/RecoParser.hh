@@ -33,6 +33,9 @@ namespace fn
             RecoParser( RecoFactory& rf, logger& log );
             void parse( boost::filesystem::path config );
 
+            void parse_output( const YAML::Node& node );
+
+
         private:
             RecoFactory& rf_;
             logger& log_;

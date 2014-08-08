@@ -9,6 +9,7 @@
 #include <iostream>
 #include <iterator>
 #include <csignal>
+#include "text.hh"
 
 using boost::filesystem::path;
 namespace po = boost::program_options;

@@ -28,5 +28,12 @@ namespace fn
             return std::unique_ptr<T>
                 ( new T( std::forward<Args>(args)... ) );
         }
+
+    void echo_launch( int argc, char * argv[], 
+            std::ostream& os, char sep = '\n' );
+
+    void write_launch( int argc, char * argv[], 
+            std::ostream& os );
+
 }
 #endif

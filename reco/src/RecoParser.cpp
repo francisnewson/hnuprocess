@@ -23,14 +23,21 @@ namespace fn
         {
             assert(it->Type() == YAML::NodeType::Map);
 
+
             YAML::const_iterator instruct_it  = it->begin();
             assert(it->Type() == YAML::NodeType::Map);
 
             const YAML::Node& instruct = instruct_it->second;
             std::string cat = instruct_it->first.as<std::string>();
 
-                std::string name;
-                std::string type;
+            if( cat == "output" )
+            {
+                parse_output( instruct );
+                return;
+            }
+
+            std::string name;
+            std::string type;
             try
             {
                 name = instruct["name"].as<std::string>();
@@ -54,7 +61,6 @@ namespace fn
             BOOST_LOG_SEV( log_, debug)
                 << "\n" << instruct ;
 
-
             //Selections need to be found by others
             if ( cat == "selection" )
             {
@@ -71,6 +77,33 @@ namespace fn
 
                 rf_.add_selection(name, sel );
             }
+        }
+    }
+
+    void RecoParser::parse_output( const YAML::Node& instruct )
+    {
+        try
+        {
+
+            std::string name;
+            std::string type;
+
+            name = instruct["name"].as<std::string>();
+            type = instruct["type"].as<std::string>();
+
+            if ( type == "ostream" )
+            {
+
+                std::string filename = 
+                    instruct["filename"].as<std::string>();
+
+                    rf_.define_ostream( name, filename );
+            }
+        }
+        catch( std::runtime_error& e )
+        {
+            std::cerr << "Trying to parse: " << instruct ;
+            throw e;
         }
     }
 }
