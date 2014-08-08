@@ -5,6 +5,8 @@
 #include "Selection.hh"
 #include "yaml-cpp/yaml.h"
 #include "Rtypes.h"
+#include <boost/filesystem/path.hpp>
+#include "OSLoader.hh"
 
 #if 0
 /*  ____
@@ -54,12 +56,26 @@ namespace fn
             //subscribers
             Subscriber * create_subscriber( std::string name, 
                     std::string subscriber_type, YAML::Node instruct );
-
             Subscriber * get_subscriber ( std::string name );
 
             //Selection management
             void add_selection ( std::string name, Selection * s  );
             Selection * get_selection ( std::string name);
+
+            //stream management
+            void set_output_prefix( boost::filesystem::path prefix );
+            void define_ostream( std::string name, std::string p );
+            std::ostream& get_ostream( std::string name);
+
+            //tfile management
+			void  define_tfile
+				( std::string name, boost::filesystem::path p );
+
+			TFile& get_tfile( std::string name );
+
+            //channel management
+            void set_channel( const std::string& channel);
+            std::string get_channel();
 
         private:
             Reconstruction& reco_;
@@ -68,6 +84,18 @@ namespace fn
             std::map< std::string, Subscriber* > subscribers_;
             std::map< std::string, Selection* > selections_;
             unsigned int next_sub_id_;
+
+            //stream management
+            boost::filesystem::path output_prefix_;
+            std::map<std::string, std::ostream*> ostreams_;
+            OSLoader osl_;
+
+            //tfile management
+			TFileLoader tfl_;
+            std::map<std::string, TFile*> tfiles_;
+
+            //channel management
+            std::string channel_;
     };
 }
 #endif
