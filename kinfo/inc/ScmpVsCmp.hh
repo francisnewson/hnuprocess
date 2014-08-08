@@ -1,0 +1,35 @@
+#ifndef SCMPVSCMP_HH
+#define SCMPVSCMP_HH
+#include "Analysis.hh"
+#if 0
+/*
+ *  ____                    __     __    ____                 
+ * / ___|  ___ _ __ ___  _ _\ \   / /__ / ___|_ __ ___  _ __  
+ * \___ \ / __| '_ ` _ \| '_ \ \ / / __| |   | '_ ` _ \| '_ \ 
+ *  ___) | (__| | | | | | |_) \ V /\__ \ |___| | | | | | |_) |
+ * |____/ \___|_| |_| |_| .__/ \_/ |___/\____|_| |_| |_| .__/ 
+ *                      |_|                            |_|    
+ * 
+ */
+#endif
+namespace fn
+{
+    /* **************************************************
+     * SCMPVSCMP
+     * Analysis to compare output of compact reader
+     * starting from .cmp or .scmp files. It just outputs
+     * text files to be compared with e.g. vimdiff
+     * **************************************************/
+
+    class ScmpVsCmp  : public Analysis
+    {
+        public :
+            ScmpVsCmp( const fne::Event* e, std:ostream& os );
+            void new_event() const;
+
+        private:
+            const fne::Event * e_;
+            std::ostream os_;
+    };
+}
+#endif
