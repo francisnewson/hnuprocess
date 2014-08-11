@@ -5,6 +5,7 @@
 #include "Reconstruction.hh"
 #include "logging.hh"
 #include <boost/filesystem.hpp>
+#include <vector>
 
 /*
  *  _                                    
@@ -26,7 +27,11 @@ bool&  remote_stop()
 
 //Handle signals by setting remote_stop
 void sig_handler( int sig )
-{ remote_stop() = true; }
+{ 
+    if ( sig )
+    remote_stop() = true;
+}
+
 
 void connect_signals()
 {
@@ -286,6 +291,8 @@ int main( int argc, char * argv[] )
     while ( reco.auto_next_event() )
     {
     }
+
+    reco.end_processing();
 
     reco.end_processing();
 }

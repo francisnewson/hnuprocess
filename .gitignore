@@ -10,6 +10,7 @@
 *.a
 *.sl
 *.swp
+*.pyc
 gmon.out
 build_O3
 build_O1

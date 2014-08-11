@@ -1,6 +1,7 @@
 #ifndef SUBSCRIBERFACTORY_HH
 #define SUBSCRIBERFACTORY_HH
 #include <stdexcept>
+#include <iosfwd>
 
 #include "Subscriber.hh"
 
@@ -49,6 +50,8 @@ namespace fn
         static Subscriber * get_subscriber( std::string const& s,
                 YAML::Node& instruct, RecoFactory& rf );
 
+        static void print_subscriber_map( std::ostream& os);
+
         protected:
         static map_type& global_subscriber_map();
     } ;
@@ -61,7 +64,7 @@ namespace fn
             global_subscriber_map().insert(
                     std::make_pair(s, &create_subscriber<ST> ) );
 
-            std::cerr << "Registered " << s << std::endl;
+            //std::cerr << "Registered " << s << std::endl;
         }
     };
 

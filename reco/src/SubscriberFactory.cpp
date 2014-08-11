@@ -37,4 +37,14 @@ namespace fn
         static map_type map_;
         return map_;
     }
+
+         void SubscriberFactory::print_subscriber_map( std::ostream& os)
+         {
+             const auto& sm = global_subscriber_map();
+
+             for ( const auto& entry : sm )
+             {
+                 os << entry.first << std::endl;
+             }
+         }
 }

@@ -27,7 +27,6 @@ using namespace fn;
 
 int main( int argc, char * argv[])
 {
-
     //COMMANDLINE
     //Set up program options
 
@@ -118,4 +117,5 @@ int main( int argc, char * argv[])
     }
 
     reco.end_processing();
+
 }
