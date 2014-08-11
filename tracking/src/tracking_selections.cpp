@@ -203,11 +203,36 @@ namespace fn
         (YAML::Node& instruct, RecoFactory& rf )
     {
             SingleTrack * st = get_single_track( instruct, rf );
-            double cda = instruct["cda"].as<double>();
+            double cda = instruct["max_cda"].as<double>();
 
             return new TrackCda( *st, cda );
     }
 
     //--------------------------------------------------
+
+    REG_DEF_SUB( TrackMomentum);
+
+    TrackMomentum::TrackMomentum( const SingleTrack& st,
+            double min_p, double max_p )
+        :st_( st), min_p_( min_p ), max_p_(max_p){}
+
+    bool TrackMomentum::do_check() const
+    {
+        const SingleRecoTrack& srt = st_.get_single_track();
+        double mom = srt.get_mom();
+        return ( mom < max_p_ ) && ( mom > min_p_ );
+    }
+
+    template<>
+        Subscriber * create_subscriber<TrackMomentum>
+        (YAML::Node& instruct, RecoFactory& rf )
+    {
+            SingleTrack * st = get_single_track( instruct, rf );
+            double min_p = instruct["min"].as<double>();
+            double max_p = instruct["max"].as<double>();
+
+            return new TrackMomentum( *st, min_p, max_p );
+    }
+
 }
 

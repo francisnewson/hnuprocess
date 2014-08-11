@@ -150,5 +150,25 @@ namespace fn
         (YAML::Node& instruct, RecoFactory& rf );
 
     //--------------------------------------------------
+
+    class TrackMomentum : public CachedSelection
+    {
+        public:
+            TrackMomentum( const SingleTrack& st,
+                    double min_p , double max_p  );
+
+        private:
+            bool do_check() const;
+
+            const SingleTrack& st_;
+            double min_p_;
+            double max_p_;
+
+            REG_DEC_SUB( TrackMomentum);
+    };
+
+    template<>
+        Subscriber * create_subscriber<TrackMomentum>
+        (YAML::Node& instruct, RecoFactory& rf );
 }
 #endif
