@@ -2,6 +2,7 @@
 #define TRACKING_SELECTIONS_HH
 #include "SingleTrack.hh"
 #include "Selection.hh"
+#include "AreaCut.hh"
 
 #if 0
 /*
@@ -109,5 +110,45 @@ namespace fn
 
     //--------------------------------------------------
 
+    class TrackPZ : public CachedSelection
+    {
+        public:
+        TrackPZ( const SingleTrack& st,
+                std::vector<rectangle> recs );
+
+        private:
+        bool do_check() const;
+
+        const SingleTrack& st_;
+        const AreaCut area_cut_;
+
+            REG_DEC_SUB( TrackPZ);
+    };
+
+    template<>
+        Subscriber * create_subscriber<TrackPZ>
+        (YAML::Node& instruct, RecoFactory& rf );
+
+    //--------------------------------------------------
+    
+    class TrackCda : public CachedSelection
+    {
+        public:
+            TrackCda( const SingleTrack& st,
+                    double cda );
+
+        private:
+            bool do_check() const;
+            const SingleTrack& st_;
+            double cda_;
+
+            REG_DEC_SUB( TrackCda);
+    };
+
+    template<>
+        Subscriber * create_subscriber<TrackCda>
+        (YAML::Node& instruct, RecoFactory& rf );
+
+    //--------------------------------------------------
 }
 #endif

@@ -147,5 +147,67 @@ namespace fn
         }
 
     //--------------------------------------------------
+
+    REG_DEF_SUB( TrackPZ);
+
+    TrackPZ::TrackPZ( const SingleTrack& st,
+            std::vector<rectangle> recs )
+        :st_( st), area_cut_( recs )
+    {}
+
+    bool TrackPZ::do_check() const
+    {
+        const SingleRecoTrack& srt = st_.get_single_track();
+        TVector3 vertex = srt.get_vertex();
+        return area_cut_.allowed({ srt.get_mom(), vertex.Z() } );
+    }
+
+    template<>
+        Subscriber * create_subscriber<TrackPZ>
+        (YAML::Node& instruct, RecoFactory& rf )
+        {
+
+            SingleTrack * st = get_single_track( instruct, rf );
+            std::string shape = instruct["shape"].as<std::string>();
+
+            if ( shape == "rectangles" )
+            {
+                std::vector<rectangle> recs=
+                    instruct["points"].as<std::vector<rectangle>>();
+
+                return new TrackPZ( *st, recs );
+            }
+            else
+            {
+                throw std::runtime_error(
+                        "Unknown TrackPZShape" );
+            }
+        }
+
+    //--------------------------------------------------
+
+    REG_DEF_SUB( TrackCda);
+
+    TrackCda::TrackCda( const SingleTrack& st,
+            double cda )
+        :st_( st), cda_( cda ){}
+
+    bool TrackCda::do_check() const
+    {
+        const SingleRecoTrack& srt = st_.get_single_track();
+        return srt.get_cda() < cda_;
+    }
+
+    template<>
+        Subscriber * create_subscriber<TrackCda>
+        (YAML::Node& instruct, RecoFactory& rf )
+    {
+            SingleTrack * st = get_single_track( instruct, rf );
+            double cda = instruct["cda"].as<double>();
+
+            return new TrackCda( *st, cda );
+    }
+
+    //--------------------------------------------------
 }
 

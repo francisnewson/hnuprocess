@@ -5,6 +5,8 @@
 #include <boost/geometry/geometries/point_xy.hpp>
 #include <boost/geometry/geometries/polygon.hpp>
 
+#include <yaml-cpp/yaml.h>
+
 #if 0
 /*
  *     _                    ____      _   
@@ -24,17 +26,6 @@ namespace fn
     typedef boost::geometry::model::polygon<point_type>
         polygon_type;
 
-    class AreaCut
-    {
-        public:
-            AreaCut(){};
-            AreaCut( std::vector<polygon_type>& areas );
-            void set_allowed_areas( std::vector<polygon_type>& areas );
-
-            bool allowed( point_type p );
-        private:
-            std::vector<polygon_type> allowed_areas_;
-    };
 
     //--------------------------------------------------
 
@@ -45,12 +36,46 @@ namespace fn
         double miny;
         double maxy;
     };
+}
+
+namespace YAML
+{
+    template<>
+        struct convert < fn::rectangle >
+        {
+            static Node encode ( const fn::rectangle& rhs );
+
+            static bool decode ( const Node& node , 
+                    fn::rectangle & rhs );
+        };
+}
+
+namespace fn
+{
+
+    polygon_type rectangle2polygon( rectangle rec  );
+
+    class AreaCut
+    {
+        public:
+            AreaCut(){};
+            AreaCut( std::vector<polygon_type>& areas );
+            AreaCut( std::vector<rectangle> rectangles );
+
+            void set_allowed_areas( std::vector<polygon_type>& areas );
+
+            bool allowed( point_type p ) const;
+        private:
+            std::vector<polygon_type> allowed_areas_;
+    };
+
+    //--------------------------------------------------
 
     class RectanglesCut
     {
         public:
             RectanglesCut( std::vector<rectangle> rectangles );
-            bool allowed( point_type p );
+            bool allowed( point_type p ) const;
 
         private:
             AreaCut area_cut_;
