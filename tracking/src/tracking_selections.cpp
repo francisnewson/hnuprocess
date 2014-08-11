@@ -201,12 +201,12 @@ namespace fn
     template<>
         Subscriber * create_subscriber<TrackCda>
         (YAML::Node& instruct, RecoFactory& rf )
-    {
+        {
             SingleTrack * st = get_single_track( instruct, rf );
             double cda = instruct["max_cda"].as<double>();
 
             return new TrackCda( *st, cda );
-    }
+        }
 
     //--------------------------------------------------
 
@@ -226,13 +226,43 @@ namespace fn
     template<>
         Subscriber * create_subscriber<TrackMomentum>
         (YAML::Node& instruct, RecoFactory& rf )
-    {
+        {
             SingleTrack * st = get_single_track( instruct, rf );
             double min_p = instruct["min"].as<double>();
             double max_p = instruct["max"].as<double>();
 
             return new TrackMomentum( *st, min_p, max_p );
+        }
+
+    //--------------------------------------------------
+
+            REG_DEF_SUB( TrackTime);
+
+    TrackTime::TrackTime(  const fne::Event * e, 
+            const SingleTrack& st ,
+            double max_dt )
+        :e_( e ), st_( st ), max_dt_( max_dt ){}
+
+    bool TrackTime::do_check() const
+    {
+        double dch_offset = e_->conditions.dch_toffst;
+        const SingleRecoTrack& srt = st_.get_single_track();
+
+        return fabs( srt.get_time() - dch_offset ) < max_dt_ ;
     }
 
+  template<>
+        Subscriber * create_subscriber<TrackTime>
+        (YAML::Node& instruct, RecoFactory& rf )
+        {
+            const fne::Event * event = rf.get_event_ptr();
+            SingleTrack * st = get_single_track( instruct, rf );
+            double max_dt = instruct["max_dt"].as<double>();
+
+            return new TrackTime( event, *st, max_dt );
+        }
+
+
+    //--------------------------------------------------
 }
 

@@ -170,5 +170,32 @@ namespace fn
     template<>
         Subscriber * create_subscriber<TrackMomentum>
         (YAML::Node& instruct, RecoFactory& rf );
+    
+    //--------------------------------------------------
+
+    class TrackTime : public CachedSelection
+    {
+
+        public:
+            TrackTime( const fne::Event * e,
+                    const SingleTrack& st ,
+                    double max_dt );
+
+        private:
+            bool do_check() const;
+
+            const fne::Event * e_;
+            const SingleTrack& st_;
+            double max_dt_;
+
+            REG_DEC_SUB( TrackTime);
+    };
+
+
+    template<>
+        Subscriber * create_subscriber<TrackTime>
+        (YAML::Node& instruct, RecoFactory& rf );
+    
+    //--------------------------------------------------
 }
 #endif
