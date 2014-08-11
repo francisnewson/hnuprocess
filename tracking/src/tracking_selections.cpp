@@ -140,7 +140,7 @@ namespace fn
 
             double z = instruct["z"].as<double>();
             double inner = instruct["inner"].as<double>();
-            double outer = instruct["inner"].as<double>();
+            double outer = instruct["outer"].as<double>();
 
             return new TrackRadialAcceptance( *st, ts, z, inner, outer );
 
