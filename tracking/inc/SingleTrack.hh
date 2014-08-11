@@ -37,6 +37,8 @@ namespace fn
 
             virtual double get_time() const = 0;
 
+            virtual double get_quality() const = 0;
+
             //downstream
             virtual TVector3 extrapolate_ds( double z) const = 0 ;
 
@@ -112,6 +114,8 @@ namespace fn
             double momentum();
 
             double get_time() const;
+
+            double get_quality() const;
 
             TVector3 extrapolate_ds( double z) const;
             TVector3 extrapolate_us( double z) const;

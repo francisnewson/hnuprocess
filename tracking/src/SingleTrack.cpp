@@ -310,6 +310,11 @@ namespace fn
         return proc_track_->rt->time;
     }
 
+    double BFSingleRecoTrack::get_quality() const
+    {
+        return proc_track_->rt->quality;
+    }
+
     TVector3 BFSingleRecoTrack::extrapolate_ds( double z) const
     {
         return extrapolate_z( * proc_track_->rt, z );

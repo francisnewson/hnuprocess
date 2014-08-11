@@ -2,6 +2,7 @@
 #define TRACKING_SELECTIONS_HH
 #include "SingleTrack.hh"
 #include "Selection.hh"
+
 #if 0
 /*
  *  _                  _    _             
@@ -33,14 +34,14 @@ namespace fn
             bool do_check() const;
             const SingleTrack& st_;
 
-                REG_DEC_SUB( FoundGoodTrack);
+            REG_DEC_SUB( FoundGoodTrack);
     };
 
     template<>
         Subscriber * create_subscriber<FoundGoodTrack>
         (YAML::Node& instruct, RecoFactory& rf );
 
-//--------------------------------------------------
+    //--------------------------------------------------
 
     class TrackCharge : public CachedSelection
     {
@@ -52,13 +53,61 @@ namespace fn
             const SingleTrack& st_;
             int charge_;
 
-                REG_DEC_SUB( TrackCharge);
+            REG_DEC_SUB( TrackCharge);
     };
 
     template<>
         Subscriber * create_subscriber<TrackCharge>
         (YAML::Node& instruct, RecoFactory& rf );
 
-//--------------------------------------------------
+    //--------------------------------------------------
+
+    class TrackQuality : public CachedSelection
+    {
+        public:
+            TrackQuality( const SingleTrack& st, double quality );
+
+        private:
+            bool do_check() const;
+            const SingleTrack& st_;
+            double quality_;
+
+            REG_DEC_SUB( TrackQuality);
+    };
+
+    template<>
+        Subscriber * create_subscriber<TrackQuality>
+        (YAML::Node& instruct, RecoFactory& rf );
+
+    //--------------------------------------------------
+
+    class TrackRadialAcceptance : public CachedSelection
+    {
+        public:
+
+            enum class track_section { us, ds, bf };
+
+            TrackRadialAcceptance( const SingleTrack& st, 
+                    track_section ts, double z, 
+                    double inner, double outer );
+
+        private:
+            bool do_check() const;
+            const SingleTrack& st_;
+            mutable TVector3 zpoint_;
+            track_section ts_;
+            double z_;
+            double inner_;
+            double outer_;
+
+            REG_DEC_SUB( TrackRadialAcceptance);
+    };
+
+    template<>
+        Subscriber * create_subscriber<TrackRadialAcceptance>
+        (YAML::Node& instruct, RecoFactory& rf );
+
+    //--------------------------------------------------
+
 }
 #endif
