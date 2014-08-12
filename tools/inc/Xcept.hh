@@ -38,6 +38,7 @@ namespace fn
     //Missing methods
     struct UnknownSingleTrackMethod{};
     struct UnknownK2piClustersMethod{};
+    struct UnknownK2piRecoMethod{};
 
     struct BadCast{};
     template <typename T> 

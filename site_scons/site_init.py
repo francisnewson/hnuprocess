@@ -15,6 +15,8 @@ def SetClang(env):
                 'LD_LIBRARY_PATH' : ':'.join(ld_library_path), 
                 'TERM': 'xterm' } )
 
+    env.Append( CXXFLAGS = ['-fcolor-diagnostics'] )
+
 AddMethod( Environment, SetClang )
 
 def SetRoot( env, root_home ):
