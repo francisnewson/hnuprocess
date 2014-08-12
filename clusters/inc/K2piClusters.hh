@@ -29,7 +29,6 @@ namespace fn
      * Select clusters compatible with K2pi
      *
      *****************************************************/
-    struct UnknownK2piClustersMethod{};
 
     class K2piRecoClusters
     {

@@ -293,6 +293,4 @@ int main( int argc, char * argv[] )
     }
 
     reco.end_processing();
-
-    reco.end_processing();
 }

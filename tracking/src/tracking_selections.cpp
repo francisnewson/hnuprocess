@@ -62,12 +62,14 @@ namespace fn
 
     //--------------------------------------------------
 
+    REG_DEF_SUB( TrackQuality);
+
     TrackQuality::TrackQuality( const SingleTrack& st, double quality )
         :st_( st ), quality_( quality )
     {}
 
     bool TrackQuality::do_check() const
-    { return st_.get_single_track().get_quality() == quality_; }
+    { return st_.get_single_track().get_quality() >= quality_; }
 
     template<>
         Subscriber * create_subscriber<TrackQuality>
@@ -109,7 +111,6 @@ namespace fn
         return ( ( rho > inner_) && rho < outer_ );
     }
 
-    //--------------------------------------------------
 
     template<>
         Subscriber * create_subscriber<TrackRadialAcceptance>

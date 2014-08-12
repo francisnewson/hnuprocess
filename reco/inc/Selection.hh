@@ -18,7 +18,6 @@
 namespace fn
 {
 
-    struct UnpreparedRequest;
 
     /*****************************************************
      * SELECTION VISITOR

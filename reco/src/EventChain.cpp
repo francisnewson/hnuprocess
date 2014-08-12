@@ -129,6 +129,24 @@ namespace fn
         return info->filename;
     }
 
+    bool EventChain::is_mc() const
+    {
+        auto tree = tch_->GetTree();
+
+        if ( !tree )
+        { 
+            throw std::runtime_error
+                ( "Attempt to read name of current tree failed"
+                  " because we received no tree" ); 
+        }
+
+        auto info =  static_cast<fne::FileInfo*>
+            ( tree->GetUserInfo()->At(0) );
+
+        return info->mc;
+    }
+
+
     //--------------------------------------------------
 
     //EVENT QUERIES
@@ -224,4 +242,5 @@ namespace fn
         //everything on header request
     }
 }
+
 

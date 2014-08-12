@@ -20,10 +20,6 @@
 #endif
 namespace fn
 {
-    //exceptions
-    struct EventDoesNotContain{};
-    struct UnknownSingleTrackMethod{};
-
     class SingleRecoTrack
     {
         public:

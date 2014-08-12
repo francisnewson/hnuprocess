@@ -21,15 +21,31 @@
  */
 #endif
 
+
 namespace fn
 {
+    //Missiong parsing
+    struct DuplicateSubscriberName{};
+    struct DuplicateSelectionName{};
+
+    struct UnknownSubscriberName{};
+    struct UnknownSelectionName{};
+
+    //Event errors
+    struct UnpreparedRequest;
+    struct EventDoesNotContain{};
+
+    //Missing methods
+    struct UnknownSingleTrackMethod{};
+    struct UnknownK2piClustersMethod{};
+
     struct BadCast{};
     template <typename T> 
         class Xcept : public std::runtime_error
-        {
-            public:
+    {
+        public:
             Xcept( std::string e )
                 :std::runtime_error( e ){}
-        };
+    };
 }
 #endif

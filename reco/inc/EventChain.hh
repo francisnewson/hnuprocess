@@ -42,6 +42,7 @@ namespace fn
             Long64_t get_max_event() const;
             std::string read_info() const;
             int get_event_version() const;
+            bool is_mc() const;
 
         private:
             void new_tree();

@@ -74,6 +74,7 @@ namespace fn
 			Long64_t max_events() const;
 			void set_remote_stop( bool& remote_stop );
 			boost::filesystem::path get_current_filename();
+            bool is_mc() const;
 
 		private:
 			//Subscribers

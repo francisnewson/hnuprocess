@@ -19,6 +19,7 @@ my_libs = [
 'conditions',
 'clusters',
 'kinfo',
+'km2',
 ]
 
 #Call Sconscript for each library

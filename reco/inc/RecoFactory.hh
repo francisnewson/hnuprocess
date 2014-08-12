@@ -34,12 +34,6 @@ namespace fn
 {
     class Reconstruction;
 
-    //exceptions
-    struct DuplicateSubscriberName{};
-    struct DuplicateSelectionName{};
-    struct UnknownSubscriberName{};
-    struct UnknownSelectionName{};
-
     class RecoFactory
     {
         public:
@@ -76,6 +70,8 @@ namespace fn
             //channel management
             void set_channel( const std::string& channel);
             std::string get_channel();
+
+            bool is_mc() const;
 
             //stoppage
             bool* get_remote_stop() const;

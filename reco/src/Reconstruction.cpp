@@ -223,5 +223,10 @@ namespace fn
     {
         return chain_->get_filename();
     }
+
+    bool Reconstruction::is_mc() const
+    {
+        return chain_->is_mc();
+    }
 }
 

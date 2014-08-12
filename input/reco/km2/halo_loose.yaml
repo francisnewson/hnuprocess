@@ -1,11 +1,16 @@
 #Loose selection for looking at halo
 ---
 #-------------------------------------------------- 
+- output:
+    name: tfout
+    type: tfile
+    filename: halo_plots.root
+
 - monitor:
     name: counter
     type: Counter
 
-        #SingleTrack
+#SingleTrack
 - input:
     name : bf_st
     type : SingleTrack
@@ -23,26 +28,32 @@
 
     dch_merge_sep: 0.5
 
-        #Autopass
+- input:
+    name: km2_event
+    type: Km2Event
+    inputs:
+        ogt: bf_st
+
+#Autopass
 - selection:
     name: passer
     type : auto_pass
 
-        #MUV bursts
+#MUV bursts
 - selection:
     name: gd_muv_brst
     type: BadBurst
     burst_list: "input/reco/conditions/bad_muv_burst.dat"
 
-        #Found ogt
+#Found ogt
 - selection:
-    name: gd_trk
+    name: good_trk
     type : FoundGoodTrack
 
     inputs :
         ogt: bf_st
 
-            #Track charge
+#Track charge
 - selection:
     name: pos_trk
     type : TrackCharge
@@ -50,7 +61,7 @@
     inputs :
         ogt: bf_st
 
-            #Track quality
+#Track quality
 - selection:
     name: quality_7
     type: TrackQuality
@@ -58,33 +69,35 @@
     inputs:
         ogt: bf_st
 
-            #Track DHC1 ACC
+#Track DHC1 ACC
 - selection:
     name: dch1_acc
     type: TrackRadialAcceptance
     track_section: upstream
     z: 9708.42 #zDCH1
-    innter: 12.0
+    inner: 12.0
     outer: 115.0
     inputs:
         ogt: bf_st
 
-            #Track DHC4 ACC
+#Track DHC4 ACC
 - selection:
     name: dch4_acc
     type: TrackRadialAcceptance
     track_section: downstream
     z: 11888.0 #zDCH1
-    innter: 14.0
+    inner: 14.0
     outer: 115.0
     inputs:
         ogt: bf_st
 
-            #Track time
+#Track time
 - selection:
     name: rk_dcht
     type : TrackTime
     max_dt: 20 #ns
+    inputs:
+        ogt: bf_st
 
         #--------------------------------------------------
 
@@ -95,15 +108,10 @@
         - gd_muv_brst
 
 - selection:
-    name : halo_tracking
-    type: CompositeSelection
-    children:
-        - gd_muv_brst
-
-- selection:
     name : halo_loose
     type: CompositeSelection
     children:
+        - gd_muv_brst
         - good_trk
         - pos_trk
         - quality_7
@@ -117,3 +125,13 @@
     type: Summary
     base : passer
     source : halo_loose 
+
+- analysis:
+    name: loose_halo_plots
+    type: Km2Plotter
+    selection: halo_loose
+    tfile: tfout
+    folder: halo_loose
+    inputs:
+        km2event: km2_event
+

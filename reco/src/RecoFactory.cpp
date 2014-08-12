@@ -160,6 +160,9 @@ namespace fn
 
             tfiles_.insert( make_pair ( name,  &tfl_.get_tfile
                         ( munged_path  ) ) );
+
+            BOOST_LOG_SEV( get_log(), debug )
+                << name << " points to " << munged_path << std::endl;
         }
 
     //get
@@ -189,6 +192,11 @@ namespace fn
     {
         return channel_;
     }
+
+            bool RecoFactory::is_mc() const
+            {
+                return reco_.is_mc();
+            }
 
     //--------------------------------------------------
 
