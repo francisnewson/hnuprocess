@@ -67,6 +67,26 @@ namespace fn
         (YAML::Node& instruct, RecoFactory& rf );
 
     //--------------------------------------------------
+    
+    class PhotonSeparation : public CachedSelection
+    {
+        public:
+            PhotonSeparation 
+                (const K2piClusters& k2pic, double min_sep );
 
+        private:
+            bool do_check() const;
+            const K2piClusters& k2pic_;
+
+            double min_sep_;
+
+            REG_DEC_SUB( PhotonSeparation );
+    };
+
+    template<>
+        Subscriber * create_subscriber<PhotonSeparation>
+        (YAML::Node& instruct, RecoFactory& rf );
+
+    //--------------------------------------------------
 }
 #endif

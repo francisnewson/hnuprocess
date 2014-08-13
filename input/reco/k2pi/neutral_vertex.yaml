@@ -83,6 +83,13 @@
         k2pic: k2pi_clusters
         ogt: bf_st
 
+- selection:
+    name: photon_sep
+    type: PhotonSeparation
+    min_sep: 20
+    inputs:
+        k2pic: k2pi_clusters
+
 
 #Track charge
 - selection:
@@ -151,6 +158,7 @@
         - rk_dcht
         - good_clust
         - track_eop
+        - photon_sep
 
 #summary
 - analysis : 

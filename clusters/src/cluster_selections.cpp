@@ -91,6 +91,36 @@ namespace fn
             return new TrackClusterEP( *k2pic, *st, min_eop, max_eop );
 
         }
-  
+
+    //--------------------------------------------------
+
+    REG_DEF_SUB( PhotonSeparation );
+
+    PhotonSeparation::PhotonSeparation
+        (const K2piClusters& k2pic, double min_sep )
+        :k2pic_( k2pic), min_sep_( min_sep)
+        {}
+
+    bool PhotonSeparation::do_check() const
+    {
+        const K2piRecoClusters &  k2pirc = k2pic_.get_reco_clusters();
+
+        CorrCluster c1 { k2pirc.cluster1() };
+        CorrCluster c2 { k2pirc.cluster2() };
+
+        double sep = fabs( ( c1.get_pos() - c2.get_pos() ).Mag() );
+        return  (sep > min_sep_ );
+    }
+
+    template<>
+        Subscriber * create_subscriber<PhotonSeparation>
+        (YAML::Node& instruct, RecoFactory& rf )
+        {
+            K2piClusters * k2pic = get_k2pi_clusters( instruct, rf );
+            double min_sep = get_yaml<double>( instruct, "min_sep");
+
+            return new PhotonSeparation( *k2pic, min_sep);
+        }
+
     //--------------------------------------------------
 }
