@@ -91,6 +91,9 @@
     inputs:
         k2pic: k2pi_clusters
 
+- selection:
+    name: muon_veto
+    type: NoMuv
 
 #Track charge
 - selection:
@@ -151,6 +154,7 @@
     type: CompositeSelection
     children:
         - gd_muv_brst
+        - muon_veto
         - good_trk
         - pos_trk
         - quality_7
