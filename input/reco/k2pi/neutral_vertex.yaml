@@ -92,6 +92,14 @@
         k2pic: k2pi_clusters
 
 - selection:
+    name: pip_mass
+    type: PipM2miss
+    min_m2: 0.0175
+    max_m2: 0.0215
+    inputs:
+        k2pi_reco:  k2pi_event
+
+- selection:
     name: muon_veto
     type: NoMuv
 
@@ -164,6 +172,7 @@
         - good_clust
         - track_eop
         - photon_sep
+        - pip_mass
 
 #summary
 - analysis : 
