@@ -72,7 +72,7 @@ namespace fn
 
         //Prepare chain
         tch_->GetFile();
-        tch_->SetCacheSize( 50000000 );
+        tch_->SetCacheSize( 100000000 );
         tch_->AddBranchToCache( "*", kTRUE );
 
         //Extract event version
