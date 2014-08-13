@@ -32,8 +32,8 @@ namespace fn
     {
         public:
             ClusterEnergyCorr( std::string filename );
-            double operator()(fne::RecoCluster& rc) const;
-            double correct_energy(fne::RecoCluster& rc) const;
+            double operator()(const fne::RecoCluster& rc) const;
+            double correct_energy(const fne::RecoCluster& rc) const;
 
 
             int GetCpdCellIndex

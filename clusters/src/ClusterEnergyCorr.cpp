@@ -92,12 +92,12 @@ namespace fn
 
     //--------------------------------------------------
 
-    double ClusterEnergyCorr::operator()(fne::RecoCluster& rc) const
+    double ClusterEnergyCorr::operator()(const fne::RecoCluster& rc) const
     {
         return correct_energy(rc);
     }
 
-    double ClusterEnergyCorr::correct_energy(fne::RecoCluster& rc) const
+    double ClusterEnergyCorr::correct_energy(const fne::RecoCluster& rc) const
     {
         //ints to receive cell information
         int cpd;

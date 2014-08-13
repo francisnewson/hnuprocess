@@ -2,6 +2,7 @@
 #define CORRCLUSTER_HH
 #include "RecoCluster.hh"
 #include "TVector3.h"
+#include "ClusterEnergyCorr.hh"
 #if 0
 /*
  *   ____                 ____ _           _            
@@ -28,6 +29,9 @@ namespace fn
 
     //--------------------------------------------------
 
+    TVector3 project_cluster
+        ( TVector3 pos, double energy, double project_depth );
+
     class PhotonProjCorrCluster : public CorrCluster
     {
         public:
@@ -35,8 +39,23 @@ namespace fn
                 ( const fne::RecoCluster& rc );
 
             TVector3 get_pos() const;
-
-            static const double lkr_project_dist;
     };
+
+    //--------------------------------------------------
+
+    class TrackProjCorrCluster : public CorrCluster
+    {
+        public:
+            TrackProjCorrCluster
+                ( const fne::RecoCluster& rc );
+
+            TVector3 get_pos() const;
+            double get_energy() const;
+
+        private:
+            ClusterEnergyCorr cec_;
+    };
+
+    //--------------------------------------------------
 }
 #endif

@@ -1,5 +1,9 @@
 #include "cluster_selections.hh"
+#include "tracking_selections.hh"
+#include "CorrCluster.hh"
+#include "SingleTrack.hh"
 #include "Xcept.hh"
+#include "yaml_help.hh"
 
 namespace fn
 {
@@ -41,5 +45,52 @@ namespace fn
             return new FoundK2piClusters{ *k2pic };
         }
 
+    //--------------------------------------------------
+
+    REG_DEF_SUB( TrackClusterEP);
+
+    TrackClusterEP::TrackClusterEP( const K2piClusters& k2pic ,
+            const SingleTrack& st , double min_eop, double max_eop)
+        :k2pic_( k2pic), st_( st ), min_eop_( min_eop),max_eop_( max_eop)
+    {}
+
+    bool TrackClusterEP::do_check() const
+    {
+        const K2piRecoClusters &  k2pirc = k2pic_.get_reco_clusters();
+
+        //If there is no track cluster we don't need to check
+        if ( ! k2pirc.found_track_cluster() )
+        {
+            return true;
+        }
+        else
+        {
+            const fne::RecoCluster tc = k2pirc.track_cluster();
+            TrackProjCorrCluster tcep( tc );
+            double track_cluster_energy = tcep.get_energy();
+
+            const SingleRecoTrack& srt = st_.get_single_track();
+            double track_momentum = srt.get_mom();
+
+            double eop = track_cluster_energy / track_momentum;
+
+            return ( ( eop < max_eop_ ) && ( eop > min_eop_ ) );
+        }
+    }
+
+    template<>
+        Subscriber * create_subscriber<TrackClusterEP>
+        (YAML::Node& instruct, RecoFactory& rf )
+        {
+            K2piClusters * k2pic = get_k2pi_clusters( instruct, rf );
+            SingleTrack * st = get_single_track( instruct, rf );
+
+            double min_eop = get_yaml<double>( instruct, "min_eop");
+            double max_eop = get_yaml<double>( instruct, "max_eop");
+
+            return new TrackClusterEP( *k2pic, *st, min_eop, max_eop );
+
+        }
+  
     //--------------------------------------------------
 }

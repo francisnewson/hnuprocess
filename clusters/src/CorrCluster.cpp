@@ -22,21 +22,46 @@ namespace fn
 
     //--------------------------------------------------
 
+    TVector3 project_cluster
+        ( TVector3 pos, double energy, double project_depth )
+        {
+            double lkr_project_dist = 10998;
+            TVector3 result = pos;
+            double cluster_depth = project_depth + 4.3 * std::log( energy);
+
+            result.SetX( result.X() * ( 1 + cluster_depth / lkr_project_dist ) );
+            result.SetY( result.Y() * ( 1 + cluster_depth / lkr_project_dist ) );
+            result.SetZ( result.Z() + cluster_depth );
+
+            return result;
+        }
+
+    //--------------------------------------------------
+
     PhotonProjCorrCluster::PhotonProjCorrCluster( const fne::RecoCluster& rc )
         :CorrCluster( rc ){}
 
-    const double PhotonProjCorrCluster::lkr_project_dist = 10998;
-
     TVector3 PhotonProjCorrCluster::get_pos() const
     {
-        //get rotated position
-        TVector3 result = CorrCluster::get_pos();
-        double cluster_depth = 20.8 + 4.3 * std::log( get_energy() );
+        return project_cluster( CorrCluster::get_pos(), get_energy(), 20.8 );
+    }
 
-        result.SetX( result.X() * ( 1 + cluster_depth / lkr_project_dist ) );
-        result.SetY( result.Y() * ( 1 + cluster_depth / lkr_project_dist ) );
-        result.SetZ( result.Z() + cluster_depth );
+    //--------------------------------------------------
 
-        return result;
+    TrackProjCorrCluster::TrackProjCorrCluster
+        ( const fne::RecoCluster& rc )
+        :CorrCluster( rc ),
+        cec_("/afs/cern.ch/user/f/fnewson/work/hnu"
+                "/gopher/data/detector/eopCorrfile.dat" )
+        {}
+
+    TVector3 TrackProjCorrCluster::get_pos() const
+    {
+        return project_cluster( CorrCluster::get_pos(), get_energy(),  16.5 );
+    }
+
+    double TrackProjCorrCluster::get_energy() const
+    {
+        return cec_.correct_energy( rc_ );
     }
 }

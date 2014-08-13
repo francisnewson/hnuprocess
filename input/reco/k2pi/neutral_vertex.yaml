@@ -74,6 +74,15 @@
     inputs:
         k2pic: k2pi_clusters
 
+- selection:
+    name: track_eop
+    type: TrackClusterEP
+    min_eop: 0.2
+    max_eop: 0.8
+    inputs:
+        k2pic: k2pi_clusters
+        ogt: bf_st
+
 
 #Track charge
 - selection:
@@ -141,6 +150,7 @@
         - dch4_acc
         - rk_dcht
         - good_clust
+        - track_eop
 
 #summary
 - analysis : 

@@ -42,5 +42,31 @@ namespace fn
         Subscriber * create_subscriber<FoundK2piClusters>
         (YAML::Node& instruct, RecoFactory& rf );
 
+    //--------------------------------------------------
+
+    class TrackClusterEP : public CachedSelection
+    {
+        public:
+            TrackClusterEP( const K2piClusters& k2pic ,
+                    const SingleTrack& st,
+                    double min_eop, double max_eop);
+
+        private:
+            bool do_check() const;
+            const K2piClusters& k2pic_;
+            const SingleTrack& st_;
+
+            double min_eop_;
+            double max_eop_;
+
+            REG_DEC_SUB( TrackClusterEP);
+    };
+
+    template<>
+        Subscriber * create_subscriber<TrackClusterEP>
+        (YAML::Node& instruct, RecoFactory& rf );
+
+    //--------------------------------------------------
+
 }
 #endif
