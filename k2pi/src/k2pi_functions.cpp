@@ -6,6 +6,7 @@
 #include "NA62Constants.hh"
 #include "root_help.hh"
 #include <boost/math/tools/roots.hpp>
+#include <boost/lexical_cast.hpp>
 
 namespace fn
 {
@@ -33,11 +34,24 @@ namespace fn
         if ( slg ){ BOOST_LOG_SEV( *slg, sl )
             << "NEUT VERT: Minimizing"; }
 
+        if ( slg ){
+            std::stringstream ss; ss << pos1;
+            BOOST_LOG_SEV( *slg, sl )
+                << "C1: " << ss.str() << " E1: " << E1 ; 
+
+            ss.str(""); ss << pos2; 
+            BOOST_LOG_SEV( *slg, sl )
+                << "C2: " << ss.str() << " E2: " << E2 ; 
+        }
+
+        if ( slg && e->header.mc ){ BOOST_LOG_SEV( *slg, sl )
+            << "NEUT VERT: true z " << e->mc.decay.decay_vertex.Z() ; }
+
         double best_z = 0;
 
         //Do the numerical bit
-            best_z = bracket_solve_neutral_vertex
-                ( kt, E1, pos1, E2, pos2, slg, sl );
+        best_z = bracket_solve_neutral_vertex
+            ( kt, E1, pos1, E2, pos2, slg, sl );
 
         return kt.extrapolate_z( best_z );
     }
@@ -54,6 +68,9 @@ namespace fn
 
             //what should cos_t be?
             double req_cos_t = pi0_cos_photon_opening( E1, E2 );
+
+            BOOST_LOG_SEV( *slg, sl )
+                << "target cos_t: " << req_cos_t; 
 
             //Functino to compare each time
             auto delta_to_minimize = [ &kt, &pos1, &pos2, &req_cos_t] ( double z )
@@ -111,6 +128,7 @@ namespace fn
                 if ( slg ){
                     BOOST_LOG_SEV( *slg, sl )
                         << "E1:" << E1 << " E2: " << E2 ;
+
                     BOOST_LOG_SEV( *slg, sl )
                         << " pos1: " << pos1.X() << " pos2: " << pos2.X();
 
@@ -121,6 +139,12 @@ namespace fn
                 }
                 std::cerr << "Error in compute_neutral_vertex\n";
             }
+
+            BOOST_LOG_SEV( *slg, sl )
+                << "raw: " << raw_vertex_z 
+                << " fit: " << fit_best_vertex.first
+                << " " << fit_best_vertex.second ;
+
             return fit_best_vertex.first;
         }
 
@@ -138,6 +162,7 @@ namespace fn
         ( TVector3 pos1, double E1, TVector3 pos2, double E2 )
         {
             double separation = fabs( ( pos1 - pos2).Perp() );
+
             return na62const::zLkr 
                 - separation * std::sqrt( E1 * E2 ) / na62const::mPi0 ;
         }

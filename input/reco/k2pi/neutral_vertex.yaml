@@ -44,7 +44,7 @@
     name: k2pi_event
     type: K2piReco
     method: simple
-    log_level: always_print
+    #log_level: always_print
     inputs:
         ogt: bf_st
         k2pic: k2pi_clusters

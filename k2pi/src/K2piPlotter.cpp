@@ -17,6 +17,15 @@ namespace fn
                 1000, -0.1, 0.2 , "pi+ m^{2} (GeV^{2})",
                 "#events");
 
+        h_m2_pi0 = hs_.MakeTH1D(
+                "h_m2_pi0", "Pi0 m^{2}",
+                1000, -0.1, 0.2 , "pi0 m^{2} (GeV^{2})",
+                "#events");
+
+        h_neutral_z_ = hs_.MakeTH1D(
+                "h_neutral_z", "Neutral Z Vertex",
+                1000, -5000 , 10000, "Z (cm)", 
+                "#events" );
     }
 
     void K2piPlotter::process_event()
@@ -26,6 +35,12 @@ namespace fn
 
         h_m2_pip_lkr_->Fill
             ( re.get_m2pip() , get_weight() );
+
+        h_m2_pi0->Fill
+            ( re.get_m2pi0() , get_weight() );
+
+        h_neutral_z_->Fill
+            ( re.get_zvertex(), get_weight() );
     }
 
     void K2piPlotter::end_processing()

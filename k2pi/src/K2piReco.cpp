@@ -23,6 +23,8 @@ namespace fn
 
     void K2piReco::new_event()
     {
+        reco_event_->set_log( get_log() );
+        reco_event_->set_log_level( log_level() );
         dirty_ = true;
     }
 
@@ -119,7 +121,13 @@ namespace fn
         TVector3 v2 = c2.get_pos() - neutral_vertex_;
         TLorentzVector p2{ c2.get_energy()* v2.Unit(), c2.get_energy() };
 
-        pi0_ = p1 + p1;
+        BOOST_LOG_SEV( get_log(), log_level() )
+            << "RECO: photons: = " << p1.E() <<  " " << p2.E() ;
+
+        pi0_ = p1 + p2;
+
+        BOOST_LOG_SEV( get_log(), log_level() )
+            << "RECO: Epi0 = " << pi0_.E();
 
         TLorentzVector k  = kt.get_kaon_4mom();
 

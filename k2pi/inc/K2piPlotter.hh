@@ -30,6 +30,8 @@ namespace fn
         void process_event();
 
         TH1D * h_m2_pip_lkr_;
+        TH1D * h_m2_pi0;
+        TH1D * h_neutral_z_;
 
         TFile& tfile_;
         std::string folder_;
