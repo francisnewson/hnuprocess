@@ -16,6 +16,7 @@ build_O3
 build_O1
 build_O0
 *.log
+tags
 
 #scons
 .sconsign.dblite

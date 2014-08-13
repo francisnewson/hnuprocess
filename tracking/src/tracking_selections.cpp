@@ -7,16 +7,26 @@ namespace fn
     SingleTrack * get_single_track
         ( YAML::Node& instruct, RecoFactory& rf )
         {
-            YAML::Node yogt = instruct["inputs"]["ogt"];
+            SingleTrack * ogt = 0;
 
-            if ( !yogt )
-            {throw Xcept<MissingNode>( "ogt" );}
+            try
+            {
+                YAML::Node yogt = instruct["inputs"]["ogt"];
 
-            SingleTrack * ogt = dynamic_cast<SingleTrack*>
-                ( rf.get_subscriber( yogt.as<std::string>() ));
+                if ( !yogt )
+                {throw Xcept<MissingNode>( "ogt" );}
 
-            if ( !ogt )
-            { throw Xcept<BadCast>( "OGT" ); }
+                ogt = dynamic_cast<SingleTrack*>
+                    ( rf.get_subscriber( yogt.as<std::string>() ));
+
+                if ( !ogt )
+                { throw Xcept<BadCast>( "OGT" ); }
+
+            }
+            catch ( ... )
+            {
+                std::cerr << "Trying to get single track (" __FILE__ ")\n" ;
+            }
 
             return ogt;
         }
@@ -237,7 +247,7 @@ namespace fn
 
     //--------------------------------------------------
 
-            REG_DEF_SUB( TrackTime);
+    REG_DEF_SUB( TrackTime);
 
     TrackTime::TrackTime(  const fne::Event * e, 
             const SingleTrack& st ,
@@ -252,7 +262,7 @@ namespace fn
         return fabs( srt.get_time() - dch_offset ) < max_dt_ ;
     }
 
-  template<>
+    template<>
         Subscriber * create_subscriber<TrackTime>
         (YAML::Node& instruct, RecoFactory& rf )
         {

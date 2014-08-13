@@ -3,8 +3,6 @@
 #include "Xcept.hh"
 namespace fn
 {
-
-
     //Constructor takes a reference to a RecoFactory which
     //can actually produce subscribers etc
     RecoParser::RecoParser( RecoFactory& rf, logger& log )
@@ -26,6 +24,9 @@ namespace fn
         {
             try
             {
+                BOOST_LOG_SEV( log_, debug)
+                    << "RECOPARSER: new subscriber";
+                ;
 
                 assert(it->Type() == YAML::NodeType::Map);
 
@@ -41,14 +42,21 @@ namespace fn
                     continue;
                 }
 
+                BOOST_LOG_SEV( log_, debug)
+                    << "RECOPARSER: reading name  ...";
                 std::string name;
-                std::string type;
                 name = instruct["name"].as<std::string>();
+
+                BOOST_LOG_SEV( log_, debug)
+                    << "RECOPARSER: reading type  ...";
+                std::string type;
                 type = instruct["type"].as<std::string>();
 
-
+                BOOST_LOG_SEV( log_, debug)
+                    << "RECOPARSER: constructing subscriber  ...";
                 //All subscribers must be registered
                 //to receive new_event's
+
                 Subscriber * s = 0;
                 s = rf_.create_subscriber( 
                         name, type, instruct );
@@ -78,13 +86,13 @@ namespace fn
 
             catch( std::runtime_error& e )
             {
-                std::cerr << "Trying to parse: " << *it ;
-                throw e;
+                std::cerr << "Trying to parse: " << *it << "\n";
+                throw ;
             }
             catch( YAML::Exception& e )
             {
-                std::cerr << "Trying to parse: " << *it ;
-                throw e;
+                std::cerr << "Trying to parse: " << *it <<  "\n";
+                throw;
             }
         }
     }
@@ -124,7 +132,7 @@ namespace fn
         catch( std::runtime_error& e )
         {
             std::cerr << "Trying to parse: " << instruct ;
-            throw e;
+            throw;
         }
     }
 }

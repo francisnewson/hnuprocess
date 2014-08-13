@@ -31,6 +31,8 @@ namespace fn
     struct UnknownSubscriberName{};
     struct UnknownSelectionName{};
 
+    struct MissingInfo{};
+
     //Event errors
     struct UnpreparedRequest;
     struct EventDoesNotContain{};

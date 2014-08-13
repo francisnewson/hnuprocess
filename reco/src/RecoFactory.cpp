@@ -48,8 +48,17 @@ namespace fn
             throw Xcept<DuplicateSubscriberName>( name );
         }
 
-        Subscriber * s = SubscriberFactory::get_subscriber
-            ( subscriber_type , instruct, *this);
+        Subscriber * s = 0;
+        try
+        {
+            s = SubscriberFactory::get_subscriber
+                ( subscriber_type , instruct, *this);
+        }
+        catch ( ... )
+        {
+            std::cerr << "Trying create " << name << "\n";
+            throw;
+        }
 
         s->set_name( name );
         s->set_id( next_sub_id_ ++ );
@@ -193,10 +202,10 @@ namespace fn
         return channel_;
     }
 
-            bool RecoFactory::is_mc() const
-            {
-                return reco_.is_mc();
-            }
+    bool RecoFactory::is_mc() const
+    {
+        return reco_.is_mc();
+    }
 
     //--------------------------------------------------
 

@@ -3,6 +3,7 @@
 #include "tracking_selections.hh"
 #include "CorrCluster.hh"
 #include "Xcept.hh"
+#include "yaml_help.hh"
 #include <iomanip>
 
 namespace fn
@@ -55,7 +56,8 @@ namespace fn
         Subscriber * create_subscriber<K2piClusters>
         (YAML::Node& instruct, RecoFactory& rf )
         {
-            std::string method = instruct["method"].as<std::string>();
+            std::string method = get_yaml<std::string>(instruct, "method");
+            
             const fne::Event * event = rf.get_event_ptr();
             const SingleTrack * single_track = get_single_track( instruct, rf );
 
@@ -83,6 +85,22 @@ namespace fn
             tc_ = tc;
         }
 
+    const fne::RecoCluster& 
+        DefaultK2piRecoClusters::cluster1() const
+        { return *c1_; }
+
+    const fne::RecoCluster& 
+        DefaultK2piRecoClusters::cluster2() const
+        { return *c1_; }
+
+    bool 
+        DefaultK2piRecoClusters::found_track_cluster() const
+        { return found_track_; }
+
+    const fne::RecoCluster& 
+        DefaultK2piRecoClusters::track_cluster() const
+        { return *tc_; }
+
     //--------------------------------------------------
 
     DefaultK2piClusters::DefaultK2piClusters( 
@@ -93,9 +111,15 @@ namespace fn
         cec_("/afs/cern.ch/user/f/fnewson/work/hnu"
                 "/gopher/data/detector/eopCorrfile.dat" )
     { 
-        min_track_cluster_time_ = instruct["min_track_cluster_time"].as<double>();
-        min_cluster_energy_ = instruct["min_cluster_energy"].as<double>();
-        max_track_cluster_distance_ = instruct["max_track_cluster_distance"].as<double>();
+        min_track_cluster_time_  = 
+            get_yaml<double>( instruct, "min_track_cluster_time");
+
+        min_cluster_energy_  = 
+            get_yaml<double>( instruct, "min_cluster_energy");
+
+        max_track_cluster_distance_  = 
+            get_yaml<double>( instruct, "max_track_cluster_distance");
+
     }
 
     //Process clusters

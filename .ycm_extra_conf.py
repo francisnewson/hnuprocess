@@ -53,7 +53,6 @@ flags = [
 # For a C project, you would set this to 'c' instead of 'c++'.
 '-x',
 'c++',
-'-isystem',
 # This path will only work on OS X, but extra paths that don't exist are not
 # harmful
 '-I',  '/afs/cern.ch/user/f/fnewson/work/hnu/gopher/code/process/clusters/inc',

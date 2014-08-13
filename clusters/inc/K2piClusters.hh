@@ -32,11 +32,12 @@ namespace fn
 
     class K2piRecoClusters
     {
-        fne::RecoCluster& cluster1() const;
-        fne::RecoCluster& cluster2() const;
+        public:
+        virtual const fne::RecoCluster& cluster1() const = 0;
+        virtual const fne::RecoCluster& cluster2() const = 0;
 
-        bool found_charged_cluster() const;
-        fne::RecoCluster& charged_cluster() const;
+        virtual bool found_track_cluster() const = 0;
+        virtual const fne::RecoCluster& track_cluster() const = 0;
     };
 
     class K2piClusters : public Subscriber

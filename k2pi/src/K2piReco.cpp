@@ -2,8 +2,10 @@
 #include <cassert>
 #include "Xcept.hh"
 #include "SingleTrack.hh"
+#include "CorrCluster.hh"
 #include "tracking_selections.hh"
 #include "cluster_selections.hh"
+#include "k2pi_functions.hh"
 
 namespace fn
 {
@@ -47,7 +49,7 @@ namespace fn
 
             if ( method == "simple" )
             {
-                re = new K2piRecoImpEvent;
+                re = new K2piSimpleRecoEvent;
             }
             else 
             {
@@ -66,21 +68,64 @@ namespace fn
             K2piRecoEvent* k2pirec,
             bool mc )
         :K2piReco( k2pirec),
-        e_( event), st_( st), k2pic_( k2pic), mc_( mc)
+        e_( event), st_( st), k2pic_( k2pic),
+        kt_( event, mc), mc_( mc)
     {}
 
     void K2piRecoImp::process_event() const
     {
-        reco_event_->update( e_, st_, k2pic_ );
+        reco_event_->update( e_, kt_, st_, k2pic_ );
     }
 
     //--------------------------------------------------
-    
-             void K2piRecoImpEvent::update( 
-                    const fne::Event * event,
-                    const SingleTrack& st,
-                    const K2piClusters& k2pic )
-             {
 
-             }
+    K2piSimpleRecoEvent::K2piSimpleRecoEvent()
+    {}
+
+    void K2piSimpleRecoEvent::update( 
+            const fne::Event * event,
+            const KaonTrack& kt,
+            const SingleTrack& st,
+            const K2piClusters& k2pic )
+    {
+        const K2piRecoClusters& k2pirc= k2pic.get_reco_clusters();
+
+        //compute neutral vertex
+        neutral_vertex_ =  compute_neutral_vertex
+            ( event, kt, k2pic.get_reco_clusters() );
+
+        //compute momenta
+        PhotonProjCorrCluster c1 {k2pirc.cluster1() };
+        PhotonProjCorrCluster c2 {k2pirc.cluster2() };
+
+        TVector3 v1 = c1.get_pos() - neutral_vertex_;
+        TLorentzVector p1{ c1.get_energy()* v1.Unit(), c1.get_energy() };
+
+        TVector3 v2 = c2.get_pos() - neutral_vertex_;
+        TLorentzVector p2{ c2.get_energy()* v2.Unit(), c2.get_energy() };
+
+        pi0_ = p1 + p1;
+
+        TLorentzVector k  = kt.get_kaon_4mom();
+
+        pip_lkr_ = k - pi0_;
+    }
+
+    double K2piSimpleRecoEvent::get_zvertex() const
+    {
+        return neutral_vertex_.Z();
+    }
+
+    double K2piSimpleRecoEvent::get_m2pip() const
+    {
+        return pip_lkr_.M2();
+    }
+
+    double K2piSimpleRecoEvent::get_m2pi0() const
+    {
+        return pi0_.M2();
+    }
+
+    double K2piSimpleRecoEvent::get_chi2() const
+    { return 0; }
 }

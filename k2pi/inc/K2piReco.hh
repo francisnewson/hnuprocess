@@ -4,6 +4,8 @@
 #include "Subscriber.hh"
 #include "K2piClusters.hh"
 #include "Event.hh"
+#include "KaonTrack.hh"
+#include "TLorentzVector.h"
 
 #if 0
 /*
@@ -23,6 +25,7 @@ namespace fn
         public:
             virtual void update( 
                     const fne::Event * event,
+                    const KaonTrack& kt,
                     const SingleTrack& st,
                     const K2piClusters& k2pic ) = 0;
 
@@ -72,17 +75,30 @@ namespace fn
             const fne::Event * e_;
             const SingleTrack & st_;
             const K2piClusters & k2pic_;
+            const KaonTrack kt_;
             bool mc_;
     };
 
     //--------------------------------------------------
     
-    class K2piRecoImpEvent : public K2piRecoEvent
+    class K2piSimpleRecoEvent : public K2piRecoEvent
     {
+        public: 
+            K2piSimpleRecoEvent();
              void update( 
                     const fne::Event * event,
+                    const KaonTrack& kt,
                     const SingleTrack& st,
                     const K2piClusters& k2pic );
+        private: 
+            double get_zvertex() const;
+            double get_m2pip() const;
+            double get_m2pi0() const;
+            double get_chi2() const;
+
+             TVector3 neutral_vertex_ ;
+             TLorentzVector pi0_;
+             TLorentzVector pip_lkr_;
     };
 }
 #endif
