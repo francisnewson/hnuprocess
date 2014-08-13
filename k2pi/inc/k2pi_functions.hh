@@ -1,6 +1,7 @@
 #ifndef K2PI_FUNCTIONS_HH
 #define K2PI_FUNCTIONS_HH
 #include "TVector3.h"
+#include "logging.hh"
 #if 0
 /*
  *  _    ____        _ 
@@ -26,14 +27,15 @@ namespace fn
     class K2piRecoClusters;
 
     TVector3 compute_neutral_vertex( const fne::Event * e,
-            const KaonTrack& kt, const K2piRecoClusters & k2pirc );
+            const KaonTrack& kt, const K2piRecoClusters & k2pirc ,
+            logger * slg  = 0 , severity_level sl = debug );
 
     double bracket_solve_neutral_vertex
         (
          const KaonTrack& kt,
          double E1, const TVector3& pos1,
-         double E2, const TVector3& pos2
-        );
+         double E2, const TVector3& pos2,
+            logger * slg  = 0 , severity_level sl = debug );
 
     double pi0_cos_photon_opening( double E1, double E2 );
 

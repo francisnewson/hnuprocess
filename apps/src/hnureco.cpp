@@ -276,12 +276,13 @@ int main( int argc, char * argv[] )
                                  + mission_name + "_" ) );
     }
 
+    Subscriber::set_log( slg );
+
     //Create RecoParser
     RecoParser reco_parser( reco_factory, slg );
     BOOST_LOG_SEV( slg , startup) << "Parssing " << mission;
     reco_parser.parse( mission );
 
-    Subscriber::set_log( slg );
 
     reco.status_report( std::cerr );
 

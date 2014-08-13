@@ -9,6 +9,17 @@
 
 namespace fn
 {
+    void K2piRecoEvent::set_log( logger& slg )
+    { slg_ = &slg; }
+
+    void K2piRecoEvent::set_log_level( severity_level sev )
+    { sl_ = sev; }
+
+    logger& K2piRecoEvent::get_log()
+    { return *slg_; }
+
+    severity_level K2piRecoEvent::log_level()
+    { return sl_; }
 
     void K2piReco::new_event()
     {
@@ -17,13 +28,16 @@ namespace fn
 
     K2piReco::K2piReco(  K2piRecoEvent* k2pirc )
         :reco_event_( k2pirc )
-    {}
+    {
+        reco_event_->set_log( get_log() );
+        reco_event_->set_log_level( log_level() );
+    }
 
     //--------------------------------------------------
 
     REG_DEF_SUB( K2piReco );
 
-    const K2piRecoEvent& K2piReco::get_reco_event()
+    const K2piRecoEvent& K2piReco::get_reco_event() const
     {
         if ( dirty_ )
         {
@@ -70,7 +84,7 @@ namespace fn
         :K2piReco( k2pirec),
         e_( event), st_( st), k2pic_( k2pic),
         kt_( event, mc), mc_( mc)
-    {}
+    { }
 
     void K2piRecoImp::process_event() const
     {
@@ -92,7 +106,8 @@ namespace fn
 
         //compute neutral vertex
         neutral_vertex_ =  compute_neutral_vertex
-            ( event, kt, k2pic.get_reco_clusters() );
+            ( event, kt, k2pic.get_reco_clusters(),
+              &get_log(), log_level() );
 
         //compute momenta
         PhotonProjCorrCluster c1 {k2pirc.cluster1() };
@@ -128,4 +143,26 @@ namespace fn
 
     double K2piSimpleRecoEvent::get_chi2() const
     { return 0; }
+
+    //--------------------------------------------------
+
+    K2piReco * get_k2pi_reco
+        ( YAML::Node& instruct, RecoFactory& rf )
+        {
+            YAML::Node yk2pi = instruct["inputs"]["k2pi_reco"];
+
+            if ( !yk2pi )
+            {
+                throw Xcept<MissingNode>( "k2pi_reco");
+            }
+
+            K2piReco * k2pir = dynamic_cast<K2piReco*>
+                ( rf.get_subscriber( yk2pi.as<std::string>() ) );
+
+            if ( !k2pir )
+            { throw Xcept<BadCast>( "K2PIRECO" ); }
+
+            return k2pir;
+        }
+
 }

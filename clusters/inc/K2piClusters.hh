@@ -48,11 +48,11 @@ namespace fn
             const K2piRecoClusters& get_reco_clusters() const;
 
         protected:
-            void set_reco_clusters( K2piRecoClusters * krc );
+            void set_reco_clusters( K2piRecoClusters * krc ) const;
 
         private:
             virtual bool process_clusters() const =0;
-            const K2piRecoClusters * reco_clusters_;
+            mutable const K2piRecoClusters * reco_clusters_;
 
             //Results cacheing
             mutable bool dirty_;

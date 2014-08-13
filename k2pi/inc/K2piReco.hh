@@ -29,10 +29,20 @@ namespace fn
                     const SingleTrack& st,
                     const K2piClusters& k2pic ) = 0;
 
-            double get_zvertex() const;
-            double get_m2pip() const;
-            double get_m2pi0() const;
-            double get_chi2() const;
+            virtual double get_zvertex() const = 0;
+            virtual double get_m2pip() const = 0;
+            virtual double get_m2pi0() const = 0;
+            virtual double get_chi2() const = 0;
+
+            void set_log( logger& slg );
+            void set_log_level( severity_level sev );
+
+            logger& get_log();
+            severity_level log_level();
+
+        private:
+                logger * slg_;
+            severity_level sl_;
     };
 
     class K2piReco : public Subscriber
@@ -40,7 +50,7 @@ namespace fn
         public:
             K2piReco( K2piRecoEvent* k2pirc );
             void new_event();
-            const K2piRecoEvent& get_reco_event();
+            const K2piRecoEvent& get_reco_event() const;
 
         protected:
             mutable K2piRecoEvent * reco_event_;
@@ -100,5 +110,11 @@ namespace fn
              TLorentzVector pi0_;
              TLorentzVector pip_lkr_;
     };
+
+    //--------------------------------------------------
+
+
+    K2piReco * get_k2pi_reco
+        ( YAML::Node& instruct, RecoFactory& rf );
 }
 #endif

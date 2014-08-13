@@ -4,14 +4,20 @@
 #include "K2piClusters.hh"
 #include "CorrCluster.hh"
 #include "NA62Constants.hh"
+#include "root_help.hh"
 #include <boost/math/tools/roots.hpp>
 
 namespace fn
 {
 
     TVector3 compute_neutral_vertex( const fne::Event * e,
-            const KaonTrack& kt, const K2piRecoClusters & k2pirc )
+            const KaonTrack& kt, const K2piRecoClusters & k2pirc ,
+            logger * slg , severity_level sl )
     {
+        //sl = always_print;
+        if ( slg ){ BOOST_LOG_SEV( *slg, sl )
+            << "NEUT VERT: Extracting clusters"; }
+
         PhotonProjCorrCluster p1 {k2pirc.cluster1() };
         PhotonProjCorrCluster p2 {k2pirc.cluster2() };
 
@@ -24,7 +30,16 @@ namespace fn
         double E2 = p2.get_energy();
 
         //minimize
-        return {};
+        if ( slg ){ BOOST_LOG_SEV( *slg, sl )
+            << "NEUT VERT: Minimizing"; }
+
+        double best_z = 0;
+
+        //Do the numerical bit
+            best_z = bracket_solve_neutral_vertex
+                ( kt, E1, pos1, E2, pos2, slg, sl );
+
+        return kt.extrapolate_z( best_z );
     }
 
     //--------------------------------------------------
@@ -33,8 +48,8 @@ namespace fn
         (
          const KaonTrack& kt,
          double E1, const TVector3& pos1,
-         double E2, const TVector3& pos2
-        )
+         double E2, const TVector3& pos2,
+         logger * slg , severity_level sl )
         {
 
             //what should cos_t be?
@@ -87,11 +102,24 @@ namespace fn
                 fit_best_vertex = boost::math::tools::toms748_solve
                     ( delta_to_minimize, za, zb, fa, fb, termination, max_it) ;
             }
-            catch ( std::runtime_error& e  )
+            catch ( std::exception & e  )
             {
                 std::cerr << "In fit_z_bracket_solve: " << std::endl;
                 std::cerr << e.what() << std::endl;
                 fit_best_vertex = std::make_pair( raw_vertex_z, 0 );
+
+                if ( slg ){
+                    BOOST_LOG_SEV( *slg, sl )
+                        << "E1:" << E1 << " E2: " << E2 ;
+                    BOOST_LOG_SEV( *slg, sl )
+                        << " pos1: " << pos1.X() << " pos2: " << pos2.X();
+
+                    BOOST_LOG_SEV( *slg, sl )
+                        << "zrange: " << za << " - " << zb 
+                        << " deltarange: " << fa << " - " << fb 
+                        ;
+                }
+                std::cerr << "Error in compute_neutral_vertex\n";
             }
             return fit_best_vertex.first;
         }

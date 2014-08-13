@@ -44,6 +44,7 @@
     name: k2pi_event
     type: K2piReco
     method: simple
+    log_level: always_print
     inputs:
         ogt: bf_st
         k2pic: k2pi_clusters
@@ -63,9 +64,16 @@
 - selection:
     name: good_trk
     type : FoundGoodTrack
-
     inputs :
         ogt: bf_st
+
+#Found k2pic
+- selection:
+    name: good_clust
+    type: FoundK2piClusters
+    inputs:
+        k2pic: k2pi_clusters
+
 
 #Track charge
 - selection:
@@ -122,7 +130,7 @@
         - gd_muv_brst
 
 - selection:
-    name : halo_loose
+    name : k2pi_cuts
     type: CompositeSelection
     children:
         - gd_muv_brst
@@ -132,10 +140,20 @@
         - dch1_acc
         - dch4_acc
         - rk_dcht
+        - good_clust
 
 #summary
 - analysis : 
-    name : loose_halo_summary
+    name : k2pi_summary
     type: Summary
     base : passer
-    source : halo_loose 
+    source : k2pi_cuts 
+
+- analysis:
+    name: k2pi_plots
+    type: K2piPlotter
+    selection: k2pi_cuts
+    tfile: tfout
+    folder: neutral_vertex
+    inputs:
+        k2pi_reco:  k2pi_event

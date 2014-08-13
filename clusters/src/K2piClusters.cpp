@@ -4,6 +4,7 @@
 #include "CorrCluster.hh"
 #include "Xcept.hh"
 #include "yaml_help.hh"
+#include "root_help.hh"
 #include <iomanip>
 
 namespace fn
@@ -46,8 +47,8 @@ namespace fn
             return *reco_clusters_;
         }
 
-    void K2piClusters::set_reco_clusters
-        ( K2piRecoClusters * krc )
+    void K2piClusters::set_reco_clusters 
+        ( K2piRecoClusters * krc ) const
         {
             reco_clusters_ = krc; 
         }
@@ -91,7 +92,7 @@ namespace fn
 
     const fne::RecoCluster& 
         DefaultK2piRecoClusters::cluster2() const
-        { return *c1_; }
+        { return *c2_; }
 
     bool 
         DefaultK2piRecoClusters::found_track_cluster() const
@@ -135,6 +136,8 @@ namespace fn
         //assign clusters (photon / pi+ )
         bool success = assign_clusters();
 
+        set_reco_clusters( &reco_clusters_ );
+
         return success;
     }
 
@@ -153,7 +156,7 @@ namespace fn
         processing_cluster pc;
 
         //Loop over clusters - Ignore noise-like clusters
-        for ( unsigned int iclus = 0 ; iclus != nclusters ; ++iclus )
+        for (  int iclus = 0 ; iclus != nclusters ; ++iclus )
         {
             pc.rc = 0;
 
