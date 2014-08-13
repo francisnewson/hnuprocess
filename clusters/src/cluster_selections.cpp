@@ -74,6 +74,10 @@ namespace fn
 
             double eop = track_cluster_energy / track_momentum;
 
+            BOOST_LOG_SEV( get_log(), log_level() )
+            << "EOP:  e "<< track_cluster_energy
+            << " p " << track_momentum;
+
             return ( ( eop < max_eop_ ) && ( eop > min_eop_ ) );
         }
     }
@@ -87,6 +91,7 @@ namespace fn
 
             double min_eop = get_yaml<double>( instruct, "min_eop");
             double max_eop = get_yaml<double>( instruct, "max_eop");
+
 
             return new TrackClusterEP( *k2pic, *st, min_eop, max_eop );
 

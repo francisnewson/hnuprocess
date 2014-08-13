@@ -6,11 +6,12 @@ namespace fn
     REG_DEF_SUB( K2piPlotter);
 
     K2piPlotter::K2piPlotter( const Selection& sel,
+        const fne::Event * e,
             TFile& tfile, std::string folder,
-            const K2piReco& k2pi_reco)
-        :Analysis( sel),
+            const K2piReco& k2pi_reco, bool mc)
+        :Analysis( sel), e_( e),
         tfile_( tfile), folder_( folder),
-        k2pi_reco_( k2pi_reco )
+        k2pi_reco_( k2pi_reco ), mc_( mc )
     {
         h_m2_pip_lkr_ = hs_.MakeTH1D(
                 "h_m2_pip_lkr", "Pi+ m^{2}",
@@ -26,10 +27,20 @@ namespace fn
                 "h_neutral_z", "Neutral Z Vertex",
                 1000, -5000 , 10000, "Z (cm)", 
                 "#events" );
+
+        if (mc_)
+        {
+            h_dz_neut_mc_ = hs_.MakeTH1D(
+                    "h_dz_neut_mc", "dZ Neutral vertex - MC",
+                    1000, -5000, 10000, "dZ (cm)",
+                "#events" );
+        }
+
     }
 
     void K2piPlotter::process_event()
     {
+        //Data only plots
         const K2piRecoEvent & re = 
             k2pi_reco_.get_reco_event();
 
@@ -41,6 +52,11 @@ namespace fn
 
         h_neutral_z_->Fill
             ( re.get_zvertex(), get_weight() );
+
+        //MC Plots
+        if (!mc_){ return;}
+
+        h_dz_neut_mc_->Fill(  e_->mc.decay.decay_vertex.Z() );
     }
 
     void K2piPlotter::end_processing()
@@ -56,6 +72,8 @@ namespace fn
             const Selection * sel = rf.get_selection( 
                     get_yaml<std::string>( instruct, "selection" ) );
 
+            const fne::Event * event = rf.get_event_ptr();
+
             TFile & tfile = rf.get_tfile( 
                     get_yaml<std::string>( instruct, "tfile" ) );
 
@@ -63,6 +81,9 @@ namespace fn
 
             const K2piReco * k2pi_reco = get_k2pi_reco( instruct, rf );
 
-            return new K2piPlotter( *sel, tfile, folder, *k2pi_reco );
+            bool mc = rf.is_mc();
+
+            return new K2piPlotter
+                ( *sel, event,  tfile, folder, *k2pi_reco, mc );
         }
 }

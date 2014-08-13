@@ -51,9 +51,6 @@ namespace fn
 
             TVector3 get_pos() const;
             double get_energy() const;
-
-        private:
-            ClusterEnergyCorr cec_;
     };
 
     //--------------------------------------------------

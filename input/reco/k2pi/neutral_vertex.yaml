@@ -76,6 +76,7 @@
 
 - selection:
     name: track_eop
+    #log_level: always_print
     type: TrackClusterEP
     min_eop: 0.2
     max_eop: 0.8

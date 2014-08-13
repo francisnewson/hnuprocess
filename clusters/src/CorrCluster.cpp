@@ -50,9 +50,7 @@ namespace fn
 
     TrackProjCorrCluster::TrackProjCorrCluster
         ( const fne::RecoCluster& rc )
-        :CorrCluster( rc ),
-        cec_("/afs/cern.ch/user/f/fnewson/work/hnu"
-                "/gopher/data/detector/eopCorrfile.dat" )
+        :CorrCluster( rc )
         {}
 
     TVector3 TrackProjCorrCluster::get_pos() const
@@ -62,6 +60,6 @@ namespace fn
 
     double TrackProjCorrCluster::get_energy() const
     {
-        return cec_.correct_energy( rc_ );
+        return correct_eop_energy( rc_ );
     }
 }

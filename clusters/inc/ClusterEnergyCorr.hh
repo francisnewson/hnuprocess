@@ -49,5 +49,7 @@ namespace fn
             float CPDlength;
             float  CELLlength;
     };
+
+    double correct_eop_energy( const fne::RecoCluster& re );
 }
 #endif

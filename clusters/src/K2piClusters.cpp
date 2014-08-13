@@ -58,7 +58,7 @@ namespace fn
         (YAML::Node& instruct, RecoFactory& rf )
         {
             std::string method = get_yaml<std::string>(instruct, "method");
-            
+
             const fne::Event * event = rf.get_event_ptr();
             const SingleTrack * single_track = get_single_track( instruct, rf );
 
@@ -203,12 +203,21 @@ namespace fn
 
         if ( nclus == 3)
         {
+            BOOST_LOG_SEV( get_log(), log_level() )
+                << "Found 3 clusters!" ;
+
+            BOOST_LOG_SEV( get_log(), log_level() )
+                << "Need d < " <<  max_track_cluster_distance_; 
+
             //one cluster should be from the track
             auto track_cluster_it = find_track_cluster( filtered_clusters_ );
             if ( track_cluster_it == std::end( filtered_clusters_ ) )
             {
                 return false;
             }
+
+            BOOST_LOG_SEV( get_log(), log_level() )
+                << "Found track cluster!" ;
 
             found_track = true;
             assert( track_cluster_it->rc != 0 );
@@ -265,9 +274,16 @@ namespace fn
             {
                 CorrCluster cc( *cluster.rc );
                 TVector3 pos = cc.get_pos();
+                TVector3 track_pos = srt.extrapolate_ds( pos.Z() );
+                double dist = fabs ( ( track_pos - pos).Mag() );
 
-                track_cluster_dists.push_back( 
-                        ( srt.extrapolate_ds( pos.Z() )  - pos ).Mag() );
+                std::stringstream ss; 
+                ss << pos << " " << track_pos << " " << dist;
+
+                BOOST_LOG_SEV( get_log(), log_level() )
+                    <<  ss.str() ;
+
+                track_cluster_dists.push_back(  dist );
             }
 
             //extract min distance

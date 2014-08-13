@@ -122,4 +122,13 @@ namespace fn
         return rc.energy / correction;
     }
 
+    double correct_eop_energy( const fne::RecoCluster& re )
+    {
+        static ClusterEnergyCorr
+            cec { "/afs/cern.ch/user/f/fnewson/work/hnu"
+                "/gopher/data/detector/eopCorrfile.dat" };
+
+        return  cec( re );
+    }
+
 }

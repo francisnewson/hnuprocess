@@ -17,8 +17,8 @@ namespace fn
     {
         double dz = z - na62const::bz_tracking;
         return TVector3( 
-                rt.bx + dz + rt.bdxdz,
-                rt.by + dz + rt.bdydz,
+                rt.bx + dz * rt.bdxdz,
+                rt.by + dz * rt.bdydz,
                 z );
     }
 
@@ -26,8 +26,8 @@ namespace fn
     {
         double dz = z - na62const::z_tracking;
         return TVector3( 
-                rt.x + dz + rt.dxdz,
-                rt.y + dz + rt.dydz,
+                rt.x + dz * rt.dxdz,
+                rt.y + dz * rt.dydz,
                 z );
     }
 

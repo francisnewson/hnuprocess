@@ -3,6 +3,7 @@
 #include "Analysis.hh"
 #include "K2piReco.hh"
 #include "HistStore.hh"
+#include "Event.hh"
 
 #if 0
 /*
@@ -21,23 +22,30 @@ namespace fn
     {
         public: 
             K2piPlotter( const Selection& sel,
+                    const fne::Event * e,
                 TFile& tfile, std::string folder,
-                const K2piReco& k2pi_reco);
+                const K2piReco& k2pi_reco, bool  mc);
 
         void end_processing();
 
         private:
         void process_event();
-
-        TH1D * h_m2_pip_lkr_;
-        TH1D * h_m2_pi0;
-        TH1D * h_neutral_z_;
+        const fne::Event * e_;
 
         TFile& tfile_;
         std::string folder_;
         HistStore hs_;
 
         const K2piReco& k2pi_reco_;
+
+        bool mc_;
+
+        TH1D * h_m2_pip_lkr_;
+        TH1D * h_m2_pi0;
+        TH1D * h_neutral_z_;
+
+        TH1D * h_dz_neut_mc_;
+
 
         REG_DEC_SUB( K2piPlotter);
 
