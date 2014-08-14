@@ -6,6 +6,7 @@
 #include "Event.hh"
 #include "KaonTrack.hh"
 #include "TLorentzVector.h"
+#include "CorrCluster.hh"
 
 #if 0
 /*
@@ -30,9 +31,21 @@ namespace fn
                     const K2piClusters& k2pic ) = 0;
 
             virtual double get_zvertex() const = 0;
+
             virtual double get_m2pip() const = 0;
+            virtual TLorentzVector get_p4pip() const = 0;
+
             virtual double get_m2pi0() const = 0;
+            virtual TLorentzVector get_p4pi0() const = 0;
+
+            virtual TLorentzVector get_p4g1() const = 0;
+            virtual TLorentzVector get_p4g2() const = 0;
+
+            virtual const ClusterData get_cluster1() const = 0;
+            virtual const ClusterData get_cluster2()  const = 0;
+
             virtual double get_chi2() const = 0;
+
 
             void set_log( logger& slg );
             void set_log_level( severity_level sev );
@@ -41,7 +54,7 @@ namespace fn
             severity_level log_level();
 
         private:
-                logger * slg_;
+            logger * slg_;
             severity_level sl_;
     };
 
@@ -77,7 +90,7 @@ namespace fn
                     const fne::Event * event,
                     const SingleTrack& st,
                     const K2piClusters& k2pic,
-                     K2piRecoEvent * k2pirec,
+                    K2piRecoEvent * k2pirec,
                     bool mc );
 
         private:
@@ -90,12 +103,12 @@ namespace fn
     };
 
     //--------------------------------------------------
-    
+
     class K2piSimpleRecoEvent : public K2piRecoEvent
     {
         public: 
             K2piSimpleRecoEvent();
-             void update( 
+            void update( 
                     const fne::Event * event,
                     const KaonTrack& kt,
                     const SingleTrack& st,
@@ -104,11 +117,27 @@ namespace fn
             double get_zvertex() const;
             double get_m2pip() const;
             double get_m2pi0() const;
+
+            ClusterData c1_;
+            ClusterData c2_;
+
+            TLorentzVector get_p4pip() const;
+            TLorentzVector get_p4pi0() const;
+
+            TLorentzVector get_p4g1() const;
+            TLorentzVector get_p4g2() const;
+
+            const ClusterData get_cluster1()  const;
+            const ClusterData get_cluster2()  const;
+
             double get_chi2() const;
 
-             TVector3 neutral_vertex_ ;
-             TLorentzVector pi0_;
-             TLorentzVector pip_lkr_;
+            TVector3 neutral_vertex_ ;
+            TLorentzVector pi0_;
+            TLorentzVector pip_lkr_;
+
+            TLorentzVector p1_;
+            TLorentzVector p2_;
     };
 
     //--------------------------------------------------

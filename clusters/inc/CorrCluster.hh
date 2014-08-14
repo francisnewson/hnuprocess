@@ -54,5 +54,15 @@ namespace fn
     };
 
     //--------------------------------------------------
+    
+    class ClusterData
+    {
+        public:
+            ClusterData( CorrCluster& c);
+            ClusterData(){};
+            void update( CorrCluster& c );
+            TVector3 position;
+            TVector3 energy;
+    };
 }
 #endif

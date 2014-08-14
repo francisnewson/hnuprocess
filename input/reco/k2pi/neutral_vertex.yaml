@@ -6,6 +6,11 @@
     type: tfile
     filename: k2pi_plots.root
 
+- output:
+    name: tftree
+    type: tfile
+    filename: k2pi_tree.root
+
 - monitor:
     name: counter
     type: Counter
@@ -172,7 +177,7 @@
         - good_clust
         - track_eop
         - photon_sep
-        - pip_mass
+        #- pip_mass
 
 #summary
 - analysis : 
@@ -189,3 +194,12 @@
     folder: neutral_vertex
     inputs:
         k2pi_reco:  k2pi_event
+
+- analysis:
+    name: k2pi_trees
+    type: K2piFilter
+    selection: k2pi_cuts
+    tfile: tftree
+    treename: k2pi
+    inputs:
+        k2pi_reco: k2pi_event

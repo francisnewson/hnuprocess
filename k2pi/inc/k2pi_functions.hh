@@ -2,6 +2,8 @@
 #define K2PI_FUNCTIONS_HH
 #include "TVector3.h"
 #include "logging.hh"
+#include "Mc.hh"
+#include "Event.hh"
 #if 0
 /*
  *  _    ____        _ 
@@ -41,5 +43,18 @@ namespace fn
 
     double raw_solve_neutral_vertex
         ( TVector3 pos1, double E1, TVector3 pos2, double E2 );
+
+    
+    //--------------------------------------------------
+    
+    struct k2pi_mc_parts
+    {
+        const fne::McParticle * k;
+        const fne::McParticle * pip;
+        const fne::McParticle * pi0;
+        std::vector<const fne::McParticle*>  photons;
+    };
+
+     k2pi_mc_parts extract_k2pi_particles( const fne::Event * e );
 }
 #endif

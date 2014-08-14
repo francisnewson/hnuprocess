@@ -166,4 +166,42 @@ namespace fn
             return na62const::zLkr 
                 - separation * std::sqrt( E1 * E2 ) / na62const::mPi0 ;
         }
+
+    //--------------------------------------------------
+
+    k2pi_mc_parts extract_k2pi_particles( const fne::Event * e )
+    {
+        const TClonesArray& tca =  e->mc.particles;
+        int nparticles = e->mc.npart;
+
+        k2pi_mc_parts result;
+
+        for ( int ip = 0; ip != nparticles ; ++ip )
+        {
+            const fne::McParticle* particle = 
+                static_cast<const fne::McParticle*>( tca[ip]  );
+
+            if ( particle->type == 16 )
+            { result.photons.push_back( particle ); }
+
+            if ( particle->type == 4 )
+            { result.pi0 = particle; }
+
+            if ( particle->type == 8 )
+            { result.pip = particle; }
+
+            if ( particle->type == 512 )
+            { result.k = particle; }
+
+        }
+
+        std::sort( begin( result.photons), end( result.photons),
+                [] ( const fne::McParticle * p,
+                    const fne::McParticle * q ) 
+                {
+                return (p->momentum.E() < q->momentum.E() );
+                } );
+
+        return result;
+    }
 }

@@ -62,4 +62,16 @@ namespace fn
     {
         return correct_eop_energy( rc_ );
     }
+
+    //--------------------------------------------------
+
+    ClusterData::ClusterData( CorrCluster&  c )
+        :position( c.get_pos() ), energy( c.get_energy())
+    {}
+
+    void ClusterData::update( CorrCluster& c )
+    {
+        position = c.get_pos();
+        energy = c.get_energy();
+    }
 }

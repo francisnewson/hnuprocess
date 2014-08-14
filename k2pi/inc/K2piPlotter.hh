@@ -45,6 +45,9 @@ namespace fn
         TH1D * h_neutral_z_;
 
         TH1D * h_dz_neut_mc_;
+        TH1D * h_mc_z_;
+
+        TH2D * h_dz_neut_mc_vs_z_;
 
 
         REG_DEC_SUB( K2piPlotter);

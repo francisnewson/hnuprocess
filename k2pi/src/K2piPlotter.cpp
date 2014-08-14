@@ -1,12 +1,13 @@
 #include "K2piPlotter.hh"
 #include "yaml_help.hh"
+#include "TProfile.h"
 
 namespace fn
 {
     REG_DEF_SUB( K2piPlotter);
 
     K2piPlotter::K2piPlotter( const Selection& sel,
-        const fne::Event * e,
+            const fne::Event * e,
             TFile& tfile, std::string folder,
             const K2piReco& k2pi_reco, bool mc)
         :Analysis( sel), e_( e),
@@ -25,17 +26,26 @@ namespace fn
 
         h_neutral_z_ = hs_.MakeTH1D(
                 "h_neutral_z", "Neutral Z Vertex",
-                1000, -5000 , 10000, "Z (cm)", 
+                1000, -5000, 10000, "dZ (cm)",
                 "#events" );
 
         if (mc_)
         {
             h_dz_neut_mc_ = hs_.MakeTH1D(
                     "h_dz_neut_mc", "dZ Neutral vertex - MC",
-                    1000, -5000, 10000, "dZ (cm)",
-                "#events" );
-        }
+                    1000, -500 , 500, "Z (cm)", 
+                    "#events" );
 
+            h_mc_z_ = hs_.MakeTH1D(
+                    "h_mc_z_", "MC Z Vertex",
+                    1000, -5000 , 10000, "Z (cm)", 
+                    "#events" );
+
+            h_dz_neut_mc_vs_z_ = hs_.MakeTH2D(
+                    "h_dz_neut_mc_vs_z_", "dZ vs mc Z",
+                    1000, -5000, 10000, "mc Z(cm)", 
+                    100, -500, 500, "dz (cm)" );
+        }
     }
 
     void K2piPlotter::process_event()
@@ -44,6 +54,8 @@ namespace fn
         const K2piRecoEvent & re = 
             k2pi_reco_.get_reco_event();
 
+        double neutral_z = re.get_zvertex();
+
         h_m2_pip_lkr_->Fill
             ( re.get_m2pip() , get_weight() );
 
@@ -51,17 +63,27 @@ namespace fn
             ( re.get_m2pi0() , get_weight() );
 
         h_neutral_z_->Fill
-            ( re.get_zvertex(), get_weight() );
+            ( neutral_z, get_weight() );
 
         //MC Plots
         if (!mc_){ return;}
 
-        h_dz_neut_mc_->Fill(  e_->mc.decay.decay_vertex.Z() );
+        double mc_z =    e_->mc.decay.decay_vertex.Z() ;
+
+        h_dz_neut_mc_->Fill( neutral_z - mc_z, get_weight() );
+        h_mc_z_->Fill(  mc_z, get_weight() );
+
+        h_dz_neut_mc_vs_z_->Fill
+            ( mc_z, neutral_z - mc_z, get_weight() );
     }
 
     void K2piPlotter::end_processing()
     {
+        TProfile * dzProfile =
+            h_dz_neut_mc_vs_z_->ProfileX( "h_dz_profile");
+
         cd_p( &tfile_, folder_ );
+        dzProfile->Write();
         hs_.Write();
     }
 

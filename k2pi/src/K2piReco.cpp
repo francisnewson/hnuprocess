@@ -115,16 +115,19 @@ namespace fn
         PhotonProjCorrCluster c1 {k2pirc.cluster1() };
         PhotonProjCorrCluster c2 {k2pirc.cluster2() };
 
+        c1_.update( c1 );
+        c2_.update( c2 );
+
         TVector3 v1 = c1.get_pos() - neutral_vertex_;
-        TLorentzVector p1{ c1.get_energy()* v1.Unit(), c1.get_energy() };
+        p1_ = TLorentzVector{ c1.get_energy()* v1.Unit(), c1.get_energy() };
 
         TVector3 v2 = c2.get_pos() - neutral_vertex_;
-        TLorentzVector p2{ c2.get_energy()* v2.Unit(), c2.get_energy() };
+        p2_ = TLorentzVector{ c2.get_energy()* v2.Unit(), c2.get_energy() };
 
         BOOST_LOG_SEV( get_log(), log_level() )
-            << "RECO: photons: = " << p1.E() <<  " " << p2.E() ;
+            << "RECO: photons: = " << p1_.E() <<  " " << p2_.E() ;
 
-        pi0_ = p1 + p2;
+        pi0_ = p1_ + p2_;
 
         BOOST_LOG_SEV( get_log(), log_level() )
             << "RECO: Epi0 = " << pi0_.E();
@@ -144,9 +147,39 @@ namespace fn
         return pip_lkr_.M2();
     }
 
+    TLorentzVector K2piSimpleRecoEvent::get_p4pip() const
+    {
+        return pip_lkr_;
+    }
+
     double K2piSimpleRecoEvent::get_m2pi0() const
     {
         return pi0_.M2();
+    }
+
+    TLorentzVector K2piSimpleRecoEvent::get_p4pi0() const
+    {
+        return pi0_;
+    }
+
+    TLorentzVector K2piSimpleRecoEvent::get_p4g1() const
+    {
+        return p1_;
+    }
+
+    TLorentzVector K2piSimpleRecoEvent::get_p4g2() const
+    {
+        return p2_;
+    }
+
+    const ClusterData K2piSimpleRecoEvent::get_cluster1()  const
+    {
+        return c1_;
+    }
+
+    const ClusterData K2piSimpleRecoEvent::get_cluster2()  const
+    {
+        return c2_;
     }
 
     double K2piSimpleRecoEvent::get_chi2() const

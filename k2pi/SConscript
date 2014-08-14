@@ -15,9 +15,32 @@ lenv.AddLibs( [
 lenv.AddEvent( event_dir, 'event' )
 lenv.SetYaml( yaml_dir )
 
+cint_builder = Builder( action = 'rootcint -f $TARGET -c -p $SOURCES' )
+lenv.Append( BUILDERS = { 'Dict' : cint_builder } )
 
-lenv.Append( CPPPATH = 'inc' )
+dict_headers = [ Glob('dict/*.hh') ]
+dict_sources = [ Glob('dict/*.cpp') ]
+dict_headers.append( 'dict/LinkDef.h'  )
+
+lenv.Dict( target = ['root/k2pivardict.cpp', 'root/k2pivardict.h'],
+source = dict_headers )
+
+k2pivar_sources = ['root/k2pivardict.cpp']
+
+target_sources = Glob( 'src/*.cpp')
+target_sources.append( k2pivar_sources )
+
+lenv.Append( CPPPATH = ['inc', 'root', 'dict', '../../'] )
+
 lenv.SharedLibrary(
         target = 'k2pi',
-        source = Glob( 'src/*.cpp' )
+        source = target_sources
         )
+
+lenv.Replace( LIBS = [] )
+lenv.SetRoot( root_dir)
+
+lenv.SharedLibrary(
+target = 'k2pivar',
+source = k2pivar_sources,
+)
