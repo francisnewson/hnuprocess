@@ -53,6 +53,7 @@ namespace fn
         public:
             K2piData data;
             K2piMC mc;
+            double chi2;
 
         virtual ~K2piVars(){};
 

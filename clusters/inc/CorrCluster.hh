@@ -62,7 +62,7 @@ namespace fn
             ClusterData(){};
             void update( CorrCluster& c );
             TVector3 position;
-            TVector3 energy;
+            double energy;
     };
 }
 #endif

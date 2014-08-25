@@ -19,23 +19,38 @@ namespace fn
         mc_ (mc)
 
     {
+        //Create output tree
         ttree_ = new TTree( tree_name.c_str(), tree_name.c_str() );
         TTree::SetMaxTreeSize( 100000000LL );
 
-        ttree_->Branch( "k2piVars", "fn::K2piVars", &vars_, 64000, 1 );
+        ttree_->Branch( "k2piVars", "fn::K2piVars", &vars_, 64000, 2 );
     }
 
     void K2piFilter::process_event()
     {
         const K2piRecoEvent& k2pirc = k2pir_.get_reco_event();
+
+        //Fill reconstructed data variables
         vars_.data.neutral_vertex =  k2pirc.get_zvertex();
         vars_.data.p4pi0 = k2pirc.get_p4pi0();
         vars_.data.p4pip = k2pirc.get_p4pip();
+
+        ClusterData c1 = k2pirc.get_cluster1();
+        ClusterData c2 = k2pirc.get_cluster2();
+
+        vars_.data.E1 = c1.energy;
+        vars_.data.E2 = c2.energy;
+
+        vars_.data.pos1 = c1.position;
+        vars_.data.pos2 = c2.position;
+
+        vars_.chi2 = k2pirc.get_chi2();
 
         if ( !mc_ ) { return; }
 
         k2pi_mc_parts mcparts = extract_k2pi_particles( event_ );
 
+        //Fill mc variables
         const fne::Mc& mc = event_->mc;
         vars_.mc.vertex =  mc.decay.decay_vertex;
         vars_.mc.p4pi0 =  mcparts.pi0->momentum;
