@@ -31,6 +31,7 @@ output/*
 input/mutable_parameters/*
 weights/
 tmva/scripts
+runlists
 
 #apps#
 apps/*

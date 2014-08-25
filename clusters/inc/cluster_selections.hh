@@ -67,7 +67,7 @@ namespace fn
         (YAML::Node& instruct, RecoFactory& rf );
 
     //--------------------------------------------------
-    
+
     class PhotonSeparation : public CachedSelection
     {
         public:
@@ -88,5 +88,26 @@ namespace fn
         (YAML::Node& instruct, RecoFactory& rf );
 
     //--------------------------------------------------
+
+    class PhotonTrackSeparation : public CachedSelection
+    {
+        public:
+            PhotonTrackSeparation
+                ( const K2piClusters& k2pic, const SingleTrack& st, 
+                  double min_sep);
+
+        private:
+            bool do_check() const;
+            const K2piClusters& k2pic_;
+            const SingleTrack& st_;
+
+            double min_sep_;
+
+            REG_DEC_SUB( PhotonTrackSeparation );
+    };
+
+    template<>
+        Subscriber * create_subscriber<PhotonTrackSeparation>
+        (YAML::Node& instruct, RecoFactory& rf );
 }
 #endif

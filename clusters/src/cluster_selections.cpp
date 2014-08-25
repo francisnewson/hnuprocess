@@ -75,8 +75,8 @@ namespace fn
             double eop = track_cluster_energy / track_momentum;
 
             BOOST_LOG_SEV( get_log(), log_level() )
-            << "EOP:  e "<< track_cluster_energy
-            << " p " << track_momentum;
+                << "EOP:  e "<< track_cluster_energy
+                << " p " << track_momentum;
 
             return ( ( eop < max_eop_ ) && ( eop > min_eop_ ) );
         }
@@ -128,4 +128,43 @@ namespace fn
         }
 
     //--------------------------------------------------
+
+    REG_DEF_SUB( PhotonTrackSeparation );
+
+    PhotonTrackSeparation::PhotonTrackSeparation
+        ( const K2piClusters& k2pic, const SingleTrack& st, 
+          double min_sep)
+        :k2pic_( k2pic), st_( st ), min_sep_( min_sep )
+        {}
+
+    bool PhotonTrackSeparation::do_check() const
+    {
+        //Extract clusters
+        const K2piRecoClusters &  k2pirc = k2pic_.get_reco_clusters();
+        CorrCluster c1 { k2pirc.cluster1() };
+        CorrCluster c2 { k2pirc.cluster2() };
+        TVector3 pos1 = c1.get_pos();
+        TVector3 pos2 = c2.get_pos();
+
+        //Extract track at Lkr cluster Z
+        const SingleRecoTrack& srt = st_.get_single_track();
+        TVector3 track1 = srt.extrapolate_ds( pos1.Z() );
+        TVector3 track2 = srt.extrapolate_ds( pos2.Z() );
+
+        double sep1 = (track1 - pos1 ).Mag();
+        double sep2 = (track2 - pos2 ).Mag();
+
+        return ( ( sep1 > min_sep_ ) && ( sep2 > min_sep_ ) );
+    }
+
+    template<>
+        Subscriber * create_subscriber<PhotonTrackSeparation>
+        (YAML::Node& instruct, RecoFactory& rf )
+        {
+            const K2piClusters * k2pic = get_k2pi_clusters( instruct, rf );
+            const SingleTrack * st = get_single_track( instruct, rf );
+            double min_sep = get_yaml<double>( instruct, "min_sep");
+
+            return new PhotonTrackSeparation( *k2pic, *st, min_sep );
+        }
 }

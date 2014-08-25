@@ -93,6 +93,11 @@ namespace fn
         reco_event_->update( e_, kt_, st_, k2pic_ );
     }
 
+    const SingleTrack& K2piRecoImp::get_single_track() const
+    {
+        return st_;
+    }
+
     //--------------------------------------------------
 
     K2piSimpleRecoEvent::K2piSimpleRecoEvent()
@@ -111,13 +116,22 @@ namespace fn
             ( event, kt, k2pic.get_reco_clusters(),
               &get_log(), log_level() );
 
-        //compute momenta
+        //Extract photon clusters
         PhotonProjCorrCluster c1 {k2pirc.cluster1() };
         PhotonProjCorrCluster c2 {k2pirc.cluster2() };
 
         c1_.update( c1 );
         c2_.update( c2 );
 
+        //Extract track cluster
+        found_track_cluster_ = k2pirc.found_track_cluster();
+        if ( found_track_cluster_)
+        {
+            TrackProjCorrCluster tc { k2pirc.track_cluster() };
+            tc_.update( tc );
+        }
+
+        //compute photon momenta
         TVector3 v1 = c1.get_pos() - neutral_vertex_;
         p1_ = TLorentzVector{ c1.get_energy()* v1.Unit(), c1.get_energy() };
 
@@ -127,6 +141,7 @@ namespace fn
         BOOST_LOG_SEV( get_log(), log_level() )
             << "RECO: photons: = " << p1_.E() <<  " " << p2_.E() ;
 
+        //Compute pion momenta
         pi0_ = p1_ + p2_;
 
         BOOST_LOG_SEV( get_log(), log_level() )
@@ -138,52 +153,47 @@ namespace fn
     }
 
     double K2piSimpleRecoEvent::get_zvertex() const
-    {
-        return neutral_vertex_.Z();
-    }
+    { return neutral_vertex_.Z(); }
+
+    TVector3 K2piSimpleRecoEvent::get_vertex() const 
+    { return neutral_vertex_ ; }
 
     double K2piSimpleRecoEvent::get_m2pip() const
-    {
-        return pip_lkr_.M2();
-    }
+    { return pip_lkr_.M2(); }
 
     TLorentzVector K2piSimpleRecoEvent::get_p4pip() const
-    {
-        return pip_lkr_;
-    }
+    { return pip_lkr_; }
 
     double K2piSimpleRecoEvent::get_m2pi0() const
-    {
-        return pi0_.M2();
-    }
+    { return pi0_.M2(); }
 
     TLorentzVector K2piSimpleRecoEvent::get_p4pi0() const
-    {
-        return pi0_;
-    }
+    { return pi0_; }
 
     TLorentzVector K2piSimpleRecoEvent::get_p4g1() const
-    {
-        return p1_;
-    }
+    { return p1_; }
 
     TLorentzVector K2piSimpleRecoEvent::get_p4g2() const
-    {
-        return p2_;
-    }
+    { return p2_; }
 
     const ClusterData K2piSimpleRecoEvent::get_cluster1()  const
-    {
-        return c1_;
-    }
+    { return c1_; }
 
     const ClusterData K2piSimpleRecoEvent::get_cluster2()  const
-    {
-        return c2_;
-    }
+    { return c2_; }
 
     double K2piSimpleRecoEvent::get_chi2() const
     { return 0; }
+
+    bool K2piSimpleRecoEvent::found_track_cluster() const
+    { return found_track_cluster_; }
+
+    const ClusterData K2piSimpleRecoEvent::get_track_cluster() const
+    { 
+        if ( ! found_track_cluster_ )
+        { throw Xcept<EventDoesNotContain>( "track_cluster " __FILE__);}
+        return tc_;
+    }
 
     //--------------------------------------------------
 

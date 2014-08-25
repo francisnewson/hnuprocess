@@ -2,6 +2,8 @@
 #include "k2pi_functions.hh"
 #include "RecoFactory.hh"
 #include "yaml_help.hh"
+#include "root_help.hh"
+#include "NA62Constants.hh"
 
 namespace fn
 {
@@ -31,7 +33,7 @@ namespace fn
         const K2piRecoEvent& k2pirc = k2pir_.get_reco_event();
 
         //Fill reconstructed data variables
-        vars_.data.neutral_vertex =  k2pirc.get_zvertex();
+        vars_.data.neutral_vertex =  k2pirc.get_vertex();
         vars_.data.p4pi0 = k2pirc.get_p4pi0();
         vars_.data.p4pip = k2pirc.get_p4pip();
 
@@ -46,29 +48,73 @@ namespace fn
 
         vars_.chi2 = k2pirc.get_chi2();
 
-        if ( !mc_ ) { return; }
+        if ( mc_ ) 
+        { 
+            //Fill mc variables
+            k2pi_mc_parts mcparts = extract_k2pi_particles( event_ );
 
-        k2pi_mc_parts mcparts = extract_k2pi_particles( event_ );
+            const fne::Mc& mc = event_->mc;
+            vars_.mc.vertex =  mc.decay.decay_vertex;
+            vars_.mc.p4pi0 =  mcparts.pi0->momentum;
+            vars_.mc.p4pip =  mcparts.pip->momentum;
+            vars_.mc.p4k =  mcparts.k->momentum;
 
-        //Fill mc variables
-        const fne::Mc& mc = event_->mc;
-        vars_.mc.vertex =  mc.decay.decay_vertex;
-        vars_.mc.p4pi0 =  mcparts.pi0->momentum;
-        vars_.mc.p4pip =  mcparts.pip->momentum;
-        vars_.mc.p4k =  mcparts.k->momentum;
+            int nphotons = mcparts.photons.size();
 
-        int nphotons = mcparts.photons.size();
-
-        if ( nphotons > 0 )
-        {
-            vars_.mc.p4g1 = mcparts.photons[0]->momentum;
-            if ( nphotons > 1 )
+            if ( nphotons > 0 )
             {
-                vars_.mc.p4g2 = mcparts.photons[1]->momentum;
+                vars_.mc.p4g1 = mcparts.photons[0]->momentum;
+                if ( nphotons > 1 )
+                {
+                    vars_.mc.p4g2 = mcparts.photons[1]->momentum;
+                }
             }
         }
 
         ttree_->Fill();
+
+#if 0
+        if ( vars_.data.p4pip.M2() > 0.05 )
+        { print_event( std::cerr ); }
+#endif
+
+    }
+
+    void K2piFilter::print_event( std::ostream& os )
+    {
+        const K2piRecoEvent& k2pirc = k2pir_.get_reco_event();
+
+        os << "\nEvent with " 
+            << event_->detector.nclusters  << " clusters."
+            << std::endl;
+        os << "DATA: "
+            << "pos1: " << vars_.data.pos1
+            << " pos2: " << vars_.data.pos2;
+
+        if ( k2pirc.found_track_cluster() )
+        {
+            os << " pippos: " 
+                << k2pirc.get_track_cluster().position;
+        }
+
+        Track t1( vars_.mc.vertex, vars_.mc.p4g1.Vect() );
+        Track t2( vars_.mc.vertex, vars_.mc.p4g2.Vect() );
+
+        Track tpip( vars_.mc.vertex, vars_.mc.p4pip.Vect() );
+
+        TVector3 p1 = t1.extrapolate( na62const::zLkr );
+        TVector3 p2 = t2.extrapolate( na62const::zLkr );
+        TVector3 ppip = tpip.extrapolate( na62const::zLkr );
+
+        os << "\n  MC: "
+            << "pos1: " <<  p1 << " pos2: " <<  p2 
+            << " pippos: " << ppip << "\n";
+
+        const SingleTrack& st = k2pir_.get_single_track();
+        const SingleRecoTrack& srt = st.get_single_track();
+        TVector3 psrt = srt.extrapolate_ds( na62const::zLkr );
+
+        os << "SingleTrack: " << psrt << "\n" <<  std::endl;
     }
 
     void K2piFilter::end_processing()

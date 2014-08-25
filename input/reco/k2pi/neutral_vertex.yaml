@@ -39,7 +39,7 @@
     type: K2piClusters
     min_track_cluster_time: 12
     min_cluster_energy: 5
-    max_track_cluster_distance: 30
+    max_track_cluster_distance: 5
 
     method: Default
     inputs:
@@ -95,6 +95,14 @@
     min_sep: 20
     inputs:
         k2pic: k2pi_clusters
+
+- selection:
+    name: photon_track_sep
+    type: PhotonTrackSeparation
+    min_sep: 30
+    inputs:
+        k2pic: k2pi_clusters
+        ogt: bf_st
 
 - selection:
     name: pip_mass
@@ -177,6 +185,7 @@
         - good_clust
         - track_eop
         - photon_sep
+        - photon_track_sep
         #- pip_mass
 
 #summary

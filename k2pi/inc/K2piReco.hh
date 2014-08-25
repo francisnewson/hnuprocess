@@ -31,6 +31,7 @@ namespace fn
                     const K2piClusters& k2pic ) = 0;
 
             virtual double get_zvertex() const = 0;
+            virtual TVector3 get_vertex() const = 0;
 
             virtual double get_m2pip() const = 0;
             virtual TLorentzVector get_p4pip() const = 0;
@@ -43,6 +44,9 @@ namespace fn
 
             virtual const ClusterData get_cluster1() const = 0;
             virtual const ClusterData get_cluster2()  const = 0;
+
+            virtual const ClusterData get_track_cluster() const = 0;
+            virtual bool found_track_cluster() const = 0;
 
             virtual double get_chi2() const = 0;
 
@@ -64,6 +68,8 @@ namespace fn
             K2piReco( K2piRecoEvent* k2pirc );
             void new_event();
             const K2piRecoEvent& get_reco_event() const;
+            virtual const SingleTrack&
+                get_single_track() const = 0;
 
         protected:
             mutable K2piRecoEvent * reco_event_;
@@ -93,6 +99,8 @@ namespace fn
                     K2piRecoEvent * k2pirec,
                     bool mc );
 
+            const SingleTrack& get_single_track() const;
+
         private:
             void process_event() const;
             const fne::Event * e_;
@@ -115,11 +123,15 @@ namespace fn
                     const K2piClusters& k2pic );
         private: 
             double get_zvertex() const;
+            TVector3 get_vertex() const;
             double get_m2pip() const;
             double get_m2pi0() const;
 
             ClusterData c1_;
             ClusterData c2_;
+            ClusterData tc_;
+
+            bool found_track_cluster_;
 
             TLorentzVector get_p4pip() const;
             TLorentzVector get_p4pi0() const;
@@ -129,6 +141,9 @@ namespace fn
 
             const ClusterData get_cluster1()  const;
             const ClusterData get_cluster2()  const;
+
+            const ClusterData get_track_cluster() const;
+            bool found_track_cluster() const;
 
             double get_chi2() const;
 

@@ -36,6 +36,7 @@ namespace fn
 
         private:
             void process_event();
+            void print_event( std::ostream& os );
 
             const fne::Event * event_;
             const K2piReco& k2pir_;
