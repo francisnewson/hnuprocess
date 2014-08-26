@@ -2,6 +2,8 @@
 #include "NA62Constants.hh"
 #include "Xcept.hh"
 #include "tracking_functions.hh"
+#include "yaml_help.hh"
+#include <random>
 
 namespace fn
 {
@@ -61,6 +63,10 @@ namespace fn
             {
                 return new BFSingleTrack{ event, instruct } ;
             }
+            else if ( method == "BFScatter" )
+            {
+                return new BFScatterSingleTrack{ event, instruct };
+            }
             else
             {
                 throw Xcept<UnknownSingleTrackMethod>( method );
@@ -69,7 +75,96 @@ namespace fn
 
     //--------------------------------------------------
 
+    BFSingleRecoTrack::BFSingleRecoTrack()
+        :bfc_( global_BFCorrection() )
+    {}
+
+    void BFSingleRecoTrack::update(  
+            const processing_track * proc_track, 
+            const fne::Event * event )
+    {
+        proc_track_ = proc_track;
+        bf_track_ = bfc_.compute_bf_track
+            ( event, proc_track_->rt, proc_track_->vert );
+    }
+
+    int BFSingleRecoTrack::get_charge() const
+    {
+        return proc_track_->rt->q;
+    }
+
+    TVector3 BFSingleRecoTrack::get_3mom() const
+    {
+        return proc_track_->corr_mom * bf_track_.get_direction().Unit();
+    }
+
+    double BFSingleRecoTrack::get_mom() const
+    {
+        return proc_track_->corr_mom;
+    }
+
+    TVector3 BFSingleRecoTrack::get_vertex() const
+    {
+        return proc_track_->vert.point;
+    }
+
+    double BFSingleRecoTrack::get_cda() const
+    {
+        return proc_track_->vert.cda;
+    }
+
+    double BFSingleRecoTrack::get_time() const
+    {
+        return proc_track_->rt->time;
+    }
+
+    double BFSingleRecoTrack::get_quality() const
+    {
+        return proc_track_->rt->quality;
+    }
+
+    TVector3 BFSingleRecoTrack::extrapolate_ds( double z) const
+    {
+        return extrapolate_z( * proc_track_->rt, z );
+    }
+
+    TVector3 BFSingleRecoTrack::extrapolate_us( double z) const
+    {
+        return extrapolate_bz( * proc_track_->rt, z );
+    }
+
+    TVector3 BFSingleRecoTrack::extrapolate_bf( double z) const
+    {
+        return bf_track_.extrapolate( z );
+    }
+
+    //--------------------------------------------------
+
     //BF
+
+    processing_track::processing_track( const processing_track& other )
+        :corr_mom( other.corr_mom ), vert( other.vert ), good( other.good ),
+        rt_( other.rt_ ), rt( &rt_ )
+    {}
+
+    void swap
+        ( processing_track& first, processing_track& second )
+        {
+            using std::swap;
+            swap( first.corr_mom, second.corr_mom );
+            swap( first.vert, second.vert );
+            swap( first.good, second.good );
+            swap( first.rt_, second.rt_ );
+            first.rt = & first.rt_;
+            second.rt = & second.rt_;
+        }
+
+    processing_track& processing_track::operator= ( processing_track other )
+    {
+        swap( *this, other );
+        return *this;
+    }
+
     BFSingleTrack::BFSingleTrack( const fne::Event * event, YAML::Node& instruct )
         :event_( event )
     {
@@ -116,9 +211,18 @@ namespace fn
         processing_track pt;
 
         //Look for tracks within initial momentum range
-        for ( unsigned int itrk = 0 ; itrk != ntracks ; ++itrk )
+        for ( int itrk = 0 ; itrk != ntracks ; ++itrk )
         {
-            pt.rt =  static_cast<fne::RecoTrack*>( etracks[itrk] );
+            //copy reco track ( and point to it )
+            fne::RecoTrack * rt = static_cast<fne::RecoTrack*>( etracks[itrk] );
+            pt.rt_ =  *rt;
+            pt.rt = &pt.rt_;
+
+            assert( pt.rt != rt );
+            assert( pt.rt->p == rt->p );
+
+            modify_processing_track( pt );
+
             pt.corr_mom = p_corr_ab( pt.rt->p, pt.rt->q, alpha, beta  );
             pt.good = true;
 
@@ -264,69 +368,58 @@ namespace fn
         return true;
     }
 
-
     //--------------------------------------------------
 
-    BFSingleRecoTrack::BFSingleRecoTrack()
-        :bfc_( global_BFCorrection() )
-    {}
-
-    void BFSingleRecoTrack::update(  
-            const processing_track * proc_track, 
-            const fne::Event * event )
+    BFScatterSingleTrack::BFScatterSingleTrack( const fne::Event * event,
+            YAML::Node& instruct )
+        :BFSingleTrack( event, instruct), event_( event)
     {
-        proc_track_ = proc_track;
-        bf_track_ = bfc_.compute_bf_track
-            ( event, proc_track_->rt, proc_track_->vert );
+        angle_sigma_ = get_yaml<double>( instruct, "angle_sigma" );
+        angle_frequency_ = get_yaml<double>( instruct, "angle_frequency" );
+
+        mom_sigma_ = get_yaml<double>( instruct, "mom_sigma" );
+        mom_frequency_ = get_yaml<double>( instruct, "mom_frequency" );
     }
 
-    int BFSingleRecoTrack::get_charge() const
-    {
-        return proc_track_->rt->q;
-    }
+    void BFScatterSingleTrack::modify_processing_track
+        ( processing_track& pt ) const
+        {
+            //seed the random number generator with the event time stamp
+            std::mt19937 gen( event_->header.time_stamp );
 
-    TVector3 BFSingleRecoTrack::get_3mom() const
-    {
-        return proc_track_->corr_mom * bf_track_.get_direction().Unit();
-    }
+            std::uniform_real_distribution<double> uni_dist;
+            std::normal_distribution<double> angle_dist(0, angle_sigma_ );
+            std::normal_distribution<double> mom_dist(0, mom_sigma_ );
 
-    double BFSingleRecoTrack::get_mom() const
-    {
-        return proc_track_->corr_mom;
-    }
+            double uniform_roll = 0;
 
-    TVector3 BFSingleRecoTrack::get_vertex() const
-    {
-        return proc_track_->vert.point;
-    }
+            //should we generate an x kick
+            uniform_roll = uni_dist(gen);
+            if( uniform_roll < angle_frequency_ )
+            {
+                //xkick
+                double xanglekick = angle_dist( gen );
+                pt.rt->bdxdz += xanglekick;
+            }
 
-    double BFSingleRecoTrack::get_cda() const
-    {
-        return proc_track_->vert.cda;
-    }
+            //should we generate an y kick
+            uniform_roll = uni_dist(gen);
+            if( uniform_roll < angle_frequency_ )
+            {
+                //ykick
+                double yanglekick = angle_dist( gen );
+                pt.rt->bdydz += yanglekick;
+            }
 
-    double BFSingleRecoTrack::get_time() const
-    {
-        return proc_track_->rt->time;
-    }
+            //should we generate a mom kick
+            uniform_roll = uni_dist(gen);
+            if ( uniform_roll < mom_frequency_ )
+            {
+                //mom kick
+                double mom_kick = mom_dist( gen ) 
+                    / std::pow(pt.corr_mom ,2 );
 
-    double BFSingleRecoTrack::get_quality() const
-    {
-        return proc_track_->rt->quality;
-    }
-
-    TVector3 BFSingleRecoTrack::extrapolate_ds( double z) const
-    {
-        return extrapolate_z( * proc_track_->rt, z );
-    }
-
-    TVector3 BFSingleRecoTrack::extrapolate_us( double z) const
-    {
-        return extrapolate_bz( * proc_track_->rt, z );
-    }
-
-    TVector3 BFSingleRecoTrack::extrapolate_bf( double z) const
-    {
-        return bf_track_.extrapolate( z );
-    }
+                pt.corr_mom += mom_kick;
+            }
+        }
 }

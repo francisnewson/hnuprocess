@@ -40,7 +40,7 @@ namespace fn
 
             //raw upstream
             virtual TVector3 extrapolate_us( double z) const = 0 ;
-            
+
             //BF track
             virtual TVector3 extrapolate_bf( double z) const = 0 ;
 
@@ -81,10 +81,19 @@ namespace fn
 
     struct processing_track
     {
+        processing_track()
+        :rt(0){ };
+        processing_track( const processing_track& other );
+        processing_track& operator= ( processing_track other );
+
+        friend void swap
+            ( processing_track& first, processing_track& second );
+
         double corr_mom;
         Vertex vert;
         bool good;
 
+        fne::RecoTrack rt_;
         fne::RecoTrack * rt;
     };
 
@@ -137,6 +146,10 @@ namespace fn
             const fne::Event * event_;
             bool process_event() const;
 
+            virtual void modify_processing_track
+                ( processing_track& pt ) const
+            { (void)pt; };
+
             mutable BFSingleRecoTrack single_reco_track_;
 
             SingleRecoTrack load_computed_track
@@ -160,7 +173,25 @@ namespace fn
 
     //--------------------------------------------------
 
+    class BFScatterSingleTrack : public BFSingleTrack
+    {
+        public:
+            BFScatterSingleTrack( const fne::Event * event,
+                    YAML::Node& instruct );
 
+        private:
+            void modify_processing_track( processing_track& pt ) const;
+
+            //Keep the event pointer so we can
+            //generate pseudo random numbers
+            const fne::Event * event_;
+
+            double angle_sigma_;
+            double angle_frequency_;
+
+            double mom_sigma_;
+            double mom_frequency_;
+    };
 
 }
 #endif

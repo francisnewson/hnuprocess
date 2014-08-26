@@ -66,6 +66,9 @@ namespace fn
             double chi2;
             double weight;
 
+            int burst_time;
+            int time_stamp;
+
             virtual ~K2piVars(){};
 
             ClassDef( K2piVars, 2 );

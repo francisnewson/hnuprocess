@@ -48,6 +48,9 @@ namespace fn
         vars_.chi2 = k2pirc.get_chi2();
         vars_.weight = weight;
 
+        vars_.burst_time = event_->header.burst_time;
+        vars_.time_stamp = event_->header.time_stamp;
+
         if ( mc ) 
         { 
             //Fill mc variables
