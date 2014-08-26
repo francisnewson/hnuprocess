@@ -11,6 +11,8 @@ env.Append( CPPFLAGS = ['-std=c++0x',
 '-Wno-error=deprecated-declarations'
 ] )
 
+env.Decider('MD5-timestamp')
+
 my_libs = [ 
 'reco',
 'tools',

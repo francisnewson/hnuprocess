@@ -4,6 +4,9 @@
 #include "K2piReco.hh"
 #include "HistStore.hh"
 #include "Event.hh"
+#include "KaonTrack.hh"
+#include "K2piVars.hh"
+#include "K2piPlots.hh"
 
 #if 0
 /*
@@ -16,6 +19,13 @@
  *
  */
 #endif
+//--------------------------------------------------
+//
+//  K2piPlotter is a wrapper for K2piPlots. It fills a
+//  K2piVars object but the actual plotting is done by 
+//  K2piPlots.
+//
+//--------------------------------------------------
 namespace fn
 {
     class K2piPlotter : public Analysis
@@ -23,34 +33,27 @@ namespace fn
         public: 
             K2piPlotter( const Selection& sel,
                     const fne::Event * e,
-                TFile& tfile, std::string folder,
-                const K2piReco& k2pi_reco, bool  mc);
+                    TFile& tfile, std::string folder,
+                    const K2piReco& k2pi_reco, bool  mc);
 
-        void end_processing();
+            void end_processing();
 
         private:
-        void process_event();
-        const fne::Event * e_;
+            void process_event();
+            const fne::Event * e_;
 
-        TFile& tfile_;
-        std::string folder_;
-        HistStore hs_;
+            TFile& tfile_;
+            std::string folder_;
 
-        const K2piReco& k2pi_reco_;
+            const K2piReco& k2pi_reco_;
+            K2piVars vars_;
+            KaonTrack kt_;
+            bool mc_;
 
-        bool mc_;
-
-        TH1D * h_m2_pip_lkr_;
-        TH1D * h_m2_pi0;
-        TH1D * h_neutral_z_;
-
-        TH1D * h_dz_neut_mc_;
-        TH1D * h_mc_z_;
-
-        TH2D * h_dz_neut_mc_vs_z_;
+            K2piPlots k2pi_plots_;
 
 
-        REG_DEC_SUB( K2piPlotter);
+            REG_DEC_SUB( K2piPlotter);
 
     };
 

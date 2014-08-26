@@ -17,6 +17,7 @@ build_O1
 build_O0
 *.log
 tags
+*.__afs*
 
 #scons
 .sconsign.dblite

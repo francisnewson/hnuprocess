@@ -47,14 +47,5 @@ namespace fn
     
     //--------------------------------------------------
     
-    struct k2pi_mc_parts
-    {
-        const fne::McParticle * k;
-        const fne::McParticle * pip;
-        const fne::McParticle * pi0;
-        std::vector<const fne::McParticle*>  photons;
-    };
-
-     k2pi_mc_parts extract_k2pi_particles( const fne::Event * e );
 }
 #endif

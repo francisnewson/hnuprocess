@@ -19,10 +19,8 @@
  */
 #endif
 
-
 namespace fn
 {
-
     class K2piFilter : public Analysis
     {
         public:
@@ -46,6 +44,8 @@ namespace fn
             TFile& tfile_;
             TTree * ttree_;
             bool mc_;
+
+            KaonTrack kt_;
 
             REG_DEC_SUB( K2piFilter);
     };
