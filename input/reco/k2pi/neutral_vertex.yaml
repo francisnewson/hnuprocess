@@ -21,27 +21,24 @@
     type : SingleTrack
     method : BF
 
-    #log_level: always_print
-
     init_min_mom: 3.0 
     init_max_mom: 80.0
-
     init_max_cda: 15.0
-
     init_min_z: -5000.0
     init_max_z:  10000.0
-
     dch_merge_sep: 0.5
+    #log_level: always_print
 
 
 - input:
     name: k2pi_clusters
     type: K2piClusters
+    method: Default
+
     min_track_cluster_time: 12
     min_cluster_energy: 5
     max_track_cluster_distance: 5
 
-    method: Default
     inputs:
         ogt: bf_st
 
@@ -103,6 +100,13 @@
     inputs:
         k2pic: k2pi_clusters
         ogt: bf_st
+
+- selection:
+    name: photon_dch_radius
+    type: PhotonRadialCut
+    z: 9708.42 #DCH1
+    min_r: 15
+    max_r: 10000
 
 - selection:
     name: pip_mass
@@ -186,6 +190,7 @@
         - track_eop
         - photon_sep
         - photon_track_sep
+        - photon_dch_radius
         #- pip_mass
 
 #summary

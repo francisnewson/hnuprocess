@@ -38,5 +38,29 @@ namespace fn
         (YAML::Node& instruct, RecoFactory& rf );
 
     //--------------------------------------------------
+    
+    class PhotonRadialCut : public CachedSelection
+    {
+        public: 
+            PhotonRadialCut( const K2piReco& k2pic,
+                        double z, double minR, double maxR );
+
+        private:
+                bool do_check() const;
+                bool check_cluster
+                    ( const ClusterData& cluster,
+                      const TVector3& vertex ) const;
+
+            const K2piReco& k2pic_;
+                double z_;
+                double min_r_;
+                double max_r_;
+    };
+
+    template<>
+        Subscriber * create_subscriber<PhotonRadialCut>
+        (YAML::Node& instruct, RecoFactory& rf );
+
+    //--------------------------------------------------
 }
 #endif

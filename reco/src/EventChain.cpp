@@ -71,7 +71,12 @@ namespace fn
             << "Going to read " << max_event_ << " entries";
 
         //Prepare chain
+        BOOST_LOG_SEV( log_, fn::severity_level::always_print)
+            << "TChain::GetFile() ... ";
         tch_->GetFile();
+
+        BOOST_LOG_SEV( log_, fn::severity_level::always_print)
+            << "Setting cache";
         tch_->SetCacheSize( 100000000 );
         tch_->AddBranchToCache( "*", kTRUE );
 
