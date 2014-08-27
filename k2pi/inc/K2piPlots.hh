@@ -38,9 +38,13 @@ namespace fn
             TFile& tf_;
             bool found_mc_;
 
+            //Data histograms
             TH1D * hm2pip_lkr_;
+            TH1D * hpt_dch_;
+            TH1D * hz_lkr_dch_;
 
             //MC histograms
+            TH1D * hdz_neutral_;
             TH2D * hdx1dz_ ;
             TH2D * hdy1dz_ ;
 

@@ -107,6 +107,8 @@
     z: 9708.42 #DCH1
     min_r: 15
     max_r: 10000
+    inputs:
+        k2pi_reco: k2pi_event
 
 - selection:
     name: pip_mass
@@ -114,7 +116,7 @@
     min_m2: 0.0175
     max_m2: 0.0215
     inputs:
-        k2pi_reco:  k2pi_event
+        k2pi_reco: k2pi_event
 
 - selection:
     name: muon_veto

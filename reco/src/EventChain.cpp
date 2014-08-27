@@ -183,7 +183,7 @@ namespace fn
         //A new tree means a new file and potentially 
         //pointers can get lost
 
-        BOOST_LOG_SEV( log_, fn::severity_level::debug)
+        BOOST_LOG_SEV( log_, fn::severity_level::always_print)
             << "New tree:" << get_filename() ;
 
         //Reassign event pointer

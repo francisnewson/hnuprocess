@@ -55,6 +55,8 @@ namespace fn
                 double z_;
                 double min_r_;
                 double max_r_;
+
+            REG_DEC_SUB( PhotonRadialCut );
     };
 
     template<>

@@ -34,6 +34,8 @@ namespace fn
 
     //--------------------------------------------------
 
+            REG_DEF_SUB( PhotonRadialCut );
+
     PhotonRadialCut::PhotonRadialCut( const K2piReco& k2pic,
             double z, double minR, double maxR )
         :k2pic_( k2pic), z_( z), min_r_( minR), max_r_( maxR )

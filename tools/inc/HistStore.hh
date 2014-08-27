@@ -17,7 +17,8 @@ namespace fn
 		makeTH1D(
 				std::string name, std::string title,
 				int nBins, double xmin, double xmax,
-				std::string xtitle, std::string ytitle);
+				std::string xtitle,
+                std::string ytitle = "#events" );
 
 	std::unique_ptr<TH2D>
 		makeTH2D(
@@ -65,7 +66,8 @@ namespace fn
 			TH1D * MakeTH1D(
 					std::string name, std::string title,
 					int nBins, double xmin, double xmax,
-					std::string xtitle, std::string ytitle);
+					std::string xtitle, 
+                    std::string ytitle = "#events");
 
 			TH2D * MakeTH2D(
 					std::string name, std::string title,

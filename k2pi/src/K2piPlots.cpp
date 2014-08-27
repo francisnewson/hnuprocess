@@ -33,6 +33,11 @@ namespace fn
         hm2pip_lkr_ = dths_.MakeTH1D( "hm2pip_lkr", "Pi+ mass from Lkr",
                 1000, -0.3, 0.2, "m^{2}_{miss}", "#events" );
 
+        hpt_dch_ = dths_.MakeTH1D( "hpt_dch_", "P_{T} measured in DCH",
+                1000, 0, 0.5, "P_{T} (GeV)", "#events" );
+
+        hz_lkr_dch_ = dths_.MakeTH1D( "hz_lkr_dch_", "Z LKr - DCH" ,
+                1000, -1000, 1000, "dZ ( cm )" );
     }
 
     void K2piPlots::process_data()
@@ -41,52 +46,63 @@ namespace fn
             ( vars_->data.p4pip_lkr.M2(), vars_->weight );
 
         lkr_dch_cmp_.Fill
-            ( vars_->data.p4pip_lkr, vars_->data.p4pip_dch, vars_->weight );
+            ( vars_->data.p4pip_lkr, vars_->data.p4pip_dch,
+              vars_->weight );
+
+        hpt_dch_->Fill( vars_->data.pt_dch , vars_->weight );
+
+        hz_lkr_dch_->Fill( vars_->data.neutral_vertex.Z() 
+                - vars_->data.charged_vertex.Z(), vars_->weight );
 
     }
 
     void K2piPlots::init_mc()
     {
-     hdxdy_ = mchs_.MakeTH2D( "hdxdy", "Cluster - Photon", 
-            200, -100, 100, "dX",
-            200, -100, 100, "dY");
 
-     hdx1dz_ = mchs_.MakeTH2D( "hdx1dz", "X Cluster1 - Photon1 vs Z", 
-            200, -100, 100, "dX",
-            200, -1000, 1000, "dZ");
+        hdz_neutral_ = mchs_.MakeTH1D( "hdz_neutral_",
+                "dZ Neutral vertex - MC",
+                10000, -1000, 1000, "dZ (cm )" );
 
-     hdy1dz_ = mchs_.MakeTH2D( "hdy1dz", "Y Cluster1 - Photon1 vs Z", 
-            200, -100, 100, "dX",
-            200, -1000, 1000, "dZ");
+        hdxdy_ = mchs_.MakeTH2D( "hdxdy", "Cluster - Photon", 
+                200, -100, 100, "dX",
+                200, -100, 100, "dY");
 
-     hdxdy1_ = mchs_.MakeTH2D( "hdxdy1", "Cluster1 - Photon1", 
-            200, -100, 100, "dX",
-            200, -100, 100, "dY");
+        hdx1dz_ = mchs_.MakeTH2D( "hdx1dz", "X Cluster1 - Photon1 vs Z", 
+                200, -100, 100, "dX",
+                200, -1000, 1000, "dZ");
 
-     hdxdy2_ = mchs_.MakeTH2D( "hdxdy2", "Cluster2 - Photon2", 
-            200, -100, 100, "dX",
-            200, -100, 100, "dY");
+        hdy1dz_ = mchs_.MakeTH2D( "hdy1dz", "Y Cluster1 - Photon1 vs Z", 
+                200, -100, 100, "dX",
+                200, -1000, 1000, "dZ");
 
-     hdEEdz_ = mchs_.MakeTH2D( "hdEEdz", "dEE vs dZ", 
-            600, -1500, 1500, "dEE",
-            200, -1000, 1000, "dZ");
+        hdxdy1_ = mchs_.MakeTH2D( "hdxdy1", "Cluster1 - Photon1", 
+                200, -100, 100, "dX",
+                200, -100, 100, "dY");
 
-     hdEEvsEE_ = mchs_.MakeTH2D( "hdEEvsEE", "dEE vs EE", 
-            400, 0, 2000, "EE",
-            400, -1500, 1500, "dEE"
-            );
+        hdxdy2_ = mchs_.MakeTH2D( "hdxdy2", "Cluster2 - Photon2", 
+                200, -100, 100, "dX",
+                200, -100, 100, "dY");
 
-     hdEE_ = mchs_.MakeTH1D( "hdEE", "Delta EE",
-            1000, 1500,  1500, "Delta E1*E2",
-            "#entries" );
+        hdEEdz_ = mchs_.MakeTH2D( "hdEEdz", "dEE vs dZ", 
+                600, -1500, 1500, "dEE",
+                200, -1000, 1000, "dZ");
 
-     hdSepdz_ = mchs_.MakeTH2D( "hdSepdz", "dSep vs dZ", 
-            200, -100, 100, "dSep",
-            200, -1000, 1000, "dZ");
+        hdEEvsEE_ = mchs_.MakeTH2D( "hdEEvsEE", "dEE vs EE", 
+                400, 0, 2000, "EE",
+                400, -1500, 1500, "dEE"
+                );
 
-     hdpvsdz_ = mchs_.MakeTH2D( "hdpvsdz", "dp (pi+) vs dZ", 
-            200, -1000, 1000, "dZ",
-            200, -50, 50, "dp");
+        hdEE_ = mchs_.MakeTH1D( "hdEE", "Delta EE",
+                1000, 1500,  1500, "Delta E1*E2",
+                "#entries" );
+
+        hdSepdz_ = mchs_.MakeTH2D( "hdSepdz", "dSep vs dZ", 
+                200, -100, 100, "dSep",
+                200, -1000, 1000, "dZ");
+
+        hdpvsdz_ = mchs_.MakeTH2D( "hdpvsdz", "dp (pi+) vs dZ", 
+                200, -1000, 1000, "dZ",
+                200, -50, 50, "dp");
     }
 
     void K2piPlots::process_mc()
@@ -130,10 +146,12 @@ namespace fn
         tf_.cd();
         dths_.Write();
 
-
-        cd_p( &tf_, "mc");
-        mchs_.Write();
-        tf_.cd();
+        if ( found_mc_ )
+        {
+            cd_p( &tf_, "mc");
+            mchs_.Write();
+            tf_.cd();
+        }
 
         cd_p( &tf_, "lkr_dch" );
         lkr_dch_cmp_.Write();
