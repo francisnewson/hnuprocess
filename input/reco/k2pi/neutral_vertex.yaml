@@ -15,6 +15,7 @@
     name: counter
     type: Counter
 
+
 #SingleTrack
 - input:
     name : bf_st
@@ -55,6 +56,13 @@
 - selection:
     name: passer
     type : auto_pass
+
+#weight
+- selection:
+    name: kaon_mom_weights
+    type: KaonMomWeight
+    crude_weights: input/reco/mod/kaon_crude_weights.dat
+    fine_weights: input/reco/mod/kaon_fine_weights.dat
 
 #MUV bursts
 - selection:
@@ -180,6 +188,7 @@
     name : k2pi_cuts
     type: CompositeSelection
     children:
+        - kaon_mom_weights
         - gd_muv_brst
         - muon_veto
         - good_trk

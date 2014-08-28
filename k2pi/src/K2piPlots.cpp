@@ -34,6 +34,10 @@ namespace fn
         hm2pip_lkr_ = dths_.MakeTH1D( "hm2pip_lkr", "Pi+ mass from Lkr",
                 1000, -0.3, 0.2, "m^{2}_{miss}", "#events" );
 
+        hpt_dch_uw_ = dths_.MakeTH1D( "hpt_dch_uw",
+                "P_{T} measured in DCH - Unweighted",
+                1000, 0, 0.5, "P_{T} (GeV)", "#events" );
+
         hpt_dch_ = dths_.MakeTH1D( "hpt_dch", "P_{T} measured in DCH",
                 1000, 0, 0.5, "P_{T} (GeV)", "#events" );
 
@@ -44,7 +48,7 @@ namespace fn
                 "Event p_{T} - DCH", 
                 1000, 0, 1, "p_{T} (GeV/c ) " );
 
-         hz_lkr_ = dths_.MakeTH1D( "hz_lkr", "Z - Lkr" ,
+        hz_lkr_ = dths_.MakeTH1D( "hz_lkr", "Z - Lkr" ,
                 1200, -2000, 10000,"Z Lkr ( cm )" );
     }
 
@@ -60,7 +64,12 @@ namespace fn
             ( vars_->data.p4pip_lkr, vars_->data.p4pip_dch,
               vars_->weight );
 
+        uw_lkr_dch_cmp_.Fill
+            ( vars_->data.p4pip_lkr, vars_->data.p4pip_dch, 1.0 );
+
         hpt_dch_->Fill( vars_->data.pt_dch , vars_->weight );
+
+        hpt_dch_uw_->Fill( vars_->data.pt_dch , 1.0 );
 
         hz_lkr_dch_->Fill( vars_->data.neutral_vertex.Z() 
                 - vars_->data.charged_vertex.Z(), vars_->weight );
@@ -79,7 +88,7 @@ namespace fn
 
         hdz_neutral_ = mchs_.MakeTH1D( "hdz_neutral_",
                 "dZ Neutral vertex - MC",
-                10000, -1000, 1000, "dZ (cm )" );
+                1000, -1000, 1000, "dZ (cm )" );
 
         hdxdy_ = mchs_.MakeTH2D( "hdxdy", "Cluster - Photon", 
                 200, -100, 100, "dX",
@@ -111,7 +120,7 @@ namespace fn
                 );
 
         hdEE_ = mchs_.MakeTH1D( "hdEE", "Delta EE",
-                1000, 1500,  1500, "Delta E1*E2",
+                1000, -1500,  1500, "Delta E1*E2",
                 "#entries" );
 
         hdSepdz_ = mchs_.MakeTH2D( "hdSepdz", "dSep vs dZ", 
@@ -121,30 +130,43 @@ namespace fn
         hdpvsdz_ = mchs_.MakeTH2D( "hdpvsdz", "dp (pi+) vs dZ", 
                 200, -1000, 1000, "dZ",
                 200, -50, 50, "dp");
+
+        h_event_weight_ = mchs_.MakeTH1D( "h_event_weight_",
+                "Event weights",
+                1000, 0.8, 2.8, "Weight" );
+
+        h_event_weight_mom_ = mchs_.MakeTH2D( "h_event_weight_mom_",
+                "Event weight vs momentim ",
+                100, 70, 80, "Momentum (GeV)",
+                100, 0.8, 2.8, "Event weight" );
     }
 
     void K2piPlots::process_mc()
     {
-        TVector3 delta1 = delta_cluster( vars_->mc.p4g1, vars_->data.pos1, vars_->mc.vertex );
-        TVector3 delta2 = delta_cluster( vars_->mc.p4g2, vars_->data.pos2, vars_->mc.vertex );
+        TVector3 delta1 = delta_cluster(
+                vars_->mc.p4g1, vars_->data.pos1, vars_->mc.vertex );
+        TVector3 delta2 = delta_cluster( 
+                vars_->mc.p4g2, vars_->data.pos2, vars_->mc.vertex );
 
-        hdxdy_->Fill( delta1.X(), delta1.Y() );
-        hdxdy_->Fill( delta2.X(), delta2.Y() );
+        hdxdy_->Fill( delta1.X(), delta1.Y(), vars_->weight );
+        hdxdy_->Fill( delta2.X(), delta2.Y(), vars_->weight );
 
-        hdxdy1_->Fill( delta1.X(), delta1.Y() );
-        hdxdy2_->Fill( delta2.X(), delta2.Y() );
+        hdxdy1_->Fill( delta1.X(), delta1.Y(), vars_->weight );
+        hdxdy2_->Fill( delta2.X(), delta2.Y(), vars_->weight );
 
         double dZ = vars_->data.neutral_vertex.Z() - vars_->mc.vertex.Z() ;
-        hdx1dz_->Fill( delta1.X(), dZ );
-        hdy1dz_->Fill( delta1.Y(), dZ );
+        hdx1dz_->Fill( delta1.X(), dZ, vars_->weight );
+        hdy1dz_->Fill( delta1.Y(), dZ , vars_->weight);
+
+        hdz_neutral_->Fill( dZ, vars_->weight );
 
         double dataEE = vars_->data.E1 * vars_->data.E2;
         double mcEE = vars_->mc.p4g1.E() * vars_->mc.p4g2.E();
         double dEE = dataEE - mcEE;
 
-        hdEEdz_->Fill( dEE, dZ );
-        hdEE_->Fill( dEE );
-        hdEEvsEE_->Fill( dataEE, dEE );
+        hdEEdz_->Fill( dEE, dZ, vars_->weight );
+        hdEE_->Fill( dEE, vars_->weight );
+        hdEEvsEE_->Fill( dataEE, dEE, vars_->weight );
 
         TVector3 photon_sep = 
             extrapolate_photon( vars_->mc.p4g1, vars_->data.pos1, vars_->mc.vertex ) - 
@@ -153,10 +175,14 @@ namespace fn
         TVector3 cluster_sep = vars_->data.pos1 - vars_->data.pos2;
         double delta_sep = cluster_sep.Mag() - photon_sep.Mag();
 
-        hdSepdz_->Fill( delta_sep, dZ );
+        hdSepdz_->Fill( delta_sep, dZ, vars_->weight );
 
         double delta_p = vars_->data.p4pip_lkr.P() - vars_->mc.p4pip.P();
-        hdpvsdz_->Fill( dZ, delta_p );
+        hdpvsdz_->Fill( dZ, delta_p, vars_->weight );
+
+        h_event_weight_->Fill( vars_->weight ) ;
+        h_event_weight_mom_->Fill( 
+                vars_->mc.p4k.P() , vars_->weight )  ;
     }
 
     void K2piPlots::end_processing()
@@ -173,6 +199,10 @@ namespace fn
 
         cd_p( &tf_, ( folder_ / "lkr_dch" ).string().c_str() );
         lkr_dch_cmp_.Write();
+        tf_.cd();
+
+        cd_p( &tf_, ( folder_ / "uw_lkr_dch" ).string().c_str() );
+        uw_lkr_dch_cmp_.Write();
         tf_.cd();
     }
 

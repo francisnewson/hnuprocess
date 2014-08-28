@@ -44,9 +44,11 @@ namespace fn
             //Data histograms
             TH1D * hm2pip_lkr_;
             TH1D * hpt_dch_;
+            TH1D * hpt_dch_uw_;
             TH1D * hz_lkr_dch_;
             TH1D * hpt_event_dch_;
             TH1D * hz_lkr_;
+
 
             //MC histograms
             TH1D * hdz_neutral_;
@@ -63,13 +65,17 @@ namespace fn
 
             TH2D * hdSepdz_ ;
             TH2D * hdpvsdz_ ;
-            //----------------------------------------
 
+            TH1D * h_event_weight_;
+            TH2D * h_event_weight_mom_;
+            
+            //----------------------------------------
 
             HistStore dths_;
             HistStore mchs_;
 
             FourMomComp lkr_dch_cmp_;
+            FourMomComp uw_lkr_dch_cmp_;
     };
 
     //--------------------------------------------------

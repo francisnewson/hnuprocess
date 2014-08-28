@@ -3,6 +3,7 @@
 #include "StreamFilter.hh"
 #include "yaml_help.hh"
 #include "RecoFactory.hh"
+#include "Xcept.hh"
 
 namespace fn
 {
@@ -47,6 +48,8 @@ namespace fn
     {
         //load crude weights
         boost::filesystem::ifstream cwifs( crude_weights);
+        if ( ! cwifs.good() )
+        { throw fn::Xcept<MissingInfo>{ crude_weights.string() }; }
         StreamFilter cwifs_remove_comments( cwifs, '#' );
 
         crude_weights_.insert( end( crude_weights_),
@@ -55,6 +58,8 @@ namespace fn
 
         //load fine weights
         boost::filesystem::ifstream fwifs( fine_weights);
+        if ( ! fwifs.good() )
+        { throw fn::Xcept<MissingInfo>{ fine_weights.string() }; }
         StreamFilter fwifs_remove_comments( fwifs, '#' );
 
         fine_weights_.insert( end( fine_weights_),
