@@ -195,15 +195,30 @@ int main( int argc, char * argv[] )
     double min_mass2 = m2pip - mass2_width;
     double max_mass2 = m2pip + mass2_width;
 
+    //Prepare z cut
+    double min_z = -1800; //cm
+    double max_z = +7000; //cm
+
+    //Prepare DCH1 cut
+
     int npassed = 0;
     Long64_t event_count = echain->get_max_event();
     fn::Counter counter( slg, event_count);
     
     //C-C now activates remote stop
     connect_signals();
+    int events_read = 0;
 
     for ( Int_t i = 0 ; i < event_count ; ++i )
     {
+        if ( remote_stop() )
+        {
+            BOOST_LOG_SEV( slg, always_print )
+                << "Stopping after " << i << " events";
+            break;
+        }
+
+        ++events_read; 
         //k2pi->GetEntry( i );
         echain->load_next_event_header();
         echain->load_full_event();
@@ -214,19 +229,19 @@ int main( int argc, char * argv[] )
         if ( reco_mass2  > max_mass2 ) continue;
         if ( reco_mass2  < min_mass2 ) continue;
 
+        double z = vars->data.neutral_vertex.Z();
+        if ( z > max_z ) continue;
+        if ( z < min_z ) continue;
+
         k2pi_plots.new_event();
         ++npassed;
 
-        if ( remote_stop() )
-        {
-            BOOST_LOG_SEV( slg, always_print )
-                << "Stopping after " << i << " events";
-            break;
-        }
     }
 
-    std::cerr << npassed << " out of " << event_count 
+    std::cerr << npassed << " out of " << events_read 
         << " events passed the mass cut" << std::endl;
+
+    std::cerr << echain->read_info();
 
     tfout.cd();
     k2pi_plots.end_processing();

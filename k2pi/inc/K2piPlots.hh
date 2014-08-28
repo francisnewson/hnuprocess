@@ -45,6 +45,8 @@ namespace fn
             TH1D * hm2pip_lkr_;
             TH1D * hpt_dch_;
             TH1D * hz_lkr_dch_;
+            TH1D * hpt_event_dch_;
+            TH1D * hz_lkr_;
 
             //MC histograms
             TH1D * hdz_neutral_;

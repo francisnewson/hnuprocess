@@ -34,17 +34,27 @@ namespace fn
         hm2pip_lkr_ = dths_.MakeTH1D( "hm2pip_lkr", "Pi+ mass from Lkr",
                 1000, -0.3, 0.2, "m^{2}_{miss}", "#events" );
 
-        hpt_dch_ = dths_.MakeTH1D( "hpt_dch_", "P_{T} measured in DCH",
+        hpt_dch_ = dths_.MakeTH1D( "hpt_dch", "P_{T} measured in DCH",
                 1000, 0, 0.5, "P_{T} (GeV)", "#events" );
 
-        hz_lkr_dch_ = dths_.MakeTH1D( "hz_lkr_dch_", "Z LKr - DCH" ,
+        hz_lkr_dch_ = dths_.MakeTH1D( "hz_lkr_dch", "Z LKr - DCH" ,
                 1000, -1000, 1000, "dZ ( cm )" );
+
+        hpt_event_dch_ = dths_.MakeTH1D( "hpt_event_dch", 
+                "Event p_{T} - DCH", 
+                1000, 0, 1, "p_{T} (GeV/c ) " );
+
+         hz_lkr_ = dths_.MakeTH1D( "hz_lkr", "Z - Lkr" ,
+                1200, -2000, 10000,"Z Lkr ( cm )" );
     }
 
     void K2piPlots::process_data()
     {
         hm2pip_lkr_->Fill
             ( vars_->data.p4pip_lkr.M2(), vars_->weight );
+
+        hz_lkr_->Fill( vars_->data.neutral_vertex.Z(),
+                vars_->weight );
 
         lkr_dch_cmp_.Fill
             ( vars_->data.p4pip_lkr, vars_->data.p4pip_dch,
@@ -54,6 +64,13 @@ namespace fn
 
         hz_lkr_dch_->Fill( vars_->data.neutral_vertex.Z() 
                 - vars_->data.charged_vertex.Z(), vars_->weight );
+
+        //Calculate event p_T
+        TVector3 event_p = vars_->data.p4pip_dch.Vect() 
+            + vars_->data.p4pi0_lkr.Vect();
+        TVector3 event_pt = event_p.Perp( vars_->data.beam_momentum );
+
+        hpt_event_dch_->Fill(  event_pt.Mag(), vars_->weight );
 
     }
 
