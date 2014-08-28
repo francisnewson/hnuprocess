@@ -16,6 +16,7 @@ env.Decider('MD5-timestamp')
 my_libs = [ 
 'reco',
 'tools',
+'corrections',
 'apps',
 'tracking',
 'conditions',

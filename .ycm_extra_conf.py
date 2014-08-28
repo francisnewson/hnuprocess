@@ -58,6 +58,7 @@ flags = [
 '-I',  '/afs/cern.ch/user/f/fnewson/work/hnu/gopher/code/process/clusters/inc',
 '-I',  '/afs/cern.ch/user/f/fnewson/work/hnu/gopher/code/process/conditions/inc',
 '-I',  '/afs/cern.ch/user/f/fnewson/work/hnu/gopher/code/process/reco/inc',
+'-I',  '/afs/cern.ch/user/f/fnewson/work/hnu/gopher/code/process/corrections/inc',
 '-I',  '/afs/cern.ch/user/f/fnewson/work/hnu/gopher/code/process/tools/inc',
 '-I',  '/afs/cern.ch/user/f/fnewson/work/hnu/gopher/code/process/tracking/inc',
 '-I',  '/afs/cern.ch/user/f/fnewson/work/hnu/gopher/code/process/kinfo/inc',
