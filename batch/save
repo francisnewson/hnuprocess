@@ -1,0 +1,33 @@
+#!/bin/env python3
+import argparse
+import yaml
+import shutil
+import subprocess
+import os
+import sys
+
+#read commmand line arguments
+parser = argparse.ArgumentParser()
+parser.add_argument( 'config_file' )
+args = parser.parse_args()
+sys.stderr.write ("Reading from {0}\n".format( args.config_file ) )
+
+#load config file
+config_file = open ( args.config_file )
+config = yaml.load( config_file )
+
+#get output options
+save = config['save']
+
+#do local
+for source, dest in save['local'].items():
+    sys.stderr.write ( "Copying {0} to {1}\n".format( source, dest ))
+    os.makedirs( os.path.dirname( dest ), exist_ok = True )
+    shutil.copy( source, dest )
+
+#do castor
+for source, dest in save['castor'].items():
+    sys.stderr.write ( "Copying {0} to {1}\n".format( source, dest ))
+    subprocess.check_call( ['rfmkdir', '-p',
+            os.path.dirname(dest)] )
+    subprocess.check_call(['rfcp', source, dest] )

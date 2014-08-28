@@ -1,0 +1,20 @@
+#!/bin/bash
+
+instruct=$1
+shift
+source /afs/cern.ch/user/f/fnewson/.virtualenvs/process/bin/activate
+
+getyaml () {
+    cat $instruct | shyaml get-value $1
+}
+
+app=$( getyaml run.app )
+channel=$( getyaml run.channel )
+runlist=$( getyaml run.runlist )
+mission=$( getyaml run.mission )
+prefix=$( getyaml run.prefix )
+
+mkdir -p output
+
+#run the command!
+$app -c $channel -l $runlist -m $mission --auto -p $prefix $count

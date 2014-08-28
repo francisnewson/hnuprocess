@@ -27,7 +27,7 @@ namespace fn
     {
         //Create output tree
         ttree_ = new TTree( tree_name.c_str(), tree_name.c_str() );
-        TTree::SetMaxTreeSize( 100000000LL );
+        TTree::SetMaxTreeSize( 10000000000LL );
 
         ttree_->Branch( "k2piVars", "fn::K2piVars", &vars_, 64000, 2 );
     }

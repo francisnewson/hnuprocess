@@ -5,8 +5,9 @@
 namespace fn
 {
 
-    K2piPlots::K2piPlots( const fn::K2piVars * vars, TFile& tf )
-        :vars_( vars ), tf_( tf ), found_mc_( false )
+    K2piPlots::K2piPlots( const fn::K2piVars * vars, TFile& tf,
+            boost::filesystem::path folder)
+        :vars_( vars ), tf_( tf ), folder_( folder ), found_mc_( false )
     {
         //init Data histograms
         init_data();
@@ -143,17 +144,17 @@ namespace fn
 
     void K2piPlots::end_processing()
     {
-        tf_.cd();
+        tf_.cd( folder_.string().c_str() );
         dths_.Write();
 
         if ( found_mc_ )
         {
-            cd_p( &tf_, "mc");
+            cd_p( &tf_, (folder_ / "mc").string().c_str() );
             mchs_.Write();
             tf_.cd();
         }
 
-        cd_p( &tf_, "lkr_dch" );
+        cd_p( &tf_, ( folder_ / "lkr_dch" ).string().c_str() );
         lkr_dch_cmp_.Write();
         tf_.cd();
     }

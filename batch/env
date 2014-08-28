@@ -1,0 +1,6 @@
+#source me
+source ./scripts/env.sh
+
+echo "Loading python3"
+source /afs/cern.ch/user/f/fnewson/.virtualenvs/process/bin/activate
+python3 --version

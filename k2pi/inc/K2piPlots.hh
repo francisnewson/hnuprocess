@@ -5,6 +5,7 @@
 #include "HistStore.hh"
 #include "FourMomComp.hh"
 #include "TH2D.h"
+#include <boost/filesystem/path.hpp>
 #if 0
 /*
  *  _  ______        _ ____  _       _
@@ -21,7 +22,8 @@ namespace fn
     class K2piPlots : public Subscriber
     {
         public:
-            K2piPlots( const fn::K2piVars * vars, TFile& tf );
+            K2piPlots( const fn::K2piVars * vars, TFile& tf,
+                    boost::filesystem::path folder =  "" );
 
             void init_data();
             void init_mc();
@@ -36,6 +38,7 @@ namespace fn
         private:
             const fn::K2piVars * vars_;
             TFile& tf_;
+            boost::filesystem::path folder_;
             bool found_mc_;
 
             //Data histograms

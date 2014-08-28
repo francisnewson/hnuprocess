@@ -294,4 +294,10 @@ int main( int argc, char * argv[] )
     }
 
     reco.end_processing();
+
+    //if we stopped remotely, give a different return value
+    int return_value = EXIT_SUCCESS;
+    if ( remote_stop() ) { return_value = EXIT_FAILURE; }
+
+    return return_value;
 }

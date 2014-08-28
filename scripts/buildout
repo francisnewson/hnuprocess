@@ -1,0 +1,10 @@
+#!/bin/bash
+ldd build_O3/apps/hnureco \
+		| ack  "build_O3" \
+		| awk '{print $3} END {
+			print "build_O3/apps/hnureco";
+			print "input"
+            print "batch"
+			print "scripts/env.sh"
+		}'  \
+			| xargs tar -cvf ../binary/process.tar 

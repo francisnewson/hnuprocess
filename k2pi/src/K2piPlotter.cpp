@@ -14,7 +14,7 @@ namespace fn
         :Analysis( sel), e_( e),
         tfile_( tfile), folder_( folder),
         k2pi_reco_( k2pi_reco ),kt_( e, mc ),  mc_( mc ),
-        k2pi_plots_( &vars_ , tfile_)
+        k2pi_plots_( &vars_ , tfile_, folder)
     {
     }
 
