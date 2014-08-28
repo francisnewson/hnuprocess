@@ -2,12 +2,14 @@
 #include <cmath>
 #include "TFile.h"
 #include "TTree.h"
+#include "TChain.h"
 #include "TCut.h"
 #include "TH1F.h"
 #include "TSystem.h"
 #include "K2piVars.hh"
 #include "Track.hh"
 #include <iostream>
+#include <iterator>
 #include "HistStore.hh"
 #include "Counter.hh"
 #include "logging.hh"
@@ -16,6 +18,33 @@
 #include "stl_help.hh"
 #include <boost/algorithm/string/replace.hpp>
 #include "NA62Constants.hh"
+#include <boost/filesystem/fstream.hpp>
+#include "EChain.hh"
+
+//A global bool which can be
+//used to store stop signals
+bool&  remote_stop()
+{
+    static bool rs{false};
+    return rs;
+}
+
+//Handle signals by setting remote_stop
+void sig_handler( int sig )
+{ 
+    if ( sig )
+    remote_stop() = true;
+}
+
+
+void connect_signals()
+{
+    //Press ctrl-C to save and close
+    signal (SIGXCPU, sig_handler);
+    signal (SIGINT, sig_handler);
+    signal (SIGTERM, sig_handler);
+    signal (127, sig_handler);
+}
 
 int main( int argc, char * argv[] )
 {
@@ -29,9 +58,16 @@ int main( int argc, char * argv[] )
         std::ofstream flaunch( "k2pi_launch.log", std::ofstream::app );
         write_launch ( argc, argv, flaunch );
     }
-    
+
     //start logging
     fn::logger slg;
+    auto  core = boost::log::core::get();
+    severity_level min_sev = startup;
+    // Set a global filter so that only error messages are logged
+    core->set_filter(boost::log::expressions::is_in_range(
+                boost::log::expressions::attr< severity_level >("Severity"), 
+                min_sev,  severity_level::maximum) );
+
 
     //**************************************************
     //Option logic
@@ -42,7 +78,10 @@ int main( int argc, char * argv[] )
     general.add_options()
         ( "help,h", "Display this help message")
         ( "input-file,i", po::value<path>(), "Specify input file")
+        ( "list-file,l", po::value<path>(), "Specify input list")
         ( "output-file,o", po::value<path>(), "Specify output file")
+        ( "channel,c", po::value<std::string>(), "Specify channel name")
+        ( "number,n", po::value<Long64_t>(), "Specify number of events")
         ;
 
     po::options_description desc("Allowed options");
@@ -64,18 +103,52 @@ int main( int argc, char * argv[] )
     }
 
     //input file
-    if ( ! vm.count ("input-file" ) )
+    if ( ! vm.count ("input-file" ) && ! vm.count( "list-file")  )
     {
         std::cerr << "**ERROR** Must specify input file!" << std::endl;
         return false;
     }
-    path input_file = vm["input-file"].as<path>() ;
-    BOOST_LOG_SEV( slg, always_print) << "Reading from " << input_file.string() ;
+
+    std::vector<std::string> input_files;
+
+    std::string input_description;
+
+    if ( vm.count( "input-file" ) )
+    {
+        path input_file = vm["input-file"].as<path>() ;
+        input_files.push_back( input_file.string() );
+        input_description = input_file.string();
+    }
+
+    if ( vm.count( "list-file" ) )
+    {
+        path file_list = vm["list-file"].as<path>() ;
+        boost::filesystem::ifstream ifs( file_list );
+        input_files.insert( begin( input_files),
+                std::istream_iterator<std::string>( ifs ),
+                std::istream_iterator<std::string>() );
+        input_description = file_list.string();
+    }
+
+    BOOST_LOG_SEV( slg, always_print) << "Reading from " << input_description;
+
+    std::vector<path> input_paths( begin( input_files), end( input_files ) );
+    EChain<fn::K2piVars> * echain = 0;
+
+    if ( vm.count( "number" ) )
+    {
+    echain = new EChain<fn::K2piVars>{ slg, input_paths, "k2pi", "k2piVars", vm["number"].as<Long64_t>() };
+    }
+    else
+    {
+    echain = new EChain<fn::K2piVars>{ slg, input_paths, "k2pi", "k2piVars" };
+    }
 
     //Default computed output name
-    std::string input_name = input_file.filename().string();
-    boost::replace_last( input_name, "tree", "plots" );
-    path output_file = path{"output"}/ input_name;
+    std::string output_description = path{input_description}.filename().string();
+    boost::replace_last( output_description, "tree", "plots" );
+    path output_file = path{"output"}/ ( "k2piplots_" + output_description) ;
+    output_file.replace_extension( "root" );
 
     //optional user output name
     if ( vm.count ("output-file" ) )
@@ -83,26 +156,38 @@ int main( int argc, char * argv[] )
         output_file = vm["output-file"].as<path>() ;
     }
 
-    BOOST_LOG_SEV( slg, always_print) << "Writing to   " << output_file.string() ;
+    BOOST_LOG_SEV( slg, always_print) 
+        << "Writing to   " << output_file.string() ;
 
     //Open tree
-    TFile * tfile = new TFile( input_file.string().c_str() );
-    TTree * k2pi = 0;
-    tfile->GetObject("k2pi", k2pi);
+#if 0
+    //TFile * tfile = new TFile( input_file.string().c_str() );
+    TChain * k2pi = new TChain( "k2pi" );
+    for ( auto& input : input_files )
+    {
+        BOOST_LOG_SEV( slg, always_print) << "Adding :" << input;
+        k2pi->AddFile( input.c_str() );
+    }
 
     k2pi->SetCacheSize( 10000000 );
     k2pi->AddBranchToCache("*");
 
     double nEntries = k2pi->GetEntriesFast();
-
-    //Connect event
     const fn::K2piVars * vars = new fn::K2piVars;
     k2pi->SetBranchAddress( "k2piVars", &vars );
+#endif
+
+    //Connect event
+    const fn::K2piVars * vars = echain->get_event_pointer();
 
     TFile tfout( output_file.string().c_str() , "RECREATE");
-    fn::Counter counter( slg, nEntries);
 
-    K2piPlots k2pi_plots( vars, tfout );
+    std::string folder = "";
+    if ( vm.count( "channel" ) )
+    {
+        folder = vm["channel"].as<std::string>() ;
+    }
+    K2piPlots k2pi_plots( vars, tfout, folder );
 
     //Prepare mass cut
     double mass2_width = 0.005;
@@ -111,10 +196,18 @@ int main( int argc, char * argv[] )
     double max_mass2 = m2pip + mass2_width;
 
     int npassed = 0;
+    Long64_t event_count = echain->get_max_event();
+    fn::Counter counter( slg, event_count);
+    
+    //C-C now activates remote stop
+    connect_signals();
 
-    for ( Int_t i = 0 ; i < nEntries ; ++i )
+    for ( Int_t i = 0 ; i < event_count ; ++i )
     {
-        k2pi->GetEntry( i );
+        //k2pi->GetEntry( i );
+        echain->load_next_event_header();
+        echain->load_full_event();
+
         counter.new_event();
 
         double reco_mass2 = vars->data.p4pip_lkr.M2();
@@ -123,9 +216,16 @@ int main( int argc, char * argv[] )
 
         k2pi_plots.new_event();
         ++npassed;
+
+        if ( remote_stop() )
+        {
+            BOOST_LOG_SEV( slg, always_print )
+                << "Stopping after " << i << " events";
+            break;
+        }
     }
 
-    std::cerr << npassed << " out of " << nEntries 
+    std::cerr << npassed << " out of " << event_count 
         << " events passed the mass cut" << std::endl;
 
     tfout.cd();

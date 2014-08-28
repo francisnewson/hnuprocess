@@ -144,7 +144,7 @@ namespace fn
 
     void K2piPlots::end_processing()
     {
-        tf_.cd( folder_.string().c_str() );
+        cd_p( &tf_,  folder_.string().c_str() );
         dths_.Write();
 
         if ( found_mc_ )
