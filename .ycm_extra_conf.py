@@ -64,6 +64,7 @@ flags = [
 '-I',  '/afs/cern.ch/user/f/fnewson/work/hnu/gopher/code/process/kinfo/inc',
 '-I',  '/afs/cern.ch/user/f/fnewson/work/hnu/gopher/code/process/km2/inc',
 '-I',  '/afs/cern.ch/user/f/fnewson/work/hnu/gopher/code/process/k2pi/inc',
+'-I',  '/afs/cern.ch/user/f/fnewson/work/hnu/gopher/code/process/akl/inc',
 '-I',  '/afs/cern.ch/user/f/fnewson/work/hnu/gopher/code/process/k2pi/dict',
 '-I',  '/afs/cern.ch/user/f/fnewson/work/hnu/gopher/code/process/muons/inc',
 '-isystem',  '/afs/cern.ch/sw/lcg/app/releases/ROOT/5.34.14/x86_64-slc6-gcc46-opt/root/include',

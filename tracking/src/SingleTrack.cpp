@@ -379,6 +379,9 @@ namespace fn
 
         mom_sigma_ = get_yaml<double>( instruct, "mom_sigma" );
         mom_frequency_ = get_yaml<double>( instruct, "mom_frequency" );
+
+        BOOST_LOG_SEV( get_log(), always_print)
+            << "K2pi scatter angle_frequency: " << angle_frequency_;
     }
 
     void BFScatterSingleTrack::modify_processing_track

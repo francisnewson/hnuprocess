@@ -17,8 +17,10 @@ namespace fn
 
         private:
             TH1D * hdp_;
+            TH1D * hdpop2_;
             TH1D * hdtx_;
             TH1D * hdty_;
+            TH2D * hdpvsp_;
 
             //Output properties
             std::string name_;

@@ -24,7 +24,8 @@ my_libs = [
 'kinfo',
 'km2',
 'k2pi',
-'muons'
+'muons',
+'akl',
 ]
 
 #Call Sconscript for each library

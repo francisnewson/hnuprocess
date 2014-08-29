@@ -1,3 +1,5 @@
+#ifndef YAML_HELP_HH
+#define YAML_HELP_HH
 #include "yaml-cpp/yaml.h"
 #include "Xcept.hh"
 #include <iostream>
@@ -21,7 +23,5 @@ namespace fn
 
             return result;
         }
-
-
-
 }
+#endif

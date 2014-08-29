@@ -15,36 +15,38 @@
     name: counter
     type: Counter
 
-
 #SingleTrack
 - input:
     name : bf_st
     type : SingleTrack
     method : BFScatter
 
+    angle_sigma: 0.02
+    angle_frequency: 0.1
+    mom_sigma: 5.0
+    mom_frequency: 0.1
+
+    #log_level: always_print
+
     init_min_mom: 3.0 
     init_max_mom: 80.0
+
     init_max_cda: 15.0
+
     init_min_z: -5000.0
     init_max_z:  10000.0
-    dch_merge_sep: 0.5
-    #log_level: always_print
-    
-    angle_sigma: 0.005
-    angle_frequency: 3e-3
 
-    mom_sigma: 5.0
-    mom_frequency: 1e-10
+    dch_merge_sep: 0.5
+
 
 - input:
     name: k2pi_clusters
     type: K2piClusters
-    method: Default
-
     min_track_cluster_time: 12
     min_cluster_energy: 5
     max_track_cluster_distance: 5
 
+    method: Default
     inputs:
         ogt: bf_st
 
@@ -61,13 +63,6 @@
 - selection:
     name: passer
     type : auto_pass
-
-#weight
-- selection:
-    name: kaon_mom_weights
-    type: KaonMomWeight
-    crude_weights: input/reco/mod/kaon_crude_weights.dat
-    fine_weights: input/reco/mod/kaon_fine_weights.dat
 
 #MUV bursts
 - selection:
@@ -115,21 +110,12 @@
         ogt: bf_st
 
 - selection:
-    name: photon_dch_radius
-    type: PhotonRadialCut
-    z: 9708.42 #DCH1
-    min_r: 15
-    max_r: 10000
-    inputs:
-        k2pi_reco: k2pi_event
-
-- selection:
     name: pip_mass
     type: PipM2miss
     min_m2: 0.0175
     max_m2: 0.0215
     inputs:
-        k2pi_reco: k2pi_event
+        k2pi_reco:  k2pi_event
 
 - selection:
     name: muon_veto
@@ -193,7 +179,6 @@
     name : k2pi_cuts
     type: CompositeSelection
     children:
-        - kaon_mom_weights
         - gd_muv_brst
         - muon_veto
         - good_trk
@@ -206,7 +191,6 @@
         - track_eop
         - photon_sep
         - photon_track_sep
-        - photon_dch_radius
         #- pip_mass
 
 #summary

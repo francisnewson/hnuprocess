@@ -134,6 +134,15 @@ int main( int argc, char * argv[] )
         mission_name = mission.stem().string();
     }
 
+    //Check mission exists
+    if ( !boost::filesystem::exists( mission ) )
+    {
+        throw std::runtime_error( 
+                mission.string() + " does not exist (" __FILE__ ")\n"
+                "[" + boost::filesystem::absolute( mission).string() + "]"
+                );
+    }
+
     /**************************************************
      * LOGGING
      ***************************************************/
@@ -280,7 +289,7 @@ int main( int argc, char * argv[] )
 
     //Create RecoParser
     RecoParser reco_parser( reco_factory, slg );
-    BOOST_LOG_SEV( slg , startup) << "Parssing " << mission;
+    BOOST_LOG_SEV( slg , startup) << "Parsing " << mission;
     reco_parser.parse( mission );
 
 

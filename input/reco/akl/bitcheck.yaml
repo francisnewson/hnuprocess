@@ -1,0 +1,22 @@
+- output:
+    name: tfout
+    type: tfile
+    filename: akl_comp.root
+
+- output:
+    name: os
+    type: ostream
+    filename: cout
+
+- selection:
+    name: passer
+    type : auto_pass
+
+- analysis:
+    #log_level: always_print
+    name: akl_comp
+    type: AKLComp
+    selection: passer
+    folder: akl_bit_check
+    tfile: tfout
+    ostream: os
