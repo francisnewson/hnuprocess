@@ -52,6 +52,8 @@ namespace fn
 
             //MC histograms
             TH1D * hdz_neutral_;
+            TH1D * hdz_charged_;
+            TH1D * hdz_tp_;
             TH2D * hdx1dz_ ;
             TH2D * hdy1dz_ ;
 
@@ -76,6 +78,10 @@ namespace fn
 
             FourMomComp lkr_dch_cmp_;
             FourMomComp uw_lkr_dch_cmp_;
+
+            FourMomComp lkr_mc_cmp_;
+            FourMomComp lkr_tk_mc_cmp_;
+            FourMomComp mc_dch_cmp_;
     };
 
     //--------------------------------------------------

@@ -25,6 +25,7 @@ namespace fn
             void new_event() ;
             double get_kaon_mom() const;
             TVector3 get_kaon_3mom() const;
+            TVector3 get_kaon_point() const;
             TLorentzVector get_kaon_4mom() const;
             TVector3 extrapolate_z( double z ) const;
 

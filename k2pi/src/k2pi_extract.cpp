@@ -24,6 +24,7 @@ namespace fn
 
         vars_.data.track_momentum = srt.get_3mom();
         vars_.data.beam_momentum = kt.get_kaon_3mom();
+        vars_.data.beam_point = kt.get_kaon_point();
 
         vars_.data.pt_dch = vars_.data.track_momentum.Perp
             ( vars_.data.beam_momentum);

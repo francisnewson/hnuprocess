@@ -29,6 +29,7 @@ namespace fn
 
             TVector3 track_momentum;
             TVector3 beam_momentum;
+            TVector3 beam_point;
 
             double pt_dch;
 

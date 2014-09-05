@@ -4,6 +4,7 @@
 #include "Event.hh"
 #include "TFile.h"
 #include <iosfwd>
+#include <bitset>
 #if 0
 /*
  *     _    _  ___     ____
@@ -33,6 +34,8 @@ namespace fn
             bool any_pocket_or();
             bool any_pocket_and();
 
+            std::bitset<16> pu_bits();
+
         private:
         std::array<AKLPocket,7> pockets_;
     };
@@ -46,7 +49,7 @@ namespace fn
                     std::ostream& os );
 
             void new_run();
-            void end_processing(){};
+            void end_processing();
 
         private:
             void process_event();
@@ -57,6 +60,8 @@ namespace fn
             std::string folder_;
 
             AKLStatus akl_status_;
+            std::map<int,int> pocket_counts_;
+            std::map<int,int> pu_pocket_counts_;
 
             REG_DEC_SUB( AKLComp );
     };
@@ -64,5 +69,12 @@ namespace fn
     template<>
         Subscriber * create_subscriber<AKLComp>
         (YAML::Node& instruct, RecoFactory& rf );
+
+    void print_pattern_unit( std::ostream& os_,
+            const fne::PatternUnit& pu, 
+            unsigned int begin_chan = 0, 
+            unsigned int end_chan = 16 );
+
+    std::string bitset_string( const std::bitset<16>& bs );
 }
 #endif

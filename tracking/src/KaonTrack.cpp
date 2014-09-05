@@ -19,6 +19,11 @@ namespace fn
         return e_->conditions.pkp;
     }
 
+    TVector3 KaonTrack::get_kaon_point() const
+    {
+        return t_.get_point();
+    }
+
     TVector3 KaonTrack::get_kaon_3mom() const
     {
         const  fne::Conditions& c = e_->conditions;

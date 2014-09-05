@@ -1,5 +1,6 @@
 #include "K2piPlots.hh"
 #include "k2pi_extract.hh"
+#include "NA62Constants.hh"
 #include "Track.hh"
 
 namespace fn
@@ -90,6 +91,14 @@ namespace fn
                 "dZ Neutral vertex - MC",
                 1000, -1000, 1000, "dZ (cm )" );
 
+        hdz_charged_ = mchs_.MakeTH1D( "hdz_charged_",
+                "dZ Charged vertex - MC",
+                1000, -1000, 1000, "dZ (cm )" );
+
+        hdz_tp_ = mchs_.MakeTH1D( "hdz_tp",
+                "dZ vertex  ( true pion ) - MC",
+                1000, -1000, 1000, "dZ (cm )" );
+
         hdxdy_ = mchs_.MakeTH2D( "hdxdy", "Cluster - Photon", 
                 200, -100, 100, "dX",
                 200, -100, 100, "dY");
@@ -143,6 +152,7 @@ namespace fn
 
     void K2piPlots::process_mc()
     {
+        //Cluster positions
         TVector3 delta1 = delta_cluster(
                 vars_->mc.p4g1, vars_->data.pos1, vars_->mc.vertex );
         TVector3 delta2 = delta_cluster( 
@@ -154,12 +164,18 @@ namespace fn
         hdxdy1_->Fill( delta1.X(), delta1.Y(), vars_->weight );
         hdxdy2_->Fill( delta2.X(), delta2.Y(), vars_->weight );
 
+        //Z vertex
         double dZ = vars_->data.neutral_vertex.Z() - vars_->mc.vertex.Z() ;
         hdx1dz_->Fill( delta1.X(), dZ, vars_->weight );
         hdy1dz_->Fill( delta1.Y(), dZ , vars_->weight);
 
         hdz_neutral_->Fill( dZ, vars_->weight );
 
+        double dZ_charged = vars_->data.charged_vertex.Z() - vars_->mc.vertex.Z() ;
+        hdz_charged_->Fill( dZ_charged , vars_->weight );
+
+
+        //Cluster energies
         double dataEE = vars_->data.E1 * vars_->data.E2;
         double mcEE = vars_->mc.p4g1.E() * vars_->mc.p4g2.E();
         double dEE = dataEE - mcEE;
@@ -168,6 +184,7 @@ namespace fn
         hdEE_->Fill( dEE, vars_->weight );
         hdEEvsEE_->Fill( dataEE, dEE, vars_->weight );
 
+        //Cluster separation
         TVector3 photon_sep = 
             extrapolate_photon( vars_->mc.p4g1, vars_->data.pos1, vars_->mc.vertex ) - 
             extrapolate_photon( vars_->mc.p4g2, vars_->data.pos2, vars_->mc.vertex );
@@ -177,12 +194,34 @@ namespace fn
 
         hdSepdz_->Fill( delta_sep, dZ, vars_->weight );
 
+        //Delta P
         double delta_p = vars_->data.p4pip_lkr.P() - vars_->mc.p4pip.P();
         hdpvsdz_->Fill( dZ, delta_p, vars_->weight );
 
         h_event_weight_->Fill( vars_->weight ) ;
         h_event_weight_mom_->Fill( 
                 vars_->mc.p4k.P() , vars_->weight )  ;
+
+        //Pi+ 4mom comparisions
+        lkr_mc_cmp_.Fill( vars_->data.p4pip_lkr  , vars_->mc.p4pip, vars_->weight );
+
+        const TLorentzVector& p4_mc_K = vars_->mc.p4k;
+        const TVector3& p3_dt_K = vars_->data.beam_momentum;
+        double EK = std::hypot( na62const::mK, p3_dt_K.Mag() );
+        TLorentzVector p4_dt_K{ p3_dt_K , EK };
+
+        lkr_tk_mc_cmp_.Fill( p4_mc_K - vars_->data.p4pi0_lkr  , 
+                vars_->mc.p4pip, vars_->weight );
+
+        mc_dch_cmp_.Fill(vars_->mc.p4pip, vars_->data.p4pip_dch,  vars_->weight );
+
+        //Z vertex comparisions
+        Track kaon_track( vars_->data.beam_point, vars_->data.beam_momentum );
+        Track true_charged_track( vars_->mc.vertex, vars_->mc.p4pip.Vect() );
+        Vertex charged_vertex_tp = compute_cda( kaon_track, true_charged_track );
+
+        hdz_tp_->Fill( charged_vertex_tp.point.Z() - vars_->mc.vertex.Z(), 
+                vars_->weight );
     }
 
     void K2piPlots::end_processing()
@@ -194,6 +233,16 @@ namespace fn
         {
             cd_p( &tf_, (folder_ / "mc").string().c_str() );
             mchs_.Write();
+
+            cd_p( &tf_, (folder_ / "mc" / "lkr_mc" ).string().c_str() );
+            lkr_mc_cmp_.Write();
+
+            cd_p( &tf_, (folder_ / "mc" / "lkr_tk_mc" ).string().c_str() );
+            lkr_tk_mc_cmp_.Write();
+
+            cd_p( &tf_, (folder_ / "mc" / "mc_dch" ).string().c_str() );
+            mc_dch_cmp_.Write();
+
             tf_.cd();
         }
 
