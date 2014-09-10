@@ -29,7 +29,7 @@ bool&  remote_stop()
 void sig_handler( int sig )
 { 
     if ( sig )
-    remote_stop() = true;
+        remote_stop() = true;
 }
 
 
@@ -120,7 +120,15 @@ int main( int argc, char * argv[] )
     else
     {
         auto channel_path = vm["channel"].as<path>();
-        channel = channel_path.stem().string();
+        std::string channel_string = channel_path.string();
+        if ( channel_string.find( "list" ) != std::string::npos ) 
+        {
+            channel = channel_path.stem().string();
+        }
+        else
+        {
+            channel = channel_path.string();
+        }
     }
 
     if ( ! vm.count( "mission" ) )
@@ -222,9 +230,10 @@ int main( int argc, char * argv[] )
             filelist = vm[ "input-filelist" ].as<path>() ;
         }
         else if ( vm.count( "auto" ) )
-
         {
-            filelist = path{ "runlists"  } / vm [ "channel" ].as<std::string>();
+            BOOST_LOG_SEV( slg, startup )
+            << "Getting file list from channel" ;
+            filelist =  vm[ "channel" ].as<path>();
         }
         else
         {
@@ -272,18 +281,27 @@ int main( int argc, char * argv[] )
     reco_factory.set_log( slg );
     reco_factory.set_remote_stop( &remote_stop() );
 
+    path output_prefix;
+
     //Prefix preparation
     if ( vm.count( "output-prefix" ) )
     {
-        reco_factory.set_output_prefix
-            ( vm["output-prefix"].as<path>() );
+        output_prefix =  vm["output-prefix"].as<path>() ;
     }
     else if ( vm.count( "auto" ) )
     {
-        reco_factory.set_output_prefix
-            ( path{"output"} / ( channel + "_"
-                                 + mission_name + "_" ) );
+        output_prefix =  path{"output"} / ( channel + "_"
+                + mission_name + "_" ) ;
     }
+
+
+    reco_factory.set_output_prefix( output_prefix );
+
+    BOOST_LOG_SEV( slg, startup )
+        << "Channel is: " <<  channel;
+
+    BOOST_LOG_SEV( slg, startup )
+        << "Output prefix is: " <<  output_prefix;
 
     Subscriber::set_log( slg );
 

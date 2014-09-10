@@ -13,16 +13,46 @@ namespace fn
                 10000, -0.7, 0.3, "m^{2}_{miss} ( GeV^{2}/ c^{4} )",
                 "#events" ); 
 
-             h_pz_ = hs_.MakeTH2D( "h_pz", "P vs Z" ,
-                     100, 0, 100, "P( GeV )",
-                     150, -5000, 10000, "Z( cm) ");
+        h_m2pimiss_ = hs_.MakeTH1D( "h_m2pimiss", 
+                "K_{#mu2} missing mass ( pion assumption )",
+                10000, -0.7, 0.3, "m^{2}_{miss} ( GeV^{2}/ c^{4} )",
+                "#events" ); 
+
+        h_m2pivsk_ = hs_.MakeTH2D( "h_m2pivsk_", 
+                "Missing mass ( Pi vs K )",
+                100, -0.7, 0.3, "Kaon asusmption GeV^{2}",
+                100, -0.7, 0.3, "Pion asusmption GeV^{2}" );
+
+        h_pz_ = hs_.MakeTH2D( "h_pz", "P vs Z" ,
+                100, 0, 100, "P( GeV )",
+                150, -5000, 10000, "Z( cm) ");
+
+        h_pm2pi_ = hs_.MakeTH2D( "h_pm2pi", "M2(pi)  vs p_muon",
+                100, 0, 100, "P( GeV )",
+                100, -0.7, 0.3, "M2, Pion asusmption GeV^{2}" );
+
+        h_pm2k_ = hs_.MakeTH2D( "h_pm2k", "M2(k)  vs p_muon",
+                100, 0, 100, "P( GeV )",
+                100, -0.7, 0.3, "M2, Kaon asusmption GeV^{2}" );
     }
 
     void Km2Plotter::process_event()
     {
         const Km2RecoEvent& km2re = km2_event_.get_reco_event();
-        h_m2miss_->Fill( km2re.get_m2miss(), get_weight() );
-        h_pz_->Fill( km2re.get_muon_mom(), km2re.get_zvertex(), get_weight() );
+
+        double m2_k = km2re.get_m2miss();
+        double m2_pi = km2re.get_m2pimiss();
+        double wgt = get_weight();
+        double p_mu = km2re.get_muon_mom();
+        double zvert = km2re.get_zvertex();
+
+        h_m2miss_->Fill( m2_k, wgt );
+        h_m2pimiss_->Fill( m2_pi , wgt );
+        h_pz_->Fill( p_mu, zvert, wgt );
+        h_m2pivsk_->Fill( m2_k, m2_pi, wgt );
+        h_pm2pi_->Fill( p_mu, m2_pi, wgt );
+        h_pm2k_->Fill( p_mu, m2_k, wgt );
+
     }
 
     void Km2Plotter::end_processing()

@@ -10,7 +10,7 @@
     name: counter
     type: Counter
 
-#SingleTrack
+        #SingleTrack
 - input:
     name : bf_st
     type : SingleTrack
@@ -34,18 +34,18 @@
     inputs:
         ogt: bf_st
 
-#Autopass
+            #Autopass
 - selection:
     name: passer
     type : auto_pass
 
-#MUV bursts
+        #MUV bursts
 - selection:
     name: gd_muv_brst
     type: BadBurst
     burst_list: "input/reco/conditions/bad_muv_burst.dat"
 
-#Found ogt
+        #Found ogt
 - selection:
     name: good_trk
     type : FoundGoodTrack
@@ -53,7 +53,7 @@
     inputs :
         ogt: bf_st
 
-#Track charge
+            #Track charge
 - selection:
     name: pos_trk
     type : TrackCharge
@@ -61,7 +61,7 @@
     inputs :
         ogt: bf_st
 
-#Track quality
+            #Track quality
 - selection:
     name: quality_7
     type: TrackQuality
@@ -69,7 +69,7 @@
     inputs:
         ogt: bf_st
 
-#Track DHC1 ACC
+            #Track DHC1 ACC
 - selection:
     name: dch1_acc
     type: TrackRadialAcceptance
@@ -80,7 +80,7 @@
     inputs:
         ogt: bf_st
 
-#Track DHC4 ACC
+            #Track DHC4 ACC
 - selection:
     name: dch4_acc
     type: TrackRadialAcceptance
@@ -91,7 +91,7 @@
     inputs:
         ogt: bf_st
 
-#Track time
+            #Track time
 - selection:
     name: rk_dcht
     type : TrackTime
@@ -99,7 +99,33 @@
     inputs:
         ogt: bf_st
 
-        #--------------------------------------------------
+            #PZ upper
+- selection:
+    name: pz_upper
+    type: TrackPZ
+    shape: rectangles
+    points:
+        - [  0, 20, -100000, 1000]
+        - [ 20, 40, -100000, 1500]
+        - [ 40, 60, -100000, 2000]
+        - [ 60, 80, -100000, 3000]
+    inputs:
+        ogt: bf_st
+
+            #PZ lower
+- selection:
+    name: pz_lower
+    type: TrackPZ
+    shape: rectangles
+    points:
+        - [  0,  20,   1000,   100000]
+        - [ 20,  40,   1500,   100000]
+        - [ 40,  60,   2000,   100000]
+        - [ 60,  80,   3000,   100000]
+    inputs:
+        ogt: bf_st
+
+            #--------------------------------------------------
 
 - selection:
     name : good_bursts
@@ -119,7 +145,7 @@
         - dch4_acc
         - rk_dcht
 
-#summary
+          #summary
 - analysis : 
     name : loose_halo_summary
     type: Summary
@@ -135,3 +161,12 @@
     inputs:
         km2event: km2_event
 
+- multianalysis:
+    name: loose_halo_plots
+    type: Km2Plotter
+    selection: halo_loose
+    extra_selection: [ [passer,  pz_upper, pz_lower ] ] 
+    tfile: tfout
+    folder: halo_loose
+    inputs:
+        km2event: km2_event

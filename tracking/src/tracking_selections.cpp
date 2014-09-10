@@ -1,6 +1,7 @@
 #include "tracking_selections.hh"
 #include "Xcept.hh"
 #include "RecoParser.hh"
+#include "yaml_help.hh"
 
 namespace fn
 {
@@ -179,12 +180,12 @@ namespace fn
         {
 
             SingleTrack * st = get_single_track( instruct, rf );
-            std::string shape = instruct["shape"].as<std::string>();
+            std::string shape = get_yaml<std::string>( instruct, "shape");
 
             if ( shape == "rectangles" )
             {
                 std::vector<rectangle> recs=
-                    instruct["points"].as<std::vector<rectangle>>();
+                    get_yaml<std::vector<rectangle>>( instruct, "points" );
 
                 return new TrackPZ( *st, recs );
             }

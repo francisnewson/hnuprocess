@@ -26,6 +26,7 @@ namespace fn
                     const KaonTrack * kt, const SingleTrack * st_ );
 
             double get_m2miss() const ;
+            double get_m2pimiss() const ;
             double get_muon_mom() const;
             double get_zvertex() const ;
             double get_cda() const; 
@@ -37,6 +38,7 @@ namespace fn
 
             TLorentzVector p4miss_;
             double m2miss_;
+            double m2pimiss_;
     };
 
     //--------------------------------------------------

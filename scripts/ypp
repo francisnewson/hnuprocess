@@ -1,0 +1,70 @@
+#!/bin/env python
+import yaml
+import argparse
+import inflect
+import pprint
+import itertools
+import os
+
+def yaml_dump( output_file, yaml_dict ):
+    '''Nice defaults for yaml.damp'''
+    dumper = yaml.SafeDumper
+    dumper.ignore_aliases = lambda self, data: True
+
+    output_file.write( yaml.dump ( yaml_dict,
+        Dumper = dumper,
+        default_flow_style = False,
+        explicit_start = True ) )
+
+def make_composite( name, selection, output ):
+    output.append( { 'selection' :
+        { 'type' : 'CompositeSelection',
+            'name' : name,
+            'children' : selection } } )
+
+def process_multi( instruct, output ):
+    base = instruct['selection']
+    extras = instruct['extra_selection']
+    extra_list = itertools.product( *extras )
+
+    for extra_selection in extra_list:
+        #form new composite selection
+        new_selection = [ base ]
+        new_selection.extend( extra_selection)
+        selection_name = '_'.join( new_selection )
+        make_composite( selection_name, new_selection, output )
+
+        #form a new analysis
+        result = instruct.copy()
+        del result['extra_selection']
+        result['selection' ] = selection_name
+        result['folder'] = os.path.join( result['folder'],  *extra_selection  )
+        result['name'] = '_'.join(   [result['name']] + list(extra_selection) )  
+        output.append( { 'analysis' : result } )
+
+ie = inflect.engine()
+pp = pprint.PrettyPrinter( indent = 4 )
+
+parser = argparse.ArgumentParser()
+parser.add_argument( 'inputfile' )
+parser.add_argument( 'outputfile' )
+args = parser.parse_args()
+
+#load config file
+inputfile = open ( args.inputfile )
+config = yaml.load( inputfile )
+
+output = []
+
+for subscriber in config:
+    for subtype, instruct in subscriber.items():
+        print ( "Processing {0}: {1}\n".format( ie.a( subtype ), instruct['name'] ) )
+        if subtype == 'multianalysis' :
+            process_multi( instruct, output )
+        else :
+            output.append( { subtype : instruct } )
+
+#pp.pprint( output )
+
+with open(  args.outputfile , 'w' ) as output_file:
+    yaml_dump( output_file, output )

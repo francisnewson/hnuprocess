@@ -1,0 +1,15 @@
+#!/bin/env python
+import pprint
+import argparse
+import yaml
+
+parser = argparse.ArgumentParser()
+parser.add_argument( 'yamlfile' )
+args = parser.parse_args()
+
+#load config file
+yamlfile = open ( args.yamlfile )
+config = yaml.load( yamlfile )
+
+pp = pprint.PrettyPrinter( indent = 4 )
+pp.pprint( config )

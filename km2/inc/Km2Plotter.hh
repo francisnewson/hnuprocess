@@ -37,7 +37,11 @@ namespace fn
             void process_event();
 
             TH1D * h_m2miss_;
+            TH1D * h_m2pimiss_;
+            TH2D * h_m2pivsk_;
             TH2D * h_pz_;
+            TH2D * h_pm2pi_;
+            TH2D * h_pm2k_;
             HistStore hs_;
 
             TFile& tfile_;

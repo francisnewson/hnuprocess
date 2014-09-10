@@ -35,11 +35,23 @@ namespace fn
         //neutrino 4 mom
         p4miss_ = kaon_4mom - muon_4mom;
         m2miss_ = p4miss_.M2();
+
+        //Beam pion 4 mom
+        const double& pion_mass = na62const::mPi;
+        double pion_energy = std::hypot( kaon_mom, pion_mass );
+        TLorentzVector pion_4mom { kaon_3mom, pion_energy };
+        TLorentzVector p4pimiss = pion_4mom - muon_4mom; 
+        m2pimiss_ = p4pimiss.M2();
     }
 
     double Km2RecoEvent::get_m2miss() const
     {
         return m2miss_;
+    }
+
+    double Km2RecoEvent::get_m2pimiss() const
+    {
+        return m2pimiss_;
     }
 
     double Km2RecoEvent::get_muon_mom() const
@@ -58,8 +70,8 @@ namespace fn
     }
 
     //--------------------------------------------------
-    
-            REG_DEF_SUB( Km2Event );
+
+    REG_DEF_SUB( Km2Event );
 
     Km2Event::Km2Event( const fne::Event * event,
             const SingleTrack& st, bool mc )
@@ -102,7 +114,7 @@ namespace fn
         }
 
     //--------------------------------------------------
-    
+
     Km2Event * get_km2_event
         ( YAML::Node& instruct, RecoFactory& rf )
         {
