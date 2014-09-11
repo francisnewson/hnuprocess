@@ -51,37 +51,52 @@ namespace fn
 
         hz_lkr_ = dths_.MakeTH1D( "hz_lkr", "Z - Lkr" ,
                 1200, -2000, 10000,"Z Lkr ( cm )" );
+
+        hrpi_dch_dch_ = dths_.MakeTH1D( "hrpi_dch_dch", "Pi+ radius at DCH [Charged]" ,
+                1000, 0, 200, "R( cm )" );
+
+        hrpi_dch_lkr_ = dths_.MakeTH1D( "hrpi_dch_lkr", "Pi+ radius at DCH [Neutral]" ,
+                1000, 0, 200, "R( cm )" );
     }
 
     void K2piPlots::process_data()
     {
-        hm2pip_lkr_->Fill
-            ( vars_->data.p4pip_lkr.M2(), vars_->weight );
+        double wgt = vars_->weight;
+        const TVector3& neutral_vertex = vars_->data.neutral_vertex;
+        const TVector3& charged_vertex = vars_->data.charged_vertex;
+        const TLorentzVector& p4pip_lkr = vars_->data.p4pip_lkr;
+        const TLorentzVector& p4pi0_lkr = vars_->data.p4pi0_lkr;
+        const TLorentzVector& p4pip_dch = vars_->data.p4pip_dch;
+        double pt_dch = vars_->data.pt_dch;
+        const TVector3& beam_momentum = vars_->data.beam_momentum;
 
-        hz_lkr_->Fill( vars_->data.neutral_vertex.Z(),
-                vars_->weight );
+        hm2pip_lkr_->Fill ( p4pip_lkr.M2(), wgt);
 
-        lkr_dch_cmp_.Fill
-            ( vars_->data.p4pip_lkr, vars_->data.p4pip_dch,
-              vars_->weight );
+        hz_lkr_->Fill(neutral_vertex.Z(), wgt);
 
-        uw_lkr_dch_cmp_.Fill
-            ( vars_->data.p4pip_lkr, vars_->data.p4pip_dch, 1.0 );
+        lkr_dch_cmp_.Fill ( p4pip_lkr, p4pip_dch, wgt );
 
-        hpt_dch_->Fill( vars_->data.pt_dch , vars_->weight );
+        uw_lkr_dch_cmp_.Fill ( p4pip_lkr, p4pip_dch, 1.0 );
 
-        hpt_dch_uw_->Fill( vars_->data.pt_dch , 1.0 );
+        hpt_dch_->Fill( pt_dch , wgt );
 
-        hz_lkr_dch_->Fill( vars_->data.neutral_vertex.Z() 
-                - vars_->data.charged_vertex.Z(), vars_->weight );
+        hpt_dch_uw_->Fill( pt_dch , 1.0 );
+
+        hz_lkr_dch_->Fill( neutral_vertex.Z() - charged_vertex.Z(), wgt );
 
         //Calculate event p_T
-        TVector3 event_p = vars_->data.p4pip_dch.Vect() 
-            + vars_->data.p4pi0_lkr.Vect();
-        TVector3 event_pt = event_p.Perp( vars_->data.beam_momentum );
+        TVector3 event_p = p4pip_dch.Vect() + p4pi0_lkr.Vect();
+        TVector3 event_pt = event_p.Perp( beam_momentum );
+        hpt_event_dch_->Fill(  event_pt.Mag(), wgt );
 
-        hpt_event_dch_->Fill(  event_pt.Mag(), vars_->weight );
+        //Pion track
+        Track pion_track_lkr{ neutral_vertex, p4pip_lkr.Vect() };
+        TVector3 pion_at_dch_lkr = pion_track_lkr.extrapolate( na62const::zDch1 );
+        hrpi_dch_lkr_->Fill( pion_at_dch_lkr.Perp() , wgt );
 
+        Track pion_track_dch{ charged_vertex, p4pip_dch.Vect() };
+        TVector3 pion_at_dch_dch = pion_track_dch.extrapolate( na62const::zDch1 );
+        hrpi_dch_dch_->Fill( pion_at_dch_dch.Perp() , wgt );
     }
 
     void K2piPlots::init_mc()

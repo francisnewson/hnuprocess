@@ -200,6 +200,8 @@ int main( int argc, char * argv[] )
     double max_z = +7000; //cm
 
     //Prepare DCH1 cut
+    double min_rdch =  20; //cm
+    double max_rdch = 100; //cm
 
     int npassed = 0;
     Long64_t event_count = echain->get_max_event();
@@ -224,6 +226,14 @@ int main( int argc, char * argv[] )
         echain->load_full_event();
 
         counter.new_event();
+
+        const TVector3& neutral_vertex = vars->data.neutral_vertex;
+        const TLorentzVector& p4pip_lkr = vars->data.p4pip_lkr;
+        Track pion_track_lkr{ neutral_vertex, p4pip_lkr.Vect() };
+        TVector3 pion_at_dch_lkr = pion_track_lkr.extrapolate( na62const::zDch1 );
+        double track_radius_dch = pion_at_dch_lkr.Perp();
+        if ( track_radius_dch < min_rdch ) continue;
+        if ( track_radius_dch > max_rdch ) continue;
 
         double reco_mass2 = vars->data.p4pip_lkr.M2();
         if ( reco_mass2  > max_mass2 ) continue;

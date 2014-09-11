@@ -49,6 +49,8 @@ namespace fn
             TH1D * hpt_event_dch_;
             TH1D * hz_lkr_;
 
+            TH1D * hrpi_dch_dch_;
+            TH1D * hrpi_dch_lkr_;
 
             //MC histograms
             TH1D * hdz_neutral_;
