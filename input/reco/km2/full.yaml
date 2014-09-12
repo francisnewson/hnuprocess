@@ -1,0 +1,154 @@
+#Loose selection for looking at halo
+---
+#-------------------------------------------------- 
+- output:
+    name: tfout
+    type: tfile
+    filename: halo_plots.root
+
+- monitor:
+    name: counter
+    type: Counter
+
+
+#SingleTrack
+- input:
+    name : bf_st
+    type : SingleTrack
+    method : BF
+
+    #log_level: always_print
+
+    init_min_mom: 3.0 
+    init_max_mom: 80.0
+
+    init_max_cda: 15.0
+
+    init_min_z: -5000.0
+    init_max_z:  10000.0
+
+    dch_merge_sep: 0.5
+
+- input:
+    name: km2_event
+    type: Km2Event
+    inputs:
+        ogt: bf_st
+
+#Km2Clusters
+- input:
+    name: full_km2clusters
+    type: Km2Clusters
+    noise_energy: 5 #GeV
+    noise_time: 12 #ns
+    brehm_radius: 5 #cm
+    track_cluster_radius: 5 #cm
+    inputs:
+        ogt: bf_st
+
+#Autopass
+- selection:
+    name: passer
+    type : auto_pass
+
+#MUV bursts
+- selection:
+    name: gd_muv_brst
+    type: BadBurst
+    burst_list: "input/reco/conditions/bad_muv_burst.dat"
+
+#Found ogt
+- selection:
+    name: good_trk
+    type : FoundGoodTrack
+
+    inputs :
+        ogt: bf_st
+
+#Track charge
+- selection:
+    name: pos_trk
+    type : TrackCharge
+    charge: +1
+    inputs :
+        ogt: bf_st
+
+#Track quality
+- selection:
+    name: quality_7
+    type: TrackQuality
+    quality: 0.7
+    inputs:
+        ogt: bf_st
+
+- selection:
+    name: cda_1cm
+    type: TrackCda
+    max_cda: 1.0 #cm
+    inputs:
+        ogt: bf_st
+
+#Track DHC1 ACC
+- selection:
+    name: dch1_acc
+    type: TrackRadialAcceptance
+    track_section: upstream
+    z: 9708.42 #zDCH1
+    inner: 12.0
+    outer: 115.0
+    inputs:
+        ogt: bf_st
+
+#Track DHC4 ACC
+- selection:
+    name: dch4_acc
+    type: TrackRadialAcceptance
+    track_section: downstream
+    z: 11888.0 #zDCH1
+    inner: 14.0
+    outer: 115.0
+    inputs:
+        ogt: bf_st
+
+#Track time
+- selection:
+    name: rk_dcht
+    type : TrackTime
+    max_dt: 20 #ns
+    inputs:
+        ogt: bf_st
+
+#NoBadClusters
+- selection:
+    name: nobadcluster
+    type: Km2NoBadCluster
+    inputs:
+        km2clusters: full_km2clusters
+
+- selection:
+    name: pzt_cut
+    type: TrackPZT
+    regions_file: "input/reco/km2/pzt.yaml"
+    inputs:
+        ogt: bf_st
+
+- selection:
+    name : hnu_selection
+    type: CompositeSelection
+    children:
+        - gd_muv_brst
+        - good_trk
+        - pos_trk
+        - quality_7
+        - cda_1cm
+        - dch1_acc
+        - dch4_acc
+        - rk_dcht
+        - pzt_cut
+        - nobadcluster
+
+- analysis : 
+    name : full_summary
+    type: Summary
+    base : passer
+    source : hnu_selection 

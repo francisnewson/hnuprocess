@@ -220,6 +220,12 @@ namespace fn
             const SingleTrack& st_;
             KaonTrack kt_;
             std::vector< PZTRegion > regions_;
+
+            REG_DEC_SUB( TrackPZT);
     };
+
+    template<>
+        Subscriber * create_subscriber<TrackPZT>
+        (YAML::Node& instruct, RecoFactory& rf );
 }
 #endif

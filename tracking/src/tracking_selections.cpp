@@ -277,6 +277,8 @@ namespace fn
 
     //--------------------------------------------------
 
+    REG_DEF_SUB( TrackPZT);
+
     TrackPZT::TrackPZT( const fne::Event * e, 
             const SingleTrack& st, 
             bool mc,
@@ -290,8 +292,8 @@ namespace fn
         for (YAML::const_iterator it=regions.begin();
                 it!=regions.end();++it)
         {
-            reg_buf.minT = get_yaml<double>( *it, "minT" );
-            reg_buf.maxT = get_yaml<double>( *it, "maxT" );
+            reg_buf.minT = get_yaml<double>( *it, "mint" );
+            reg_buf.maxT = get_yaml<double>( *it, "maxt" );
             std::vector<polygon_type> pz_areas { get_yaml<polygon_type>( *it, "pz" ) };
             reg_buf.pz_cut = AreaCut{ pz_areas };
 
@@ -317,5 +319,21 @@ namespace fn
 
         return false;
     }
+
+    template<>
+        Subscriber * create_subscriber<TrackPZT>
+        (YAML::Node& instruct, RecoFactory& rf )
+        {
+            const fne::Event * event = rf.get_event_ptr();
+            SingleTrack * st = get_single_track( instruct, rf );
+            bool mc = rf.is_mc();
+
+            std::string pzt_region_file = get_yaml<std::string>
+                ( instruct, "regions_file" );
+
+            YAML::Node regions = YAML::LoadFile( pzt_region_file );
+
+            return new TrackPZT( event, *st, mc, regions );
+        }
 }
 
