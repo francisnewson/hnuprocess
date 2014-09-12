@@ -48,6 +48,22 @@ namespace YAML
             static bool decode ( const Node& node , 
                     fn::rectangle & rhs );
         };
+
+    template<>
+        struct convert < fn::point_type >
+        {
+        static Node encode ( const fn::point_type& rhs );
+            static bool decode ( const Node& node , 
+                    fn::point_type & rhs );
+        };
+
+    template<>
+        struct convert < fn::polygon_type >
+        {
+        static Node encode ( const fn::polygon_type& rhs );
+            static bool decode ( const Node& node , 
+                    fn::polygon_type & rhs );
+        };
 }
 
 namespace fn

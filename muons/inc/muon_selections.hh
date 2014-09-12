@@ -31,7 +31,12 @@ namespace fn
             const fne::Event * e_;
             std::set<int> allowed_status_;
 
+            REG_DEC_SUB( MuonReqStatus );
     };
+
+    template<>
+        Subscriber * create_subscriber<MuonReqStatus>
+        (YAML::Node& instruct, RecoFactory& rf );
 
     //--------------------------------------------------
 

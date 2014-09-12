@@ -52,6 +52,8 @@ namespace fn
             TH1D * hrpi_dch_dch_;
             TH1D * hrpi_dch_lkr_;
 
+            TH1D * hetot_;
+
             //MC histograms
             TH1D * hdz_neutral_;
             TH1D * hdz_charged_;

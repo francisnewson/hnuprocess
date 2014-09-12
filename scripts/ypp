@@ -47,7 +47,6 @@ pp = pprint.PrettyPrinter( indent = 4 )
 
 parser = argparse.ArgumentParser()
 parser.add_argument( 'inputfile' )
-parser.add_argument( 'outputfile' )
 args = parser.parse_args()
 
 #load config file
@@ -66,5 +65,8 @@ for subscriber in config:
 
 #pp.pprint( output )
 
-with open(  args.outputfile , 'w' ) as output_file:
+output_filename = os.path.splitext( args.inputfile )[0]
+output_filename += '.yamlc'
+
+with open(  output_filename  , 'w' ) as output_file:
     yaml_dump( output_file, output )

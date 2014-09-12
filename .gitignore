@@ -12,6 +12,7 @@
 *.swp
 *.pyc
 *.comp.yaml
+*.yamlc
 gmon.out
 build_O3
 build_O1

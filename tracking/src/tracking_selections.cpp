@@ -276,5 +276,46 @@ namespace fn
 
 
     //--------------------------------------------------
+
+    TrackPZT::TrackPZT( const fne::Event * e, 
+            const SingleTrack& st, 
+            bool mc,
+            const YAML::Node& regions )
+        :st_( st ), kt_( e, mc )
+    {
+        assert(regions.Type() == YAML::NodeType::Sequence);
+
+        //Loop over items
+        PZTRegion reg_buf;
+        for (YAML::const_iterator it=regions.begin();
+                it!=regions.end();++it)
+        {
+            reg_buf.minT = get_yaml<double>( *it, "minT" );
+            reg_buf.maxT = get_yaml<double>( *it, "maxT" );
+            std::vector<polygon_type> pz_areas { get_yaml<polygon_type>( *it, "pz" ) };
+            reg_buf.pz_cut = AreaCut{ pz_areas };
+
+            regions_.push_back( reg_buf );
+        }
+    }
+
+    bool TrackPZT::do_check() const
+    {
+        const SingleRecoTrack& srt = st_.get_single_track();
+        double p = srt.get_mom();
+        double z = srt.get_vertex().Z();
+        double t = srt.get_3mom().Angle( kt_.get_kaon_3mom() );
+
+        for( const auto& region :  regions_ )
+        {
+            if ( t < region.minT || t > region.maxT )
+            {
+                continue;
+            }
+            return region.pz_cut.allowed( {p, z} );
+        }
+
+        return false;
+    }
 }
 

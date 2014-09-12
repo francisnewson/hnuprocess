@@ -1,9 +1,11 @@
 #include "muon_selections.hh"
 #include "RecoMuon.hh"
+#include "yaml_help.hh"
 
 
 namespace fn
 {
+            REG_DEF_SUB( MuonReqStatus );
 
     MuonReqStatus::MuonReqStatus( const fne::Event * e ,
             std::set<int> allowed_status )
@@ -32,17 +34,31 @@ namespace fn
         return false;
     }
 
+    template<>
+        Subscriber * create_subscriber<MuonReqStatus>
+        (YAML::Node& instruct, RecoFactory& rf )
+        {
+            const fne::Event *  event = rf.get_event_ptr();
+            std::vector<int> allowed_status_list = 
+                get_yaml<std::vector<int>>( instruct, "allowed_status" );
+
+            std::set<int> allowed_status
+                ( begin( allowed_status_list ), end( allowed_status_list ) );
+
+            return new MuonReqStatus( event, allowed_status );
+        }
+
     //--------------------------------------------------
 
-            REG_DEF_SUB( NoMuv );
+    REG_DEF_SUB( NoMuv );
 
-            NoMuv::NoMuv( const fne::Event * e )
-                :e_( e ){}
+    NoMuv::NoMuv( const fne::Event * e )
+        :e_( e ){}
 
-            bool NoMuv::do_check() const
-            {
-                return (e_->detector.nmuons == 0 );
-            }
+    bool NoMuv::do_check() const
+    {
+        return (e_->detector.nmuons == 0 );
+    }
 
     template<>
         Subscriber * create_subscriber<NoMuv>

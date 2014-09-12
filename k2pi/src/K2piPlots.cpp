@@ -57,6 +57,9 @@ namespace fn
 
         hrpi_dch_lkr_ = dths_.MakeTH1D( "hrpi_dch_lkr", "Pi+ radius at DCH [Neutral]" ,
                 1000, 0, 200, "R( cm )" );
+
+        hetot_ = dths_.MakeTH1D( "hetot", "Total event energy: dch Pi+ + lkr Pi0",
+                1000, 65, 85, "E (GeV) " );
     }
 
     void K2piPlots::process_data()
@@ -83,6 +86,8 @@ namespace fn
         hpt_dch_uw_->Fill( pt_dch , 1.0 );
 
         hz_lkr_dch_->Fill( neutral_vertex.Z() - charged_vertex.Z(), wgt );
+
+        hetot_->Fill( (p4pip_dch + p4pi0_lkr ).E(), wgt );
 
         //Calculate event p_T
         TVector3 event_p = p4pip_dch.Vect() + p4pi0_lkr.Vect();

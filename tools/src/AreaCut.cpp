@@ -29,6 +29,45 @@ namespace YAML
             rhs.maxy =  node[3].as<double>()  ;
             return true;
         }
+
+    //--------------------------------------------------
+    Node convert<fn::point_type>::encode 
+        ( const fn::point_type& rhs )
+        {
+            Node node;
+            node.push_back( rhs.x() );
+            node.push_back( rhs.y() );
+            return node;
+        }
+
+    bool convert<fn::point_type>::decode ( const Node& node , 
+            fn::point_type & rhs )
+    {
+        rhs.x( node[0].as<double>() );
+        rhs.y( node[1].as<double>() );
+        return true;
+    }
+
+    //--------------------------------------------------
+
+    Node convert<fn::polygon_type>::encode ( const fn::polygon_type& rhs )
+    {
+        Node node;
+        std::vector<fn::point_type> point_list( begin( rhs.outer() ), end( rhs.outer() ) );
+        node = point_list;
+        return node;
+    }
+
+    bool convert<fn::polygon_type>::decode ( const Node& node , 
+            fn::polygon_type & rhs )
+    {
+        std::vector<fn::point_type> points = node.as<std::vector<fn::point_type>>();
+        rhs.outer() = 
+            fn::polygon_type::ring_type( points.begin(), points.end() );
+
+        return true;
+    }
+    //--------------------------------------------------
 }
 
 namespace fn

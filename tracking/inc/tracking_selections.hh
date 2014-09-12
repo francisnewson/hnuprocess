@@ -3,6 +3,7 @@
 #include "SingleTrack.hh"
 #include "Selection.hh"
 #include "AreaCut.hh"
+#include "KaonTrack.hh"
 
 #if 0
 /*
@@ -197,5 +198,28 @@ namespace fn
         (YAML::Node& instruct, RecoFactory& rf );
     
     //--------------------------------------------------
+    
+    struct PZTRegion
+    {
+        double minT;
+        double maxT;
+        AreaCut pz_cut;
+    };
+    
+    class TrackPZT : public CachedSelection
+    {
+        public:
+            TrackPZT( const fne::Event * e,
+                    const SingleTrack& st, 
+                    bool mc ,
+                    const YAML::Node& regions );
+
+        private:
+            bool do_check() const;
+            const fne::Event * e_;
+            const SingleTrack& st_;
+            KaonTrack kt_;
+            std::vector< PZTRegion > regions_;
+    };
 }
 #endif

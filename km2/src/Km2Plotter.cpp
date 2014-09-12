@@ -34,6 +34,9 @@ namespace fn
         h_pm2k_ = hs_.MakeTH2D( "h_pm2k", "M2(k)  vs p_muon",
                 100, 0, 100, "P( GeV )",
                 100, -0.7, 0.3, "M2, Kaon asusmption GeV^{2}" );
+
+        h_cda_ = hs_.MakeTH1D( "h_cda", "CDA (cm)",
+                100, 0, 10, "CDA (cm)" );
     }
 
     void Km2Plotter::process_event()
@@ -45,6 +48,7 @@ namespace fn
         double wgt = get_weight();
         double p_mu = km2re.get_muon_mom();
         double zvert = km2re.get_zvertex();
+        double cda = km2re.get_cda();
 
         h_m2miss_->Fill( m2_k, wgt );
         h_m2pimiss_->Fill( m2_pi , wgt );
@@ -52,7 +56,7 @@ namespace fn
         h_m2pivsk_->Fill( m2_k, m2_pi, wgt );
         h_pm2pi_->Fill( p_mu, m2_pi, wgt );
         h_pm2k_->Fill( p_mu, m2_k, wgt );
-
+        h_cda_->Fill( cda, wgt );
     }
 
     void Km2Plotter::end_processing()

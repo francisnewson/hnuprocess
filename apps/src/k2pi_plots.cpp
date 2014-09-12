@@ -159,24 +159,6 @@ int main( int argc, char * argv[] )
     BOOST_LOG_SEV( slg, always_print) 
         << "Writing to   " << output_file.string() ;
 
-    //Open tree
-#if 0
-    //TFile * tfile = new TFile( input_file.string().c_str() );
-    TChain * k2pi = new TChain( "k2pi" );
-    for ( auto& input : input_files )
-    {
-        BOOST_LOG_SEV( slg, always_print) << "Adding :" << input;
-        k2pi->AddFile( input.c_str() );
-    }
-
-    k2pi->SetCacheSize( 10000000 );
-    k2pi->AddBranchToCache("*");
-
-    double nEntries = k2pi->GetEntriesFast();
-    const fn::K2piVars * vars = new fn::K2piVars;
-    k2pi->SetBranchAddress( "k2piVars", &vars );
-#endif
-
     //Connect event
     const fn::K2piVars * vars = echain->get_event_pointer();
 
