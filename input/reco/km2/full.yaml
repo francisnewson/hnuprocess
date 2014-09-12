@@ -57,6 +57,12 @@
     type: BadBurst
     burst_list: "input/reco/conditions/bad_muv_burst.dat"
 
+#Muon status
+- selection:
+    name: muv_12
+    type : MuonReqStatus
+    allowed_status: [ 1, 2 ]
+
 #Found ogt
 - selection:
     name: good_trk
@@ -137,6 +143,7 @@
     type: CompositeSelection
     children:
         - gd_muv_brst
+        - muv_12
         - good_trk
         - pos_trk
         - quality_7

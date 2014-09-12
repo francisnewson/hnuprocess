@@ -30,7 +30,6 @@ namespace fn
                 return true;
             }
         }
-
         return false;
     }
 
