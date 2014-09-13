@@ -1,7 +1,9 @@
 #include "K2piPlots.hh"
 #include "k2pi_extract.hh"
+#include  "k2pi_functions.hh"
 #include "NA62Constants.hh"
 #include "Track.hh"
+#include "TMath.h"
 
 namespace fn
 {
@@ -15,6 +17,7 @@ namespace fn
 
         //init MC histograms
         init_mc();
+        init_resids();
     }
 
     void K2piPlots::new_event()
@@ -27,6 +30,7 @@ namespace fn
         {
             found_mc_ = true;
             process_mc();
+            process_resids();
         }
     }
 
@@ -60,6 +64,12 @@ namespace fn
 
         hetot_ = dths_.MakeTH1D( "hetot", "Total event energy: dch Pi+ + lkr Pi0",
                 1000, 65, 85, "E (GeV) " );
+
+        hchi2_ = dths_.MakeTH1D( "hchi2", "Fit #chi^{2}",
+                1000, 0, 5, "#chi^{2}" );
+
+        hprob_ = dths_.MakeTH1D( "hprob", "Fit prob",
+                1000, 0, 1, "fit prob" );
     }
 
     void K2piPlots::process_data()
@@ -72,6 +82,7 @@ namespace fn
         const TLorentzVector& p4pip_dch = vars_->data.p4pip_dch;
         double pt_dch = vars_->data.pt_dch;
         const TVector3& beam_momentum = vars_->data.beam_momentum;
+        double chi2 = vars_->chi2;
 
         hm2pip_lkr_->Fill ( p4pip_lkr.M2(), wgt);
 
@@ -88,6 +99,10 @@ namespace fn
         hz_lkr_dch_->Fill( neutral_vertex.Z() - charged_vertex.Z(), wgt );
 
         hetot_->Fill( (p4pip_dch + p4pi0_lkr ).E(), wgt );
+
+        hchi2_->Fill( chi2, wgt );
+
+        hprob_->Fill( TMath::Prob( chi2, 1 ) , wgt );
 
         //Calculate event p_T
         TVector3 event_p = p4pip_dch.Vect() + p4pi0_lkr.Vect();
@@ -244,6 +259,130 @@ namespace fn
                 vars_->weight );
     }
 
+    void K2piPlots::init_resids()
+    {
+        hr_E1_ = resid_.MakeTH1D( "hr_E1", "E1 Normalized Residuals",
+                1000, -5, 5 , "r" );
+
+        hr_E2_ = resid_.MakeTH1D( "hr_E2", "E2 Normalized Residuals",
+                1000, -5, 5 , "r" );
+
+        hr_C1_X_ = resid_.MakeTH1D( "hr_C1_X", "C1_X Normalized Residuals",
+                1000, -5, 5 , "r" );
+
+        hr_C2_X_ = resid_.MakeTH1D( "hr_C2_X", "C2_X Normalized Residuals",
+                1000, -5, 5 , "r" );
+
+        hr_C1_Y_ = resid_.MakeTH1D( "hr_C1_Y", "C1_Y Normalized Residuals",
+                1000, -5, 5 , "r" );
+
+        hr_C2_Y_ = resid_.MakeTH1D( "hr_C2_Y", "C2_Y Normalized Residuals",
+                1000, -5, 5 , "r" );
+
+        hr_pK_X_ = resid_.MakeTH1D( "hr_pK_X", "pK_X Normalized Residuals",
+                1000, -5, 5 , "r" );
+
+        hr_pK_Y_ = resid_.MakeTH1D( "hr_pK_Y", "pK_Y Normalized Residuals",
+                1000, -5, 5 , "r" );
+
+        hr_pK_Z_ = resid_.MakeTH1D( "hr_pK_Z", "pK_Z Normalized Residuals",
+                1000, -5, 5 , "r" );
+
+        hr_posK_X_ = resid_.MakeTH1D( "hr_posK_X", "posK_X Normalized Residuals",
+                1000, -5, 5 , "r" );
+
+        hr_posK_Y_ = resid_.MakeTH1D( "hr_posK_Y", "posK_Y Normalized Residuals",
+                1000, -5, 5 , "r" );
+    }
+
+    void K2piPlots::process_resids()
+    {
+        double wgt = vars_->weight;
+
+        Track mc_pip_track( vars_->mc.vertex, vars_->mc.p4pip.Vect() );
+        Track mc_g1_track( vars_->mc.vertex, vars_->mc.p4g1.Vect() );
+        Track mc_g2_track( vars_->mc.vertex, vars_->mc.p4g2.Vect() );
+
+        //E1
+        double dtE1 = vars_->data.E1;
+        double mcE1 = vars_->mc.p4g1.E();
+        double erE1 = lkr_energy_res( dtE1 );
+        hr_E1_->Fill( ( dtE1 - mcE1 ) / erE1 , wgt );
+
+        //E2
+        double dtE2 = vars_->data.E2;
+        double mcE2 = vars_->mc.p4g2.E();
+        double erE2 = lkr_energy_res( dtE2 );
+        hr_E2_->Fill( ( dtE2 - mcE2 ) / erE2 , wgt );
+
+        TVector3 dtC1 = vars_->data.pos1;
+        TVector3 mcC1 = mc_g1_track.extrapolate( dtC1.Z() );
+
+        //C1_X
+        double dtC1X = dtC1.X();
+        double mcC1X = mcC1.X();
+        double erC1X = lkr_pos_res( dtE1 );
+        hr_C1_X_->Fill( ( dtC1X - mcC1X ) / erC1X, wgt );
+
+        //C1_Y
+        double dtC1Y = dtC1.Y();
+        double mcC1Y = mcC1.Y();
+        double erC1Y = lkr_pos_res( dtE1 );
+        hr_C1_Y_->Fill( ( dtC1Y - mcC1Y ) / erC1Y, wgt );
+
+        TVector3 dtC2 = vars_->data.pos2;
+        TVector3 mcC2 = mc_g2_track.extrapolate( dtC2.Z() );
+
+        //C2_X
+        double dtC2X = dtC2.X();
+        double mcC2X = mcC2.X();
+        double erC2X = lkr_pos_res( dtE2 );
+        hr_C2_X_->Fill( ( dtC2X - mcC2X ) / erC2X, wgt );
+
+        //C2_Y
+        double dtC2Y = dtC2.Y();
+        double mcC2Y = mcC2.Y();
+        double erC2Y = lkr_pos_res( dtE2 );
+        hr_C2_Y_->Fill( ( dtC2Y - mcC2Y ) / erC2Y, wgt );
+
+        TVector3 mcPK = vars_->mc.p4k.Vect();
+        TVector3 dtPK = vars_->data.beam_momentum;
+
+        //PK_X
+        double mcPK_X = mcPK.X();
+        double dtPK_X = dtPK.X();
+        double erPK_X = 1e-3;
+        hr_pK_X_->Fill( ( mcPK_X - dtPK_X ) / erPK_X, wgt );
+
+        //PK_Y
+        double mcPK_Y = mcPK.Y();
+        double dtPK_Y = dtPK.Y();
+        double erPK_Y = 1e-3;
+        hr_pK_Y_->Fill( ( mcPK_Y - dtPK_Y ) / erPK_Y, wgt );
+
+        //PK_Z
+        double mcPK_Z = mcPK.Z();
+        double dtPK_Z = dtPK.Z();
+        double erPK_Z = 1.5;
+        hr_pK_Z_->Fill( ( mcPK_Z - dtPK_Z ) / erPK_Z, wgt );
+
+        Track mcKtrack { vars_->mc.vertex, mcPK };
+        TVector3 mcPosK = mcKtrack.extrapolate( 0 );
+        TVector3 dtPosK = vars_->data.beam_point;
+
+        //PK_X
+        double mcPosK_X = mcPosK.X();
+        double dtPosK_X = dtPosK.X();
+        double erPosK_X = 0.3;
+        hr_posK_X_->Fill( ( mcPosK_X - dtPosK_X ) / erPosK_X, wgt );
+
+        //PosK_Y
+        double mcPosK_Y = mcPosK.Y();
+        double dtPosK_Y = dtPosK.Y();
+        double erPosK_Y = 0.3;
+        hr_posK_Y_->Fill( ( mcPosK_Y - dtPosK_Y ) / erPosK_Y, wgt );
+    }
+
     void K2piPlots::end_processing()
     {
         cd_p( &tf_,  folder_.string().c_str() );
@@ -262,6 +401,9 @@ namespace fn
 
             cd_p( &tf_, (folder_ / "mc" / "mc_dch" ).string().c_str() );
             mc_dch_cmp_.Write();
+
+            cd_p( &tf_, ( folder_ / "resids" ).string().c_str() );
+            resid_.Write();
 
             tf_.cd();
         }

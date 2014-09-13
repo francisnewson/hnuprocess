@@ -33,7 +33,7 @@ bool&  remote_stop()
 void sig_handler( int sig )
 { 
     if ( sig )
-    remote_stop() = true;
+        remote_stop() = true;
 }
 
 
@@ -137,11 +137,11 @@ int main( int argc, char * argv[] )
 
     if ( vm.count( "number" ) )
     {
-    echain = new EChain<fn::K2piVars>{ slg, input_paths, "k2pi", "k2piVars", vm["number"].as<Long64_t>() };
+        echain = new EChain<fn::K2piVars>{ slg, input_paths, "k2pi", "k2piVars", vm["number"].as<Long64_t>() };
     }
     else
     {
-    echain = new EChain<fn::K2piVars>{ slg, input_paths, "k2pi", "k2piVars" };
+        echain = new EChain<fn::K2piVars>{ slg, input_paths, "k2pi", "k2piVars" };
     }
 
     //Default computed output name
@@ -169,7 +169,10 @@ int main( int argc, char * argv[] )
     {
         folder = vm["channel"].as<std::string>() ;
     }
-    K2piPlots k2pi_plots( vars, tfout, folder );
+
+    K2piPlots full_k2pi_plots( vars, tfout, (folder+"/full").c_str()  );
+    K2piPlots chi2_k2pi_plots( vars, tfout, (folder+"/chi2").c_str()  );
+    K2piPlots mass_k2pi_plots( vars, tfout, (folder+"/mass").c_str()  );
 
     //Prepare mass cut
     double mass2_width = 0.005;
@@ -185,10 +188,13 @@ int main( int argc, char * argv[] )
     double min_rdch =  20; //cm
     double max_rdch = 100; //cm
 
+    //Prepare chi2 cut
+    double max_chi2 = 2.7; //90% of 1dof dist
+
     int npassed = 0;
     Long64_t event_count = echain->get_max_event();
     fn::Counter counter( slg, event_count);
-    
+
     //C-C now activates remote stop
     connect_signals();
     int events_read = 0;
@@ -213,21 +219,36 @@ int main( int argc, char * argv[] )
         const TLorentzVector& p4pip_lkr = vars->data.p4pip_lkr;
         Track pion_track_lkr{ neutral_vertex, p4pip_lkr.Vect() };
         TVector3 pion_at_dch_lkr = pion_track_lkr.extrapolate( na62const::zDch1 );
+
         double track_radius_dch = pion_at_dch_lkr.Perp();
         if ( track_radius_dch < min_rdch ) continue;
         if ( track_radius_dch > max_rdch ) continue;
 
-        double reco_mass2 = vars->data.p4pip_lkr.M2();
-        if ( reco_mass2  > max_mass2 ) continue;
-        if ( reco_mass2  < min_mass2 ) continue;
 
         double z = vars->data.neutral_vertex.Z();
-        if ( z > max_z ) continue;
-        if ( z < min_z ) continue;
+        bool passed_z = ( z < max_z ) && ( z > min_z );
+        if ( ! passed_z ) continue;
 
-        k2pi_plots.new_event();
+        full_k2pi_plots.new_event();
+
+        double reco_mass2 = vars->data.p4pip_lkr.M2();
+        bool passed_mass = ( reco_mass2  < max_mass2 )
+            &&  ( reco_mass2 > min_mass2 ) ;
+
+        if ( passed_mass )
+        {
+            mass_k2pi_plots.new_event();
+        }
+
+        double chi2 = vars->chi2;
+        bool passed_chi2 = ( chi2 < max_chi2 );
+
+        if ( passed_chi2  )
+        {
+            chi2_k2pi_plots.new_event();
+        }
+
         ++npassed;
-
     }
 
     std::cerr << npassed << " out of " << events_read 
@@ -236,5 +257,7 @@ int main( int argc, char * argv[] )
     std::cerr << echain->read_info();
 
     tfout.cd();
-    k2pi_plots.end_processing();
+    full_k2pi_plots.end_processing();
+    chi2_k2pi_plots.end_processing();
+    mass_k2pi_plots.end_processing();
 }

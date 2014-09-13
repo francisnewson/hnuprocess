@@ -1,4 +1,5 @@
 #include "K2piReco.hh"
+#include "K2piFitReco.hh"
 #include <cassert>
 #include "Xcept.hh"
 #include "SingleTrack.hh"
@@ -66,6 +67,10 @@ namespace fn
             if ( method == "simple" )
             {
                 re = new K2piSimpleRecoEvent;
+            }
+            else if ( method == "fit" )
+            {
+                re = new K2piFitRecoEvent;
             }
             else 
             {

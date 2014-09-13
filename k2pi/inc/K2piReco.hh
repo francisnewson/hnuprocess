@@ -121,17 +121,6 @@ namespace fn
                     const KaonTrack& kt,
                     const SingleTrack& st,
                     const K2piClusters& k2pic );
-        private: 
-            double get_zvertex() const;
-            TVector3 get_vertex() const;
-            double get_m2pip() const;
-            double get_m2pi0() const;
-
-            ClusterData c1_;
-            ClusterData c2_;
-            ClusterData tc_;
-
-            bool found_track_cluster_;
 
             TLorentzVector get_p4pip() const;
             TLorentzVector get_p4pi0() const;
@@ -146,6 +135,18 @@ namespace fn
             bool found_track_cluster() const;
 
             double get_chi2() const;
+
+        private: 
+            double get_zvertex() const;
+            TVector3 get_vertex() const;
+            double get_m2pip() const;
+            double get_m2pi0() const;
+
+            ClusterData c1_;
+            ClusterData c2_;
+            ClusterData tc_;
+
+            bool found_track_cluster_;
 
             TVector3 neutral_vertex_ ;
             TLorentzVector pi0_;

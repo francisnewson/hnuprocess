@@ -27,11 +27,13 @@ namespace fn
 
             void init_data();
             void init_mc();
+            void init_resids();
 
             void new_event();
 
             void process_data();
             void process_mc();
+            void process_resids();
 
             void end_processing();
 
@@ -54,6 +56,9 @@ namespace fn
 
             TH1D * hetot_;
 
+            TH1D * hchi2_;
+            TH1D * hprob_;
+
             //MC histograms
             TH1D * hdz_neutral_;
             TH1D * hdz_charged_;
@@ -74,11 +79,25 @@ namespace fn
 
             TH1D * h_event_weight_;
             TH2D * h_event_weight_mom_;
+
+            //Residuals
+            TH1D * hr_E1_;
+            TH1D * hr_E2_;
+            TH1D * hr_C1_X_;
+            TH1D * hr_C2_X_;
+            TH1D * hr_C1_Y_;
+            TH1D * hr_C2_Y_;
+            TH1D * hr_pK_X_;
+            TH1D * hr_pK_Y_;
+            TH1D * hr_pK_Z_;
+            TH1D * hr_posK_X_;
+            TH1D * hr_posK_Y_;
             
             //----------------------------------------
 
             HistStore dths_;
             HistStore mchs_;
+            HistStore resid_;
 
             FourMomComp lkr_dch_cmp_;
             FourMomComp uw_lkr_dch_cmp_;

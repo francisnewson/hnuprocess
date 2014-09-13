@@ -4,6 +4,7 @@
 #include "logging.hh"
 #include "Mc.hh"
 #include "Event.hh"
+#include "Track.hh"
 #if 0
 /*
  *  _    ____        _ 
@@ -34,7 +35,8 @@ namespace fn
 
     double bracket_solve_neutral_vertex
         (
-         const KaonTrack& kt,
+         //const KaonTrack& kt,
+         const Track& kt,
          double E1, const TVector3& pos1,
          double E2, const TVector3& pos2,
             logger * slg  = 0 , severity_level sl = debug );
@@ -44,6 +46,8 @@ namespace fn
     double raw_solve_neutral_vertex
         ( TVector3 pos1, double E1, TVector3 pos2, double E2 );
 
+   double  lkr_energy_res( double energy);
+   double  lkr_pos_res( double energy);
     
     //--------------------------------------------------
     

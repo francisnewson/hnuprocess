@@ -1,0 +1,26 @@
+- output:
+    name: tfout
+    type: tfile
+    filename: plots.root
+
+- monitor:
+    name: counter
+    type: Counter
+
+
+- selection:
+    name: passer
+    type : auto_pass
+
+- selection:
+    name: kaon_mom_weights
+    type: KaonMomWeight
+    crude_weights: input/reco/mod/kaon_crude_weights.dat
+    fine_weights: input/reco/mod/kaon_fine_weights.dat
+
+- analysis:
+    name: kmomstudy
+    type: KMomStudy
+    selection: kaon_mom_weights
+    tfile: tfout
+    folder: kmomstudy

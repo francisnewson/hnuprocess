@@ -49,9 +49,11 @@ namespace fn
 
         double best_z = 0;
 
+        Track kaon_track{ kt.get_kaon_point(), kt.get_kaon_3mom() };
+
         //Do the numerical bit
         best_z = bracket_solve_neutral_vertex
-            ( kt, E1, pos1, E2, pos2, slg, sl );
+            ( kaon_track, E1, pos1, E2, pos2, slg, sl );
 
         return kt.extrapolate_z( best_z );
     }
@@ -60,7 +62,7 @@ namespace fn
 
     double bracket_solve_neutral_vertex
         (
-         const KaonTrack& kt,
+         const Track& kt,
          double E1, const TVector3& pos1,
          double E2, const TVector3& pos2,
          logger * slg , severity_level sl )
@@ -69,7 +71,7 @@ namespace fn
             //what should cos_t be?
             double req_cos_t = pi0_cos_photon_opening( E1, E2 );
 
-            BOOST_LOG_SEV( *slg, sl )
+            if( slg ) BOOST_LOG_SEV( *slg, sl )
                 << "target cos_t: " << req_cos_t; 
 
             //Functino to compare each time
@@ -80,7 +82,7 @@ namespace fn
                 { throw std::domain_error
                     ( "z: " + std::to_string( z ) ); }
 
-                TVector3 new_vertex = kt.extrapolate_z( z );
+                TVector3 new_vertex = kt.extrapolate( z );
                 TVector3 p1 = pos1 - new_vertex;
                 TVector3 p2 = pos2 - new_vertex;
 
@@ -140,10 +142,10 @@ namespace fn
                 std::cerr << "Error in compute_neutral_vertex\n";
             }
 
-            BOOST_LOG_SEV( *slg, sl )
+            if ( slg )BOOST_LOG_SEV( *slg, sl )
                 << "raw: " << raw_vertex_z 
-                << " fit: " << fit_best_vertex.first
-                << " " << fit_best_vertex.second ;
+                    << " fit: " << fit_best_vertex.first
+                    << " " << fit_best_vertex.second ;
 
             return fit_best_vertex.first;
         }
@@ -168,5 +170,23 @@ namespace fn
         }
 
     //--------------------------------------------------
+
+    double  lkr_energy_res( double energy)
+    {
+        const double& ce = energy;
+        return std::sqrt(
+                std::pow( 0.032 * std::sqrt( ce ), 2 )
+                + std::pow( 0.09, 2 )
+                + std::pow( 0.0042 * ce, 2 ) );
+    }
+
+    double  lkr_pos_res( double energy)
+    {
+        const double& ce = energy;
+        return std::sqrt(
+                std::pow( 0.42 / std::sqrt(ce),  2 )
+                + std::pow( 0.06 * ce, 2 )
+                );
+    }
 
 }
