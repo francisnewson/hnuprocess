@@ -10,6 +10,10 @@
     name: counter
     type: Counter
 
+- input:
+    name: kaon_track
+    type: KaonTrack
+    kaon_type: rawkp
 
 #SingleTrack
 - input:
@@ -29,11 +33,15 @@
 
     dch_merge_sep: 0.5
 
+    inputs:
+        kt: kaon_track
+
 - input:
     name: km2_event
     type: Km2Event
     inputs:
         ogt: bf_st
+        kt: kaon_track
 
 #Km2Clusters
 - input:
@@ -137,6 +145,7 @@
     regions_file: "input/reco/km2/pzt.yaml"
     inputs:
         ogt: bf_st
+        kt: kaon_track
 
 - selection:
     name : hnu_selection

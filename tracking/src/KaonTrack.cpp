@@ -31,7 +31,7 @@ namespace fn
             std::string kaon_type =  
                 get_yaml<std::string>( instruct, "kaon_type" );
 
-            if ( kaon_type == "rawkp " )
+            if ( kaon_type == "rawkp" )
             {
                 return new RawKPTrack( event, is_mc );
             }
@@ -64,6 +64,7 @@ namespace fn
         catch( ... )
         {
             std::cerr << "Trying to get kaon track (" __FILE__")\n";
+            throw;
         }
 
         return kt;
