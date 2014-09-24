@@ -41,6 +41,7 @@ namespace fn
     struct UnknownSingleTrackMethod{};
     struct UnknownK2piClustersMethod{};
     struct UnknownK2piRecoMethod{};
+    struct UnknownKaonType{};
 
     struct BadCast{};
     template <typename T> 

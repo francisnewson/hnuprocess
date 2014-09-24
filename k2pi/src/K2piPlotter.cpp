@@ -9,11 +9,12 @@ namespace fn
 
     K2piPlotter::K2piPlotter( const Selection& sel,
             const fne::Event * e,
+            const KaonTrack& kt,
             TFile& tfile, std::string folder,
             const K2piReco& k2pi_reco, bool mc)
-        :Analysis( sel), e_( e),
+        :Analysis( sel), e_( e),kt_(kt), 
         tfile_( tfile), folder_( folder),
-        k2pi_reco_( k2pi_reco ),kt_( e, mc ),  mc_( mc ),
+        k2pi_reco_( k2pi_reco ), mc_( mc ),
         k2pi_plots_( &vars_ , tfile_, folder)
     {
     }
@@ -24,7 +25,6 @@ namespace fn
         const K2piRecoEvent& k2pirc = k2pi_reco_.get_reco_event();
         const SingleTrack& st = k2pi_reco_.get_single_track();
         const SingleRecoTrack& srt = st.get_single_track();
-        kt_.new_event();
 
         //Extract vars_
         k2pi_extract( mc_, get_weight() , e_ , k2pirc, srt, kt_, vars_ );
@@ -47,6 +47,8 @@ namespace fn
 
             const fne::Event * event = rf.get_event_ptr();
 
+            const KaonTrack * kt = get_kaon_track( instruct, rf );
+
             TFile & tfile = rf.get_tfile( 
                     get_yaml<std::string>( instruct, "tfile" ) );
 
@@ -57,6 +59,6 @@ namespace fn
             bool mc = rf.is_mc();
 
             return new K2piPlotter
-                ( *sel, event,  tfile, folder, *k2pi_reco, mc );
+                ( *sel, event, *kt, tfile, folder, *k2pi_reco, mc );
         }
 }

@@ -28,7 +28,9 @@ namespace fn
                     const Selection& sel, 
                     TFile& tfile_, std::string tree_name,
                     const fne::Event * event,
-                    const K2piReco& k2pir , bool mc );
+                    const K2piReco& k2pir ,
+                    const KaonTrack& kt,
+                    bool mc );
 
             void end_processing();
 
@@ -38,6 +40,7 @@ namespace fn
 
             const fne::Event * event_;
             const K2piReco& k2pir_;
+            const KaonTrack& kt_;
 
             K2piVars vars_;
 
@@ -45,7 +48,6 @@ namespace fn
             TTree * ttree_;
             bool mc_;
 
-            KaonTrack kt_;
 
             REG_DEC_SUB( K2piFilter);
     };

@@ -16,14 +16,15 @@ namespace fn
             const Selection& sel, 
             TFile& tfile, std::string tree_name,
             const fne::Event * event,
-            const K2piReco& k2pir, bool mc  )
+            const K2piReco& k2pir, 
+            const KaonTrack& kt,
+            bool mc  )
         : Analysis( sel),
         event_( event),
         k2pir_( k2pir ),
+        kt_( kt),
         tfile_( tfile ),
-        mc_ (mc),
-        kt_( event_, mc_ )
-
+        mc_ (mc)
     {
         //Create output tree
         ttree_ = new TTree( tree_name.c_str(), tree_name.c_str() );
@@ -37,7 +38,6 @@ namespace fn
         const K2piRecoEvent& k2pirc = k2pir_.get_reco_event();
         const SingleTrack& st = k2pir_.get_single_track();
         const SingleRecoTrack& srt = st.get_single_track();
-        kt_.new_event();
 
         k2pi_extract( mc_, get_weight(), event_, k2pirc, srt, kt_, vars_ );
 
@@ -114,6 +114,8 @@ namespace fn
 
             const fne::Event * event = rf.get_event_ptr();
 
+            const KaonTrack * kt = get_kaon_track( instruct, rf );
+
             TFile & tfile = rf.get_tfile( 
                     get_yaml<std::string>( instruct, "tfile" ) );
 
@@ -125,6 +127,6 @@ namespace fn
             bool mc = rf.is_mc();
 
             return new K2piFilter
-                ( *sel, tfile, tree_name, event, *k2pi_reco, mc );
+                ( *sel, tfile, tree_name, event, *k2pi_reco, *kt, mc );
         }
 }

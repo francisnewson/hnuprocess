@@ -59,6 +59,7 @@ namespace fn
             const fne::Event * event = rf.get_event_ptr();
             const SingleTrack* st = get_single_track( instruct, rf );
             const K2piClusters* k2pic = get_k2pi_clusters( instruct, rf );
+            const KaonTrack* kt = get_kaon_track( instruct, rf );
             std::string method = instruct["method"].as<std::string>();
             bool mc = rf.is_mc();
 
@@ -78,19 +79,20 @@ namespace fn
             }
 
             return new K2piRecoImp( 
-                    event, *st, *k2pic, re, mc );
+                    event, *st, *kt, *k2pic, re, mc );
         }
 
     //--------------------------------------------------
 
     K2piRecoImp::K2piRecoImp( const fne::Event * event,
             const SingleTrack& st,
+            const KaonTrack& kt,
             const K2piClusters& k2pic,
             K2piRecoEvent* k2pirec,
             bool mc )
         :K2piReco( k2pirec),
         e_( event), st_( st), k2pic_( k2pic),
-        kt_( event, mc), mc_( mc)
+        kt_( kt ), mc_( mc)
     { }
 
     void K2piRecoImp::process_event() const

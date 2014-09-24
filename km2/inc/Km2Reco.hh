@@ -48,6 +48,7 @@ namespace fn
         public:
             Km2Event( const fne::Event * event, 
                     const SingleTrack& st,
+                    const KaonTrack& kt,
                     bool mc );
 
             void new_event();
@@ -57,7 +58,7 @@ namespace fn
             void process_event() const ;
             const fne::Event * e_;
             const SingleTrack& st_;
-            KaonTrack kt_;
+            const KaonTrack& kt_;
 
             mutable Km2RecoEvent reco_event_;
             mutable bool dirty_;

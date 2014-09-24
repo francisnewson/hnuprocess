@@ -7,6 +7,7 @@
 #include "RecoTrack.hh"
 #include "BFCorrection.hh"
 #include "Track.hh"
+#include "KaonTrack.hh"
 #if 0
 /*
  *  ____  _             _     _____               _
@@ -139,7 +140,7 @@ namespace fn
     {
         public:
             BFSingleTrack( const fne::Event * event, 
-                    YAML::Node& instruct );
+                    YAML::Node& instruct, KaonTrack& kt );
 
 
         private:
@@ -169,6 +170,8 @@ namespace fn
             double init_max_z_;
 
             double dch_1_merge_sep_;
+
+            KaonTrack& kt_;
     };
 
     //--------------------------------------------------
@@ -177,7 +180,7 @@ namespace fn
     {
         public:
             BFScatterSingleTrack( const fne::Event * event,
-                    YAML::Node& instruct );
+                    YAML::Node& instruct, KaonTrack& kt );
 
         private:
             void modify_processing_track( processing_track& pt ) const;

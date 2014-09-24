@@ -25,7 +25,9 @@ namespace fn
         public:
             KMomStudy( const Selection& sel,
                     TFile& tf, std::string folder,
-                    const fne::Event * e, bool mc);
+                    const fne::Event * e, bool mc,
+                    KaonTrack& kt
+                    );
 
             void end_processing();
 
@@ -60,7 +62,7 @@ namespace fn
             TFile& tfile_;
             std::string folder_;
             const fne::Event * e_;
-            KaonTrack kt_;
+            KaonTrack& kt_;
 
             REG_DEC_SUB( KMomStudy );
     };

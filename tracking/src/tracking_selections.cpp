@@ -281,9 +281,10 @@ namespace fn
 
     TrackPZT::TrackPZT( const fne::Event * e, 
             const SingleTrack& st, 
+            KaonTrack& kt,
             bool mc,
             const YAML::Node& regions )
-        :st_( st ), kt_( e, mc )
+        :st_( st ), kt_(kt)
     {
         assert(regions.Type() == YAML::NodeType::Sequence);
 
@@ -327,13 +328,14 @@ namespace fn
             const fne::Event * event = rf.get_event_ptr();
             SingleTrack * st = get_single_track( instruct, rf );
             bool mc = rf.is_mc();
+            KaonTrack * kt = get_kaon_track( instruct, rf );
 
             std::string pzt_region_file = get_yaml<std::string>
                 ( instruct, "regions_file" );
 
             YAML::Node regions = YAML::LoadFile( pzt_region_file );
 
-            return new TrackPZT( event, *st, mc, regions );
+            return new TrackPZT( event, *st, *kt, mc, regions );
         }
 }
 

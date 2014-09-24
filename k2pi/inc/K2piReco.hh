@@ -95,6 +95,7 @@ namespace fn
             K2piRecoImp( 
                     const fne::Event * event,
                     const SingleTrack& st,
+                    const KaonTrack& kt,
                     const K2piClusters& k2pic,
                     K2piRecoEvent * k2pirec,
                     bool mc );
@@ -106,7 +107,7 @@ namespace fn
             const fne::Event * e_;
             const SingleTrack & st_;
             const K2piClusters & k2pic_;
-            const KaonTrack kt_;
+            const KaonTrack& kt_;
             bool mc_;
     };
 

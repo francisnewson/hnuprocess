@@ -211,6 +211,7 @@ namespace fn
         public:
             TrackPZT( const fne::Event * e,
                     const SingleTrack& st, 
+                    KaonTrack& kt,
                     bool mc ,
                     const YAML::Node& regions );
 
@@ -218,7 +219,7 @@ namespace fn
             bool do_check() const;
             const fne::Event * e_;
             const SingleTrack& st_;
-            KaonTrack kt_;
+            KaonTrack& kt_;
             std::vector< PZTRegion > regions_;
 
             REG_DEC_SUB( TrackPZT);

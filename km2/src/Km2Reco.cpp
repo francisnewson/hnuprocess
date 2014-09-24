@@ -74,8 +74,8 @@ namespace fn
     REG_DEF_SUB( Km2Event );
 
     Km2Event::Km2Event( const fne::Event * event,
-            const SingleTrack& st, bool mc )
-        :e_( event), st_( st ), kt_( event, mc )
+            const SingleTrack& st, const KaonTrack& kt, bool mc )
+        :e_( event), st_( st ), kt_( kt )
     {}
 
     void Km2Event::new_event()
@@ -108,9 +108,10 @@ namespace fn
         {
             const fne::Event * event =  rf.get_event_ptr();
             SingleTrack * st = get_single_track( instruct, rf );
+            KaonTrack * kt = get_kaon_track( instruct, rf );
             bool mc = rf.is_mc();
 
-            return new Km2Event( event, *st, mc  );
+            return new Km2Event( event, *st, *kt,  mc  );
         }
 
     //--------------------------------------------------

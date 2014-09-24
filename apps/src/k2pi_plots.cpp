@@ -173,6 +173,8 @@ int main( int argc, char * argv[] )
     K2piPlots full_k2pi_plots( vars, tfout, (folder+"/full").c_str()  );
     K2piPlots chi2_k2pi_plots( vars, tfout, (folder+"/chi2").c_str()  );
     K2piPlots mass_k2pi_plots( vars, tfout, (folder+"/mass").c_str()  );
+    K2piPlots dee_k2pi_plots( vars, tfout, (folder+"/dee").c_str()  );
+
 
     //Prepare mass cut
     double mass2_width = 0.005;
@@ -190,6 +192,9 @@ int main( int argc, char * argv[] )
 
     //Prepare chi2 cut
     double max_chi2 = 2.7; //90% of 1dof dist
+
+    //prepare dEE cut
+    double min_dEE = 60;
 
     int npassed = 0;
     Long64_t event_count = echain->get_max_event();
@@ -224,7 +229,6 @@ int main( int argc, char * argv[] )
         if ( track_radius_dch < min_rdch ) continue;
         if ( track_radius_dch > max_rdch ) continue;
 
-
         double z = vars->data.neutral_vertex.Z();
         bool passed_z = ( z < max_z ) && ( z > min_z );
         if ( ! passed_z ) continue;
@@ -248,6 +252,18 @@ int main( int argc, char * argv[] )
             chi2_k2pi_plots.new_event();
         }
 
+        //Cluster energies
+        double dataEE = vars->data.E1 * vars->data.E2;
+        double mcEE = vars->mc.p4g1.E() * vars->mc.p4g2.E();
+        double dEE = dataEE - mcEE;
+
+        bool passed_dEE = ( dEE > min_dEE );
+
+        if ( passed_dEE )
+        {
+            dee_k2pi_plots.new_event();
+        }
+
         ++npassed;
     }
 
@@ -260,4 +276,5 @@ int main( int argc, char * argv[] )
     full_k2pi_plots.end_processing();
     chi2_k2pi_plots.end_processing();
     mass_k2pi_plots.end_processing();
+    dee_k2pi_plots.end_processing();
 }

@@ -58,14 +58,15 @@ namespace fn
         {
             std::string method = instruct["method"].as<std::string>();
             const fne::Event * event = rf.get_event_ptr();
+            KaonTrack * kt = get_kaon_track( instruct, rf );
 
             if ( method == "BF" )
             {
-                return new BFSingleTrack{ event, instruct } ;
+                return new BFSingleTrack{ event, instruct, *kt } ;
             }
             else if ( method == "BFScatter" )
             {
-                return new BFScatterSingleTrack{ event, instruct };
+                return new BFScatterSingleTrack{ event, instruct, *kt };
             }
             else
             {
@@ -165,8 +166,9 @@ namespace fn
         return *this;
     }
 
-    BFSingleTrack::BFSingleTrack( const fne::Event * event, YAML::Node& instruct )
-        :event_( event )
+    BFSingleTrack::BFSingleTrack( const fne::Event * event, 
+            YAML::Node& instruct, KaonTrack& kt)
+        :event_( event ), kt_( kt )
     {
         //Load BF single track parameters
         try
@@ -313,7 +315,7 @@ namespace fn
             }
 
             Track pt_track = get_bz_track( *pt.rt );
-            Track kaon_track = get_kaon_track( conditions );
+            const Track& kaon_track = kt_.get_kaon_track();
 
             //extract raw vertex and cda
             pt.vert  = compute_cda(
@@ -371,8 +373,8 @@ namespace fn
     //--------------------------------------------------
 
     BFScatterSingleTrack::BFScatterSingleTrack( const fne::Event * event,
-            YAML::Node& instruct )
-        :BFSingleTrack( event, instruct), event_( event)
+            YAML::Node& instruct, KaonTrack& kt )
+        :BFSingleTrack( event, instruct, kt), event_( event)
     {
         angle_sigma_ = get_yaml<double>( instruct, "angle_sigma" );
         angle_frequency_ = get_yaml<double>( instruct, "angle_frequency" );

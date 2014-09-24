@@ -35,7 +35,6 @@ namespace fn
 
 
     //Extract tracks from compact events
-    Track get_kaon_track( const fne::Conditions c );
     Track get_bz_track( const fne::RecoTrack& rt );
     Track get_z_track( const fne::RecoTrack& rt );
 

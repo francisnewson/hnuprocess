@@ -7,10 +7,11 @@ namespace fn
 {
     KMomStudy::KMomStudy( const Selection& sel,
             TFile& tf, std::string folder,
-            const fne::Event * e, bool mc)
+            const fne::Event * e, bool mc,
+            KaonTrack& kt)
         :Analysis( sel ), tfile_( tf ), 
         folder_( folder ), e_( e ),
-        kt_( e_, mc )
+        kt_(kt)
     {
 
         h_px = hs_.MakeTH1D( "h_px", "PX Res",
@@ -82,7 +83,6 @@ namespace fn
         double mckaonmom = mckaon3mom.Mag();
 
         //data kaon
-        kt_.new_event();
         TVector3 dtkaon3mom = kt_.get_kaon_3mom();
         double dtkaonmom = kt_.get_kaon_mom();
         TVector3 dtpoint = kt_.extrapolate_z( 0 );
@@ -150,8 +150,10 @@ namespace fn
             TFile& tfile = rf.get_tfile( 
                     get_yaml<std::string>( instruct, "tfile" ) );
 
+            KaonTrack * kt = get_kaon_track( instruct, rf );
+
             bool is_mc = rf.is_mc();
 
-            return new KMomStudy( *sel, tfile, folder, event, is_mc );
+            return new KMomStudy( *sel, tfile, folder, event, is_mc, *kt );
         }
 }

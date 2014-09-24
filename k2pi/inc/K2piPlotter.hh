@@ -33,6 +33,7 @@ namespace fn
         public: 
             K2piPlotter( const Selection& sel,
                     const fne::Event * e,
+                    const KaonTrack& kt,
                     TFile& tfile, std::string folder,
                     const K2piReco& k2pi_reco, bool  mc);
 
@@ -41,13 +42,13 @@ namespace fn
         private:
             void process_event();
             const fne::Event * e_;
+            const KaonTrack& kt_;
 
             TFile& tfile_;
             std::string folder_;
 
             const K2piReco& k2pi_reco_;
             K2piVars vars_;
-            KaonTrack kt_;
             bool mc_;
 
             K2piPlots k2pi_plots_;

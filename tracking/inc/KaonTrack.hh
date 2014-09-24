@@ -1,5 +1,6 @@
 #ifndef KAONTRACK_HH
 #define KAONTRACK_HH
+#include "RecoFactory.hh"
 #include "Subscriber.hh"
 #include "Event.hh"
 #include "Track.hh"
@@ -17,22 +18,76 @@
 #endif
 namespace fn
 {
+    Track get_kp_track( const fne::Conditions c );
+    Track get_km_track( const fne::Conditions c );
+
+    //--------------------------------------------------
 
     class KaonTrack : public Subscriber
     {
         public:
-            KaonTrack( const fne::Event * e , bool mc);
-            void new_event() ;
-            double get_kaon_mom() const;
+            virtual void new_event() ;
             TVector3 get_kaon_3mom() const;
             TVector3 get_kaon_point() const;
             TLorentzVector get_kaon_4mom() const;
             TVector3 extrapolate_z( double z ) const;
 
+            virtual const Track& get_kaon_track() const = 0;
+            virtual double get_kaon_mom() const = 0;
+
+            REG_DEC_SUB( KaonTrack );
+    };
+
+    template<>
+        Subscriber * create_subscriber<KaonTrack>
+        (YAML::Node& instruct, RecoFactory& rf );
+
+    KaonTrack * get_kaon_track( YAML::Node& instruct, RecoFactory& rf );
+
+    //--------------------------------------------------
+
+    class CachedKaonTrack : public KaonTrack
+    {
+        public:
+            virtual const Track& get_kaon_track() const;
+            virtual double get_kaon_mom() const;
+            void new_event();
+
+        private:
+            virtual Track load_kaon_track() const = 0;
+            virtual double load_kaon_mom() const = 0;
+
+            Track kt_;
+            double kmom_;
+    };
+
+    //--------------------------------------------------
+
+    class RawKPTrack : public CachedKaonTrack
+    {
+        public:
+            RawKPTrack ( const fne::Event * e , bool mc );
+            virtual Track load_kaon_track() const;
+            virtual double load_kaon_mom() const;
+
         private:
             const fne::Event * e_;
             bool mc_;
-            Track t_;
+    };
+
+    //--------------------------------------------------
+
+    class RawKMTrack : public CachedKaonTrack
+    {
+        public:
+            RawKMTrack ( const fne::Event * e , bool mc );
+
+            virtual  Track load_kaon_track() const;
+            virtual double load_kaon_mom() const;
+
+        private:
+            const fne::Event * e_;
+            bool mc_;
     };
 
 }
