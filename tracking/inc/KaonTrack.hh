@@ -5,6 +5,8 @@
 #include "Event.hh"
 #include "Track.hh"
 #include "TLorentzRotation.h"
+#include "RandomSampler.hh"
+#include "PolarityFinder.hh"
 #if 0
 /*
  *  _  __               _____               _    
@@ -20,6 +22,10 @@ namespace fn
 {
     Track get_kp_track( const fne::Conditions c );
     Track get_km_track( const fne::Conditions c );
+
+    //--------------------------------------------------
+    
+    YAML::Node auto_kaon_track( const YAML::Node& instruct, RecoFactory& rf );
 
     //--------------------------------------------------
 
@@ -88,6 +94,45 @@ namespace fn
         private:
             const fne::Event * e_;
             bool mc_;
+    };
+
+    //--------------------------------------------------
+
+    struct kaon_properties
+    {
+        double dxdz;
+        double dydz;
+        double xoff;
+        double yoff;
+        double pmag;
+    };
+
+
+    std::istream& operator >> ( std::istream& is , kaon_properties& kp );
+    std::ostream& operator << ( std::ostream& is , kaon_properties& kp );
+
+    //--------------------------------------------------
+
+    class WeightedKTrack : public KaonTrack
+    {
+        public:
+            WeightedKTrack ( const fne::Event * e, bool mc, 
+                    const YAML::Node& instruct );
+
+            virtual void new_event() ;
+            virtual const Track& get_kaon_track() const;
+            virtual double get_kaon_mom() const ;
+
+        private:
+            const fne::Event * e_;
+            bool mc_;
+
+            Track kt_;
+            double kmom_;
+
+            RandomSampler< kaon_properties > pos_pol_kaon_sampler_; 
+            RandomSampler< kaon_properties > neg_pol_kaon_sampler_; 
+            PolarityFinder pf_;
     };
 
 }

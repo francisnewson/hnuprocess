@@ -2,6 +2,9 @@
 #define STL_HELP_HH
 #include <iosfwd>
 #include <memory>
+#include <map>
+#include <set>
+#include <algorithm>
 #if 0
 /*
  *      _   _   _          _       
@@ -34,6 +37,24 @@ namespace fn
 
     void write_launch( int argc, char * argv[], 
             std::ostream& os );
+
+    //contains wrappers for stl containers
+    //http://stackoverflow.com/a/6197446/1527126
+
+    template <typename Container>
+        bool contains(Container const& c, typename Container::const_reference v) {
+            return std::find(c.begin(), c.end(), v) != c.end();
+        }
+
+    template <typename Key, typename Cmp, typename Alloc>
+        bool contains(std::set<Key,Cmp,Alloc> const& s, Key const& k) {
+            return s.find(k) != s.end();
+        }
+
+    template <typename Key, typename Value, typename Cmp, typename Alloc>
+        bool contains(std::map<Key,Value,Cmp,Alloc> const& m, Key const& k) {
+            return m.find(k) != m.end();
+        }
 
 }
 #endif

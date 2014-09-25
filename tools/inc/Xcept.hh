@@ -33,6 +33,8 @@ namespace fn
 
     struct MissingInfo{};
 
+    struct MissingFile{};
+
     //Event errors
     struct UnpreparedRequest;
     struct EventDoesNotContain{};

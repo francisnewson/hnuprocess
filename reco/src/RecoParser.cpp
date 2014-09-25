@@ -1,12 +1,24 @@
 #include "RecoParser.hh"
 #include <cassert>
 #include "Xcept.hh"
+#include "stl_help.hh"
 namespace fn
 {
     //Constructor takes a reference to a RecoFactory which
     //can actually produce subscribers etc
     RecoParser::RecoParser( RecoFactory& rf, logger& log )
-        :rf_ (rf ) , log_( log ){}
+        :rf_ (rf ) , log_( log ){
+
+            boost::filesystem::path channel_classes_file
+                = "input/reco/channel_classes.yaml";
+
+            BOOST_LOG_SEV( log_, startup)
+                << "RECOPARSER: Loading  channel classes from "
+                << channel_classes_file;
+
+            channel_classes_ = YAML::LoadFile( channel_classes_file.string() ).as
+                <std::map<std::string, std::vector<std::string>>>();
+        }
 
     //Process a YAML file
     void RecoParser::parse( boost::filesystem::path config )
@@ -58,8 +70,24 @@ namespace fn
                 //to receive new_event's
 
                 Subscriber * s = 0;
-                s = rf_.create_subscriber( 
-                        name, type, instruct );
+
+                //Do we need to ignore subscriber?
+                bool ignore_subscriber = 
+                    check_ignore_subscriber( instruct, rf_.get_channel());
+
+                if ( ignore_subscriber )
+                {
+                    BOOST_LOG_SEV( log_, startup)
+                        << "RECOPARSER: skipping " << name << " (" << type << ")";
+
+                    YAML::Node skip = YAML::Load( "{name: " + name + ", type: auto_pass}" );
+                    s = rf_.create_subscriber( name, "auto_pass", skip );
+                }
+                else
+                {
+                    s = rf_.create_subscriber( 
+                            name, type, instruct );
+                }
 
                 BOOST_LOG_SEV( log_, debug)
                     << "RECOPARSER: Subscriber - " << name;
@@ -135,4 +163,30 @@ namespace fn
             throw;
         }
     }
+
+    bool RecoParser::check_ignore_subscriber
+        ( const YAML::Node& instruct, std::string channel )
+        {
+            //Do we have an ignore_class node?
+            if ( YAML::Node ignore_class_node = instruct["ignore_classes"] )
+            {
+                std::vector<std::string> ignore_classes = 
+                    ignore_class_node.as<std::vector<std::string>>();
+
+                for ( auto& ignore_class : ignore_classes )
+                {
+                    BOOST_LOG_SEV( log_, debug )
+                        << "Checking ignore class: " << ignore_class << " for "  << channel;
+
+                    std::vector<std::string> ignore_channels = channel_classes_[ignore_class];
+
+                    if ( contains( ignore_channels , channel ) )
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
 }

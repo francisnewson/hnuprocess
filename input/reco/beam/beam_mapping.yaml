@@ -1,0 +1,19 @@
+property_files:
+    p5.q1:
+        pos: input/reco/beam/p5.q1.prop_pos.dat
+        neg: input/reco/beam/p5.q1.prop_neg.dat
+
+    p5.q11t:
+        pos: input/reco/beam/p5.q11t.prop_pos.dat
+        neg: input/reco/beam/p5.q11t.prop_neg.dat
+
+channel_lists:
+    - period: p5.q1
+      channels:
+        - p6.data.kless.q1.v2
+        - p6.data.km.q1.v2
+
+    - period: p5.q11t
+      channels:
+        - p6.data.kless.q11t.v2
+        - p6.data.km.q11t.v2

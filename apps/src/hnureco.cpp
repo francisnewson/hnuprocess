@@ -280,6 +280,7 @@ int main( int argc, char * argv[] )
     RecoFactory reco_factory( reco );
     reco_factory.set_log( slg );
     reco_factory.set_remote_stop( &remote_stop() );
+    reco_factory.set_channel( channel );
 
     path output_prefix;
 
