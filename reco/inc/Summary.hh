@@ -45,6 +45,34 @@ namespace fn
     };
 
     /* **************************************************
+     * Class to count the total weight passing a 
+     * selection. Maps ids to weights
+     * **************************************************/
+    class SummaryWeightVisitor : public SelectionVisitor
+    {
+        public:
+            SummaryWeightVisitor();
+            bool visit( Selection& ) ;
+            bool visit_enter( Selection& ){ return true;} 
+            bool visit_leave( Selection& );
+
+            void set_event_weight( double weight );
+
+            //Collection (vectorish) interface
+            typedef std::vector<double> container;
+
+            typedef container::const_iterator const_iterator;
+
+            const_iterator begin() const;
+            const_iterator end() const;
+            double at( unsigned int i) const;
+
+        private:
+            container weights_;
+            double event_weight_;
+    };
+
+    /* **************************************************
      * Class to count the number of times each selection
      * is passed. Maps ids to counts
      * **************************************************/
@@ -67,8 +95,8 @@ namespace fn
 
         private:
             container counts_;
-
     };
+
 
     //--------------------------------------------------
 
@@ -89,6 +117,7 @@ namespace fn
             Selection& source_;
             std::ostream& os_;
             SummaryVisitor sv_;
+            SummaryWeightVisitor swv_;
 
             REG_DEC_SUB( Summary );
     };

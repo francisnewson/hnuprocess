@@ -62,6 +62,12 @@
     name: passer
     type : auto_pass
 
+- selection:
+    name: kaon_mom_weights
+    type: KaonMomWeight
+    crude_weights: input/reco/mod/kaon_crude_weights.dat
+    fine_weights: input/reco/mod/kaon_fine_weights.dat
+
 #MUV bursts
 - selection:
     name: gd_muv_brst
@@ -155,6 +161,7 @@
     name : hnu_selection
     type: CompositeSelection
     children:
+        - kaon_mom_weights
         - gd_muv_brst
         - muv_12
         - good_trk

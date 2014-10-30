@@ -90,6 +90,53 @@ namespace fn
 
     //--------------------------------------------------
 
+    //Initialize vector with space for maximum id
+    //( should remove hardcoded max at some point)
+    SummaryWeightVisitor::SummaryWeightVisitor()
+        :weights_( 200, 0 ){
+            std::cerr << " Summary weight visitor container size: " 
+                << weights_.size() << std::endl;
+        }
+
+
+    bool SummaryWeightVisitor::visit( Selection& s) 
+    {
+        //If selection passed, increment the vector
+        //position corresponding to the selection id
+        //std::cerr <<"Checking" << std::endl;
+        if ( s.check() )
+        {
+            //std::cerr <<"passed" << std::endl;
+            weights_.at( s.get_id() ) += event_weight_;
+                //std::cerr <<"incremented" << std::endl;
+                return true;
+        }
+        //std::cerr <<"failed" << std::endl;
+        return false;
+    }
+
+    bool SummaryWeightVisitor::visit_leave( Selection& s )
+    {
+        //Do the composite count on the way out
+        //std::cerr <<"About to visit" << std::endl;
+        return visit( s );
+    } 
+
+    void SummaryWeightVisitor::set_event_weight( double weight )
+    { event_weight_ = weight; }
+
+    //expose vector of counts
+    SummaryWeightVisitor::const_iterator SummaryWeightVisitor::begin() const
+    { return weights_.begin(); }
+
+    SummaryWeightVisitor::const_iterator SummaryWeightVisitor::end() const
+    { return weights_.end(); }
+
+    double SummaryWeightVisitor::at(  unsigned int i ) const
+    { return weights_.at( i ); }
+
+    //--------------------------------------------------
+
     REG_DEF_SUB( Summary );
 
     Summary::Summary
@@ -101,6 +148,9 @@ namespace fn
     void Summary::process_event()
     {
         source_.accept( sv_ );
+
+        swv_.set_event_weight( source_.get_weight() );
+        source_.accept( swv_ );
         //std::cerr << "Done processing" << std::endl;
     }
     void Summary::end_processing()
@@ -114,7 +164,10 @@ namespace fn
         for ( auto& ns : nv )
         {
             os_ << std::setw(20 + ns.gen * 10) << ns.name ;
-            os_ << std::setw(10)  << sv_.at( ns.id ) << std::endl;
+            os_
+                << std::setw(10)  << sv_.at( ns.id ) 
+                << std::setw(10)  << swv_.at( ns.id ) 
+                << std::endl;
         }
     }
 
