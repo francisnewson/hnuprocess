@@ -1,4 +1,6 @@
 #Loose selection for looking at halo
+#inputs:
+#km2event: km2_event
 ---
 #-------------------------------------------------- 
 - output:
@@ -170,3 +172,12 @@
     type: Summary
     base : passer
     source : hnu_selection 
+
+- analysis :
+    type: Km2Plotter
+    name: full_plots
+    folder: full_km2
+    tfile: tfout
+    selection: hnu_selection
+    inputs:
+        km2event: km2_event

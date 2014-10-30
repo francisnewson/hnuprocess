@@ -27,6 +27,7 @@ namespace fn
             catch ( ... )
             {
                 std::cerr << "Trying to get single track (" __FILE__ ")\n" ;
+                throw;
             }
 
             return ogt;

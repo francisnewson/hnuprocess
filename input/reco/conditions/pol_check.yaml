@@ -1,0 +1,124 @@
+# Analysis to check MNP33 kick
+---
+#-------------------------------------------------- 
+- output:
+    name: tfout
+    type: tfile
+    filename: pol_check.root
+
+- output:
+    name: fout_posk
+    type: ostream
+    filename: run_pol_posk.dat
+
+- output:
+    name: fout_negk
+    type: ostream
+    filename: run_pol_negk.dat
+
+- monitor:
+    name: counter
+    type: Counter
+
+- input:
+    name: kaon_track
+    type: KaonTrack
+    kaon_type: auto
+    beam_mapping: input/reco/beam/beam_mapping.yaml
+
+- selection:
+    name: passer
+    type : auto_pass
+
+#SingleTrack
+- input:
+    name : bf_st
+    type : SingleTrack
+    method : BF
+
+    #log_level: always_print
+
+    init_min_mom: 3.0 
+    init_max_mom: 80.0
+
+    init_max_cda: 15.0
+
+    init_min_z: -5000.0
+    init_max_z:  10000.0
+
+    dch_merge_sep: 0.5
+
+    inputs:
+        kt: kaon_track
+
+#Found ogt
+- selection:
+    name: good_trk
+    type : FoundGoodTrack
+
+    inputs :
+        ogt: bf_st
+
+#Track charge
+- selection:
+    name: pos_trk
+    type : TrackCharge
+    charge: +1
+    inputs :
+        ogt: bf_st
+
+- selection:
+    name: neg_trk
+    type : TrackCharge
+    charge: -1
+    inputs :
+        ogt: bf_st
+
+- selection:
+    name : pol_check_sel_pos
+    type: CompositeSelection
+    children:
+        - good_trk
+        - pos_trk
+
+
+- selection:
+    name : pol_check_sel_neg
+    type: CompositeSelection
+    children:
+        - good_trk
+        - neg_trk
+
+- analysis :
+    name: pol_check_pos
+    type: PolCheck
+    log_level: always_print
+    selection: pol_check_sel_pos
+    folder: pol_check_posk
+    tfile: tfout
+    fout:  fout_posk
+    inputs:
+        ogt: bf_st
+
+- analysis :
+    name: pol_check_neg
+    type: PolCheck
+    log_level: always_print
+    selection: pol_check_sel_neg
+    folder: pol_check_negk
+    tfile: tfout
+    fout:  fout_negk
+    inputs:
+        ogt: bf_st
+
+- analysis : 
+    name : full_summary_pos
+    type: Summary
+    base : passer
+    source : pol_check_sel_pos
+
+- analysis : 
+    name : full_summary_neg
+    type: Summary
+    base : passer
+    source : pol_check_sel_neg

@@ -15,7 +15,7 @@ lenv.AddLibs( [
 lenv.AddEvent( event_dir, 'event' )
 lenv.SetYaml( yaml_dir )
 
-cint_builder = Builder( action = 'rootcint -f $TARGET -c -p $SOURCES' )
+cint_builder = Builder( action = os.path.join(root_dir, 'bin', 'rootcint')+' -f $TARGET -c -p $SOURCES' )
 lenv.Append( BUILDERS = { 'Dict' : cint_builder } )
 
 dict_headers = [ Glob('dict/*.hh') ]

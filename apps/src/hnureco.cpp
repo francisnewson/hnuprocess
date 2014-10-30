@@ -53,6 +53,7 @@ int main( int argc, char * argv[] )
     {
         std::ofstream flaunch( "launch.log", std::ofstream::app );
         write_launch ( argc, argv, flaunch );
+
     }
 
     //**************************************************
@@ -99,58 +100,6 @@ int main( int argc, char * argv[] )
 
     //Process program options--------------------------------------------
 
-    //help
-    if ( vm.count( "help" ) )
-    {
-        std::cerr << desc << "\n";
-        std::cerr << "Exiting because help was requested." << "\n";
-        return false;
-    }
-
-    std::string channel;
-    path mission;
-    std::string mission_name;
-
-    //Required options
-    if ( !  vm.count( "channel" ) )
-    {
-        std::cerr << "**ERROR** Must specify channel!" << std::endl;
-        return false;
-    }
-    else
-    {
-        auto channel_path = vm["channel"].as<path>();
-        std::string channel_string = channel_path.string();
-        if ( channel_string.find( "list" ) != std::string::npos ) 
-        {
-            channel = channel_path.stem().string();
-        }
-        else
-        {
-            channel = channel_path.string();
-        }
-    }
-
-    if ( ! vm.count( "mission" ) )
-    {
-        std::cerr << "**ERROR** Must specify mission file!" << std::endl;
-        return false;
-    }
-    else
-    {
-        mission = vm["mission"].as<path>();
-        mission_name = mission.stem().string();
-    }
-
-    //Check mission exists
-    if ( !boost::filesystem::exists( mission ) )
-    {
-        throw std::runtime_error( 
-                mission.string() + " does not exist (" __FILE__ ")\n"
-                "[" + boost::filesystem::absolute( mission).string() + "]"
-                );
-    }
-
     /**************************************************
      * LOGGING
      ***************************************************/
@@ -181,6 +130,61 @@ int main( int argc, char * argv[] )
                 min_sev,  severity_level::maximum) );
 
     //--------------------------------------------------
+
+    //help
+    if ( vm.count( "help" ) )
+    {
+        std::cerr << desc << "\n";
+        std::cerr << "Exiting because help was requested." << "\n";
+        return false;
+    }
+
+    std::string channel;
+    path mission;
+    std::string mission_name;
+
+    //Required options
+    if ( !  vm.count( "channel" ) )
+    {
+        std::cerr << "**ERROR** Must specify channel!" << std::endl;
+        return false;
+    }
+    else
+    {
+        auto channel_path = vm["channel"].as<path>();
+        std::string channel_string = channel_path.string();
+        if ( channel_string.find( "list" ) != std::string::npos ) 
+        {
+            channel = channel_path.stem().string();
+            BOOST_LOG_SEV( slg, startup)
+                << "Extracting channel name: " << channel;
+        }
+        else
+        {
+            channel = channel_path.string();
+        }
+    }
+
+    if ( ! vm.count( "mission" ) )
+    {
+        std::cerr << "**ERROR** Must specify mission file!" << std::endl;
+        return false;
+    }
+    else
+    {
+        mission = vm["mission"].as<path>();
+        mission_name = mission.stem().string();
+    }
+
+    //Check mission exists
+    if ( !boost::filesystem::exists( mission ) )
+    {
+        throw std::runtime_error( 
+                mission.string() + " does not exist (" __FILE__ ")\n"
+                "[" + boost::filesystem::absolute( mission).string() + "]"
+                );
+    }
+
 
     //PREPARE INPUT
     //Create Reconstruction
@@ -231,9 +235,10 @@ int main( int argc, char * argv[] )
         }
         else if ( vm.count( "auto" ) )
         {
-            BOOST_LOG_SEV( slg, startup )
-            << "Getting file list from channel" ;
             filelist =  vm[ "channel" ].as<path>();
+            BOOST_LOG_SEV( slg, startup )
+            << "Getting file list from channel: "
+            << vm["channel"].as<path>();
         }
         else
         {

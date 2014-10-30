@@ -139,6 +139,20 @@ namespace fn
         return bf_track_.extrapolate( z );
     }
 
+    TVector3 BFSingleRecoTrack::get_us_mom() const
+    {
+        const fne::RecoTrack& rt = *proc_track_->rt;
+        TVector3 usmom{ rt.bdxdz, rt.bdydz, 1};
+        return proc_track_->corr_mom  * usmom.Unit();
+    }
+
+    TVector3 BFSingleRecoTrack::get_ds_mom() const
+    {
+        const fne::RecoTrack& rt = *proc_track_->rt;
+        TVector3 dsmom{ rt.dxdz, rt.dydz, 1};
+        return proc_track_->corr_mom  * dsmom.Unit();
+    }
+
     //--------------------------------------------------
 
     //BF

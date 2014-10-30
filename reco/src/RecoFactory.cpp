@@ -130,8 +130,9 @@ namespace fn
         }
         else
         {
-            std::cerr << name << " actually points to " <<
-                output_prefix_.string() + p << std::endl;
+            BOOST_LOG_SEV( get_log(), startup )
+            << name << " actually points to " <<
+                output_prefix_.string() + p ;
 
             //Add a prefix to physical files
             ostreams_.insert( 

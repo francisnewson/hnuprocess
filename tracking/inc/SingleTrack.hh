@@ -38,9 +38,11 @@ namespace fn
 
             //downstream
             virtual TVector3 extrapolate_ds( double z) const = 0 ;
+            virtual TVector3 get_ds_mom() const = 0;
 
             //raw upstream
             virtual TVector3 extrapolate_us( double z) const = 0 ;
+            virtual TVector3 get_us_mom() const = 0;
 
             //BF track
             virtual TVector3 extrapolate_bf( double z) const = 0 ;
@@ -126,6 +128,9 @@ namespace fn
             TVector3 extrapolate_ds( double z) const;
             TVector3 extrapolate_us( double z) const;
             TVector3 extrapolate_bf( double z) const;
+
+            TVector3 get_us_mom() const;
+            TVector3 get_ds_mom() const;
 
         private:
             BFCorrection& bfc_;

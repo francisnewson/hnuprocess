@@ -88,28 +88,30 @@ namespace fn
                 {
                     auto& h = event_->header;
 
-                    if ( current_burst_ == h.burst_time )
-                    {
-                        new_burst_ = false;
-                        new_run_ = false;
-                        new_tree_ = false;
+                    new_burst_ = false;
+                    new_run_ = false;
+                    new_tree_ = false;
+
+                    new_burst_ =  ( current_burst_ != h.burst_time );
+                    new_run_ = ( current_run_ != h.run );
+                    new_tree_ = ( current_tree_ != tree );
+
+                    if ( new_run_ )
+                    { 
+                        //std::cerr << "NEW RUN" << std::endl;
+                        current_run_ = h.run; 
                     }
-                    else
-                    {
-                        new_burst_ = true;
-                        current_burst_ = h.burst_time ;
 
-                        new_run_ =  ( current_run_ != h.run );
-                        if ( new_run_ )
-                        { current_run_ = h.run; }
+                    if ( new_tree_ )
+                    { 
+                        //std::cerr << "NEW TREE" << std::endl;
+                        current_tree_ = tree;
+                    }
 
-
-                        new_tree_ =  ( current_tree_ != tree );
-
-                        if ( new_tree_ )
-                        {
-                            current_tree_ = tree;
-                        }
+                    if ( new_burst_ )
+                    { 
+                        //std::cerr << "NEW BURST" << std::endl;
+                        current_burst_ = h.burst_time;
                     }
                 }
 
@@ -166,25 +168,26 @@ namespace fn
                             { sub->end_burst(); }
                         }
 
-                        if ( new_run_)
-                        {
-                            if ( started_run_ )
-                            {
-                                for ( auto& sub : s )
-                                { sub->end_run(); }
-                            }
-
-                            for ( auto& sub : s )
-                            { sub->new_run(); }
-
-                            started_run_ = true;
-
-                        }
 
                         for ( auto& sub : s )
                         { sub->new_burst(); }
 
                         started_burst_ = true;
+                    }
+
+                    if ( new_run_)
+                    {
+                        if ( started_run_ )
+                        {
+                            for ( auto& sub : s )
+                            { sub->end_run(); }
+                        }
+
+                        for ( auto& sub : s )
+                        { sub->new_run(); }
+
+                        started_run_ = true;
+
                     }
 
                     for ( auto& sub : s )
