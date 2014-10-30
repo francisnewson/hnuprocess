@@ -3,6 +3,11 @@
     type: tfile
     filename: halo_plots.root
 
+- output:
+    name: fout_stats
+    type: ostream
+    filename: km2_stats.dat
+
 - monitor:
     name: counter
     type: Counter
@@ -12,6 +17,12 @@
     type: KaonTrack
     kaon_type: auto
     beam_mapping: input/reco/beam/beam_mapping.yaml
+
+- selection:
+    name: kaon_mom_weights
+    type: KaonMomWeight
+    crude_weights: input/reco/mod/kaon_crude_weights.dat
+    fine_weights: input/reco/mod/kaon_fine_weights.dat
 
 #SingleTrack
 - input:
@@ -66,6 +77,7 @@
     name : hnu_selection
     type: CompositeSelection
     children:
+        - kaon_mom_weights
         - good_trk
         - pos_trk
 
@@ -83,3 +95,14 @@
     type: Summary
     base : passer
     source : hnu_selection 
+
+- analysis:
+    name: km2_stats
+    type: Km2Stats
+    selection: hnu_selection
+    tfile: tfout
+    folder: statsfolder
+    ostream: fout_stats
+    inputs:
+        km2event: km2_event
+
