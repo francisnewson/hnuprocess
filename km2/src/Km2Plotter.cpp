@@ -1,4 +1,5 @@
 #include "Km2Plotter.hh"
+#include "yaml_help.hh"
 
 namespace fn
 {
@@ -70,12 +71,13 @@ namespace fn
         (YAML::Node& instruct, RecoFactory& rf )
         {
             const Selection * sel = rf.get_selection( 
-                    instruct["selection"].as<std::string>() );
+                    get_yaml<std::string>( instruct, "selection" ) );
 
             TFile & tfile = rf.get_tfile( 
-                    instruct["tfile"].as<std::string>() );
+                    get_yaml<std::string>( instruct, "tfile" ) );
 
-            std::string folder = instruct["folder"].as<std::string>();
+            std::string folder = 
+                get_yaml<std::string>( instruct, "folder" );
 
             const Km2Event* km2_event = get_km2_event( instruct, rf );
 
