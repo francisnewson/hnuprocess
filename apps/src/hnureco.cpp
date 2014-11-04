@@ -300,6 +300,22 @@ int main( int argc, char * argv[] )
                 + mission_name + "_" ) ;
     }
 
+    //Run management
+    if ( vm.count("start-run" ) )
+    {
+        int min_run =  vm["start-run"].as<int>() ;
+        reco.set_min_run( min_run );
+        BOOST_LOG_SEV( slg, startup) 
+            << "Setting min run:" << min_run;
+    }
+
+    if ( vm.count("end-run" ) )
+    {
+        int max_run =  vm["end-run"].as<int>() ;
+        reco.set_max_run( max_run );
+        BOOST_LOG_SEV( slg, startup) 
+            << "Setting max run:" << max_run;
+    }
 
     reco_factory.set_output_prefix( output_prefix );
 

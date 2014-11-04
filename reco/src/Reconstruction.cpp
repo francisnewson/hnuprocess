@@ -165,8 +165,8 @@ namespace fn
     void Reconstruction::process_event()
     {
         load_event();
-            BOOST_LOG_SEV( log_, fn::severity_level::debug)
-                << "RECO:  about to notify full event";
+        BOOST_LOG_SEV( log_, fn::severity_level::debug)
+            << "RECO:  about to notify full event";
         notifyer_.notify_event();
     }
 
@@ -178,6 +178,18 @@ namespace fn
         bool carry_on = next_event();
 
         if ( !carry_on )
+        { return false; }
+
+        int run = event_ptr_->header.run;
+
+        //If we haven't reached the required 
+        //run range, don't process
+        if ( min_run_ && ( run < *min_run_ ) )
+        { return true; }
+
+        //If we've gone past the required
+        //run range, stop proceesing
+        if ( max_run_ && ( run > *max_run_ ) )
         { return false; }
 
         if ( ! continue_event() )
@@ -197,7 +209,6 @@ namespace fn
             process_event();
         }
         return true;
-
     }
 
     //----------------------------------------------------------------------
@@ -228,5 +239,11 @@ namespace fn
     {
         return chain_->is_mc();
     }
+
+    void Reconstruction::set_min_run( int min_run )
+    { min_run_.reset( min_run); }
+
+    void Reconstruction::set_max_run( int max_run )
+    { max_run_.reset(max_run); }
 }
 

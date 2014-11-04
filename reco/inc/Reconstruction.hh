@@ -76,6 +76,9 @@ namespace fn
 			boost::filesystem::path get_current_filename();
             bool is_mc() const;
 
+            void set_min_run( int min_run );
+            void set_max_run( int max_run );
+
 		private:
 			//Subscribers
 			std::vector<Selection*> header_checks_;
@@ -93,6 +96,9 @@ namespace fn
 			boost::optional<bool&> remote_stop_;
 			bool stop_;
 			bool event_loaded_;
+
+            boost::optional<int> min_run_;
+            boost::optional<int> max_run_;
 
 			//Debug
 			std::ostream& os_;
