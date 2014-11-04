@@ -30,6 +30,7 @@ namespace fn
             double get_muon_mom() const;
             double get_zvertex() const ;
             double get_cda() const; 
+            const SingleRecoTrack * get_reco_track() const;
 
         private:
             const SingleRecoTrack * srt_;

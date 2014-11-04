@@ -69,6 +69,11 @@ namespace fn
         return srt_->get_cda();
     }
 
+    const SingleRecoTrack * Km2RecoEvent::get_reco_track() const
+    {
+        return srt_;
+    }
+
     //--------------------------------------------------
 
     REG_DEF_SUB( Km2Event );

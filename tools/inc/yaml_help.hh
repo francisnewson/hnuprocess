@@ -18,6 +18,7 @@ namespace fn
             catch( YAML::Exception& c )
             {
                 std::cerr << "Extracting " <<  s << "\n";
+                std::cerr << c.what() << std::endl;
                 throw Xcept<MissingInfo>( s );
             }
 

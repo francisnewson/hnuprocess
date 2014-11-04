@@ -51,5 +51,8 @@ namespace fn
     };
 
     double correct_eop_energy( const fne::RecoCluster& re );
+
+    std::pair<int, int> get_cpd_cell_index( double pos_x, double pos_y);
+
 }
 #endif

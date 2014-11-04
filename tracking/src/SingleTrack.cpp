@@ -124,6 +124,11 @@ namespace fn
         return proc_track_->rt->quality;
     }
 
+    double BFSingleRecoTrack::get_ddead_cell() const
+    {
+        return proc_track_->rt->dDeadCell;
+    }
+
     TVector3 BFSingleRecoTrack::extrapolate_ds( double z) const
     {
         return extrapolate_z( * proc_track_->rt, z );

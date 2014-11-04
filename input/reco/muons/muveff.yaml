@@ -1,0 +1,224 @@
+#Loose selection for looking at halo
+#inputs:
+#km2event: km2_event
+---
+#-------------------------------------------------- 
+- output:
+    name: tfout
+    type: tfile
+    filename: halo_plots.root
+
+- monitor:
+    name: counter
+    type: Counter
+
+- input:
+    name: kaon_track
+    type: KaonTrack
+    kaon_type: auto
+    beam_mapping: input/reco/beam/beam_mapping.yaml
+
+#SingleTrack
+- input:
+    name : bf_st
+    type : SingleTrack
+    method : BF
+
+    #log_level: always_print
+
+    init_min_mom: 3.0 
+    init_max_mom: 75.0
+
+    init_max_cda: 10.0
+
+    init_min_z: -2000.0
+    init_max_z:  9000.0
+
+    dch_merge_sep: 0.5
+
+    inputs:
+        kt: kaon_track
+
+- input:
+    name: km2_event
+    type: Km2Event
+    inputs:
+        ogt: bf_st
+        kt: kaon_track
+
+#Km2Clusters
+- input:
+    name: full_km2clusters
+    type: Km2Clusters
+    noise_energy: 5 #GeV
+    noise_time: 12 #ns
+    brehm_radius: 5 #cm
+    track_cluster_radius: 5 #cm
+    inputs:
+        ogt: bf_st
+
+#Autopass
+- selection:
+    name: passer
+    type : auto_pass
+
+- selection:
+    name: kaon_mom_weights
+    type: KaonMomWeight
+    crude_weights: input/reco/mod/kaon_crude_weights.dat
+    fine_weights: input/reco/mod/kaon_fine_weights.dat
+
+#MUV bursts
+- selection:
+    name: gd_muv_brst
+    type: BadBurst
+    burst_list: "input/reco/conditions/bad_muv_burst.dat"
+
+#Muon status
+- selection:
+    name: muv_12
+    type : MuonReqStatus
+    allowed_status: [ 1, 2 ]
+    ignore_classes: [ p6 ]
+
+#Found ogt
+- selection:
+    name: good_trk
+    type : FoundGoodTrack
+
+    inputs :
+        ogt: bf_st
+
+#Track charge
+- selection:
+    name: pos_trk
+    type : TrackCharge
+    charge: +1
+    inputs :
+        ogt: bf_st
+
+#Track quality
+- selection:
+    name: quality_7
+    type: TrackQuality
+    quality: 0.7
+    inputs:
+        ogt: bf_st
+
+- selection:
+    name: cda_1cm
+    type: TrackCda
+    max_cda: 1.0 #cm
+    inputs:
+        ogt: bf_st
+
+- selection:
+    name: cda_35mm
+    type: TrackCda
+    max_cda: 3.5 #cm
+    inputs:
+        ogt: bf_st
+
+#Track DHC1 ACC
+- selection:
+    name: dch1_acc
+    type: TrackRadialAcceptance
+    track_section: upstream
+    z: 9708.42 #zDCH1
+    inner: 12.0
+    outer: 115.0
+    inputs:
+        ogt: bf_st
+
+#Track DHC4 ACC
+- selection:
+    name: dch4_acc
+    type: TrackRadialAcceptance
+    track_section: downstream
+    z: 11888.0 #zDCH1
+    inner: 14.0
+    outer: 115.0
+    inputs:
+        ogt: bf_st
+
+#Track time
+- selection:
+    name: rk_dcht
+    type : TrackTime
+    max_dt: 20 #ns
+    inputs:
+        ogt: bf_st
+
+#NoBadClusters
+- selection:
+    name: nobadcluster
+    type: Km2NoBadCluster
+    inputs:
+        km2clusters: full_km2clusters
+
+- selection:
+    name: pzt_cut
+    type: TrackPZT
+    regions_file: "input/reco/km2/pzt.yaml"
+    inputs:
+        ogt: bf_st
+        kt: kaon_track
+
+- selection:
+    name: rk_pz
+    type: TrackPZ
+    shape: rectangles
+    points:
+        - [ 13, 20, -1000, 9000 ]
+        - [ 20, 25, -1000, 9000 ]
+        - [ 25, 30,     0, 9000 ]
+        - [ 30, 35,   500, 9000 ]
+        - [ 35, 40,   500, 9000 ] 
+        - [ 40, 45,   500, 9000 ]
+        - [ 45, 50,  1000, 9000 ]
+        - [ 50, 55,  1000, 9000 ]
+        - [ 55, 60,  1500, 9000 ]
+        - [ 60, 65,  1500, 9000 ]
+    inputs:
+        ogt: bf_st
+
+- selection:
+    name: km2_peak_m2
+    type: Km2M2Miss
+    min_m2: -0.01
+    max_m2:   0.01
+    inputs:
+        km2event: km2_event
+
+- selection:
+    name : hnu_selection
+    type: CompositeSelection
+    children:
+        - kaon_mom_weights
+        - gd_muv_brst
+        - good_trk
+        - pos_trk
+        - quality_7
+        - cda_35mm
+        - dch1_acc
+        - dch4_acc
+        - rk_dcht
+        - rk_pz
+        - nobadcluster
+        - km2_peak_m2
+
+- analysis : 
+    name : full_summary
+    type: Summary
+    base : passer
+    source : hnu_selection 
+
+- analysis :
+    type: MuvEff
+    name: muv_eff
+    folder: muv_eff
+    tfile: tfout
+    selection: hnu_selection
+    muv_selection: muv_12
+    inputs:
+        km2event: km2_event

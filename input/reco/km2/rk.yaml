@@ -1,0 +1,255 @@
+#************************************************************
+#
+#    This is the selection used for the 2007 RK analysis
+#    Numbers, x], correspond to this page:
+#    http://goudzovs.web.cern.ch/goudzovs/ke2/selection.html
+#
+#************************************************************
+
+#Kaon track
+- input:
+    name: kaon_track
+    type: KaonTrack
+    kaon_type: auto
+    beam_mapping: input/reco/beam/beam_mapping.yaml
+
+#weight
+- selection:
+    name: kaon_mom_weights
+    type: KaonMomWeight
+    crude_weights: input/reco/mod/kaon_crude_weights.dat
+    fine_weights: input/reco/mod/kaon_fine_weights.dat
+
+#Autopass
+- selection:
+    name: passer
+    type : auto_pass
+
+# 2] SingleTrack
+- input:
+    name : bf_st
+    type : SingleTrack
+    method : BF
+
+    #log_level: always_print
+
+    init_min_mom: 3.0 
+    init_max_mom: 75.0
+
+    init_max_cda: 10.0
+
+    init_min_z: -2000.0
+    init_max_z:  9000.0
+
+    dch_merge_sep: 0.5
+
+    inputs:
+        kt: kaon_track
+
+- selection:
+    name: dch_veto
+    type : FoundGoodTrack
+
+    inputs :
+        ogt: bf_st
+
+
+# 3] Track charge
+- selection:
+    name: pos_trk
+    type : TrackCharge
+    charge: +1
+    inputs :
+        ogt: bf_st
+
+# 4] Track quality
+- selection:
+    name: quality_7
+    type: TrackQuality
+    quality: 0.7
+    inputs:
+        ogt: bf_st
+
+# 5] Track momentum
+- selection:
+    name: rk_track_mom
+    type: TrackMomentum
+    min: 13 #GeV
+    max: 65 #GeV
+    inputs:
+        ogt: bf_st
+
+# 6] LKr Veto
+- input:
+    name: rk_km2_clusters
+    type: Km2Clusters
+    noise_energy: 2 #GeV
+    noise_time: 12 #ns
+    brehm_radius: 6 #cm
+    track_cluster_radius: 5 #cm
+    inputs:
+        ogt: bf_st
+
+- selection:
+    name: rk_lkr_veto
+    type: Km2NoBadCluster
+    inputs:
+        km2clusters: rk_km2_clusters
+
+# 7] Fiducial volume
+- selection:
+    name: rk_pz
+    type: TrackPZ
+    shape: rectangles
+    points:
+        - [ 13, 20, -1000, 9000 ]
+        - [ 20, 25, -1000, 9000 ]
+        - [ 25, 30,     0, 9000 ]
+        - [ 30, 35,   500, 9000 ]
+        - [ 35, 40,   500, 9000 ] 
+        - [ 40, 45,   500, 9000 ]
+        - [ 45, 50,  1000, 9000 ]
+        - [ 50, 55,  1000, 9000 ]
+        - [ 55, 60,  1500, 9000 ]
+        - [ 60, 65,  1500, 9000 ]
+    inputs:
+        ogt: bf_st
+
+# 8] CDA
+- selection:
+    name: rk_cda
+    type: TrackCda
+    max_cda: 3.5 #cm
+    inputs:
+        ogt: bf_st
+
+# 9] LKr acceptance
+- selection:
+    name: rk_lkr_accep
+    type: TrackLkrAcceptance
+    margin_parameter: 8 #cm
+    inputs:
+        ogt: bf_st
+
+# 10] LKr Hot cells
+
+- input:
+    name: km2_event
+    type: Km2Event
+    inputs:
+        ogt: bf_st
+        kt: kaon_track
+
+- selection:
+    name: rk_hot_lkr
+    type: Km2HotLkr
+    hot_cells: [ [ 134, 56 ], [ 134, 57 ] ]
+    inputs:
+        km2event: km2_event
+        km2clusters: rk_km2_clusters
+
+# 13] Track DHC1 ACC
+- selection:
+    name: rk_dch1_acc
+    type: TrackRadialAcceptance
+    track_section: upstream
+    z: 9708.42 #zDCH1
+    inner: 12.0
+    outer: 115.0
+    inputs:
+        ogt: bf_st
+
+# 14] Track DHC4 ACC
+- selection:
+    name: rk_dch4_acc
+    type: TrackRadialAcceptance
+    track_section: downstream
+    z: 11888.0 #zDCH1
+    inner: 14.0
+    outer: 115.0
+    inputs:
+        ogt: bf_st
+
+# 15] Track distance to LKr dead cell
+- selection:
+    name: rk_ddead_cell
+    type: TrackDDeadCell
+    min_ddead_cell: 2.0 #cm
+    inputs:
+        ogt: bf_st
+
+# 16] Track time
+- selection:
+    name: rk_dcht
+    type : TrackTime
+    max_dt: 20 #ns
+    inputs:
+        ogt: bf_st
+
+#Specific cuts for km2
+# S2] m2miss
+- selection:
+    name: rk_km2_m2m
+    type: Km2PM2Miss
+    shape: rectangles
+    points:
+        - [ 13, 20, -16e-3, 13e-3 ]
+        - [ 20, 25, -14e-3, 11e-3 ]
+        - [ 25, 30, -13e-3, 10e-3 ]
+        - [ 30, 35, -13e-3, 10e-3 ]
+        - [ 35, 40, -13e-3, 10e-3 ] 
+        - [ 40, 45, -13e-3, 10e-3 ]
+        - [ 45, 50, -13e-3, 10e-3 ]
+        - [ 50, 55, -14e-3, 11e-3 ]
+        - [ 55, 60, -15e-3, 12e-3 ]
+        - [ 60, 65, -16e-3, 12e-3 ]
+    inputs:
+        km2event: km2_event
+
+# S3] E/p
+- selection:
+    name: rk_km2_eop
+    #log_level: always_print
+    type: Km2TrackClusterEP
+    min_eop: 0.0
+    max_eop: 0.85
+    inputs:
+        km2clusters: rk_km2_clusters
+        ogt: bf_st
+
+#full RK selection
+- selection:
+    name: rk_selection
+    type: CompositeSelection
+    children:
+        - passer
+        - dch_veto
+        - pos_trk
+        - quality_7
+        - rk_track_mom
+        - rk_lkr_veto
+        - rk_pz
+        - rk_cda
+        - rk_lkr_accep
+        - rk_hot_lkr
+        - rk_dch1_acc
+        - rk_dch4_acc
+        - rk_ddead_cell
+        - rk_dcht
+        - rk_km2_m2m
+        - rk_km2_eop
+
+- monitor:
+    name: counter
+    type: Counter
+
+- output:
+    name: tfout
+    type: tfile
+    filename: halo_plots.root
+
+- analysis : 
+    name : full_summary
+    type: Summary
+    base : passer
+    source : rk_selection 

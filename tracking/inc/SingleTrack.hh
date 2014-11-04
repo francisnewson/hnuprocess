@@ -36,6 +36,8 @@ namespace fn
 
             virtual double get_quality() const = 0;
 
+            virtual double get_ddead_cell() const = 0;
+
             //downstream
             virtual TVector3 extrapolate_ds( double z) const = 0 ;
             virtual TVector3 get_ds_mom() const = 0;
@@ -124,6 +126,8 @@ namespace fn
             double get_time() const;
 
             double get_quality() const;
+
+            double get_ddead_cell() const;
 
             TVector3 extrapolate_ds( double z) const;
             TVector3 extrapolate_us( double z) const;

@@ -165,8 +165,8 @@ namespace fn
         {
             os_ << std::setw(20 + ns.gen * 10) << ns.name ;
             os_
-                << std::setw(10)  << sv_.at( ns.id ) 
-                << std::setw(10)  << swv_.at( ns.id ) 
+                << std::setw(20)  << sv_.at( ns.id ) 
+                << std::setw(20)  << swv_.at( ns.id ) 
                 << std::endl;
         }
     }

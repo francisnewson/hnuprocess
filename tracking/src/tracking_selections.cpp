@@ -2,6 +2,8 @@
 #include "Xcept.hh"
 #include "RecoParser.hh"
 #include "yaml_help.hh"
+#include "lkraccep_2007.hh"
+#include "NA62Constants.hh"
 
 namespace fn
 {
@@ -249,6 +251,33 @@ namespace fn
 
     //--------------------------------------------------
 
+    REG_DEF_SUB( TrackVertexZ);
+
+
+    TrackVertexZ::TrackVertexZ( const SingleTrack& st,
+            double min_z, double max_z )
+        :st_( st), min_z_( min_z ), max_z_(max_z){}
+
+    bool TrackVertexZ::do_check() const
+    {
+        const SingleRecoTrack& srt = st_.get_single_track();
+        double z = srt.get_vertex().Z();
+        return ( z < max_z_ ) && ( z > min_z_ ) ;
+    }
+
+    template<>
+        Subscriber * create_subscriber<TrackVertexZ>
+        (YAML::Node& instruct, RecoFactory& rf )
+        {
+            SingleTrack * st = get_single_track( instruct, rf );
+            double min_z = get_yaml<double>( instruct, "min" );
+            double max_z = get_yaml<double>( instruct, "max" );
+
+            return new TrackVertexZ( *st, min_z, max_z );
+        }
+
+    //--------------------------------------------------
+
     REG_DEF_SUB( TrackTime);
 
     TrackTime::TrackTime(  const fne::Event * e, 
@@ -338,5 +367,67 @@ namespace fn
 
             return new TrackPZT( event, *st, *kt, mc, regions );
         }
+
+    //--------------------------------------------------
+
+    REG_DEF_SUB( TrackLkrAcceptance);
+
+    TrackLkrAcceptance::TrackLkrAcceptance
+        (const fne::Event *e,  const SingleTrack& st, double margin_parameter )
+        :st_( st ), e_( e ), margin_parameter_( margin_parameter )
+        {}
+
+    bool TrackLkrAcceptance::do_check() const
+    {
+        int run = e_->header.run;
+        const SingleRecoTrack& srt = st_.get_single_track();
+        TVector3 vLkr = srt.extrapolate_ds( na62const::zLkr );
+
+        return ( ! LKr_acc( run, vLkr.X(), vLkr.Y(), margin_parameter_ ) );
+    }
+
+    template<>
+        Subscriber * create_subscriber<TrackLkrAcceptance>
+        (YAML::Node& instruct, RecoFactory& rf )
+        {
+            const fne::Event * event = rf.get_event_ptr();
+            SingleTrack * st = get_single_track( instruct, rf );
+
+            double margin_parameter = get_yaml<double>
+                ( instruct, "margin_parameter" );
+
+            return new TrackLkrAcceptance( event, *st, margin_parameter );
+        }
+
+    //--------------------------------------------------
+
+    REG_DEF_SUB( TrackDDeadCell);
+
+    TrackDDeadCell::TrackDDeadCell(
+            const SingleTrack& st,
+            double min_ddead_cell )
+        :st_( st ), min_ddead_cell_( min_ddead_cell )
+    {}
+
+    bool TrackDDeadCell::do_check() const
+    {
+        const SingleRecoTrack& srt = st_.get_single_track();
+        double track_ddead_cell = srt.get_ddead_cell();
+
+        return ( track_ddead_cell > min_ddead_cell_ );
+    }
+
+    template<>
+        Subscriber * create_subscriber<TrackDDeadCell>
+        (YAML::Node& instruct, RecoFactory& rf )
+        {
+            SingleTrack * st = get_single_track( instruct, rf );
+
+            double min_ddead_cell = get_yaml<double>
+                ( instruct, "min_ddead_cell" );
+
+            return new TrackDDeadCell( *st, min_ddead_cell );
+        }
+
 }
 

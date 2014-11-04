@@ -10,6 +10,7 @@ namespace fn
         bad_clusters_.clear();
         associate_clusters_.clear();
         ignored_clusters_.clear();
+        all_clusters_.clear();
     }
 
     void Km2RecoClusters::add_cluster( cluster_type ct, const fne::RecoCluster * cd )
@@ -28,6 +29,8 @@ namespace fn
                 associate_clusters_.push_back( cd );
                 break;
         }
+
+        all_clusters_.push_back( cd );
     }
 
     //--------------------------------------------------

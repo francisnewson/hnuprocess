@@ -114,14 +114,14 @@ namespace fn
     class TrackPZ : public CachedSelection
     {
         public:
-        TrackPZ( const SingleTrack& st,
-                std::vector<rectangle> recs );
+            TrackPZ( const SingleTrack& st,
+                    std::vector<rectangle> recs );
 
         private:
-        bool do_check() const;
+            bool do_check() const;
 
-        const SingleTrack& st_;
-        const AreaCut area_cut_;
+            const SingleTrack& st_;
+            const AreaCut area_cut_;
 
             REG_DEC_SUB( TrackPZ);
     };
@@ -131,7 +131,7 @@ namespace fn
         (YAML::Node& instruct, RecoFactory& rf );
 
     //--------------------------------------------------
-    
+
     class TrackCda : public CachedSelection
     {
         public:
@@ -171,9 +171,30 @@ namespace fn
     template<>
         Subscriber * create_subscriber<TrackMomentum>
         (YAML::Node& instruct, RecoFactory& rf );
-    
+
     //--------------------------------------------------
 
+    class TrackVertexZ : public CachedSelection
+    {
+        public:
+            TrackVertexZ( const SingleTrack& st,
+                    double min_z , double max_z  );
+
+        private:
+            bool do_check() const;
+
+            const SingleTrack& st_;
+            double min_z_;
+            double max_z_;
+            REG_DEC_SUB( TrackVertexZ);
+    };
+
+    template<>
+        Subscriber * create_subscriber<TrackVertexZ>
+        (YAML::Node& instruct, RecoFactory& rf );
+
+
+    //--------------------------------------------------
     class TrackTime : public CachedSelection
     {
 
@@ -196,16 +217,16 @@ namespace fn
     template<>
         Subscriber * create_subscriber<TrackTime>
         (YAML::Node& instruct, RecoFactory& rf );
-    
+
     //--------------------------------------------------
-    
+
     struct PZTRegion
     {
         double minT;
         double maxT;
         AreaCut pz_cut;
     };
-    
+
     class TrackPZT : public CachedSelection
     {
         public:
@@ -227,6 +248,50 @@ namespace fn
 
     template<>
         Subscriber * create_subscriber<TrackPZT>
+        (YAML::Node& instruct, RecoFactory& rf );
+
+    //--------------------------------------------------
+
+    class TrackLkrAcceptance : public CachedSelection
+    {
+        public:
+            TrackLkrAcceptance( 
+                    const fne::Event * e,
+                    const SingleTrack& st, 
+                    double margin_parameter );
+        private:
+            bool do_check() const;
+            const SingleTrack& st_;
+            const fne::Event * e_;
+
+            double margin_parameter_;
+
+            REG_DEC_SUB( TrackLkrAcceptance);
+    };
+
+    template<>
+        Subscriber * create_subscriber<TrackLkrAcceptance>
+        (YAML::Node& instruct, RecoFactory& rf );
+
+    //--------------------------------------------------
+
+    class TrackDDeadCell : public CachedSelection
+    {
+        public:
+            TrackDDeadCell(
+                    const SingleTrack& st,
+                    double min_ddead_cell );
+
+        private:
+            bool do_check() const;
+            const SingleTrack& st_;
+
+            double min_ddead_cell_;
+            REG_DEC_SUB( TrackDDeadCell);
+    };
+
+    template<>
+        Subscriber * create_subscriber<TrackDDeadCell>
         (YAML::Node& instruct, RecoFactory& rf );
 }
 #endif

@@ -131,4 +131,16 @@ namespace fn
         return  cec( re );
     }
 
+    std::pair<int, int> get_cpd_cell_index( double pos_x, double pos_y)
+    {
+        static ClusterEnergyCorr
+            cec { "/afs/cern.ch/user/f/fnewson/work/hnu"
+                "/gopher/data/detector/eopCorrfile.dat" };
+
+        int cpd;
+        int cell;
+        cec.GetCpdCellIndex( pos_x, pos_y, &cpd, &cell );
+        return std::make_pair( cpd, cell );
+    }
+
 }
