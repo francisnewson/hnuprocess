@@ -13,10 +13,10 @@ namespace fn
                 100, 0, 100, "Momentum (GeV/c)" );
 
         h_m2miss_ = hs_.MakeTH1D( "h_m2miss", "Reconstructed m^{2}_{miss}",
-                100, -0.02, 0.02, "m^{2}_{miss} (GeV^{2}/c^{4})" );
+                200, -0.2, 0.2, "m^{2}_{miss} (GeV^{2}/c^{4})" );
 
         h_m2p_ = hs_.MakeTH2D( "h_m2p", "Momentum vs m^{2}_{miss}",
-                100, -0.02, 0.02, "m^{2}_{miss} (GeV^{2}/c^{4})" ,
+                200, -0.2, 0.2, "m^{2}_{miss} (GeV^{2}/c^{4})" ,
                 100, 0, 100, "Momentum (GeV/c)" );
 
         h_pz_  = hs_.MakeTH2D( "h_pz", "Z vs Momentum",
@@ -44,9 +44,11 @@ namespace fn
             TFile& tfile, std::string folder)
         :Analysis( sel), muv_selection_( muv_selection),
         km2e_( km2_event), tfile_( tfile), folder_( folder),
-        eff_mom_( "eff_mom", "Eff( muon momentum)", 100, 0, 100 )
+        eff_mom_( "eff_mom", "Eff( muon momentum)", 100, 0, 100 ),
+        eff_m2m_( "eff_m2m", "Eff( muon m^{2}_{miss})", 200, -0.2, 0.2 )
     {
         eff_mom_.SetDirectory( 0 );
+        eff_m2m_.SetDirectory( 0 );
     }
 
     void MuvEff::process_event()
@@ -67,6 +69,7 @@ namespace fn
             fail_plots_.Fill( km2re, weight );
         }
             eff_mom_.Fill( pass, km2re.get_muon_mom() );
+            eff_m2m_.Fill( pass, km2re.get_m2miss() );
     }
 
     void MuvEff::end_processing()
@@ -82,6 +85,7 @@ namespace fn
 
         cd_p( &tfile_, folder_ );
         eff_mom_.Write();
+        eff_m2m_.Write();
     }
 
     //--------------------------------------------------

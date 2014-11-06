@@ -237,6 +237,14 @@
         km2clusters: rk_km2_clusters
         ogt: bf_st
 
+- selection:
+    name: km2_peak_m2
+    type: Km2M2Miss
+    min_m2: -0.002
+    max_m2:   0.002
+    inputs:
+        km2event: km2_event
+
 #full RK selection
 - selection:
     name: rk_selection
@@ -257,63 +265,57 @@
         - rk_dch4_acc
         - rk_ddead_cell
         - rk_dcht
-        - rk_km2_m2m
-        - rk_km2_eop
+#       - rk_km2_eop
+#       - km2_peak_m2
+#
+
+- selection:
+    name: rk_peak
+    type: CompositeSelection
+    children:
+        - rk_selection
+        - km2_peak_m2
 
 
 - monitor:
     name: counter
     type: Counter
 
-#- monitor:
-    #name: announcer
-    #type: Announcer
+#Muon status
+- selection:
+    name: muv_12
+    type : MuonReqStatus
+    allowed_status: [ 1, 2 ]
+    ignore_classes: [ p6 ]
 
 - output:
     name: tfout
     type: tfile
-    filename: halo_plots.root
+    filename: muv_eff.root
+
+- analysis :
+    type: MuvEff
+    name: muv_eff_full
+    folder: muv_eff_full
+    tfile: tfout
+    selection: rk_selection
+    muv_selection: muv_12
+    inputs:
+        km2event: km2_event
+
+- analysis :
+    type: MuvEff
+    name: muv_eff_peak
+    folder: muv_eff_peak
+    tfile: tfout
+    selection: rk_peak
+    muv_selection: muv_12
+    inputs:
+        km2event: km2_event
 
 - analysis : 
     name : full_summary
     type: Summary
     base : passer
-    source : rk_selection 
+    source : rk_peak 
 
-- output:
-    name: oselist
-    type: ostream
-    filename: km2_events.dat
-
-- analysis:
-    name: km2_events
-    type: EventLister
-    selection: rk_selection
-    ostream:  oselist
-
-- selection:
-    name: km_events
-    type: EventSelector
-    event_list: input/reco/disag.dat
-
-
-- output:
-    name: printstream
-    type: ostream
-    filename: cout
-
-#- analysis:
-    #name: rk_sel_printer
-    #type: EventPrinter
-    #required: km_events
-    #description: rk_selection
-    #ostream: printstream
-
-#- analysis:
-    #name: km2_printer
-    #type: Km2Printer
-    #selection: km_events
-    #ostream: printstream
-    #inputs:
-        #km2event: km2_event
-        #km2clusters: rk_km2_clusters

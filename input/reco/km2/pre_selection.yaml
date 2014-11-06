@@ -1,0 +1,140 @@
+#************************************************************
+#
+#    This is the selection used for the 2007 RK analysis
+#    Numbers, x], correspond to this page:
+#    http://goudzovs.web.cern.ch/goudzovs/ke2/selection.html
+#
+#************************************************************
+
+#Kaon track
+- input:
+    name: kaon_track
+    type: KaonTrack
+    kaon_type: auto
+    beam_mapping: input/reco/beam/beam_mapping.yaml
+
+#weight
+- selection:
+    name: kaon_mom_weights
+    type: KaonMomWeight
+    crude_weights: input/reco/mod/kaon_crude_weights.dat
+    fine_weights: input/reco/mod/kaon_fine_weights.dat
+
+#Autopass
+- selection:
+    name: passer
+    type : auto_pass
+        
+# 1]Bad bursts
+- selection:
+    name: good_phys_burst
+    type: BadBurst
+    burst_list: "input/reco/conditions/bad_phys_burst.dat"
+
+- selection:
+    name: good_dch_burst
+    type: BadBurst
+    burst_list: "input/reco/conditions/bad_dch_burst.dat"
+
+- selection:
+    name: good_bursts
+    type: CompositeSelection
+    children:
+        - good_phys_burst
+        - good_dch_burst
+
+# 2] SingleTrack
+- input:
+    name : bf_st
+    type : SingleTrack
+    method : BF
+
+    #log_level: always_print
+
+    init_min_mom: 3.0 
+    init_max_mom: 75.0
+
+    init_max_cda: 10.0
+
+    init_min_z: -2000.0
+    init_max_z:  9000.0
+
+    dch_merge_sep: 0.5
+
+    inputs:
+        kt: kaon_track
+
+- selection:
+    name: dch_veto
+    type : FoundGoodTrack
+
+    inputs :
+        ogt: bf_st
+
+# 3] Track charge
+- selection:
+    name: pos_trk
+    type : TrackCharge
+    charge: +1
+    inputs :
+        ogt: bf_st
+
+# 4] Track quality
+- selection:
+    name: quality_7
+    type: TrackQuality
+    quality: 0.7
+    inputs:
+        ogt: bf_st
+
+# 5] Track momentum
+- selection:
+    name: wide_track_mom
+    type: TrackMomentum
+    min:  5 #GeV
+    max: 70 #GeV
+    inputs:
+        ogt: bf_st
+
+# 7] Fiducial volume
+- selection:
+    name: fiducial_z 
+    type: TrackPZ
+    shape: rectangles
+    points:
+        - [  5, 70, -1000, 9000 ]
+    inputs:
+        ogt: bf_st
+
+#pre selection
+- selection:
+    name: pre_selection
+    type: CompositeSelection
+    children:
+        - passer
+        - good_bursts
+        - dch_veto
+        - pos_trk
+        - quality_7
+        - wide_track_mom
+        - fiducial_z
+
+- input:
+    name: km2_event
+    type: Km2Event
+    inputs:
+        ogt: bf_st
+        kt: kaon_track
+
+- analysis : 
+    name : full_summary
+    type: Summary
+    base : passer
+    source : pre_selection 
+
+- analysis :
+    name: km2_plots
+    type: Km2Plotter
+    selection: pre_selection
+    intputs:
+        km2event: km2_event

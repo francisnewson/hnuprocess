@@ -14,7 +14,13 @@ namespace fn
         auto this_burst = BurstId
         { event_->header.run, event_->header.burst_time};
 
-        return ! burst_tracker_.check_value( this_burst );
+        bool burst_in_list = burst_tracker_.check_value( this_burst );
+
+        BOOST_LOG_SEV( get_log(), log_level() )
+            << "Burst: " << this_burst 
+            << burst_in_list;
+
+        return ! burst_in_list;
     }
 
     template<>
@@ -51,6 +57,13 @@ namespace fn
         ( std::istream& is , BadBurst::BurstId& bi)
         {
             return is >> bi.run >> bi.burst_time ;
+        }
+
+    std::ostream& operator << 
+        ( std::ostream& os , const BadBurst::BurstId& bi)
+        {
+            return os << "[ " << bi.run << " "
+                << bi.burst_time << " ]";
         }
 
     bool operator<  ( const BadBurst::BurstId& lhs,

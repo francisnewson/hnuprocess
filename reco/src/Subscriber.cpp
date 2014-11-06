@@ -35,7 +35,7 @@ namespace fn
         return * log_;
     }
 
-    void Subscriber::set_log_level( severity_level sl ) 
+    void Subscriber::set_log_level( severity_level sl )  const
     { log_level_ = sl; }
 
     severity_level Subscriber::log_level() const

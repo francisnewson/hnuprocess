@@ -50,7 +50,7 @@ namespace fn
             static void set_log( logger& log);
             static logger& get_log();
 
-            void set_log_level( severity_level sl ) ;
+            void set_log_level( severity_level sl ) const;
             severity_level log_level() const;
 
         private:
@@ -58,7 +58,7 @@ namespace fn
             int id_;
 
             static logger * log_;
-            severity_level log_level_;
+            mutable severity_level log_level_;
     };
 
 

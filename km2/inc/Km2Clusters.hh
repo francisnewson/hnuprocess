@@ -88,10 +88,10 @@ namespace fn
 
             void new_event();
             const Km2RecoClusters& get_reco_clusters() const;
+            virtual cluster_type id_cluster( const fne::RecoCluster* rc ) const;
 
         private:
             virtual void process_clusters() const;
-            virtual cluster_type id_cluster( const fne::RecoCluster* rc ) const;
             const fne::Event * e_;
             const SingleTrack& st_;
             mutable Km2RecoClusters km2rc_;

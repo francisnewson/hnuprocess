@@ -2,6 +2,7 @@
 #define ANNOUNCERY_HH
 
 #include "Subscriber.hh"
+#include "Event.hh"
 
 #if 0
 /*                                                       
@@ -18,7 +19,7 @@ namespace fn
     class Announcer : public Subscriber
     {
         public:
-            Announcer( logger& log);
+            Announcer( const fne::Event * e);
             void new_file();
             void new_burst();
             void new_run();
@@ -27,10 +28,14 @@ namespace fn
             void end_processing();
 
         private:
-            logger& log_;
-            severity_level sl_;
+            const fne::Event * e_;
 
-            static SubscriberRegister<Announcer> announcer_reg_;
+            bool file_;
+            bool run_;
+            bool burst_;
+            bool event_;
+
+            REG_DEC_SUB( Announcer );
     };
 
     template<>

@@ -41,7 +41,7 @@ namespace fn
 
             TH2D * h_m2pivsk_;
             TH2D * h_pm2pi_;
-            TH2D * h_pm2k_;
+            TH2D * h_pm2mu_;
 
             TH2D * h_pz_;
             TH1D * h_cda_;

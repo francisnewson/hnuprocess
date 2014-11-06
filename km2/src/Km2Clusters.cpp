@@ -67,26 +67,45 @@ namespace fn
         //Is it noise?
         const SingleRecoTrack& srt = st_.get_single_track();
         double energy = rc->energy;
-        if ( energy < noise_energy_ ) 
+
+        BOOST_LOG_SEV( get_log(), log_level() )
+            << "Energy: " << energy ;
+
+        if ( energy <= noise_energy_ ) 
             return cluster_type::IGN;
 
         //Is it an accidental
         double track_time = srt.get_time();
-        if( !mc_ && ( (track_time - rc->time) > noise_time_ ) )
+        double delta_t = fabs(track_time - rc->time);
+
+        BOOST_LOG_SEV( get_log(), log_level() )
+            << "Delta_t: " << delta_t ;
+
+        if( !mc_ && delta_t >= noise_time_  )
             return cluster_type::IGN;
 
         //Is it Brehmsstrahlung
         TVector3 brehm_trkLkr = srt.extrapolate_bf( na62const::zLkr );
         PhotonProjCorrCluster photon_cluster{ *rc };
         TVector3 photon_pos = photon_cluster.get_pos();
-        if( (brehm_trkLkr - photon_pos).Mag() < brehm_radius_ )
+        double brehm_sep =  (brehm_trkLkr - photon_pos).Mag();
+
+        BOOST_LOG_SEV( get_log(), log_level() )
+            << "Brehm_sep: " << brehm_sep ;
+
+        if( brehm_sep  <= brehm_radius_ )
             return  cluster_type::IGN;
 
         //Is it associated to the track
         TVector3 trkLkr = srt.extrapolate_ds( na62const::zLkr );
         TrackProjCorrCluster track_cluster{ *rc };
         TVector3 cluster_pos = track_cluster.get_pos();
-        if ( (trkLkr - cluster_pos).Mag() < track_cluster_radius_ )
+        double track_cluster_sep = (trkLkr - cluster_pos).Mag();
+
+        BOOST_LOG_SEV( get_log(), log_level() )
+            << "Track cluster sep: " << track_cluster_sep ;
+
+        if ( track_cluster_sep  < track_cluster_radius_ )
             return cluster_type::ASS;
 
         //If nothing else, it is a bad cluster

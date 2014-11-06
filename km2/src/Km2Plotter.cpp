@@ -32,9 +32,9 @@ namespace fn
                 100, 0, 100, "P( GeV )",
                 100, -0.7, 0.3, "M2, Pion asusmption GeV^{2}" );
 
-        h_pm2k_ = hs_.MakeTH2D( "h_pm2k", "M2(k)  vs p_muon",
+        h_pm2mu_ = hs_.MakeTH2D( "h_pm2mu", "M2(#mu)  vs p_muon",
                 100, 0, 100, "P( GeV )",
-                100, -0.7, 0.3, "M2, Kaon asusmption GeV^{2}" );
+                100, -0.7, 0.3, "M2, Muon asusmption GeV^{2}" );
 
         h_cda_ = hs_.MakeTH1D( "h_cda", "CDA (cm)",
                 100, 0, 10, "CDA (cm)" );
@@ -44,7 +44,7 @@ namespace fn
     {
         const Km2RecoEvent& km2re = km2_event_.get_reco_event();
 
-        double m2_k = km2re.get_m2miss();
+        double m2_mu = km2re.get_m2miss();
         double m2_pi = km2re.get_m2pimiss();
         double wgt = get_weight();
         double p_mu = km2re.get_muon_mom();
@@ -56,7 +56,7 @@ namespace fn
         h_pz_->Fill( p_mu, zvert, wgt );
         h_m2pivsk_->Fill( m2_k, m2_pi, wgt );
         h_pm2pi_->Fill( p_mu, m2_pi, wgt );
-        h_pm2k_->Fill( p_mu, m2_k, wgt );
+        h_pm2mu_->Fill( p_mu, m2_mu, wgt );
         h_cda_->Fill( cda, wgt );
     }
 

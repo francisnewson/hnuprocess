@@ -65,6 +65,7 @@ namespace fn
         MuvPlots fail_plots_;
 
         TEfficiency eff_mom_;
+        TEfficiency eff_m2m_;
     };
 
     //--------------------------------------------------

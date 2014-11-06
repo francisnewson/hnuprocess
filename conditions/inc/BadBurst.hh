@@ -62,6 +62,9 @@ namespace fn
     std::istream& operator >> 
         ( std::istream& is , BadBurst::BurstId& bi);
 
+    std::ostream& operator << 
+        ( std::ostream& os , const BadBurst::BurstId& bi);
+
     bool operator<  ( const BadBurst::BurstId& lhs,
             const BadBurst::BurstId& rhs );
 
