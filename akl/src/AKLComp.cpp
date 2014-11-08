@@ -213,7 +213,7 @@ namespace fn
             TFile & tfile = rf.get_tfile( 
                     get_yaml<std::string>( instruct, "tfile" ) );
 
-            std::string folder = get_yaml<std::string>( instruct, "folder") ;
+            std::string folder = get_folder( instruct, rf );
 
             return new AKLComp( *sel, event, tfile, folder,  os );
         }

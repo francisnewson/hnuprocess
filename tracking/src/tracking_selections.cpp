@@ -204,13 +204,14 @@ namespace fn
     REG_DEF_SUB( TrackCda);
 
     TrackCda::TrackCda( const SingleTrack& st,
-            double cda )
-        :st_( st), cda_( cda ){}
+            double min_cda, double max_cda )
+        :st_( st), min_cda_( min_cda ), max_cda_( max_cda){}
 
     bool TrackCda::do_check() const
     {
         const SingleRecoTrack& srt = st_.get_single_track();
-        return srt.get_cda() < cda_;
+        double cda = srt.get_cda();
+            return ( cda > min_cda_ ) && ( cda < max_cda_ );
     }
 
     template<>
@@ -218,9 +219,18 @@ namespace fn
         (YAML::Node& instruct, RecoFactory& rf )
         {
             SingleTrack * st = get_single_track( instruct, rf );
-            double cda = instruct["max_cda"].as<double>();
+            double max_cda =get_yaml<double>( instruct, "max_cda" );
 
-            return new TrackCda( *st, cda );
+            //Minimum CDA defaults to 0
+            double min_cda = 0;
+            if ( YAML::Node min_cda_node = instruct["min_cda"] )
+            {
+                min_cda = min_cda_node.as<double>();
+            }
+
+            instruct["max_cda"].as<double>();
+
+            return new TrackCda( *st, min_cda, max_cda );
         }
 
     //--------------------------------------------------

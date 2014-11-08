@@ -45,5 +45,6 @@ namespace fn
             std::map<std::string,
                 std::vector<std::string>> channel_classes_;
     };
+
 }
 #endif

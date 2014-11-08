@@ -136,12 +136,13 @@ namespace fn
     {
         public:
             TrackCda( const SingleTrack& st,
-                    double cda );
+                    double min_cda, double max_cda );
 
         private:
             bool do_check() const;
             const SingleTrack& st_;
-            double cda_;
+            double min_cda_;
+            double max_cda_;
 
             REG_DEC_SUB( TrackCda);
     };

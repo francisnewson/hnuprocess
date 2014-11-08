@@ -30,6 +30,8 @@ namespace na62const
     constexpr double mK2 =  mK * mK;
     constexpr double mMu2 = mMu * mMu;
 
+    constexpr double zFinalCollimator = -1950;
+
     constexpr double zLkr  = 12108.2;
     constexpr double rLkrPojection = 10998.0;
 

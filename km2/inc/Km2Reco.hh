@@ -26,10 +26,14 @@ namespace fn
                     const KaonTrack * kt, const SingleTrack * st_ );
 
             double get_m2miss() const ;
-            double get_m2pimiss() const ;
+            double get_m2m_kmu() const ;
+            double get_m2m_kpi() const ;
+            double get_m2m_pimu() const ;
+
             double get_muon_mom() const;
             double get_zvertex() const ;
             double get_cda() const; 
+            double get_opening_angle()  const;
             const SingleRecoTrack * get_reco_track() const;
 
         private:
@@ -37,9 +41,12 @@ namespace fn
             const fne::Event * e_;
             const KaonTrack * kt_;
 
-            TLorentzVector p4miss_;
-            double m2miss_;
-            double m2pimiss_;
+            TLorentzVector p4miss_kmu_;
+            double m2m_kmu_;
+            double m2m_pimu_;
+            double m2m_kpi_;
+
+            double opening_angle_;
     };
 
     //--------------------------------------------------

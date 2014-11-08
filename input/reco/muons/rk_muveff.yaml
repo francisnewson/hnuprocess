@@ -245,6 +245,14 @@
     inputs:
         km2event: km2_event
 
+- selection:
+    name: halo_m2
+    type: Km2M2Miss
+    min_m2: -0.2
+    max_m2: -0.1
+    inputs:
+        km2event: km2_event
+
 #full RK selection
 - selection:
     name: rk_selection
@@ -267,7 +275,27 @@
         - rk_dcht
 #       - rk_km2_eop
 #       - km2_peak_m2
-#
+
+
+# Track MUV1 Radius
+- selection:
+    name: muv1_radius
+    type: TrackRadialAcceptance
+    track_section: downstream
+    z: 12740.0 #zmuv1
+    inner: 22.0
+    outer: 200
+    inputs:
+        ogt: bf_st
+
+# Halo  CDA
+- selection:
+    name: halo_cda
+    type: TrackCda
+    min_cda: 5.0 #cm
+    max_cda: 10.0 #cm
+    inputs:
+        ogt: bf_st
 
 - selection:
     name: rk_peak
@@ -276,6 +304,32 @@
         - rk_selection
         - km2_peak_m2
 
+- selection:
+    name: rk_peak_out
+    type: CompositeSelection
+    children:
+        - rk_selection
+        - km2_peak_m2
+        - muv1_radius
+
+- selection:
+    name: rk_halo
+    type: CompositeSelection
+    children:
+        - passer
+        - good_bursts
+        - dch_veto
+        - pos_trk
+        - quality_7
+        - rk_track_mom
+        - rk_lkr_veto
+        - rk_lkr_accep
+        - rk_hot_lkr
+        - rk_dch1_acc
+        - rk_dch4_acc
+        - rk_ddead_cell
+        - rk_dcht
+        - halo_cda
 
 - monitor:
     name: counter
@@ -309,6 +363,26 @@
     folder: muv_eff_peak
     tfile: tfout
     selection: rk_peak
+    muv_selection: muv_12
+    inputs:
+        km2event: km2_event
+
+- analysis :
+    type: MuvEff
+    name: muv_eff_peak_out
+    folder: muv_eff_peak_out
+    tfile: tfout
+    selection: rk_peak_out
+    muv_selection: muv_12
+    inputs:
+        km2event: km2_event
+
+- analysis :
+    type: MuvEff
+    name: muv_eff_halo
+    folder: muv_eff_halo
+    tfile: tfout
+    selection: rk_halo
     muv_selection: muv_12
     inputs:
         km2event: km2_event

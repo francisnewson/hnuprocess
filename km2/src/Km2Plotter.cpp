@@ -1,8 +1,132 @@
 #include "Km2Plotter.hh"
 #include "yaml_help.hh"
+#include "NA62Constants.hh"
+
 
 namespace fn
 {
+
+    Km2Plots::Km2Plots()
+    {
+        //Mass and momentum
+        h_m2m_kmu_ = hs_.MakeTH1D( "h_m2m_kmu", "K_{#mu2} missing mass",
+                10000, -0.7, 0.3, "m^{2}_{miss} ( GeV^{2}/ c^{4} )", "#events" ); 
+
+        h_m2m_kpi_ = hs_.MakeTH1D( "h_m2m_kpi", "K_{2#pi} missing mass",
+                10000, -0.7, 0.3, "m^{2}_{miss} ( GeV^{2}/ c^{4} )", "#events" ); 
+
+        h_m2m_pimu_ = hs_.MakeTH1D( "h_m2m_kpi", "#pi_{#mu2} missing mass",
+                10000, -0.7, 0.3, "m^{2}_{miss} ( GeV^{2}/ c^{4} )", "#events" ); 
+
+        h_p_m2m_kmu_ = hs_.MakeTH2D( "h_p_m2m_kmu", "Momentum vs K_{#mu2} missing mass",
+                1000, -0.7, 0.3, "m^{2}_{miss} ( GeV^{2}/ c^{4} )",
+                100, 0, 100, "p (GeV/c)" );
+
+        h_p_m2m_kpi_ = hs_.MakeTH2D( "h_p_m2m_kpi", "Momentum vs K_{2#pi} missing mass",
+                1000, -0.7, 0.3, "m^{2}_{miss} ( GeV^{2}/ c^{4} )",
+                100, 0, 100, "p (GeV/c)" );
+
+        h_p_m2m_pimu_ = hs_.MakeTH2D( "h_p_m2m_pimu", "Momentum vs #pi_{#mu2} missing mass",
+                1000, -0.7, 0.3, "m^{2}_{miss} ( GeV^{2}/ c^{4} )",
+                100, 0, 100, "p (GeV/c)" );
+
+        h_p_ = hs_.MakeTH1D( "h_p", "Momentum (GeV)",
+                100, 0, 100, "p (GeV)" );
+
+        //----------
+
+        //Kinematic shape
+        h_cda_ = hs_.MakeTH1D( "h_cda", "CDA (cm)",
+                100, 0, 10, "CDA (cm)" );
+
+        h_t_ = hs_.MakeTH1D( "h_t", "Opening angle (rad)",
+                150, 0, 15e-3, "#Theta (rad)" );
+
+        h_z_ = hs_.MakeTH1D( "h_z", "Z Decay Vertex (cm)",
+                120, -2000, 10000, "Z (cm)" );
+
+        //----------
+
+        //Kinematic correlations
+        h_pt_ = hs_.MakeTH2D( "h_pt", "P vs angle" ,
+                100, 0, 100, "P( GeV )",
+                120, 0, 12e-3, "t( rad) ");
+
+        h_pz_ = hs_.MakeTH2D( "h_pz", "P vs Z vertex" ,
+                100, 0, 100, "P( GeV )",
+                150, -5000, 10000, "Z( cm) ");
+
+        //----------
+
+        //Slices
+        h_xy_coll_ = hs_.MakeTH2D( "h_xy_coll", "XY at Final Collimator",
+                100, -200, 200, "X (cm)",
+                100, -200, 200, "Y (cm)" );
+
+        h_xy_DCH1_ = hs_.MakeTH2D( "h_xy_DCH1", "XY at DCH1",
+                100, -200, 200, "X (cm)",
+                100, -200, 200, "Y (cm)" );
+
+        h_xy_DCH4_ = hs_.MakeTH2D( "h_xy_DCH4", "XY at DCH4",
+                100, -200, 200, "X (cm)",
+                100, -200, 200, "Y (cm)" );
+
+        h_xy_LKr_ = hs_.MakeTH2D( "h_xy_LKr", "XY at LKr",
+                100, -200, 200, "X (cm)",
+                100, -200, 200, "Y (cm)" );
+
+        h_xy_MUV1_ = hs_.MakeTH2D( "h_xy_MUV1", "XY at MUV1",
+                100, -200, 200, "X (cm)",
+                100, -200, 200, "Y (cm)" );
+    }
+
+
+    void Km2Plots::Fill( const Km2RecoEvent& km2re, double wgt )
+    {
+        //Mass and momentum
+        h_m2m_kmu_->Fill( km2re.get_m2m_kmu(), wgt );
+        h_m2m_kpi_->Fill( km2re.get_m2m_kpi(), wgt );
+        h_m2m_pimu_->Fill( km2re.get_m2m_pimu(), wgt );
+
+        h_p_m2m_kmu_->Fill( km2re.get_m2m_kmu(), km2re.get_muon_mom() , wgt );
+        h_p_m2m_kpi_->Fill( km2re.get_m2m_kpi(), km2re.get_muon_mom() , wgt );
+        h_p_m2m_pimu_->Fill( km2re.get_m2m_pimu(), km2re.get_muon_mom() , wgt );
+
+        h_p_->Fill( km2re.get_muon_mom(), wgt );
+
+        //Kinematic shape
+        h_cda_->Fill( km2re.get_cda(), wgt );
+        h_t_->Fill( km2re.get_opening_angle() , wgt );
+        h_z_->Fill( km2re.get_zvertex(), wgt );
+
+        //Kinematic correlations
+        h_pt_->Fill( km2re.get_muon_mom(), km2re.get_opening_angle(), wgt );
+        h_pz_->Fill( km2re.get_muon_mom(), km2re.get_zvertex(), wgt );
+
+        //Slices
+        const SingleRecoTrack * srt = km2re.get_reco_track();
+
+        TVector3 v_coll = srt->extrapolate_bf( na62const::zFinalCollimator );
+        h_xy_coll_->Fill( v_coll.X(), v_coll.Y(), wgt );
+
+        TVector3 v_DCH1 = srt->extrapolate_us( na62const::zDch1 );
+        h_xy_DCH1_->Fill( v_DCH1.X(), v_DCH1.Y(), wgt );
+
+        TVector3 v_DCH4 = srt->extrapolate_ds( na62const::zDch4 );
+        h_xy_DCH4_->Fill( v_DCH4.X(), v_DCH4.Y(), wgt );
+
+        TVector3 v_LKr = srt->extrapolate_ds( na62const::zLkr );
+        h_xy_LKr_->Fill( v_LKr.X(), v_LKr.Y(), wgt );
+
+        TVector3 v_MUV1 = srt->extrapolate_ds( na62const::zMuv1 );
+        h_xy_MUV1_->Fill( v_MUV1.X(), v_MUV1.Y(), wgt );
+    }
+
+    void Km2Plots::Write()
+    {
+        hs_.Write();
+    }
+
     REG_DEF_SUB( Km2Plotter);
 
     Km2Plotter::Km2Plotter( const Selection& sel, 
@@ -10,60 +134,19 @@ namespace fn
             const Km2Event& km2_event)
         :Analysis( sel), tfile_(tfile),folder_( folder ), km2_event_( km2_event )
     {
-        h_m2miss_ = hs_.MakeTH1D( "h_m2miss", "K_{#mu2} missing mass",
-                10000, -0.7, 0.3, "m^{2}_{miss} ( GeV^{2}/ c^{4} )",
-                "#events" ); 
-
-        h_m2pimiss_ = hs_.MakeTH1D( "h_m2pimiss", 
-                "K_{#mu2} missing mass ( pion assumption )",
-                10000, -0.7, 0.3, "m^{2}_{miss} ( GeV^{2}/ c^{4} )",
-                "#events" ); 
-
-        h_m2pivsk_ = hs_.MakeTH2D( "h_m2pivsk_", 
-                "Missing mass ( Pi vs K )",
-                100, -0.7, 0.3, "Kaon asusmption GeV^{2}",
-                100, -0.7, 0.3, "Pion asusmption GeV^{2}" );
-
-        h_pz_ = hs_.MakeTH2D( "h_pz", "P vs Z" ,
-                100, 0, 100, "P( GeV )",
-                150, -5000, 10000, "Z( cm) ");
-
-        h_pm2pi_ = hs_.MakeTH2D( "h_pm2pi", "M2(pi)  vs p_muon",
-                100, 0, 100, "P( GeV )",
-                100, -0.7, 0.3, "M2, Pion asusmption GeV^{2}" );
-
-        h_pm2mu_ = hs_.MakeTH2D( "h_pm2mu", "M2(#mu)  vs p_muon",
-                100, 0, 100, "P( GeV )",
-                100, -0.7, 0.3, "M2, Muon asusmption GeV^{2}" );
-
-        h_cda_ = hs_.MakeTH1D( "h_cda", "CDA (cm)",
-                100, 0, 10, "CDA (cm)" );
     }
 
     void Km2Plotter::process_event()
     {
         const Km2RecoEvent& km2re = km2_event_.get_reco_event();
+        km2_plots_.Fill( km2re, get_weight() );
 
-        double m2_mu = km2re.get_m2miss();
-        double m2_pi = km2re.get_m2pimiss();
-        double wgt = get_weight();
-        double p_mu = km2re.get_muon_mom();
-        double zvert = km2re.get_zvertex();
-        double cda = km2re.get_cda();
-
-        h_m2miss_->Fill( m2_k, wgt );
-        h_m2pimiss_->Fill( m2_pi , wgt );
-        h_pz_->Fill( p_mu, zvert, wgt );
-        h_m2pivsk_->Fill( m2_k, m2_pi, wgt );
-        h_pm2pi_->Fill( p_mu, m2_pi, wgt );
-        h_pm2mu_->Fill( p_mu, m2_mu, wgt );
-        h_cda_->Fill( cda, wgt );
     }
 
     void Km2Plotter::end_processing()
     {
         cd_p( &tfile_, folder_ );
-        hs_.Write();
+        km2_plots_.Write();
     }
 
     template<>
@@ -76,8 +159,7 @@ namespace fn
             TFile & tfile = rf.get_tfile( 
                     get_yaml<std::string>( instruct, "tfile" ) );
 
-            std::string folder = 
-                get_yaml<std::string>( instruct, "folder" );
+            std::string folder = get_folder( instruct, rf );
 
             const Km2Event* km2_event = get_km2_event( instruct, rf );
 

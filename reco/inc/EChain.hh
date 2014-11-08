@@ -271,6 +271,11 @@ namespace fn
                         << "  transactions.";
                     return ss.str();
                 }
+
+                void set_next_event( Long64_t n )
+                {
+                    next_event_ = n;
+                }
         };
 }
 

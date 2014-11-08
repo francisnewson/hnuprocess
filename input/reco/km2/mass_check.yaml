@@ -1,7 +1,7 @@
 - output:
     name: tfout
     type: tfile
-    filename: halo_plots.root
+    filename: km2_stats.root
 
 - output:
     name: fout_stats

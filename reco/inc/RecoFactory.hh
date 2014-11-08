@@ -62,14 +62,14 @@ namespace fn
             std::ostream& get_ostream( std::string name);
 
             //tfile management
-			void  define_tfile
-				( std::string name, boost::filesystem::path p );
+            void  define_tfile
+                ( std::string name, boost::filesystem::path p );
 
-			TFile& get_tfile( std::string name );
+            TFile& get_tfile( std::string name );
 
-            //channel management
+            //channel management 
             void set_channel( const std::string& channel);
-            std::string get_channel();
+            std::string get_channel() const;
 
             bool is_mc() const;
 
@@ -91,7 +91,7 @@ namespace fn
             OSLoader osl_;
 
             //tfile management
-			TFileLoader tfl_;
+            TFileLoader tfl_;
             std::map<std::string, TFile*> tfiles_;
 
             //channel management
@@ -100,5 +100,8 @@ namespace fn
             //stoppage
             bool * remote_stop_;
     };
+
+    std::string get_folder( const YAML::Node& node, const RecoFactory& rf,
+            std::string key = "folder" );
 }
 #endif

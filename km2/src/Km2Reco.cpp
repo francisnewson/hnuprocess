@@ -15,64 +15,73 @@ namespace fn
         kt_ = kt ;
 
         //COMPUTE MISSING MASS
+        const double& muon_mass = na62const::mMu;
+        const double& pion_mass = na62const::mPi;
+        const double& kaon_mass = na62const::mK;
 
-        //muon 4 mom
+        //daughter muon 4 mom
         TVector3 muon_3mom = srt_->get_3mom();
         double muon_mom = srt_->get_mom();
-        const double& muon_mass = na62const::mMu;
         double muon_energy = std::hypot( muon_mom, muon_mass );
+        TLorentzVector daughter_muon_4mom { muon_3mom, muon_energy };
 
-        TLorentzVector muon_4mom { muon_3mom, muon_energy };
-
-
-        //kaon 4 mom
+        //parent kaon 4 mom
         TVector3  kaon_3mom = kt_->get_kaon_3mom();
         double kaon_mom = kt_->get_kaon_mom();
-        const double& kaon_mass = na62const::mK;
         double kaon_energy = std::hypot( kaon_mom, kaon_mass );
-        TLorentzVector kaon_4mom { kaon_3mom, kaon_energy };
+        TLorentzVector parent_kaon_4mom { kaon_3mom, kaon_energy };
 
-        //neutrino 4 mom
-        p4miss_ = kaon_4mom - muon_4mom;
-        m2miss_ = p4miss_.M2();
+        //parent pion 4 mom
+        double parent_pion_energy = std::hypot( kaon_mom, pion_mass );
+        TLorentzVector parent_pion_4mom { kaon_3mom, parent_pion_energy };
 
-        //Beam pion 4 mom
-        const double& pion_mass = na62const::mPi;
-        double pion_energy = std::hypot( kaon_mom, pion_mass );
-        TLorentzVector pion_4mom { kaon_3mom, pion_energy };
-        TLorentzVector p4pimiss = pion_4mom - muon_4mom; 
-        m2pimiss_ = p4pimiss.M2();
+        //daughter pion 4 mom
+        double daughter_pion_energy = std::hypot( muon_mom, pion_mass );
+        TLorentzVector daughter_pion_4mom { muon_3mom, daughter_pion_energy };
+
+        //km2 missing mass
+        p4miss_kmu_ = parent_kaon_4mom - daughter_muon_4mom;
+        m2m_kmu_ = p4miss_kmu_.M2();
+
+        //pm2 missing mass
+        TLorentzVector p4miss_pimu = parent_pion_4mom - daughter_muon_4mom; 
+        m2m_pimu_ = p4miss_pimu.M2();
+
+        //k2pi missing mass
+        TLorentzVector p4miss_kpi = parent_kaon_4mom- daughter_pion_4mom;
+        m2m_kpi_ = p4miss_kpi.M2();
+
+        opening_angle_ = kaon_3mom.Angle( muon_3mom );
     }
 
+    //Return missing masses
     double Km2RecoEvent::get_m2miss() const
-    {
-        return m2miss_;
-    }
+    { return m2m_kmu_; }
 
-    double Km2RecoEvent::get_m2pimiss() const
-    {
-        return m2pimiss_;
-    }
+    double Km2RecoEvent::get_m2m_kmu() const 
+    { return m2m_kmu_; }
+
+    double Km2RecoEvent::get_m2m_kpi() const 
+    { return m2m_kpi_; }
+
+    double Km2RecoEvent::get_m2m_pimu() const 
+    { return m2m_pimu_; }
+
 
     double Km2RecoEvent::get_muon_mom() const
-    {
-        return srt_->get_mom();
-    }
+    { return srt_->get_mom(); }
 
     double Km2RecoEvent::get_zvertex() const
-    {
-        return srt_->get_vertex().Z();
-    }
+    { return srt_->get_vertex().Z(); }
 
     double Km2RecoEvent::get_cda() const
-    {
-        return srt_->get_cda();
-    }
+    { return srt_->get_cda(); }
+
+    double Km2RecoEvent::get_opening_angle() const
+    { return opening_angle_; }
 
     const SingleRecoTrack * Km2RecoEvent::get_reco_track() const
-    {
-        return srt_;
-    }
+    { return srt_; }
 
     //--------------------------------------------------
 

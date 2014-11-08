@@ -24,6 +24,44 @@ namespace fn
 {
     class HistStore;
 
+    //Class to do actual plotting
+    class Km2Plots
+    {
+        public:
+            Km2Plots();
+            void Fill( const Km2RecoEvent& km2re, double wgt  );
+            void Write();
+
+        private:
+            TH1D * h_m2m_kmu_;
+            TH1D * h_m2m_kpi_;
+            TH1D * h_m2m_pimu_;
+
+            TH2D * h_p_m2m_kmu_;
+            TH2D * h_p_m2m_kpi_;
+            TH2D * h_p_m2m_pimu_;
+
+            TH1D * h_p_;
+
+
+            TH1D * h_cda_;
+            TH1D * h_t_;
+            TH1D * h_z_;
+
+            TH2D * h_pt_;
+            TH2D * h_pz_;
+
+            TH2D * h_xy_coll_;
+            TH2D * h_xy_DCH1_;
+            TH2D * h_xy_DCH4_;
+            TH2D * h_xy_LKr_;
+            TH2D * h_xy_MUV1_;
+
+            HistStore hs_;
+    };
+
+    //--------------------------------------------------
+
     class Km2Plotter : public Analysis
     {
         public:
@@ -36,20 +74,10 @@ namespace fn
         private:
             void process_event();
 
-            TH1D * h_m2miss_;
-            TH1D * h_m2pimiss_;
-
-            TH2D * h_m2pivsk_;
-            TH2D * h_pm2pi_;
-            TH2D * h_pm2mu_;
-
-            TH2D * h_pz_;
-            TH1D * h_cda_;
-            HistStore hs_;
-
             TFile& tfile_;
             std::string folder_;
             const Km2Event& km2_event_;
+            Km2Plots km2_plots_;
 
             REG_DEC_SUB( Km2Plotter);
     };

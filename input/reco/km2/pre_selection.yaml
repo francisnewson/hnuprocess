@@ -91,7 +91,7 @@
 - selection:
     name: wide_track_mom
     type: TrackMomentum
-    min:  5 #GeV
+    min:  3 #GeV
     max: 70 #GeV
     inputs:
         ogt: bf_st
@@ -132,9 +132,16 @@
     base : passer
     source : pre_selection 
 
+- output:
+    name: tfout
+    type: tfile
+    filename: pre_select.root
+
 - analysis :
     name: km2_plots
     type: Km2Plotter
     selection: pre_selection
-    intputs:
+    tfile: tfout
+    folder: pre_selection
+    inputs:
         km2event: km2_event

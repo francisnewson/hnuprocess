@@ -44,21 +44,21 @@ namespace fn
         size_t prec = os_.precision( 4 );
 
         os_
-            << std::setw(19) << "#Channel"
-            << std::setw(10) << "TotalWeight"
-            << std::setw(10) << "SampleMean"
-            << std::setw(10) << "SampelSigma"
-            << std::setw(10) << "FitMean"
-            << std::setw(10) << "FitSigma"
+            << std::setw(30) << "#Channel"
+            << std::setw(15) << "TotalWeight"
+            << std::setw(15) << "SampleMean"
+            << std::setw(15) << "SampelSigma"
+            << std::setw(15) << "FitMean"
+            << std::setw(15) << "FitSigma"
             << std::endl;
 
         os_
-            << std::setw(20) << channel_
-            << std::setw(10) << rs_.TotalWeight()
-            << std::setw(10) << rs_.Mean()
-            << std::setw(10) << rs_.StandardDeviation()
-            << std::setw(10) << gaussian->GetParameter(1)
-            << std::setw(10) << gaussian->GetParameter(2)
+            << std::setw(30) << channel_
+            << std::setw(15) << rs_.TotalWeight()
+            << std::setw(15) << rs_.Mean()
+            << std::setw(15) << rs_.StandardDeviation()
+            << std::setw(15) << gaussian->GetParameter(1)
+            << std::setw(15) << gaussian->GetParameter(2)
             << std::endl;
 
         os_.precision( prec );
@@ -79,7 +79,7 @@ namespace fn
             TFile & tfile = rf.get_tfile( 
                     get_yaml<std::string>( instruct, "tfile" ) );
 
-            std::string folder = get_yaml<std::string>( instruct, "folder" );
+            std::string folder = get_folder( instruct, rf );
 
             std::string ostream_name =
                 get_yaml<std::string>( instruct, "ostream" ) ;

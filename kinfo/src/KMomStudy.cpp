@@ -139,8 +139,7 @@ namespace fn
         (YAML::Node& instruct, RecoFactory& rf )
         {
 
-            std::string folder = 
-                get_yaml<std::string>( instruct, "folder" );
+            std::string folder = get_folder( instruct, rf );
 
             const fne::Event * event = rf.get_event_ptr();
 

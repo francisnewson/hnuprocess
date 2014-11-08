@@ -52,7 +52,7 @@ namespace fn
             TFile & tfile = rf.get_tfile( 
                     get_yaml<std::string>( instruct, "tfile" ) );
 
-            std::string folder = get_yaml<std::string>( instruct, "folder") ;
+            std::string folder = get_folder( instruct, rf );
 
             const K2piReco * k2pi_reco = get_k2pi_reco( instruct, rf );
 

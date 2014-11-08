@@ -104,8 +104,7 @@ namespace fn
         Subscriber * create_subscriber<PolCheck>
         (YAML::Node& instruct, RecoFactory& rf )
         {
-            std::string folder = 
-                get_yaml<std::string>( instruct, "folder" );
+            std::string folder = get_folder( instruct, rf );
 
             const fne::Event * event = rf.get_event_ptr();
             SingleTrack * st = get_single_track( instruct, rf );

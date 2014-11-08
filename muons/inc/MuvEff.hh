@@ -4,6 +4,9 @@
 #include "Analysis.hh"
 #include "HistStore.hh"
 #include "TEfficiency.h"
+#include "RecoMuon.hh"
+#include "Km2Plotter.hh"
+#include "Event.hh"
 #if 0
 /*
  *  __  __             _____  __  __
@@ -19,19 +22,22 @@ namespace fn
 {
     class Km2RecoEvent;
     class Km2Event;
+    class SingleRecoTrack;
 
-    //MUVPLOTS - plot all relevant info for a km2 event
-    class MuvPlots {
+    //--------------------------------------------------
+
+    class MuvGeom {
         public:
-            MuvPlots();
-            void Fill( Km2RecoEvent& km2re, double weight );
+            MuvGeom( int status );
+            void Fill( const fne::RecoMuon& rm, 
+                    const SingleRecoTrack& srt,
+                    double wgt);
             void Write();
 
         private:
-            TH1D * h_mom_;
-            TH1D * h_m2miss_;
-            TH2D * h_m2p_;
-            TH2D * h_pz_;
+            int status_;
+            TH2D * h_muv_hits_;
+            TH2D * h_muv_track_hits_;
             HistStore hs_;
     };
 
@@ -41,31 +47,39 @@ namespace fn
     class MuvEff : public Analysis
     {
         public:
-        MuvEff( const Selection& sel, const Selection& muv_selection,
-                const Km2Event& km2_event,
-                TFile& tfile, std::string folder);
+            MuvEff( const Selection& sel, const Selection& muv_selection,
+                    const Km2Event& km2_event, const fne::Event * e,
+                    TFile& tfile, std::string folder);
 
             void end_processing();
 
         private:
-        void process_event();
+            void process_event();
 
-        std::string channel_;
+            std::string channel_;
 
-        REG_DEC_SUB( MuvEff );
+            REG_DEC_SUB( MuvEff );
 
-        const Selection& muv_selection_;
-        const Km2Event& km2e_;
+            const Selection& muv_selection_;
+            const Km2Event& km2e_;
+            const fne::Event * e_;
 
-        TFile& tfile_;
-        std::string folder_;
+            TFile& tfile_;
+            std::string folder_;
 
-        MuvPlots all_plots_;
-        MuvPlots pass_plots_;
-        MuvPlots fail_plots_;
+            Km2Plots all_plots_;
+            Km2Plots pass_plots_;
+            Km2Plots fail_plots_;
 
-        TEfficiency eff_mom_;
-        TEfficiency eff_m2m_;
+            MuvGeom muvhits_1_;
+            MuvGeom muvhits_2_;
+            MuvGeom muvhits_3_;
+            MuvGeom muvhits_4_;
+
+            TEfficiency eff_mom_;
+            TEfficiency eff_m2m_;
+            TEfficiency eff_z_;
+            TEfficiency eff_rmuv1_;
     };
 
     //--------------------------------------------------

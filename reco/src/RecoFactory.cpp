@@ -1,6 +1,7 @@
 #include "RecoFactory.hh"
 #include "Reconstruction.hh"
 #include "Xcept.hh"
+#include "yaml_help.hh"
 
 namespace fn
 {
@@ -131,7 +132,7 @@ namespace fn
         else
         {
             BOOST_LOG_SEV( get_log(), startup )
-            << name << " actually points to " <<
+                << name << " actually points to " <<
                 output_prefix_.string() + p ;
 
             //Add a prefix to physical files
@@ -198,7 +199,7 @@ namespace fn
         channel_ = channel;
     }
 
-    std::string RecoFactory::get_channel()
+    std::string RecoFactory::get_channel() const
     {
         return channel_;
     }
@@ -219,5 +220,12 @@ namespace fn
     void RecoFactory::set_remote_stop( bool * b )
     {
         remote_stop_ = b;
+    }
+
+    std::string get_folder( const YAML::Node& node, const RecoFactory& rf, std::string key )
+    {
+        std::string raw_folder = get_yaml<std::string>( node, key );
+        std::string channel = rf.get_channel();
+        return ( channel + "/" + raw_folder );
     }
 }
