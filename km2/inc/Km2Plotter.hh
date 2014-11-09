@@ -47,8 +47,9 @@ namespace fn
             TH1D * h_cda_;
             TH1D * h_t_;
             TH1D * h_z_;
+            TH1D * h_pt_;
 
-            TH2D * h_pt_;
+            TH2D * h_p_t_;
             TH2D * h_pz_;
 
             TH2D * h_xy_coll_;

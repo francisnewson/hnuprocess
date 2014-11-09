@@ -3,6 +3,27 @@
 
 #include "Event.hh"
 
+#if 0
+/*
+ *  _    ____        _
+ * | | _|___ \ _ __ (_)
+ * | |/ / __) | '_ \| |
+ * |   < / __/| |_) | |
+ * |_|\_\_____| .__/|_|
+ *            |_|
+ *            _                  _
+ *   _____  _| |_ _ __ __ _  ___| |_
+ *  / _ \ \/ / __| '__/ _` |/ __| __|
+ * |  __/>  <| |_| | | (_| | (__| |_
+ *  \___/_/\_\\__|_|  \__,_|\___|\__|
+ *
+*/
+
+//Construct a K2piVars object from a K2piRecoEvent
+//( plus SingleRecoTrack and KaonTrack )
+
+#endif
+
 namespace fn
 {
 
@@ -10,6 +31,7 @@ namespace fn
     class SingleRecoTrack;
     class KaonTrack;
     class K2piVars;
+    class K2piData;
 
     void k2pi_extract( 
             bool mc, double weight,
@@ -18,6 +40,10 @@ namespace fn
             const SingleRecoTrack& srt,
             const KaonTrack& kt,
             K2piVars& vars_ );
+
+    void k2pi_extract_data( const K2piRecoEvent& k2pirc, 
+            const SingleRecoTrack& srt, const KaonTrack& kt,
+             K2piData& data_ );
 
     //--------------------------------------------------
 

@@ -329,8 +329,14 @@ int main( int argc, char * argv[] )
 
     //Create RecoParser
     RecoParser reco_parser( reco_factory, slg );
+
+    path default_config = "input/reco/auto.yaml";
+    BOOST_LOG_SEV( slg , startup) << "Parsing " << default_config;
+    reco_parser.parse( default_config );
+
     BOOST_LOG_SEV( slg , startup) << "Parsing " << mission;
     reco_parser.parse( mission );
+
 
 
     reco.status_report( std::cerr );

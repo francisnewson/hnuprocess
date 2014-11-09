@@ -42,15 +42,18 @@ namespace fn
         h_t_ = hs_.MakeTH1D( "h_t", "Opening angle (rad)",
                 150, 0, 15e-3, "#Theta (rad)" );
 
+        h_pt_ = hs_.MakeTH1D( "h_pt", "P_T",
+                100, 0, 0.5, "#P_T (GeV)" );
+
         h_z_ = hs_.MakeTH1D( "h_z", "Z Decay Vertex (cm)",
                 120, -2000, 10000, "Z (cm)" );
 
         //----------
 
         //Kinematic correlations
-        h_pt_ = hs_.MakeTH2D( "h_pt", "P vs angle" ,
+        h_p_t_ = hs_.MakeTH2D( "h_p_t", "P vs angle" ,
                 100, 0, 100, "P( GeV )",
-                120, 0, 12e-3, "t( rad) ");
+                200, 0, 20e-3, "t( rad) ");
 
         h_pz_ = hs_.MakeTH2D( "h_pz", "P vs Z vertex" ,
                 100, 0, 100, "P( GeV )",
@@ -99,8 +102,10 @@ namespace fn
         h_t_->Fill( km2re.get_opening_angle() , wgt );
         h_z_->Fill( km2re.get_zvertex(), wgt );
 
+        h_pt_->Fill( km2re.get_pt(), wgt );
+
         //Kinematic correlations
-        h_pt_->Fill( km2re.get_muon_mom(), km2re.get_opening_angle(), wgt );
+        h_p_t_->Fill( km2re.get_muon_mom(), km2re.get_opening_angle(), wgt );
         h_pz_->Fill( km2re.get_muon_mom(), km2re.get_zvertex(), wgt );
 
         //Slices

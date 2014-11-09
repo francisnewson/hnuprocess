@@ -2,6 +2,7 @@
 #include "stl_help.hh"
 #include "Xcept.hh"
 #include "yaml-cpp/yaml.h"
+#include "yaml_help.hh"
 #include <iomanip>
 #include "RecoFactory.hh"
 
@@ -175,6 +176,7 @@ namespace fn
         Subscriber * create_subscriber<Summary>
         (YAML::Node& instruct, RecoFactory& rf )
         {
+#if 0
             Selection * base = 0 ;
             Selection * source = 0 ;
             std::ostream& os = std::cerr;
@@ -197,6 +199,16 @@ namespace fn
             {
                 throw Xcept<MissingSelection>( "Summary: source" );
             }
+#endif
+
+            Selection * base = rf.get_selection(
+                    get_yaml<std::string>(instruct, "base" ));
+
+            Selection * source = rf.get_selection( 
+                    get_yaml<std::string>(instruct, "source"));
+            
+            std::ostream& os = rf.get_ostream( 
+                    get_yaml<std::string>( instruct, "ostream" ));
 
             return new Summary( *base, *source, os );
         }

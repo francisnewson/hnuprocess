@@ -34,6 +34,7 @@ namespace fn
             double get_zvertex() const ;
             double get_cda() const; 
             double get_opening_angle()  const;
+            double get_pt()  const;
             const SingleRecoTrack * get_reco_track() const;
 
         private:
@@ -47,6 +48,7 @@ namespace fn
             double m2m_kpi_;
 
             double opening_angle_;
+            double pt_;
     };
 
     //--------------------------------------------------

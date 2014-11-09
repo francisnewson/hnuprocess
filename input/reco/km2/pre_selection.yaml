@@ -20,6 +20,11 @@
     crude_weights: input/reco/mod/kaon_crude_weights.dat
     fine_weights: input/reco/mod/kaon_fine_weights.dat
 
+- output:
+    name: text_out
+    type: ostream
+    filename: cerr
+
 #Autopass
 - selection:
     name: passer
@@ -131,6 +136,7 @@
     type: Summary
     base : passer
     source : pre_selection 
+    ostream: text_out
 
 - output:
     name: tfout

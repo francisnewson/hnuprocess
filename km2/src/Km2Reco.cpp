@@ -52,6 +52,8 @@ namespace fn
         m2m_kpi_ = p4miss_kpi.M2();
 
         opening_angle_ = kaon_3mom.Angle( muon_3mom );
+
+        pt_ = muon_3mom.Perp( kaon_3mom );
     }
 
     //Return missing masses
@@ -82,6 +84,11 @@ namespace fn
 
     const SingleRecoTrack * Km2RecoEvent::get_reco_track() const
     { return srt_; }
+
+            double Km2RecoEvent::get_pt()  const
+            {
+                return pt_;
+            }
 
     //--------------------------------------------------
 
