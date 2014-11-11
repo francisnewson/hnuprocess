@@ -26,6 +26,7 @@ my_libs = [
 'k2pi',
 'muons',
 'akl',
+'shuffle'
 ]
 
 #Call Sconscript for each library

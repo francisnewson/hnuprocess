@@ -337,8 +337,24 @@ namespace fn
             const Track& kaon_track = kt_.get_kaon_track();
 
             //extract raw vertex and cda
+            try
+            {
             pt.vert  = compute_cda(
                     pt_track, kaon_track );
+            }
+            catch ( std::domain_error& e )
+            {
+                //Handle parallel tracks
+                BOOST_LOG_SEV( get_log(), always_print )
+                    << "Event : "
+                    << event_->header.run << " "
+                    << event_->header.burst_time << " " 
+                    << event_->header.compact_number 
+                    << " " << e.what() ;
+
+                pt.vert.point = TVector3( 0, 0, - 1000000.0 );
+                pt.vert.cda = ( pt_track.extrapolate(0) - kaon_track.extrapolate(0) ).Mag() ;
+            }
 
             //raw cda requirement
             if ( pt.vert.cda > init_max_cda_ )

@@ -106,6 +106,10 @@ namespace fn
                 YAML::Node computed_instruct = 
                     auto_kaon_track( instruct, rf );
 
+                BOOST_LOG_SEV( rf.get_log(), startup )
+                    << "KaonTrack auto ==> " << 
+                    get_yaml<std::string>( computed_instruct, "kaon_type" );
+
                 return create_subscriber<KaonTrack>
                     ( computed_instruct , rf );
             }

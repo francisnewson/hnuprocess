@@ -1,4 +1,5 @@
 #include "Track.hh"
+#include <stdexcept>
 
 namespace fn
 {
@@ -30,6 +31,7 @@ namespace fn
     Vertex compute_cda
         ( const Track& a, const Track& b )
         {
+
             TVector3 r = a.get_point();
             TVector3 v = a.get_direction();
 
@@ -39,6 +41,12 @@ namespace fn
             //Vector perpendicular to both
             TVector3 n = v.Cross(w);
             TVector3 nhat = n.Unit();
+
+            //Check tracks aren't paralell
+            if ( ( n.Mag()  / v.Mag() / w.Mag() ) < 1e-20 )
+            {
+                throw std::domain_error( "Parallel tracks vertex requested" );
+            }
 
             //Vector joining tracks
             TVector3 j = r - s;
@@ -50,7 +58,7 @@ namespace fn
 
             double lambda = (s - r) * ( nhat.Cross(w) ) / ( v * (nhat.Cross(w)));
 
-             result.point =  r + lambda * v - nhat * (result.cda / 2) ;
+            result.point =  r + lambda * v - nhat * (result.cda / 2) ;
 
             return result;
         }
