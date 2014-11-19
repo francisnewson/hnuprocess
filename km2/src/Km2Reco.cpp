@@ -69,6 +69,8 @@ namespace fn
     double Km2RecoEvent::get_m2m_pimu() const 
     { return m2m_pimu_; }
 
+    double Km2RecoEvent::get_kaon_mom() const
+    { return kt_->get_kaon_mom() ; }
 
     double Km2RecoEvent::get_muon_mom() const
     { return srt_->get_mom(); }
@@ -85,10 +87,10 @@ namespace fn
     const SingleRecoTrack * Km2RecoEvent::get_reco_track() const
     { return srt_; }
 
-            double Km2RecoEvent::get_pt()  const
-            {
-                return pt_;
-            }
+    double Km2RecoEvent::get_pt()  const
+    {
+        return pt_;
+    }
 
     //--------------------------------------------------
 

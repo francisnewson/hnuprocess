@@ -1,0 +1,159 @@
+#!/bin/env python
+import os.path as osp
+import os
+import re
+import yaml
+
+from collections import OrderedDict
+
+#convenicence yaml dump parameters
+def yaml_dump( output_file, yaml_dict ):
+    '''Nice defaults for yaml.damp'''
+    output_file.write( yaml.dump ( yaml_dict,
+        default_flow_style = False,
+        explicit_start = True ) )
+
+class AnalysisSummary:
+    def __init__( self , name ):
+        self.name = name
+        self.counts = OrderedDict()
+        self.weights = OrderedDict()
+
+    def process_line( self, line ):
+        cut, count, weight = line.strip().split()
+
+        if not cut in self.counts:
+            self.counts[cut] = 0
+        if not cut in self.weights:
+            self.weights[cut] = 0
+
+        self.counts[cut] += int( count )
+        self.weights[cut]+= float( weight )
+
+    def __str__( self ):
+        result = [ self.name ]
+        for k, v in self.counts.items():
+            result.append( 
+                    '{cut:{cut_width}} {count:{count_width}} {weight:{weight_width}.10}'.format(
+                        cut=k, cut_width=20 ,
+                        count=v, count_width=25,
+                        weight=self.weights[k], weight_width=25 ) )
+        return "\n".join( result )
+
+    def get_stats( self, key ):
+        return( self.counts[key], self.weights[key] )
+
+class CombinedSummary:
+    def __init__( self):
+        self.summaries = {}
+        self.current_summary = None
+
+    def set_current_summary( self, summary_name ):
+        if not summary_name in self.summaries:
+            self.summaries[summary_name] = AnalysisSummary( summary_name )
+
+        self.current_summary = self.summaries[summary_name]
+
+    def process_summary_file( self, summary_file):
+        #Read all the lines in file
+        with open( summary_file ) as f:
+            for line in f:
+                if line.startswith( '#START'):
+                    self.set_current_summary ( line.strip().split()[1] )
+                    continue
+
+                elif line.startswith( '#END'):
+                    assert (line.strip().split()[1] == self.current_summary.name)
+                    self.current_summary = None
+                    continue
+
+                else:
+                    assert self.current_summary is not None
+
+                try:
+                    self.current_summary.process_line( line )
+                except ValueError as err:
+                    print( err )
+                    print( line )
+
+    def __str__( self ):
+        return "\n\n".join([ str( summary ) for name, summary in self.summaries.items() ] )
+
+def analyse_channel( folder, match_regex, batch_regex ):
+    #List folder
+    all_files = (osp.join( folder , f ) for f in os.listdir( folder ) )
+
+    #extract all matching files
+    compiled_regex = re.compile( match_regex )
+    matching_files = [ f for f in all_files if compiled_regex.search( f ) ]
+
+    batches = []
+    batch_cregex = re.compile( batch_regex )
+    for filename in matching_files:
+        match = batch_cregex.search( filename )
+        if match:
+            batches.append( int( match.group(1) ) )
+
+    batches.sort()
+    print( '{0:30}'.format( osp.split( folder )[-1]), batches )
+
+    #Add all mathcing files to summary
+    cs = CombinedSummary()
+    for stats_file in matching_files:
+        cs.process_summary_file( stats_file )
+
+    return cs
+
+#START
+
+channels = {
+'p5.data.nhod': 'p5.data.nhod.v2',
+'p5.data.nhod': 'p5.data.nhod.v2',
+'p5.data.q1' : 'p5.data.q1.v2',
+'p5.data.q11t' : 'p5.data.q11t.v2',
+'p5.k2pig' : 'p5.k2pig.v2',
+'p5.k3pi' : 'p5.k3pi.v2',
+'p5.k3pi0' : 'p5.k3pi0.v2',
+'p5.ke2' : 'p5.ke2.v2',
+'p5.ke3' : 'p5.ke3.v2',
+'p5.km2' : 'p5.km2.v2',
+'p5.km3' : 'p5.km3.v2',
+'p6.data.kless.q1' : 'p6.data.kless.q1.v2',
+'p6.data.kless.q11t' : 'p6.data.kless.q11t.v2',
+'p6.data.km.q1' : 'p6.data.km.q1.v2',
+'p6.data.km.q11t' : 'p6.data.km.q11t.v2',
+}
+
+
+analysis_folder= "/afs/cern.ch/user/f/fnewson/work/hnu/gopher/data/process/km2_full_scatter/channels"
+output_folder =  osp.join( 'working', 'km2_full_scatter' )
+for sub in ["km2_stats", "fiducial_count"]:
+    os.makedirs( osp.join( output_folder, sub ), exist_ok = True ) 
+
+all_fids = {}
+
+for short_name, name_folder in channels.items():
+    name = name_folder
+    for pol in ['pos', 'neg']:
+        channel_folder = osp.join( analysis_folder, '.'.join([ name_folder , pol] ) )
+        channel_name =  '.'.join( [name, pol] )
+        if osp.isdir( channel_folder ):
+            #Create summaries
+            summary = analyse_channel( channel_folder, "km2_stats", "batch(\d+)" ) 
+            output_filename = osp.join( output_folder,'km2_stats', channel_name ) 
+            with open( output_filename, 'w' ) as fout:
+                fout.write( str( summary ) )
+            #Do fiducial counts
+            try:
+                fidsum = analyse_channel( channel_folder, "auto_stats_out", "batch(\d+)" )
+                mcz =  fidsum.summaries['mcz_summary'].get_stats('mcz')
+                fid_filename = osp.join( output_folder, 'fiducial_count', channel_name )
+                all_fids[channel_name] = mcz[0]
+                with open( fid_filename, 'w' ) as fidout:
+                    fidout.write(  '{0}'.format( mcz[0] ) )
+            except KeyError:
+                print( "No fiducial info for {0}".format( channel_name ) )
+        else:
+            print( "No dir {0}".format( channel_folder ) )
+
+yaml_dump( open( osp.join( output_folder, 'fids.dat' ), 'w' ), all_fids )

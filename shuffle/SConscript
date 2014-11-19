@@ -1,0 +1,18 @@
+Import('env')
+Import('*')
+
+lenv = env.Clone()
+
+lenv.SetRoot( root_dir )
+lenv.SetBoost( boost_dir, boost_name )
+lenv.AddLibs( [
+'tools', 
+] )
+lenv.SetYaml( yaml_dir )
+
+lenv.Append( CPPPATH = 'inc' )
+lenv.SharedLibrary(
+        target = 'shuffle',
+        source = Glob( 'src/*.cpp' )
+        )
+

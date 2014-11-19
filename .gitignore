@@ -10,6 +10,7 @@
 *.a
 *.sl
 *.swp
+*.swo
 *.pyc
 *.comp.yaml
 *.yamlc
@@ -55,3 +56,4 @@ unit/*
 !unit/Rules.mk
 
 #excluded files#
+data

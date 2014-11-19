@@ -329,6 +329,7 @@
         - rk_dch4_acc
         - rk_ddead_cell
         - rk_dcht
+        - rk_km2_eop
         - halo_cda
 
 - monitor:

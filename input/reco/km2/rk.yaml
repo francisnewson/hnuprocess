@@ -24,6 +24,11 @@
 - selection:
     name: passer
     type : auto_pass
+
+
+###################################################
+# CUTS
+###################################################
         
 # 1]Bad bursts
 - selection:
@@ -237,6 +242,36 @@
         km2clusters: rk_km2_clusters
         ogt: bf_st
 
+
+- selection:
+    name: fiducial_z 
+    type: TrackPZ
+    shape: rectangles
+    points:
+        - [  5, 70, -1000, 9000 ]
+    inputs:
+        ogt: bf_st
+
+###################################################
+# SELECTIONS
+###################################################
+
+- selection:
+    name: debug_momentum
+    type: TrackMomentum
+    min: 10 #GeV
+    max: 15 #GeV
+    inputs:
+        ogt: bf_st
+
+- selection:
+    name: debug_m2m
+    type: Km2M2Miss
+    min_m2: 0.02
+    max_m2: 0.04
+    inputs:
+        km2event: km2_event
+
 #full RK selection
 - selection:
     name: rk_selection
@@ -257,9 +292,65 @@
         - rk_dch4_acc
         - rk_ddead_cell
         - rk_dcht
-        - rk_km2_m2m
+#       - rk_km2_m2m
+#       - rk_km2_eop
+
+#full RK selection
+- selection:
+    name: rk_selection_eop
+    type: CompositeSelection
+    children:
+        - rk_selection
         - rk_km2_eop
 
+
+- selection:
+    name: rk_selection_debug
+    type: CompositeSelection
+    children:
+        - passer
+        - good_bursts
+        - dch_veto
+        - debug_momentum
+        - rk_selection
+
+- selection: 
+    name: debug_m2m_base
+    type: CompositeSelection
+    children:
+        - passer
+        - good_bursts
+        - dch_veto
+        - debug_m2m
+
+- selection:
+    name: rk_selection_debug_m2m
+    type: CompositeSelection
+    children:
+        - rk_selection
+
+#pre selection
+- selection:
+    name: pre_selection
+    type: CompositeSelection
+    children:
+        - passer
+        - good_bursts
+        - dch_veto
+        - pos_trk
+        - quality_7
+        - fiducial_z
+
+- selection:
+    name: pre_selection_lkr
+    type: CompositeSelection
+    children:
+        - pre_selection
+        - rk_lkr_veto
+
+###################################################
+# ANALYSES
+###################################################
 
 - monitor:
     name: counter
@@ -272,35 +363,119 @@
 - output:
     name: tfout
     type: tfile
-    filename: halo_plots.root
-
-- analysis : 
-    name : full_summary
-    type: Summary
-    base : passer
-    source : rk_selection 
+    filename: km2_plots.root
 
 - output:
     name: oselist
     type: ostream
     filename: km2_events.dat
 
-- analysis:
-    name: km2_events
-    type: EventLister
-    selection: rk_selection
+- output:
+    name: cout
+    type: ostream
+    filename: cout
+
+- analysis : 
+    name : rk_summary
+    type: Summary
+    base : passer
+    source : rk_selection 
     ostream:  oselist
+
+- analysis : 
+    name : rk_summary_eop
+    type: Summary
+    base : passer
+    source : rk_selection_eop
+    ostream:  oselist
+
+- analysis : 
+    name : rk_summary_debug
+    type: Summary
+    base : passer
+    source : rk_selection_debug
+    ostream:  oselist
+
+- analysis : 
+    name : rk_summary_debug_m2m
+    type: Summary
+    base :  debug_m2m_base
+    source : rk_selection_debug_m2m
+    ostream:  oselist
+
+- analysis : 
+    name : full_summary_cout
+    type: Summary
+    base : passer
+    source : rk_selection_eop
+    ostream:  cout
+
+#- analysis:
+#    name: km2_events
+#    type: EventLister
+#    selection: rk_selection
+#    ostream:  oselist
 
 - selection:
     name: km_events
     type: EventSelector
     event_list: input/reco/disag.dat
 
+- analysis :
+    type: Km2Plotter
+    name: rk_km2_plots
+    folder: rk_km2
+    tfile: tfout
+    selection: rk_selection
+    inputs:
+        km2event: km2_event
 
-- output:
-    name: printstream
-    type: ostream
-    filename: cout
+- analysis :
+    type: Km2Plotter
+    name: rk_eop_km2_plots
+    folder: rk_eop_km2
+    tfile: tfout
+    selection: rk_selection_eop
+    inputs:
+        km2event: km2_event
+
+- analysis :
+    type: Km2Plotter
+    name: rk_debug_km2_plots
+    folder: rk_debug_km2
+    tfile: tfout
+    selection: rk_selection_debug
+    inputs:
+        km2event: km2_event
+
+- analysis :
+    type: Km2Plotter
+    name: rk_debug_m2m_km2_plots
+    folder: rk_debug_m2m_km2
+    tfile: tfout
+    selection: rk_selection_debug_m2m
+    inputs:
+        km2event: km2_event
+
+- analysis :
+    type: Km2Plotter
+    name: pre_selection_plots
+    folder: pre_selection
+    tfile: tfout
+    selection: pre_selection
+    inputs:
+        km2event: km2_event
+
+
+- analysis :
+    type: Km2Plotter
+    name: pre_selection_lkr_plots
+    folder: pre_selection_lkr
+    tfile: tfout
+    selection: pre_selection_lkr
+    inputs:
+        km2event: km2_event
+
 
 #- analysis:
     #name: rk_sel_printer

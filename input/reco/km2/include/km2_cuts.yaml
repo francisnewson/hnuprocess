@@ -1,0 +1,186 @@
+- input:
+    name: kaon_track
+    type: KaonTrack
+    kaon_type: auto
+    beam_mapping: input/reco/beam/beam_mapping.yaml
+
+# 1]Bad bursts
+- selection:
+    name: good_phys_burst
+    type: BadBurst
+    burst_list: "input/reco/conditions/bad_phys_burst.dat"
+
+- selection:
+    name: good_dch_burst
+    type: BadBurst
+    burst_list: "input/reco/conditions/bad_dch_burst.dat"
+
+- selection:
+    name: good_bursts
+    type: CompositeSelection
+    children:
+        - good_phys_burst
+        - good_dch_burst
+
+###################################################
+#SINGLE TRACK DCH VETO
+###################################################
+
+#SingleTrack
+#Not the rk one
+- input:
+    name : full_bf_st
+    type : SingleTrack
+    method : BF
+
+    #log_level: always_print
+
+    init_min_mom: 3.0 
+    init_max_mom: 80.0
+
+    init_max_cda: 15.0
+
+    init_min_z: -50000.0
+    init_max_z:  100000.0
+
+    dch_merge_sep: 0.5
+
+    inputs:
+        kt: kaon_track
+
+# 2] SingleTrack
+- input:
+    name : rk_bf_st
+    type : SingleTrack
+    method : BF
+
+    #log_level: always_print
+
+    init_min_mom: 3.0 
+    init_max_mom: 75.0
+
+    init_max_cda: 10.0
+
+    init_min_z: -2000.0
+    init_max_z:  9000.0
+
+    dch_merge_sep: 0.5
+
+    inputs:
+        kt: kaon_track
+
+- selection:
+    name: dch_veto
+    type : FoundGoodTrack
+
+    inputs :
+        ogt: bf_st
+
+###################################################
+#TRACK CUTS
+###################################################
+
+# 3] Track charge
+- selection:
+    name: pos_trk
+    type : TrackCharge
+    charge: +1
+    inputs :
+        ogt: bf_st
+
+# 4] Track quality
+- selection:
+    name: quality_7
+    type: TrackQuality
+    quality: 0.7
+    inputs:
+        ogt: bf_st
+
+- selection:
+    name: wide_track_mom
+    type: TrackMomentum
+    min:  3 #GeV
+    max: 70 #GeV
+    inputs:
+        ogt: bf_st
+
+# 5] Track momentum
+- selection:
+    name: rk_track_mom
+    type: TrackMomentum
+    min: 13 #GeV
+    max: 65 #GeV
+    inputs:
+        ogt: bf_st
+
+# 8] CDA
+- selection:
+    name: rk_cda
+    type: TrackCda
+    max_cda: 3.5 #cm
+    inputs:
+        ogt: bf_st
+
+- selection:
+    name: cda_1cm
+    type: TrackCda
+    max_cda: 1.0 #cm
+    inputs:
+        ogt: bf_st
+
+- selection:
+    name: fiducial_z 
+    type: TrackPZ
+    shape: rectangles
+    points:
+        - [  5, 70, -1000, 9000 ]
+    inputs:
+        ogt: bf_st
+
+- selection:
+    name: pzt_cut
+    type: TrackPZT
+    regions_file: "input/reco/km2/pzt.yaml"
+    inputs:
+        ogt: bf_st
+        kt: kaon_track
+
+- input:
+    name: km2_event
+    type: Km2Event
+    inputs:
+        ogt: bf_st
+        kt: kaon_track
+
+###################################################
+#LKR CUTS
+###################################################
+
+#Km2Clusters
+- input:
+    name: full_km2clusters
+    type: Km2Clusters
+    noise_energy: 5 #GeV
+    noise_time: 12 #ns
+    brehm_radius: 5 #cm
+    track_cluster_radius: 5 #cm
+    inputs:
+        ogt: bf_st
+
+# 9] LKr acceptance
+- selection:
+    name: rk_lkr_accep
+    type: TrackLkrAcceptance
+    margin_parameter: 8 #cm
+    inputs:
+        ogt: bf_st
+
+# 10] LKr Hot cells
+
+- selection:
+    name: rk_hot_lkr
+    type: Km2HotLkr
+    hot_cells: [ [ 134, 56 ], [ 134, 57 ] ]
+    inputs:
+        km2event: km2_event
+        km2clusters: rk_km2_clusters

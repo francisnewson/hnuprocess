@@ -84,7 +84,7 @@ namespace fn
         public:
             Km2Clusters( const fne::Event* e, const SingleTrack& st ,
                     double noise_energy, double noise_time, 
-                    double brehm_radius, double track_cluster_radius );
+                    double brehm_radius, double track_cluster_radius, bool is_mc );
 
             void new_event();
             const Km2RecoClusters& get_reco_clusters() const;
@@ -95,12 +95,13 @@ namespace fn
             const fne::Event * e_;
             const SingleTrack& st_;
             mutable Km2RecoClusters km2rc_;
-            bool mc_;
 
             double noise_energy_;
             double noise_time_;
             double brehm_radius_;
             double track_cluster_radius_;
+
+            bool mc_;
 
             mutable bool dirty_;
 

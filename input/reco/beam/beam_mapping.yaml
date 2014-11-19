@@ -12,8 +12,24 @@ channel_lists:
       channels:
         - p6.data.kless.q1.v2
         - p6.data.km.q1.v2
+        - p6.data.kless.q1.v2
+        - p6.data.km.q1.v2
+        - p6.data.kless.q1.v2.pos
+        - p6.data.km.q1.v2.pos
+        - p6.data.kless.q1.v2.neg
+        - p6.data.km.q1.v2.neg
+        - p6.halo.kless.m-.ka+.b-
+        - p6.halo.kless.m-.ka+.b+
 
     - period: p5.q11t
       channels:
         - p6.data.kless.q11t.v2
         - p6.data.km.q11t.v2
+        - p6.data.kless.q11t.v2
+        - p6.data.km.q11t.v2
+        - p6.data.kless.q11t.v2.pos
+        - p6.data.km.q11t.v2.pos
+        - p6.data.kless.q11t.v2.neg
+        - p6.data.km.q11t.v2.neg
+        - klesska+
+        - klesspi+

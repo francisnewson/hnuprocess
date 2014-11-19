@@ -62,6 +62,7 @@ namespace YAML
             fn::polygon_type & rhs )
     {
         std::vector<fn::point_type> points = node.as<std::vector<fn::point_type>>();
+        points.push_back( points.front() );
         rhs.outer() = 
             fn::polygon_type::ring_type( points.begin(), points.end() );
 

@@ -51,6 +51,28 @@ namespace fn
             std::string file_string  = filename.string();
             add_file_protocol( file_string);
 
+            if ( !have_max_event_ )
+            {
+                //Check we can open file
+                bool found_file =  false;
+                int nb_attempts = 0 ;
+                int max_attempts = 100;
+                while ( !found_file )
+                {
+                    ++nb_attempts;
+                    std::unique_ptr<TFile> tf{ TFile::Open( root_file_string( file_string ) ) };
+                    if ( tf )
+                    { 
+                        BOOST_LOG_SEV( log_, always_print) << "Checked: " << tf->GetName() ; 
+                        found_file = true;
+                    }
+                    else if ( nb_attempts == max_attempts ){
+                        throw std::runtime_error( "Can't open " + file_string + 
+                                " after " + std::to_string( max_attempts ) + " attempts"); 
+                    }
+                }
+            }
+
             //add file: NB we don't count entries
             int added = tch_->Add( root_file_string( file_string ) );
             if ( added != 1 )
@@ -73,7 +95,11 @@ namespace fn
         //Prepare chain
         BOOST_LOG_SEV( log_, fn::severity_level::always_print)
             << "TChain::GetFile() ... ";
-        tch_->GetFile();
+        TFile * floaded  = tch_->GetFile();
+        if ( ! floaded )
+        {
+            throw std::runtime_error( "TChain::GetFile() failed");
+        }
 
         BOOST_LOG_SEV( log_, fn::severity_level::always_print)
             << "Setting cache";
@@ -105,6 +131,8 @@ namespace fn
             << "Using event version " << event_version_ ;
 
         new_tree();
+
+        is_mc_ = is_tree_mc();
     }
 
 
@@ -136,15 +164,18 @@ namespace fn
 
     bool EventChain::is_mc() const
     {
-        auto tree = tch_->GetTree();
+        return is_mc_;
+    }
 
+    bool EventChain::is_tree_mc() const
+    {
+        auto tree = tch_->GetTree();
         if ( !tree )
         { 
             throw std::runtime_error
                 ( "Attempt to read name of current tree failed"
                   " because we received no tree" ); 
         }
-
         auto info =  static_cast<fne::FileInfo*>
             ( tree->GetUserInfo()->At(0) );
 
@@ -204,6 +235,9 @@ namespace fn
         assert( check_event_tree_matches);
 
         current_tree_ = tch_->GetTreeNumber();
+
+        BOOST_LOG_SEV( log_, always_print) 
+            << "New tree: " << ( is_tree_mc() ? "MC" : "DATA" );
     }
 
     bool EventChain::load_next_event_header()
@@ -219,6 +253,23 @@ namespace fn
             << "EventChain: about to do LoadTree(event)";
 
         local_entry_ = tch_->LoadTree(next_event_);
+
+        if ( local_entry_ < 0 )
+        {
+            switch( local_entry_ )
+            {
+                case -1:
+                    throw std::runtime_error( "Empty chain" );
+                case -2:
+                    throw std::out_of_range( "Entry too big for chain" );
+                case -3:
+                    throw std::runtime_error( "Cannot open corresponding file" );
+                case -4:
+                    throw std::runtime_error( "Missing TChainElement or TTree" );
+            }
+        }
+
+
         if (tch_->GetTreeNumber() != current_tree_)
         { new_tree() ;}
 

@@ -5,17 +5,48 @@
 
 namespace fn
 {
+    PZTPlots::PZTPlots()
+    {
+        for (int i = 0 ; i != 15; ++i )
+        {
+            hists_.push_back( hs_.MakeTH2D( Form( "hpzt_%d", i ), 
+                        Form("PZ for #theta in range %f - %f", i * 1e-3, ( i+1) * 1e-3),
+                        100, 0, 100, "P( GeV )",
+                        150, -5000, 10000, "Z( cm) ") );
+        }
+    }
+
+    void PZTPlots::Fill( const Km2RecoEvent& km2re, double wgt  )
+    {
+        double p = km2re.get_muon_mom();
+        double z = km2re.get_zvertex();
+        double t = km2re.get_opening_angle();
+        int bin =  int( floor( t / (1e-3) ) );
+        //std::cerr << t << " " << bin << std::endl;
+        if ( bin < hists_.size() )
+        {
+            hists_[bin]->Fill( p, z, wgt );
+        }
+    }
+    void PZTPlots::Write()
+    {
+        hs_.Write();
+    }
 
     Km2Plots::Km2Plots()
     {
         //Mass and momentum
+
+        h_pk_ = hs_.MakeTH1D( "h_pk", "Kaon Momentum", 
+                1000, 70, 80, "p_{K} GeV" );
+
         h_m2m_kmu_ = hs_.MakeTH1D( "h_m2m_kmu", "K_{#mu2} missing mass",
                 10000, -0.7, 0.3, "m^{2}_{miss} ( GeV^{2}/ c^{4} )", "#events" ); 
 
         h_m2m_kpi_ = hs_.MakeTH1D( "h_m2m_kpi", "K_{2#pi} missing mass",
                 10000, -0.7, 0.3, "m^{2}_{miss} ( GeV^{2}/ c^{4} )", "#events" ); 
 
-        h_m2m_pimu_ = hs_.MakeTH1D( "h_m2m_kpi", "#pi_{#mu2} missing mass",
+        h_m2m_pimu_ = hs_.MakeTH1D( "h_m2m_pimu", "#pi_{#mu2} missing mass",
                 10000, -0.7, 0.3, "m^{2}_{miss} ( GeV^{2}/ c^{4} )", "#events" ); 
 
         h_p_m2m_kmu_ = hs_.MakeTH2D( "h_p_m2m_kmu", "Momentum vs K_{#mu2} missing mass",
@@ -55,6 +86,10 @@ namespace fn
                 100, 0, 100, "P( GeV )",
                 200, 0, 20e-3, "t( rad) ");
 
+        h_m2_t_ = hs_.MakeTH2D( "h_m2_t", "m^{2} vs angle" ,
+                1000, -0.7, 0.3, "m^{2}_{miss} ( GeV^{2}/ c^{4} )",
+                200, 0, 20e-3, "t( rad) ");
+
         h_pz_ = hs_.MakeTH2D( "h_pz", "P vs Z vertex" ,
                 100, 0, 100, "P( GeV )",
                 150, -5000, 10000, "Z( cm) ");
@@ -87,6 +122,7 @@ namespace fn
     void Km2Plots::Fill( const Km2RecoEvent& km2re, double wgt )
     {
         //Mass and momentum
+        h_pk_->Fill( km2re.get_kaon_mom(), wgt );
         h_m2m_kmu_->Fill( km2re.get_m2m_kmu(), wgt );
         h_m2m_kpi_->Fill( km2re.get_m2m_kpi(), wgt );
         h_m2m_pimu_->Fill( km2re.get_m2m_pimu(), wgt );
@@ -104,9 +140,12 @@ namespace fn
 
         h_pt_->Fill( km2re.get_pt(), wgt );
 
+        pzt_plots_.Fill( km2re, wgt );
+
         //Kinematic correlations
         h_p_t_->Fill( km2re.get_muon_mom(), km2re.get_opening_angle(), wgt );
         h_pz_->Fill( km2re.get_muon_mom(), km2re.get_zvertex(), wgt );
+        h_m2_t_->Fill( km2re.get_m2m_kmu(), km2re.get_opening_angle(), wgt );
 
         //Slices
         const SingleRecoTrack * srt = km2re.get_reco_track();
@@ -130,6 +169,9 @@ namespace fn
     void Km2Plots::Write()
     {
         hs_.Write();
+        gDirectory->mkdir("pztplots" );
+        gDirectory->cd( "pztplots" );
+        pzt_plots_.Write();
     }
 
     REG_DEF_SUB( Km2Plotter);

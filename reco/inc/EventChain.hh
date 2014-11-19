@@ -43,6 +43,7 @@ namespace fn
             std::string read_info() const;
             int get_event_version() const;
             bool is_mc() const;
+            bool is_tree_mc() const;
 
         private:
             void new_tree();
@@ -62,6 +63,7 @@ namespace fn
             std::unique_ptr<TChain> tch_;
 
             int event_version_;
+            bool is_mc_;
     };
 
 }

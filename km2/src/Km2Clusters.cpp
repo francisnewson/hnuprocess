@@ -39,11 +39,12 @@ namespace fn
 
     Km2Clusters::Km2Clusters( const fne::Event* e, const SingleTrack& st ,
             double noise_energy, double noise_time, 
-            double brehm_radius, double track_cluster_radius )
+            double brehm_radius, double track_cluster_radius, bool is_mc )
         :e_ ( e ), st_( st ),
         noise_energy_( noise_energy ), noise_time_( noise_time),
-        brehm_radius_( brehm_radius), track_cluster_radius_( track_cluster_radius )
-    {}
+        brehm_radius_( brehm_radius), track_cluster_radius_( track_cluster_radius ),
+         mc_( is_mc )
+    { }
 
     void Km2Clusters::new_event()
     {
@@ -81,8 +82,11 @@ namespace fn
         BOOST_LOG_SEV( get_log(), log_level() )
             << "Delta_t: " << delta_t ;
 
-        if( !mc_ && delta_t >= noise_time_  )
-            return cluster_type::IGN;
+        BOOST_LOG_SEV( get_log(), log_level() )
+            << "MC? : " << ( mc_ ? "YES" : "NO" );
+
+        if( (!mc_) && (delta_t >= noise_time_)  )
+            {return cluster_type::IGN;}
 
         //Is it Brehmsstrahlung
         TVector3 brehm_trkLkr = srt.extrapolate_bf( na62const::zLkr );
@@ -114,6 +118,18 @@ namespace fn
 
     void Km2Clusters::process_clusters() const
     {
+        static int counter = 0;
+        ++counter;
+
+        auto save_log = log_level();
+
+        if ( counter < 50  ) 
+        {
+            set_log_level( always_print );
+        BOOST_LOG_SEV( get_log(), log_level() )
+            <<"--------------------NEW Km2Clusters EVENT--------------------";
+        }
+
         km2rc_.reset();
 
         int nclusters = e_->detector.nclusters;
@@ -127,6 +143,11 @@ namespace fn
             cluster_type ct = id_cluster(  rc );
             km2rc_.add_cluster( ct, rc );
         }
+
+        BOOST_LOG_SEV( get_log(), log_level() )
+            << km2rc_.bad_size() << " bad clusters!";
+
+        set_log_level( save_log );
     }
 
     template<>
@@ -141,9 +162,10 @@ namespace fn
             double noise_time = get_yaml<double>( instruct, "noise_time" );
             double brehm_radius = get_yaml<double>( instruct, "brehm_radius" );
             double track_cluster_radius = get_yaml<double>( instruct, "track_cluster_radius" );
+            bool is_mc = rf.is_mc();
 
             return new Km2Clusters( event, *st, noise_energy, noise_time,
-                    brehm_radius, track_cluster_radius );
+                    brehm_radius, track_cluster_radius, is_mc );
         }
 
     //--------------------------------------------------

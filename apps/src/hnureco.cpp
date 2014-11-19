@@ -279,8 +279,19 @@ int main( int argc, char * argv[] )
         << "Give filelist to reconstruction" ;
 
     reco.set_filenames( filenames );
+
+    /**************************************************
+     * Load Chain
+     ***************************************************/
     reco.load_chain();
 
+    BOOST_LOG_SEV( slg, startup )
+        << "Checking MC or data: " << ( reco.is_mc() ? "MC" : "DATA" ) ;
+
+    /**************************************************
+     * Reconstruction
+     ***************************************************/
+    
     //Create RecoFactory
     RecoFactory reco_factory( reco );
     reco_factory.set_log( slg );
@@ -336,7 +347,6 @@ int main( int argc, char * argv[] )
 
     BOOST_LOG_SEV( slg , startup) << "Parsing " << mission;
     reco_parser.parse( mission );
-
 
 
     reco.status_report( std::cerr );

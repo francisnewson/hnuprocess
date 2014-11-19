@@ -162,6 +162,7 @@ namespace fn
 
         std::cerr << "Summary:" << std::endl;
         //loop over namesets
+        os_ << "#START " << get_name() << std::endl;
         for ( auto& ns : nv )
         {
             os_ << std::setw(20 + ns.gen * 10) << ns.name ;
@@ -170,6 +171,7 @@ namespace fn
                 << std::setw(20)  << swv_.at( ns.id ) 
                 << std::endl;
         }
+        os_ << "#END " << get_name() << std::endl;
     }
 
     template<>

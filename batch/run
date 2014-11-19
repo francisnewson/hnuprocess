@@ -13,6 +13,7 @@ channel=$( getyaml run.channel )
 runlist=$( getyaml run.runlist )
 mission=$( getyaml run.mission )
 prefix=$( getyaml run.prefix )
+count=$( getyaml run.count )
 
 mkdir -p output
 

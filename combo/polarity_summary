@@ -1,0 +1,18 @@
+#!/bin/bash
+
+pol_folder=$HOME/work/hnu/gopher/data/process/polarity
+
+function cat_pol {
+awk ' NR == 1 || !/#/ { print }' $@
+}
+
+channels="p5.data.nhod.v2  p5.km2.v2  p6.data.kless.q11t.v2  p6.data.km.q11t.v2"
+
+for chan in $channels
+do
+
+paste <( echo "pos" ; cat_pol $pol_folder/$chan/*posk.dat ) \
+    <( echo "neg" ; cat_pol $pol_folder/$chan/*negk.dat ) \
+    > output/polarity_$chan.dat
+
+done

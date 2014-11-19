@@ -6,7 +6,7 @@
 - output:
     name: tfout
     type: tfile
-    filename: halo_plots.root
+    filename: km2_plots.root
 
 - monitor:
     name: counter
@@ -18,6 +18,21 @@
     kaon_type: auto
     beam_mapping: input/reco/beam/beam_mapping.yaml
 
+- output:
+    name: text_out
+    type: ostream
+    filename: cerr
+
+- output:
+    name: stats_out
+    type: ostream
+    filename: km2_stats.dat
+
+- output:
+    name: debug_out
+    type: ostream
+    filename: km2_debug.dat
+
 #SingleTrack
 - input:
     name : bf_st
@@ -28,9 +43,12 @@
 
     init_min_mom: 3.0 
     init_max_mom: 80.0
+
     init_max_cda: 15.0
-    init_min_z: -5000.0
-    init_max_z:  10000.0
+
+    init_min_z: -50000.0
+    init_max_z:  100000.0
+
     dch_merge_sep: 0.5
 
     angle_sigma: 0.005
@@ -115,6 +133,14 @@
     inputs:
         ogt: bf_st
 
+- selection:
+    name: cda_halo
+    type: TrackCda
+    min_cda: 2.0 #cm
+    max_cda: 6.0 #cm
+    inputs:
+        ogt: bf_st
+
 #Track DHC1 ACC
 - selection:
     name: dch1_acc
@@ -161,6 +187,31 @@
         kt: kaon_track
 
 - selection:
+    name: wide_track_mom
+    type: TrackMomentum
+    min:  3 #GeV
+    max: 70 #GeV
+    inputs:
+        ogt: bf_st
+
+- selection:
+    name: debug_momentum
+    type: TrackMomentum
+    min: 10 #GeV
+    max: 15 #GeV
+    inputs:
+        ogt: bf_st
+
+- selection:
+    name: fiducial_z 
+    type: TrackPZ
+    shape: rectangles
+    points:
+        - [  5, 70, -1000, 9000 ]
+    inputs:
+        ogt: bf_st
+
+- selection:
     name : hnu_selection
     type: CompositeSelection
     children:
@@ -177,17 +228,115 @@
         - pzt_cut
         - nobadcluster
 
+- selection:
+    name: debug_selection
+    type: CompositeSelection
+    children:
+        - kaon_mom_weights
+        - gd_muv_brst
+        - good_trk
+        - debug_momentum
+        - muv_12
+        - pos_trk
+        - quality_7
+        - cda_1cm
+        - dch1_acc
+        - dch4_acc
+        - rk_dcht
+        - pzt_cut
+        - nobadcluster
+
+- selection:
+    name: halo_selection
+    type: CompositeSelection
+    children:
+        - kaon_mom_weights
+        - gd_muv_brst
+        - good_trk
+        - pos_trk
+        - quality_7
+        - cda_halo
+
+- selection:
+    name: pre_selection
+    type: CompositeSelection
+    children:
+        - kaon_mom_weights
+        - gd_muv_brst
+        - good_trk
+        - pos_trk
+#       - quality_7
+#       - wide_track_mom
+
 - analysis : 
     name : full_summary
     type: Summary
     base : passer
     source : hnu_selection 
+    ostream: text_out
+
+- analysis : 
+    name : full_summary_file
+    type: Summary
+    base : passer
+    source : hnu_selection 
+    ostream: stats_out
+
+- analysis : 
+    name : hnu_summary_file
+    type: Summary
+    base : passer
+    source : halo_selection 
+    ostream: stats_out
+
+- analysis : 
+    name : preselction_summary_file
+    type: Summary
+    base : passer
+    source : pre_selection 
+    ostream: stats_out
 
 - analysis :
     type: Km2Plotter
-    name: full_plots
+    name: km2_full_plots
     folder: full_km2
     tfile: tfout
     selection: hnu_selection
     inputs:
         km2event: km2_event
+
+- analysis :
+    type: Km2Plotter
+    name: halo_full_plots
+    folder: halo_km2
+    tfile: tfout
+    selection: halo_selection
+    inputs:
+        km2event: km2_event
+
+- analysis :
+    type: Km2Plotter
+    name: preselection_full_plots
+    folder: preselection_km2
+    tfile: tfout
+    selection: pre_selection
+    inputs:
+        km2event: km2_event
+
+- analysis:
+    type: Summary
+    name: debug_summary
+    base: passer
+    source: debug_selection
+    ostream: debug_out
+
+
+- analysis :
+    name: pol_check
+    type: PolCheck
+    selection: pre_selection
+    folder: pol_check
+    tfile: tfout
+    fout:  text_out
+    inputs:
+        ogt: bf_st

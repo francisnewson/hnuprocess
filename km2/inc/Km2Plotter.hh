@@ -24,6 +24,18 @@ namespace fn
 {
     class HistStore;
 
+    class PZTPlots
+    {
+        public:
+            PZTPlots();
+            void Fill( const Km2RecoEvent& km2re, double wgt  );
+            void Write();
+
+        private:
+            std::vector<TH2D*> hists_;
+            HistStore hs_;
+    };
+
     //Class to do actual plotting
     class Km2Plots
     {
@@ -33,6 +45,8 @@ namespace fn
             void Write();
 
         private:
+            TH1D * h_pk_;
+
             TH1D * h_m2m_kmu_;
             TH1D * h_m2m_kpi_;
             TH1D * h_m2m_pimu_;
@@ -43,6 +57,7 @@ namespace fn
 
             TH1D * h_p_;
 
+            TH1D * h_kick_;
 
             TH1D * h_cda_;
             TH1D * h_t_;
@@ -50,6 +65,7 @@ namespace fn
             TH1D * h_pt_;
 
             TH2D * h_p_t_;
+            TH2D * h_m2_t_;
             TH2D * h_pz_;
 
             TH2D * h_xy_coll_;
@@ -59,6 +75,8 @@ namespace fn
             TH2D * h_xy_MUV1_;
 
             HistStore hs_;
+
+            PZTPlots pzt_plots_;
     };
 
     //--------------------------------------------------

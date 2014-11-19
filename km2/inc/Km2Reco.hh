@@ -35,6 +35,7 @@ namespace fn
             double get_cda() const; 
             double get_opening_angle()  const;
             double get_pt()  const;
+            double get_kaon_mom() const;
             const SingleRecoTrack * get_reco_track() const;
 
         private:

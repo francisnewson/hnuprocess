@@ -1,0 +1,40 @@
+defaults:
+    LineWidth: 2
+    FillStyle: 1
+
+channels:
+    km2:
+        kcolor: kCyan
+        colormod: +1
+
+    background:
+        kcolor: kGray
+        colormod: 0
+
+    km3:
+        kcolor: kViolet
+        colormod: +4
+
+    k2pi:
+        kcolor: kOrange
+        colormod: -1
+
+    k3pi:
+        kcolor: kOrange
+        colormod: +9
+
+    k3pi0:
+        kcolor: kBlack
+        colormod: 0
+
+    halo:
+        kcolor: kGray
+        colormod: 0
+
+    data:
+        kcolor: kRed
+        colormod: +2
+
+    hnu:
+        kcolor: kBlack
+        colormod: 0
