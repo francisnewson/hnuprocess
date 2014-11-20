@@ -9,14 +9,14 @@ namespace fn
     }
 
     Track BFCorrection::compute_bf_track (
-            const fne::Event * event,
+            double corr_mom,
             const fne::RecoTrack * rt,
             const Vertex& vertex )
     {
 
         //Track properties
         int charge = rt->q;
-        float tmom = rt->p;
+        float tmom =  corr_mom;
 
         //Rawy track geometry
         float Vpnt[2];

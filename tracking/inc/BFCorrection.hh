@@ -28,7 +28,7 @@ namespace fn
             BFCorrection();
 
             Track compute_bf_track (
-                    const fne::Event * event,
+                     double corr_mom,
                     const fne::RecoTrack * rt,
                     const Vertex& vertex );
 

@@ -1,0 +1,208 @@
+#Loose selection for looking at halo
+---
+#-------------------------------------------------- 
+
+- output:
+    name: tftree
+    type: tfile
+    filename: k2pi_tree.root
+
+- monitor:
+    name: counter
+    type: Counter
+
+- output:
+    name: sumout
+    type: ostream
+    filename: k2pi.dat
+
+#-------------------------------------------------- 
+
+#Kaon track
+- input:
+    name: kaon_track
+    type: KaonTrack
+    kaon_type: auto
+    beam_mapping: input/reco/beam/beam_mapping.yaml
+
+#-------------------------------------------------- 
+
+#SingleTrack
+- input:
+    name : bf_st
+    type : SingleTrack
+    method : BF
+
+    init_min_mom: 3.0 
+    init_max_mom: 80.0
+    kt: kaon
+    init_max_cda: 15.0
+    init_min_z: -5000.0
+    init_max_z:  10000.0
+    dch_merge_sep: 0.5
+    #log_level: always_print
+    inputs:
+        kt: kaon_track
+
+
+- input:
+    name: k2pi_clusters
+    type: K2piClusters
+    method: Default
+
+    min_track_cluster_time: 12
+    min_cluster_energy: 5
+    max_track_cluster_distance: 5
+
+    inputs:
+        ogt: bf_st
+            
+#-------------------------------------------------- 
+
+#Autopass
+- selection:
+    name: passer
+    type : auto_pass
+
+#weight
+- selection:
+    name: kaon_mom_weights
+    kt: kaon
+    type: KaonMomWeight
+    crude_weights: input/reco/mod/kaon_crude_weights.dat
+    fine_weights: input/reco/mod/kaon_fine_weights.dat
+
+#MUV bursts
+- selection:
+    name: gd_muv_brst
+    type: BadBurst
+    burst_list: "input/reco/conditions/bad_muv_burst.dat"
+
+#-------------------------------------------------- 
+
+#Found ogt
+- selection:
+    name: good_trk
+    type : FoundGoodTrack
+    inputs :
+        ogt: bf_st
+
+#Found k2pic
+- selection:
+    name: good_clust
+    type: FoundK2piClusters
+    inputs:
+        k2pic: k2pi_clusters
+
+- selection:
+    name: photon_sep
+    type: PhotonSeparation
+    min_sep: 20
+    inputs:
+        k2pic: k2pi_clusters
+
+- selection:
+    name: photon_track_sep
+    type: PhotonTrackSeparation
+    min_sep: 30
+    inputs:
+        k2pic: k2pi_clusters
+        ogt: bf_st
+
+- selection:
+    name: muon_veto
+    type: NoMuv
+
+#Track charge
+- selection:
+    name: pos_trk
+    type : TrackCharge
+    charge: +1
+    inputs :
+        ogt: bf_st
+
+#Track quality
+- selection:
+    name: quality_7
+    type: TrackQuality
+    quality: 0.7
+    inputs:
+        ogt: bf_st
+
+#Track DHC1 ACC
+- selection:
+    name: dch1_acc
+    type: TrackRadialAcceptance
+    track_section: upstream
+    z: 9708.42 #zDCH1
+    inner: 12.0
+    outer: 115.0
+    inputs:
+        ogt: bf_st
+
+#Track DHC4 ACC
+- selection:
+    name: dch4_acc
+    type: TrackRadialAcceptance
+    track_section: downstream
+    z: 11888.0 #zDCH1
+    inner: 14.0
+    outer: 115.0
+    inputs:
+        ogt: bf_st
+
+#Track time
+- selection:
+    name: rk_dcht
+    type : TrackTime
+    max_dt: 20 #ns
+    inputs:
+        ogt: bf_st
+
+        #--------------------------------------------------
+
+- selection:
+    name : good_bursts
+    type: CompositeSelection
+    children:
+        - gd_muv_brst
+
+- selection:
+    name : k2pi_cuts
+    type: CompositeSelection
+    children:
+        - kaon_mom_weights
+        - gd_muv_brst
+        - muon_veto
+        - good_trk
+        - pos_trk
+        - quality_7
+        - dch1_acc
+        - dch4_acc
+        - rk_dcht
+        - good_clust
+        - photon_sep
+
+#summary
+- analysis : 
+    name : k2pi_summary
+    type: Summary
+    base : passer
+    source : k2pi_cuts 
+    ostream: sumout
+
+- analysis:
+    name: k2pi_extract
+    type: FNK2piExtractor
+    inputs:
+        k2pic: k2pi_clusters
+        kt: kaon_track
+        ogt: bf_st
+
+- analysis:
+    name: k2pi_filter
+    type: FNK2piFilter
+    tfile: tftree
+    selection: k2pi_cuts
+    inputs:
+        k2pix: k2pi_extract

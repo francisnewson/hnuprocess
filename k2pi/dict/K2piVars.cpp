@@ -1,5 +1,5 @@
 #include "K2piVars.hh"
 
-    ClassImp( fne::k2piData );
-    ClassImp( fne::k2piMC );
-    ClassImp( fne::k2piVars );
+    ClassImp( fn::k2piData );
+    ClassImp( fn::k2piMC );
+    ClassImp( fn::k2piVars );

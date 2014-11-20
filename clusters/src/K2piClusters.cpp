@@ -100,7 +100,14 @@ namespace fn
 
     const fne::RecoCluster& 
         DefaultK2piRecoClusters::track_cluster() const
-        { return *tc_; }
+        {
+            if ( !found_track_ )
+            {
+                throw Xcept<EventDoesNotContain>(
+                        "K2PiRecoClusters: track_cluster" );
+            }
+            return *tc_; 
+        }
 
     //--------------------------------------------------
 

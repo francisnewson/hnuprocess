@@ -86,7 +86,7 @@ namespace fn
     {
         proc_track_ = proc_track;
         bf_track_ = bfc_.compute_bf_track
-            ( event, proc_track_->rt, proc_track_->vert );
+            ( proc_track_->corr_mom, proc_track_->rt, proc_track_->vert );
     }
 
     int BFSingleRecoTrack::get_charge() const

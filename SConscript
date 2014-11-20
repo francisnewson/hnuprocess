@@ -25,6 +25,7 @@ my_libs = [
 'km2',
 'k2pi',
 'muons',
+'dch',
 'akl',
 'shuffle'
 ]

@@ -1,0 +1,47 @@
+import os.path
+Import('env')
+Import('*')
+
+lenv = env.Clone()
+
+lenv.SetRoot( root_dir )
+lenv.SetBoost( boost_dir, boost_name )
+lenv.AddLibs( [
+'tools', 
+'reco', 
+'tracking',
+'clusters',
+'k2pi',
+] )
+lenv.AddEvent( event_dir, 'event' )
+lenv.SetYaml( yaml_dir )
+
+cint_builder = Builder( action = os.path.join(root_dir, 'bin', 'rootcint')+' -f $TARGET -c -p $SOURCES' )
+lenv.Append( BUILDERS = { 'Dict' : cint_builder } )
+
+dict_headers = [ Glob('dict/*.hh') ]
+dict_sources = [ Glob('dict/*.cpp') ]
+dict_headers.append( 'dict/LinkDef.h'  )
+
+lenv.Dict( target = ['root/K2piEventDataDict.cpp', 'root/K2piEventDataDict.h'],
+source = dict_headers )
+
+k2pidata_sources = ['root/K2piEventDataDict.cpp']
+
+target_sources = Glob( 'src/*.cpp')
+target_sources.append( k2pidata_sources )
+
+lenv.Append( CPPPATH = ['inc', 'root', 'dict', '../../'] )
+
+lenv.SharedLibrary(
+        target = 'dch',
+        source = target_sources
+        )
+
+lenv.Replace( LIBS = [] )
+lenv.SetRoot( root_dir)
+
+lenv.SharedLibrary(
+target = 'K2piEventData',
+source = k2pidata_sources,
+)
