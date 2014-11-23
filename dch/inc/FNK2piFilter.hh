@@ -37,6 +37,7 @@ namespace fn
     {
         public:
             FNK2piExtractor( 
+                    const Selection& weighter,
                     const fne::Event * event,
                     const SingleTrack & st ,
                     const K2piClusters& k2pi_clusters,
@@ -49,6 +50,7 @@ namespace fn
 
         private:
             void process_event();
+            const Selection& weighter_;
             const fne::Event * e_;
             const SingleTrack& st_;
             const K2piClusters& k2pi_clusters_;
@@ -57,6 +59,7 @@ namespace fn
             K2piEventData k2pi_event_data_;
             bool mc_;
             bool dirty_;
+
 
             REG_DEC_SUB( FNK2piExtractor );
     };
@@ -91,7 +94,7 @@ namespace fn
             FNK2piFilter( 
                     const Selection& sel, 
                     TFile& tfile, std::string tree_name,
-                    FNK2piExtractor& extractor) ;
+                    FNK2piExtractor& extractor, bool mc) ;
 
             void end_processing();
 

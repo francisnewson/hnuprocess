@@ -24,7 +24,7 @@ dict_sources = [ Glob('dict/*.cpp') ]
 dict_headers.append( 'dict/LinkDef.h'  )
 
 lenv.Dict( target = ['root/K2piEventDataDict.cpp', 'root/K2piEventDataDict.h'],
-source = dict_headers )
+source = dict_headers)
 
 k2pidata_sources = ['root/K2piEventDataDict.cpp']
 

@@ -9,8 +9,10 @@
 #include "root_help.hh"
 #include "TList.h"
 #include "TStreamerInfo.h"
+#include "EHelp.hh"
 #include <sstream>
 #include <iomanip>
+#include <boost/optional.hpp>
 
 namespace fn
 {
@@ -27,6 +29,8 @@ namespace fn
                 Long64_t next_event_;
                 Long64_t local_entry_;
 
+                boost::optional<bool> is_mc_;
+
                 //ROOT objects
                 E * event_ptr_;
                 TBranch * event_branch_;
@@ -37,6 +41,17 @@ namespace fn
 
                 int event_version_;
 
+                boost::optional<bool> is_tree_mc() const
+                {
+                    auto tree = tch_->GetTree();
+                    if ( !tree )
+                    { 
+                        throw std::runtime_error
+                            ( "Attempt to read name of current tree failed"
+                              " because we received no tree" ); 
+                    }
+                    return is_mc<E>( tree );
+                }
 
                 void new_tree()
                 {
@@ -46,9 +61,15 @@ namespace fn
                     BOOST_LOG_SEV( log_, fn::severity_level::always_print)
                         << "New tree:" << get_filename() ;
 
+                    BOOST_LOG_SEV( log_, debug) 
+                        << "About to print event_branch_";
+
                     //Reassign event pointer
                     BOOST_LOG_SEV( log_, debug) 
-                        << "EBRANCH: " << event_branch_ << "name: " << branch_name_;
+                        << "EBRANCH: " << event_branch_ ;
+
+                    BOOST_LOG_SEV( log_, always_print) 
+                        << "name: " << branch_name_;
                     event_branch_ = tch_->GetBranch( branch_name_.c_str() );
                     BOOST_LOG_SEV( log_, debug) << "EBRANCH: " << event_branch_;
                     event_branch_->SetAddress(&event_ptr_);
@@ -67,9 +88,24 @@ namespace fn
                     assert( check_event_tree_matches);
 
                     current_tree_ = tch_->GetTreeNumber();
+
+                    is_mc_ = is_tree_mc();
+
+                    if ( is_mc_ )
+                    {
+                        std::cerr << "We know that mc = "
+                            << ( (*is_mc_) ? "true" : "false" )<< std::endl;
+                    }
+                    else
+                    {
+                        std::cerr << "We don't know mc status" << std::endl;
+                    }
                 }
 
             public:
+
+                boost::optional<bool> get_is_mc()
+                { return  is_mc_;}
 
                 //get filename
                 std::string get_filename() const
@@ -89,7 +125,7 @@ namespace fn
 
                     return info->filename;
 #endif
-                    return "get_filename not implemented";
+                    return std::string("get_filename not implemented");
                 }
 
                 int get_tree_number() const
@@ -144,7 +180,12 @@ namespace fn
                     //Prepare chain
                     BOOST_LOG_SEV( log_, fn::severity_level::always_print)
                         << "TChain::GetFile() ... ";
-                    tch_->GetFile();
+
+                    TFile * floaded  = tch_->GetFile();
+                    if ( ! floaded )
+                    {
+                        throw std::runtime_error( "TChain::GetFile() failed");
+                    }
 
                     BOOST_LOG_SEV( log_, fn::severity_level::always_print)
                         << "Setting cache";
@@ -152,14 +193,16 @@ namespace fn
                     tch_->AddBranchToCache( "*", kTRUE );
 
                     //Extract event version
-                    //
+                    event_version_ = 0;
+
                     const TList * streamer_infos = tch_->GetFile()->GetStreamerInfoList();
                     TIter next( streamer_infos );
                     for (  TObject * obj = next() ; obj ; obj = next() ) 
                     {
-                        //obj->Print();
                         auto streamer_info = static_cast<TStreamerInfo*>( obj );
-                        if ( strcmp( streamer_info->GetName(), "fne::Event" ) == 0 )
+                        //obj->Print();
+                        //std::cerr << streamer_info->GetName() << std::endl;
+                        if ( strcmp( streamer_info->GetName(), branch_name_.c_str() ) == 0 )
                         {
                             event_version_ =  streamer_info->GetClassVersion(); 
                         }
@@ -168,8 +211,8 @@ namespace fn
                     if ( event_version_ == 0 )
                     { 
                         std::string message = 
-                            "Could not find event version for"
-                            " fne::Event ( or it was 0 )" ;
+                            "Could not find event version for "
+                            + branch_name_ + " ( or it was 0 )" ;
 
                         BOOST_LOG_SEV( log_, always_print) << message;
                         //throw std::runtime_error ( message );
@@ -188,8 +231,8 @@ namespace fn
                         std::string tree_name,std::string branch_name,
                         Long64_t nEs )
                     :log_(log), have_max_event_( true ), max_event_( nEs),
-                    current_tree_(-1), next_event_(0), tree_name_( tree_name ),
-                    branch_name_( branch_name )
+                    current_tree_(-1), next_event_(0), event_branch_( 0 ),
+                    tree_name_( tree_name ), branch_name_( branch_name )
             {
                 init_root_objects();
                 load_root_files( filenames );
@@ -200,9 +243,9 @@ namespace fn
                         std::string tree_name, std::string branch_name
                        )
                     :log_(log), have_max_event_( false ),
-                    current_tree_(-1), next_event_(0), tree_name_( tree_name ),
-                    branch_name_( branch_name )
-                     
+                    current_tree_(-1), next_event_(0), event_branch_( 0 ),
+                    tree_name_( tree_name ), branch_name_( branch_name )
+
             {
                 init_root_objects();
                 load_root_files( filenames );
@@ -253,7 +296,7 @@ namespace fn
                 }
 
                 //INFO
-                const E* get_event_pointer() const
+                E* get_event_pointer() const
                 { return event_ptr_; }
 
                 Long64_t get_max_event() const

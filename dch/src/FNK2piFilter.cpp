@@ -23,10 +23,11 @@ namespace fn
     REG_DEF_SUB( FNK2piExtractor );
 
     FNK2piExtractor::FNK2piExtractor( 
+            const Selection& weighter,
             const fne::Event * event, const SingleTrack & st , 
             const K2piClusters& k2pi_clusters, const KaonTrack& kt,
             bool mc )
-        :e_( event ), st_( st ), k2pi_clusters_( k2pi_clusters),
+        :weighter_( weighter ),e_( event ), st_( st ), k2pi_clusters_( k2pi_clusters),
         kt_( kt ), mc_( mc )
     {}
 
@@ -72,6 +73,7 @@ namespace fn
         k2pi_event_data_.run = e_->header.run;
         k2pi_event_data_.burst_time = e_->header.burst_time;
         k2pi_event_data_.compact_number = e_->header.compact_number;
+        k2pi_event_data_.weight = weighter_.get_weight();
 
         //Extract track cluster
         if( k2pirc.found_track_cluster() )
@@ -92,13 +94,15 @@ namespace fn
         Subscriber * create_subscriber<FNK2piExtractor>
         (YAML::Node& instruct, RecoFactory& rf )
         {
+            const Selection * sel = rf.get_selection( 
+                    get_yaml<std::string>( instruct, "weighter" ) );
             const fne::Event * event = rf.get_event_ptr();
             const SingleTrack* st = get_single_track( instruct, rf );
             const K2piClusters* k2pic = get_k2pi_clusters( instruct, rf );
             const KaonTrack* kt = get_kaon_track( instruct, rf );
             bool mc = rf.is_mc();
 
-            return new FNK2piExtractor( event, *st, *k2pic, *kt, mc );
+            return new FNK2piExtractor( *sel, event, *st, *k2pic, *kt, mc );
         }
 
     //--------------------------------------------------
@@ -215,8 +219,9 @@ namespace fn
     FNK2piFilter::FNK2piFilter( 
             const Selection& sel, 
             TFile& tfile, std::string tree_name,
-            FNK2piExtractor& extractor )
-        :Analysis( sel), tfile_( tfile ), extractor_( extractor )
+            FNK2piExtractor& extractor, bool mc )
+        :Analysis( sel), tfile_( tfile ), extractor_( extractor ),
+        mc_( mc )
     {
         k2pi_event_ = extractor_.get_k2pi_event_ptr();
 
@@ -224,6 +229,14 @@ namespace fn
         TTree::SetMaxTreeSize( 10000000000LL );
         ttree_->Branch( "K2piEventData", "fn::K2piEventData",
                 &k2pi_event_ , 64000, 2 );
+
+        BOOST_LOG_SEV( get_log(), always_print )
+            << "MC is " << ( mc_ ? "true" : "false" );
+
+        k2pi_user_info * ui = new k2pi_user_info();
+        ui->is_mc = mc_;
+        ui->test_string = "fred";
+        ttree_->GetUserInfo()->Add( ui );
     }
 
     void FNK2piFilter::process_event()
@@ -248,6 +261,9 @@ namespace fn
                     get_yaml<std::string>( instruct, "tfile" ) );
             const Selection * sel = rf.get_selection( 
                     get_yaml<std::string>( instruct, "selection" ) );
-            return new FNK2piFilter( *sel, tfile, "T",  *extractor );
+
+            bool is_mc = rf.is_mc();
+
+            return new FNK2piFilter( *sel, tfile, "T",  *extractor, is_mc );
         }
 }

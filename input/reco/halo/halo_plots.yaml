@@ -1,0 +1,331 @@
+##################################################
+#
+#   SELECTIONS
+#
+##################################################
+
+- monitor:
+    name: counter
+    type: Counter
+
+
+- selection:
+    name: kaon_mom_weights
+    type: KaonMomWeight
+    crude_weights: input/reco/mod/kaon_crude_weights.dat
+    fine_weights: input/reco/mod/kaon_fine_weights.dat
+
+#MUV bursts
+- selection:
+    name: gd_muv_brst
+    type: BadBurst
+    burst_list: "input/reco/conditions/bad_muv_burst.dat"
+
+- input:
+    name: kaon_track
+    type: KaonTrack
+    kaon_type: auto
+    beam_mapping: input/reco/beam/beam_mapping.yaml
+
+#Autopass
+- selection:
+    name: passer
+    type : auto_pass
+    
+#SingleTrack
+- input:
+    name : bf_st
+    type : SingleTrack
+    method : BF
+
+    #log_level: always_print
+
+    init_min_mom: 3.0 
+    init_max_mom: 80.0
+
+    init_max_cda: 15.0
+
+    init_min_z: -50000.0
+    init_max_z:  100000.0
+
+    dch_merge_sep: 0.5
+
+    inputs:
+        kt: kaon_track
+
+#Found ogt
+- selection:
+    name: good_trk
+    type : FoundGoodTrack
+
+    inputs :
+        ogt: bf_st
+
+#Track charge
+- selection:
+    name: pos_trk
+    type : TrackCharge
+    charge: +1
+    inputs :
+        ogt: bf_st
+
+
+- selection:
+    name: cda_halo
+    type: TrackCda
+    min_cda: 3.0 #cm
+    max_cda: 7.0 #cm
+    inputs:
+        ogt: bf_st
+
+#Track quality
+- selection:
+    name: quality_7
+    type: TrackQuality
+    quality: 0.7
+    inputs:
+        ogt: bf_st
+
+
+- selection:
+    name: fiducial_pz 
+    type: TrackPZ
+    shape: rectangles
+    points:
+        - [  5, 70, -1000, 9000 ]
+    inputs:
+        ogt: bf_st
+
+#Km2Clusters
+- input:
+    name: full_km2clusters
+    type: Km2Clusters
+    noise_energy: 5 #GeV
+    noise_time: 12 #ns
+    brehm_radius: 5 #cm
+    track_cluster_radius: 5 #cm
+    inputs:
+        ogt: bf_st
+
+#NoBadClusters
+- selection:
+    name: nobadcluster
+    type: Km2NoBadCluster
+    inputs:
+        km2clusters: full_km2clusters
+
+#Muon status
+- selection:
+    name: muv_12
+    type : MuonReqStatus
+    allowed_status: [ 1, 2 ]
+    ignore_classes: [ p6 ]
+
+- selection:
+    name: halo_selection
+    type: CompositeSelection
+    children:
+        - kaon_mom_weights
+        - gd_muv_brst
+        - good_trk
+        - pos_trk
+        - quality_7
+        - cda_halo
+        - muv_12
+        - fiducial_pz
+        - nobadcluster
+
+- selection:
+    name: pre_halo
+    type: CompositeSelection
+    children:
+        - kaon_mom_weights
+        - gd_muv_brst
+        - good_trk
+        - pos_trk
+        - muv_12
+        - nobadcluster
+
+- selection:
+    name: post_halo
+    type: CompositeSelection
+    children:
+        - quality_7
+        - cda_halo
+        - fiducial_pz
+
+#--------------------------------------------------
+
+##################################################
+#
+#   ANALYSES
+#
+##################################################
+
+#PZ upper
+- selection:
+    name: pz_lower
+    type: TrackPZ
+    shape: rectangles
+    points:
+        - [  0, 20, -100000, 1000]
+        - [ 20, 40, -100000, 1500]
+        - [ 40, 60, -100000, 2000]
+        - [ 60, 80, -100000, 3000]
+    inputs:
+        ogt: bf_st
+
+- selection:
+    name: halo_lower_sel
+    type: CompositeSelection
+    children:
+        - pre_halo
+        - pz_lower
+        - post_halo
+
+- selection:
+    name: pre_halo_lower_sel
+    type: CompositeSelection
+    children:
+        - pre_halo
+        - pz_lower
+
+#PZ lower
+- selection:
+    name: pz_upper
+    type: TrackPZ
+    shape: rectangles
+    points:
+        - [  0,  20,   1000,   100000]
+        - [ 20,  40,   1500,   100000]
+        - [ 40,  60,   2000,   100000]
+        - [ 60,  80,   3000,   100000]
+    inputs:
+        ogt: bf_st
+
+- selection:
+    name: halo_upper_sel
+    type: CompositeSelection
+    children:
+        - pre_halo
+        - pz_upper
+        - post_halo
+          
+- selection:
+    name: pre_halo_upper_sel
+    type: CompositeSelection
+    children:
+        - pre_halo
+        - pz_upper
+
+#--------------------------------------------------
+
+##################################################
+#
+#   PZREGIONS
+#
+##################################################
+
+- input:
+    name: km2_event
+    type: Km2Event
+    inputs:
+        ogt: bf_st
+        kt: kaon_track
+
+- output:
+    name: tfout
+    type: tfile
+    filename: km2_plots.root
+
+- output:
+    name: stats_out
+    type: ostream
+    filename: km2_stats.dat
+
+- output:
+    name: text_out
+    type: ostream
+    filename: cerr
+
+#--------------------------------------------------
+
+#FULL
+
+- analysis :
+    type: Km2Plotter
+    name: full_halo_plots
+    folder: halo_full
+    tfile: tfout
+    selection: halo_selection
+    inputs:
+        km2event: km2_event
+
+#--------------------------------------------------
+
+#PRE
+
+- analysis :
+    type: Km2Plotter
+    name: pre_upper_halo_plots
+    folder: pre_halo_upper
+    tfile: tfout
+    selection: pre_halo_upper_sel
+    inputs:
+        km2event: km2_event
+
+- analysis :
+    type: Km2Plotter
+    name: pre_lower_halo_plots
+    folder: pre_halo_lower
+    tfile: tfout
+    selection: pre_halo_lower_sel
+    inputs:
+        km2event: km2_event
+
+#--------------------------------------------------
+
+#POST
+
+- analysis :
+    type: Km2Plotter
+    name: upper_halo_plots
+    folder: halo_upper
+    tfile: tfout
+    selection: halo_upper_sel
+    inputs:
+        km2event: km2_event
+
+- analysis :
+    type: Km2Plotter
+    name: lower_halo_plots
+    folder: halo_lower
+    tfile: tfout
+    selection: halo_lower_sel
+    inputs:
+        km2event: km2_event
+
+#--------------------------------------------------
+
+#SUMMARY
+
+- analysis : 
+    name : full_summary
+    type: Summary
+    base : passer
+    source : halo_selection 
+    ostream: stats_out
+
+- analysis : 
+    name : upper_summary
+    type: Summary
+    base : passer
+    source : halo_upper_sel 
+    ostream: stats_out
+
+- analysis : 
+    name : lower_summary
+    type: Summary
+    base : passer
+    source : halo_lower_sel 
+    ostream: stats_out

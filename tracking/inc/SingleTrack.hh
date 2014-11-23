@@ -87,7 +87,7 @@ namespace fn
     struct processing_track
     {
         processing_track()
-        :rt(0){ };
+            :rt(0){ };
         processing_track( const processing_track& other );
         processing_track& operator= ( processing_track other );
 
@@ -158,7 +158,7 @@ namespace fn
 
             virtual void modify_processing_track
                 ( processing_track& pt ) const
-            { (void)pt; };
+                { (void)pt; };
 
             mutable BFSingleRecoTrack single_reco_track_;
 
@@ -184,6 +184,29 @@ namespace fn
     };
 
     //--------------------------------------------------
+    
+    class TrackScatterer
+    {
+        public:
+        TrackScatterer(){}
+        TrackScatterer(
+                double angle_sigma, double angle_frequency,
+                double mom_sigma, double mom_frequency );
+
+        void set_angle_params( double sigma, double frequency);
+        void set_mom_params( double sigma, double frequency);
+
+        void scatter_track( Long64_t seed, 
+                double& dxdz, double& dydz, double& mom ) const;
+
+        private:
+        double angle_sigma_;
+        double angle_frequency_;
+
+        double mom_sigma_;
+        double mom_frequency_;
+    };
+
 
     class BFScatterSingleTrack : public BFSingleTrack
     {
@@ -198,11 +221,7 @@ namespace fn
             //generate pseudo random numbers
             const fne::Event * event_;
 
-            double angle_sigma_;
-            double angle_frequency_;
-
-            double mom_sigma_;
-            double mom_frequency_;
+            TrackScatterer scatterer_;
     };
 
 }

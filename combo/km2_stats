@@ -125,8 +125,8 @@ channels = {
 }
 
 
-analysis_folder= "/afs/cern.ch/user/f/fnewson/work/hnu/gopher/data/process/km2_full_scatter/channels"
-output_folder =  osp.join( 'working', 'km2_full_scatter' )
+analysis_folder= "/afs/cern.ch/user/f/fnewson/work/hnu/gopher/data/process/halo_plots/channels"
+output_folder =  osp.join( 'working', 'halo_plots' )
 for sub in ["km2_stats", "fiducial_count"]:
     os.makedirs( osp.join( output_folder, sub ), exist_ok = True ) 
 

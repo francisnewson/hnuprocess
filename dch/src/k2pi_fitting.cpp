@@ -47,12 +47,12 @@ namespace fn
     double FNK2piFit::operator()( const double * fit )
     {
         std::copy( &fit[0], &fit[11], begin( fit_.par_ ) );
-        double pion_mass = compute_pion_mass( fit_ );
+        double pion_mass = compute_pion_mass( fit_, result_ );
         double chi2 = compute_chi2( pion_mass );
         return chi2;
     }
 
-    double FNK2piFit::compute_pion_mass( k2pi_params& fit )
+    double compute_pion_mass( k2pi_params& fit, k2pi_fit& result )
     {
         //find neutral vertex
         TVector3 kaon_point = TVector3{ fit.pos0K_X(), fit.pos0K_Y(), 0};
@@ -69,26 +69,26 @@ namespace fn
         double neutral_z = bracket_solve_neutral_vertex
             ( kt, fit.E1(),  pos1, fit.E2(), pos2 );
 
-        result_.neutral_vertex = kt.extrapolate( neutral_z );
+        result.neutral_vertex = kt.extrapolate( neutral_z );
 
         //compute photon momenta
-        TVector3 v1 = pos1 - result_.neutral_vertex;
-        result_.p1 = TLorentzVector{ fit.E1() * v1.Unit(), fit.E1() };
+        TVector3 v1 = pos1 - result.neutral_vertex;
+        result.p1 = TLorentzVector{ fit.E1() * v1.Unit(), fit.E1() };
 
-        TVector3 v2 = pos2 - result_.neutral_vertex;
-        result_.p2 = TLorentzVector{ fit.E2() * v2.Unit(), fit.E2() };
+        TVector3 v2 = pos2 - result.neutral_vertex;
+        result.p2 = TLorentzVector{ fit.E2() * v2.Unit(), fit.E2() };
 
         //Compute pion momenta
-        result_.pi0 = result_.p1 + result_.p2;
+        result.pi0 = result.p1 + result.p2;
 
         double kaon_energy = std::sqrt( kaon_3mom.Mag2() + na62const::mK2 );
 
         TLorentzVector k{ kaon_3mom , kaon_energy };
 
-        result_.pip = k - result_.pi0;
+        result.pip = k - result.pi0;
 
         //compute pion mass
-        return result_.pip.M();
+        return result.pip.M();
     }
 
     double FNK2piFit::compute_chi2(double pion_mass )

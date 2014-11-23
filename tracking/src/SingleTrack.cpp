@@ -339,8 +339,8 @@ namespace fn
             //extract raw vertex and cda
             try
             {
-            pt.vert  = compute_cda(
-                    pt_track, kaon_track );
+                pt.vert  = compute_cda(
+                        pt_track, kaon_track );
             }
             catch ( std::domain_error& e )
             {
@@ -411,55 +411,84 @@ namespace fn
             YAML::Node& instruct, KaonTrack& kt )
         :BFSingleTrack( event, instruct, kt), event_( event)
     {
-        angle_sigma_ = get_yaml<double>( instruct, "angle_sigma" );
-        angle_frequency_ = get_yaml<double>( instruct, "angle_frequency" );
+        double angle_sigma = get_yaml<double>( instruct, "angle_sigma" );
+        double angle_frequency = get_yaml<double>( instruct, "angle_frequency" );
 
-        mom_sigma_ = get_yaml<double>( instruct, "mom_sigma" );
-        mom_frequency_ = get_yaml<double>( instruct, "mom_frequency" );
+        double mom_sigma = get_yaml<double>( instruct, "mom_sigma" );
+        double mom_frequency = get_yaml<double>( instruct, "mom_frequency" );
+
+        scatterer_.set_angle_params( angle_sigma, angle_frequency );
+        scatterer_.set_mom_params( mom_sigma, mom_frequency );
 
         BOOST_LOG_SEV( get_log(), always_print)
-            << "K2pi scatter angle_frequency: " << angle_frequency_;
+            << "K2pi scatter angle_frequency: " << angle_frequency;
     }
 
     void BFScatterSingleTrack::modify_processing_track
         ( processing_track& pt ) const
         {
-            //seed the random number generator with the event time stamp
-            std::mt19937 gen( event_->header.time_stamp );
-
-            std::uniform_real_distribution<double> uni_dist;
-            std::normal_distribution<double> angle_dist(0, angle_sigma_ );
-            std::normal_distribution<double> mom_dist(0, mom_sigma_ );
-
-            double uniform_roll = 0;
-
-            //should we generate an x kick
-            uniform_roll = uni_dist(gen);
-            if( uniform_roll < angle_frequency_ )
-            {
-                //xkick
-                double xanglekick = angle_dist( gen );
-                pt.rt->bdxdz += xanglekick;
-            }
-
-            //should we generate an y kick
-            uniform_roll = uni_dist(gen);
-            if( uniform_roll < angle_frequency_ )
-            {
-                //ykick
-                double yanglekick = angle_dist( gen );
-                pt.rt->bdydz += yanglekick;
-            }
-
-            //should we generate a mom kick
-            uniform_roll = uni_dist(gen);
-            if ( uniform_roll < mom_frequency_ )
-            {
-                //mom kick
-                double mom_kick = mom_dist( gen ) 
-                    / std::pow(pt.corr_mom ,2 );
-
-                pt.corr_mom += mom_kick;
-            }
+            scatterer_.scatter_track( event_->header.time_stamp,
+                    pt.rt->bdxdz, pt.rt->bdydz, pt.corr_mom );
         }
+
+    TrackScatterer::TrackScatterer(
+            double angle_sigma, double angle_frequency,
+            double mom_sigma, double mom_frequency )
+        : angle_sigma_( angle_sigma), angle_frequency_( angle_frequency ),
+        mom_sigma_( mom_sigma), mom_frequency_( mom_frequency )
+    {}
+
+    void TrackScatterer::set_angle_params( double sigma, double frequency)
+    {
+        angle_sigma_ = sigma;
+        angle_frequency_ = frequency;
+    }
+
+    void TrackScatterer::set_mom_params( double sigma, double frequency)
+    {
+        mom_sigma_ = sigma;
+        mom_frequency_ = frequency;
+    }
+
+    void TrackScatterer::scatter_track( Long64_t seed, 
+            double& dxdz, double& dydz, double& mom ) const
+    {
+        //seed the random number generator with the event time stamp
+        std::mt19937 gen( seed );
+
+        std::uniform_real_distribution<double> uni_dist;
+        std::normal_distribution<double> angle_dist(0, angle_sigma_ );
+        std::normal_distribution<double> mom_dist(0, mom_sigma_ );
+
+        double uniform_roll = 0;
+
+        //should we generate an x kick
+        uniform_roll = uni_dist(gen);
+        if( uniform_roll < angle_frequency_ )
+        {
+            //xkick
+            double xanglekick = angle_dist( gen );
+            dxdz += xanglekick;
+        }
+
+        //should we generate an y kick
+        uniform_roll = uni_dist(gen);
+        if( uniform_roll < angle_frequency_ )
+        {
+            //ykick
+            double yanglekick = angle_dist( gen );
+            dydz += yanglekick;
+        }
+
+        //should we generate a mom kick
+        uniform_roll = uni_dist(gen);
+        if ( uniform_roll < mom_frequency_ )
+        {
+            //mom kick
+            double mom_kick = mom_dist( gen ) * std::pow(mom,2 );
+
+            mom += mom_kick;
+        }
+
+    }
 }

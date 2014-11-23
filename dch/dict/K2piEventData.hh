@@ -13,9 +13,10 @@
  *
  */
 #endif
+class TTree;
 namespace fn
 {
-    class K2piLkrData
+    class K2piLkrData : public TObject
     {
         public:
             //Cluster 1
@@ -38,10 +39,10 @@ namespace fn
             Double_t ky0;
 
             virtual ~K2piLkrData(){}
-            ClassDef ( K2piLkrData, 1 );
+            ClassDef ( K2piLkrData, 2 );
     };
 
-    class K2piDchData
+    class K2piDchData : public TObject
     {
         public:
             //Momentum
@@ -54,10 +55,10 @@ namespace fn
             Double_t y0;
 
             virtual ~K2piDchData(){}
-            ClassDef ( K2piDchData, 1 );
+            ClassDef ( K2piDchData, 2 );
     };
 
-    class K2piMcData
+    class K2piMcData : public TObject
     {
         public:
             TLorentzVector p4K;
@@ -69,16 +70,17 @@ namespace fn
             TVector3 vertex;
 
             virtual ~K2piMcData(){}
-            ClassDef ( K2piMcData, 1 );
+            ClassDef ( K2piMcData, 2 );
     };
 
-    class K2piEventData
+    class K2piEventData : public TObject
     {
         public:
             //Header
             Long64_t run;
             Long64_t burst_time;
             Long64_t compact_number;
+            Double_t weight;
 
             //Track Cluster
             Bool_t found_track_cluster;
@@ -99,8 +101,18 @@ namespace fn
             K2piMcData mc;
 
             virtual ~K2piEventData(){}
-            ClassDef ( K2piEventData, 1 );
+            ClassDef ( K2piEventData, 2 );
     };
+
+    class k2pi_user_info : public TObject
+    {
+        public:
+            bool is_mc;
+            std::string test_string;
+            virtual ~k2pi_user_info(){}
+            ClassDef ( k2pi_user_info, 1 );
+    };
+
 }
 
 #endif

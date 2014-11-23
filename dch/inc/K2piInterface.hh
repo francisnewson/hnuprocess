@@ -1,5 +1,8 @@
 #ifndef K2PIINTERFACE_HH
 #define K2PIINTERFACE_HH
+#include "TLorentzVector.h"
+#include "K2piEventData.hh"
+#include "EHelp.hh"
 #if 0
 /*
  *  _  ______        _ ___       _             __
@@ -16,8 +19,6 @@ class TVector3;
 
 namespace fn
 {
-    class K2piLkrData;
-
     struct K2piLkrInterface
     {
         public:
@@ -57,6 +58,8 @@ namespace fn
             double& dydz();
             double& x0();
             double& y0();
+
+            TLorentzVector get_pip_4mom();
 
         private:
             K2piDchData& data_;
@@ -101,5 +104,9 @@ namespace fn
             rhs.pos0K_X() = lhs.pos0K_X();
             rhs.pos0K_Y() = lhs.pos0K_Y();
         }
+
+
+    template<>
+        boost::optional<bool> is_mc<K2piEventData>( TTree * T );
 }
 #endif

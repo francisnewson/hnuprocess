@@ -24,7 +24,6 @@ namespace fn
             void prepare_errors();
             double operator()( const double * fit_params );
             double compute_chi2(double pion_mass );
-            double compute_pion_mass( k2pi_params& fit );
             void set_variables(  ROOT::Math::Minimizer * minimizer );
             k2pi_params fit_;
 
@@ -36,5 +35,6 @@ namespace fn
         private:
     };
 
+    double compute_pion_mass( k2pi_params& fit, k2pi_fit& result );
 }
 #endif

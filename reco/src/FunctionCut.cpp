@@ -10,4 +10,9 @@ namespace fn
         { return true; }
 
     REG_DEF_CREATE_FC(auto_pass);
+
+    bool LambdaCut::do_check() const
+    {
+        return cut_function_();
+    }
 }

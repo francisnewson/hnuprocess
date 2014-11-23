@@ -65,5 +65,21 @@ namespace fn
 
     template<>
         bool selection_function<auto_pass>( const fne::Event * e );
+
+
+    class LambdaCut: public CachedSelection
+    {
+        private:
+            bool do_check() const;
+            std::function<bool()> cut_function_;
+
+        public:
+            template <class F>
+            LambdaCut( F cut_function )
+            {
+                cut_function_ = cut_function;
+            }
+    };
+
 }
 #endif

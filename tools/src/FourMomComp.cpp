@@ -17,16 +17,16 @@ namespace fn
                 1000, -50, 50, "#Delta p" );
 
         hdtx_ = hs_.MakeTH1D( "hdtx",
-        ( name_ + " #Delta #theta_x").c_str() ,
+                ( name_ + " #Delta #theta_x").c_str() ,
                 1000, -0.05, 0.05, "#Delta #theta_x", "#events" );
 
         hdty_ = hs_.MakeTH1D( "hdty",
-        ( name_ + " #Delta #theta_y").c_str() ,
+                ( name_ + " #Delta #theta_y").c_str() ,
                 1000, -0.05, 0.05, "#Delta #theta_y", "#events" );
     }
 
     void FourMomComp::Fill( const TLorentzVector& a, const TLorentzVector& b,
-    double wgt)
+            double wgt)
     {
         auto amom = a.Vect();
         auto bmom = b.Vect();
@@ -44,5 +44,14 @@ namespace fn
     void FourMomComp::Write()
     {
         hs_.Write();
+    }
+
+    void FourMomComp::SetColor( Color_t color )
+    {
+        for ( auto& h : hs_ )
+        {
+            h->SetLineColor( color );
+            h->SetLineWidth( 2 );
+        }
     }
 }

@@ -15,6 +15,8 @@ namespace fn
                     const TLorentzVector& b , double wgt );
             void Write();
 
+            void SetColor( Color_t color );
+
         private:
             TH1D * hdp_;
             TH1D * hdpop2_;

@@ -194,6 +194,7 @@
 - analysis:
     name: k2pi_extract
     type: FNK2piExtractor
+    weighter: kaon_mom_weights
     inputs:
         k2pic: k2pi_clusters
         kt: kaon_track
