@@ -1,0 +1,8 @@
+./build_O3/apps/shuffle -m input/shuffle/halo/halo_h_m2m_kmu_halo_upper.yaml -o output/halo_h_m2m_kmu_halo_upper.root
+./build_O3/apps/shuffle -m input/shuffle/halo/halo_h_p_halo_upper.yaml -o output/halo_h_p_halo_upper.root
+./build_O3/apps/shuffle -m input/shuffle/halo/halo_h_cda_halo_upper.yaml -o output/halo_h_cda_halo_upper.root
+./build_O3/apps/shuffle -m input/shuffle/halo/halo_h_z_halo_upper.yaml -o output/halo_h_z_halo_upper.root
+./build_O3/apps/shuffle -m input/shuffle/halo/halo_h_m2m_kmu_halo_lower.yaml -o output/halo_h_m2m_kmu_halo_lower.root
+./build_O3/apps/shuffle -m input/shuffle/halo/halo_h_p_halo_lower.yaml -o output/halo_h_p_halo_lower.root
+./build_O3/apps/shuffle -m input/shuffle/halo/halo_h_cda_halo_lower.yaml -o output/halo_h_cda_halo_lower.root
+./build_O3/apps/shuffle -m input/shuffle/halo/halo_h_z_halo_lower.yaml -o output/halo_h_z_halo_lower.root

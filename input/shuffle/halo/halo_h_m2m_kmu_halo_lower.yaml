@@ -1,0 +1,95 @@
+---
+output:
+  data_plot:
+    channels:
+    - p5.data.q11t.v2.pos
+    do_blind: 'false'
+  input_file: data/halo_plots/all.halo_plots.root
+  plot_path: halo_lower/h_m2m_kmu
+  rebin: 1
+  stack:
+  - item:
+      channels:
+      - p5.km3.v2.pos
+      fid_weight: p5.km3.v2.pos
+      name: km3_pos
+      scaling: mc_pos_halo_lower
+      type: km3
+  - item:
+      channels:
+      - p5.k2pig.v2.pos
+      fid_weight: p5.k2pig.v2.pos
+      name: k2pig_pos
+      scaling: mc_pos_halo_lower
+      type: k2pi
+  - item:
+      channels:
+      - p5.k3pi.v2.pos
+      fid_weight: p5.k3pi.v2.pos
+      name: k3pi_pos
+      scaling: mc_pos_halo_lower
+      type: k3pi
+  - item:
+      channels:
+      - p6.data.kless.q11t.v2.pos
+      fid_weight: p5.halo.v2.pos
+      name: halo_pos
+      scaling: mc_pos_halo_lower
+      type: halo
+  - item:
+      channels:
+      - p5.k3pi0.v2.pos
+      fid_weight: p5.k3pi0.v2.pos
+      name: k3pi0_pos
+      scaling: mc_pos_halo_lower
+      type: k3pi0
+  - item:
+      channels:
+      - p5.km2.v2.pos
+      fid_weight: p5.km2.v2.pos
+      name: km2_pos
+      scaling: mc_pos_halo_lower
+      type: km2
+scaling:
+- scaling_method:
+    data_channels:
+    - p5.data.q11t.v2.pos
+    halo:
+      input_file: data/halo_plots/all.halo_plots.root
+      max_mass: -0.1
+      min_mass: -0.3
+      plot_path: halo_upper/h_m2m_kmu
+      strategy: m2
+    halo_channels:
+    - p6.data.kless.q11t.v2.pos
+    km2:
+      input_file: data/halo_plots/all.halo_plots.root
+      max_mass: -0.01
+      min_mass: -0.01
+      plot_path: halo_upper/h_m2m_kmu
+      strategy: m2
+    km2_channels:
+    - p5.km2.v2.pos
+    name: mc_pos_halo_upper
+- scaling_method:
+    data_channels:
+    - p5.data.q11t.v2.pos
+    halo:
+      input_file: data/halo_plots/all.halo_plots.root
+      max_mass: -0.05
+      min_mass: -0.3
+      plot_path: halo_lower/h_m2m_kmu
+      strategy: m2
+    halo_channels:
+    - p6.data.kless.q11t.v2.pos
+    km2:
+      input_file: data/halo_plots/all.halo_plots.root
+      max_mass: -0.01
+      min_mass: -0.01
+      plot_path: halo_lower/h_m2m_kmu
+      strategy: m2
+    km2_channels:
+    - p5.km2.v2.pos
+    name: mc_pos_halo_lower
+weights:
+  fid_file: working/halo_plots/fids.dat

@@ -37,6 +37,8 @@ namespace fn
 
         private:
             TH1D * h_eop_;
+            TH1D * h_n_ass_cluster_;
+            TH1D * h_n_bad_cluster_;
             HistStore hs_;
 
     };

@@ -67,7 +67,7 @@ mass_windows:
 
 output:
     input_file:  data/km2_full/all.km2_full.root
-    plot_path: full_km2/h_m2m_kmu
+    plot_path: full_km2/h_t
     rebin: 10
 
     data_plot:

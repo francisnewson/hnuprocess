@@ -11,13 +11,25 @@ namespace fn
     {
         h_eop_ = hs_.MakeTH1D( "h_eop_", "E/p for single track in Lkr",
                 150, 0, 1.5 , "E/P");
+
+        h_n_ass_cluster_ = hs_.MakeTH1D( "h_ass_ncluster", "Number of clusters in event",
+                10, -0.5, 9.5 , "N");
+
+        h_n_bad_cluster_ = hs_.MakeTH1D( "h_bad_ncluster", "Number of clusters in event",
+                10, -0.5, 9.5 , "N");
     }
 
     void Km2ClusterPlots::Fill( const SingleRecoTrack& srt, 
             const Km2RecoClusters& km2rc, double weight )
     {
-        h_eop_->Fill( km2_eop( km2rc, srt), weight );
+        h_n_ass_cluster_->Fill( km2rc.associate_size(), weight );
+        h_n_bad_cluster_->Fill( km2rc.associate_size(), weight );
 
+        if ( km2rc.associate_size() == 0 )
+        { return; }
+
+        if ( km2rc.associate_size() == 1 )
+        {h_eop_->Fill( km2_eop( km2rc, srt), weight );}
     }
 
     void Km2ClusterPlots::Write()

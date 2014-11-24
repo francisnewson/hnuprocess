@@ -15,6 +15,13 @@ mission=$( getyaml run.mission )
 prefix=$( getyaml run.prefix )
 count=$( getyaml run.count )
 
+printf "\nMission file is:"
+printf "\n==================================================\n\n"
+
+cat $mission
+
+printf "\n\n==================================================\n\n"
+
 mkdir -p output
 
 #run the command!

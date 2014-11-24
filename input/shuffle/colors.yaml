@@ -19,6 +19,10 @@ channels:
         kcolor: kOrange
         colormod: -1
 
+    k2pig:
+        kcolor: kOrange
+        colormod: -1
+
     k3pi:
         kcolor: kOrange
         colormod: +9

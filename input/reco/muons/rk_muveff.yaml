@@ -253,30 +253,6 @@
     inputs:
         km2event: km2_event
 
-#full RK selection
-- selection:
-    name: rk_selection
-    type: CompositeSelection
-    children:
-        - passer
-        - good_bursts
-        - dch_veto
-        - pos_trk
-        - quality_7
-        - rk_track_mom
-        - rk_lkr_veto
-        - rk_pz
-        - rk_cda
-        - rk_lkr_accep
-        - rk_hot_lkr
-        - rk_dch1_acc
-        - rk_dch4_acc
-        - rk_ddead_cell
-        - rk_dcht
-#       - rk_km2_eop
-#       - km2_peak_m2
-
-
 # Track MUV1 Radius
 - selection:
     name: muv1_radius
@@ -298,22 +274,19 @@
         ogt: bf_st
 
 - selection:
-    name: rk_peak
+    name: raw_sel
     type: CompositeSelection
     children:
-        - rk_selection
-        - km2_peak_m2
+        - passer
+        - good_bursts
+        - dch_veto
+        - pos_trk
+        - quality_7
+        - rk_track_mom
 
+#full RK selection
 - selection:
-    name: rk_peak_out
-    type: CompositeSelection
-    children:
-        - rk_selection
-        - km2_peak_m2
-        - muv1_radius
-
-- selection:
-    name: rk_halo
+    name: base_rk_selection
     type: CompositeSelection
     children:
         - passer
@@ -323,14 +296,29 @@
         - quality_7
         - rk_track_mom
         - rk_lkr_veto
+        - rk_pz
         - rk_lkr_accep
         - rk_hot_lkr
         - rk_dch1_acc
         - rk_dch4_acc
         - rk_ddead_cell
         - rk_dcht
-        - rk_km2_eop
-        - halo_cda
+        - muv1_radius
+
+- selection:
+    { name: signal_rk_selection, type: CompositeSelection, children: [ base_rk_selection,  rk_cda ] }
+
+- selection:
+    { name: rk_peak, type: CompositeSelection, children: [ signal_rk_selection , km2_peak_m2 ] }
+
+- selection:
+    { name: rk_eop, type: CompositeSelection, children: [ signal_rk_selection , rk_km2_eop ] }
+
+- selection:
+    { name:  rk_eop_peak, type: CompositeSelection, children: [ signal_rk_selection , rk_km2_eop , km2_peak_m2 ] }
+
+- selection:
+    { name: rk_halo, type: CompositeSelection, children: [ base_rk_selection,  halo_cda, rk_km2_eop ] }
 
 - monitor:
     name: counter
@@ -348,49 +336,61 @@
     type: tfile
     filename: muv_eff.root
 
-- analysis :
-    type: MuvEff
-    name: muv_eff_full
-    folder: muv_eff_full
-    tfile: tfout
-    selection: rk_selection
-    muv_selection: muv_12
-    inputs:
-        km2event: km2_event
+###
 
 - analysis :
-    type: MuvEff
-    name: muv_eff_peak
-    folder: muv_eff_peak
-    tfile: tfout
-    selection: rk_peak
-    muv_selection: muv_12
-    inputs:
-        km2event: km2_event
+    { type: MuvEff,  name: raw_muv,  folder: raw_muv,  tfile: tfout, 
+    selection: raw_sel,  muv_selection: muv_12,  inputs: {km2event: km2_event } }
+
 
 - analysis :
-    type: MuvEff
-    name: muv_eff_peak_out
-    folder: muv_eff_peak_out
-    tfile: tfout
-    selection: rk_peak_out
-    muv_selection: muv_12
-    inputs:
-        km2event: km2_event
+    { type: MuvEff,  name: muv_eff_signal,  folder: muv_eff_signal,  tfile: tfout, 
+    selection: signal_rk_selection,  muv_selection: muv_12,  inputs: {km2event: km2_event } }
 
 - analysis :
-    type: MuvEff
-    name: muv_eff_halo
-    folder: muv_eff_halo
-    tfile: tfout
-    selection: rk_halo
-    muv_selection: muv_12
-    inputs:
-        km2event: km2_event
+    { type: Km2ClusterPlotter,  name: cluster_signal,  folder: muv_eff_signal,  tfile: tfout, 
+    selection: signal_rk_selection,  inputs: {km2event: km2_event, km2clusters: rk_km2_clusters } } 
+
+###
+
+- analysis :
+    { type: MuvEff,  name: muv_eff_peak,  folder: muv_eff_peak,  tfile: tfout, 
+    selection: rk_peak,  muv_selection: muv_12,  inputs: {km2event: km2_event } }
+
+- analysis :
+    { type: Km2ClusterPlotter,  name: cluster_peak,  folder: muv_eff_peak,  tfile: tfout, 
+    selection: rk_peak,  inputs: {km2event: km2_event, km2clusters: rk_km2_clusters } } 
+        
+###
+
+- analysis :
+    { type: MuvEff,  name: muv_eff_eop,  folder: muv_eff_eop,  tfile: tfout, 
+    selection: rk_eop,  muv_selection: muv_12,  inputs: {km2event: km2_event } }
+
+- analysis :
+    { type: Km2ClusterPlotter,  name: cluster_eop,  folder: muv_eff_eop,  tfile: tfout, 
+    selection: rk_eop,  inputs: {km2event: km2_event, km2clusters: rk_km2_clusters } } 
+
+###
+
+- analysis :
+    { type: MuvEff,  name: muv_eff_eop_peak,  folder: muv_eff_eop_peak,  tfile: tfout, 
+    selection: rk_eop_peak,  muv_selection: muv_12,  inputs: {km2event: km2_event } }
+
+- analysis :
+    { type: Km2ClusterPlotter,  name: cluster_eop_peak,  folder: muv_eff_eop_peak,  tfile: tfout, 
+    selection: rk_eop_peak,  inputs: {km2event: km2_event, km2clusters: rk_km2_clusters } } 
+
+###
+
+- output:
+    name: oselist
+    type: ostream
+    filename: km2_events.dat
 
 - analysis : 
     name : full_summary
     type: Summary
     base : passer
-    source : rk_peak 
-
+    source : rk_eop_peak 
+    ostream: oselist

@@ -1,7 +1,9 @@
 #include "Km2Clusters.hh"
 #include "NA62Constants.hh"
 #include "yaml_help.hh"
+#include "root_help.hh"
 #include "tracking_selections.hh"
+#include <boost/lexical_cast.hpp>
 
 namespace fn
 {
@@ -101,13 +103,15 @@ namespace fn
             return  cluster_type::IGN;
 
         //Is it associated to the track
-        TVector3 trkLkr = srt.extrapolate_ds( na62const::zLkr );
         TrackProjCorrCluster track_cluster{ *rc };
         TVector3 cluster_pos = track_cluster.get_pos();
+        TVector3 trkLkr = srt.extrapolate_ds( cluster_pos.Z() );
         double track_cluster_sep = (trkLkr - cluster_pos).Mag();
 
         BOOST_LOG_SEV( get_log(), log_level() )
-            << "Track cluster sep: " << track_cluster_sep ;
+            << "Track: " <<  trkLkr.X() << ", " << trkLkr.Y() <<  ", " << trkLkr.Z()
+            << " Cluster: " << cluster_pos.X() << ", " << cluster_pos.Y() << ", " << cluster_pos.Z()
+            << " Track cluster sep: " << track_cluster_sep ;
 
         if ( track_cluster_sep  < track_cluster_radius_ )
             return cluster_type::ASS;
@@ -141,6 +145,13 @@ namespace fn
                 static_cast<fne::RecoCluster*>( eclusters[iclus] );
 
             cluster_type ct = id_cluster(  rc );
+
+            if ( ct == cluster_type::ASS )
+            { 
+                BOOST_LOG_SEV( get_log(), log_level() )
+                << "Found associated cluster!" ;
+            }
+
             km2rc_.add_cluster( ct, rc );
         }
 

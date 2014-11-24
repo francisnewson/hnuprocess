@@ -16,6 +16,9 @@ sys.stderr.write ("Reading from {0}\n".format( args.config_file ) )
 config_file = open ( args.config_file )
 config = yaml.load( config_file )
 
+#get mission file
+mission = config['run']['mission']
+
 #get output options
 save = config['save']
 

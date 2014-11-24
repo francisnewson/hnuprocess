@@ -15,7 +15,7 @@ namespace fn
     bool Km2NoBadCluster::do_check() const
     {
         const Km2RecoClusters& km2rc  = km2c_.get_reco_clusters();
-        return ( km2rc.bad_size() < 1 );
+        return ( km2rc.bad_size() < 1 && km2rc.associate_size() < 2);
     }
 
     template<>

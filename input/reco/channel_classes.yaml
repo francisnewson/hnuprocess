@@ -13,5 +13,7 @@ p6:
     - p6.data.km.q1.v2.neg
     - p6.halo.kless.m-.ka+.b-
     - p6.halo.kless.m-.ka+.b+
+    - p6.halo.kless.m-.pi+.b-
+    - p6.halo.kless.m-.pi+.b+
     - klesska+
     - klesspi+
