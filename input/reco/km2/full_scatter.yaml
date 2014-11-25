@@ -53,9 +53,11 @@
 
     angle_sigma: 0.005
     angle_frequency: 3e-3
+    #angle_frequency: 1.0
 
     mom_sigma: 0.5
     mom_frequency: 2e-2
+    #mom_frequency: 1.0
 
     inputs:
         kt: kaon_track
@@ -304,6 +306,15 @@
     selection: hnu_selection
     inputs:
         km2event: km2_event
+
+- analysis :
+    type: SingleTrackPlotter
+    name: km2_full_track_plots
+    folder: full_km2_track
+    tfile: tfout
+    selection: hnu_selection
+    inputs:
+        ogt: bf_st
 
 - analysis :
     type: Km2Plotter

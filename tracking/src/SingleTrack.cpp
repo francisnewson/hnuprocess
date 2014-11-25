@@ -3,6 +3,7 @@
 #include "Xcept.hh"
 #include "tracking_functions.hh"
 #include "yaml_help.hh"
+#include "root_help.hh"
 #include <random>
 
 namespace fn
@@ -144,6 +145,14 @@ namespace fn
         return bf_track_.extrapolate( z );
     }
 
+    TVector3 BFSingleRecoTrack::get_unscattered_3mom() const
+    {
+        assert( proc_track_->orig_rt !=0  );
+        const fne::RecoTrack& rt = *proc_track_->orig_rt;
+        TVector3 unscatmom{ rt.bdxdz, rt.bdydz, 1};
+        return proc_track_->corr_mom  * unscatmom.Unit();
+    }
+
     TVector3 BFSingleRecoTrack::get_us_mom() const
     {
         const fne::RecoTrack& rt = *proc_track_->rt;
@@ -164,7 +173,7 @@ namespace fn
 
     processing_track::processing_track( const processing_track& other )
         :corr_mom( other.corr_mom ), vert( other.vert ), good( other.good ),
-        rt_( other.rt_ ), rt( &rt_ )
+        rt_( other.rt_ ), rt( &rt_ ), orig_rt( other.orig_rt )
     {}
 
     void swap
@@ -175,6 +184,7 @@ namespace fn
             swap( first.vert, second.vert );
             swap( first.good, second.good );
             swap( first.rt_, second.rt_ );
+            swap( first.orig_rt, second.orig_rt );
             first.rt = & first.rt_;
             second.rt = & second.rt_;
         }
@@ -238,13 +248,16 @@ namespace fn
             fne::RecoTrack * rt = static_cast<fne::RecoTrack*>( etracks[itrk] );
             pt.rt_ =  *rt;
             pt.rt = &pt.rt_;
+            pt.orig_rt = rt;
 
             assert( pt.rt != rt );
             assert( pt.rt->p == rt->p );
+            assert( pt.orig_rt == rt );
 
-            modify_processing_track( pt );
+
 
             pt.corr_mom = p_corr_ab( pt.rt->p, pt.rt->q, alpha, beta  );
+            modify_processing_track( pt );
             pt.good = true;
 
             BOOST_LOG_SEV( get_log() , log_level() )
@@ -485,8 +498,8 @@ namespace fn
         if ( uniform_roll < mom_frequency_ )
         {
             //mom kick
-            double mom_kick = mom_dist( gen ) * std::pow(mom,2 );
-
+            double mom_roll = mom_dist( gen );
+            double mom_kick = mom_roll * std::pow(mom,2 );
             mom += mom_kick;
         }
 
