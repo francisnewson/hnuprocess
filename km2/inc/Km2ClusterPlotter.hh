@@ -39,6 +39,11 @@ namespace fn
             TH1D * h_eop_;
             TH1D * h_n_ass_cluster_;
             TH1D * h_n_bad_cluster_;
+            TH1D * h_n_ign_cluster_;
+
+            TH1D * h_cluster_energy_;
+
+            TH1D * h_n_cluster_;
             HistStore hs_;
 
     };

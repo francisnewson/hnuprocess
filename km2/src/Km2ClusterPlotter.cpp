@@ -17,19 +17,33 @@ namespace fn
 
         h_n_bad_cluster_ = hs_.MakeTH1D( "h_bad_ncluster", "Number of clusters in event",
                 10, -0.5, 9.5 , "N");
+
+        h_n_ign_cluster_ = hs_.MakeTH1D( "h_ign_ncluster", "Number of clusters in event",
+                10, -0.5, 9.5 , "N");
+
+        h_n_cluster_ = hs_.MakeTH1D( "h_ncluster", "Number of clusters in event",
+                10, -0.5, 9.5 , "N");
+
+        h_cluster_energy_ = hs_.MakeTH1D( "h_cluster_energy", "All cluster energies",
+                100, 0, 100 , "E( GeV )");
     }
 
     void Km2ClusterPlots::Fill( const SingleRecoTrack& srt, 
             const Km2RecoClusters& km2rc, double weight )
     {
         h_n_ass_cluster_->Fill( km2rc.associate_size(), weight );
-        h_n_bad_cluster_->Fill( km2rc.associate_size(), weight );
-
-        if ( km2rc.associate_size() == 0 )
-        { return; }
+        h_n_bad_cluster_->Fill( km2rc.bad_size(), weight );
+        h_n_ign_cluster_->Fill( km2rc.ignored_size(), weight );
+        h_n_cluster_->Fill( km2rc.all_size(), weight );
 
         if ( km2rc.associate_size() == 1 )
         {h_eop_->Fill( km2_eop( km2rc, srt), weight );}
+
+        for( auto itclus = km2rc.all_begin() ; itclus != km2rc.all_end() ; ++itclus )
+        {
+            TrackProjCorrCluster track_cluster{ **itclus };
+            h_cluster_energy_->Fill( track_cluster.get_energy() );
+        }
     }
 
     void Km2ClusterPlots::Write()

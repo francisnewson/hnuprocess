@@ -46,7 +46,7 @@ namespace fn
         muvhits_1_( 1 ), muvhits_2_( 2 ),
         muvhits_3_( 3 ), muvhits_4_( 4 ),
         eff_mom_( "eff_mom", "Eff( muon momentum)", 100, 0, 100 ),
-        eff_m2m_( "eff_m2m", "Eff( muon m^{2}_{miss})", 200, -0.2, 0.2 ),
+        eff_m2m_( "eff_m2m", "Eff( muon m^{2}_{miss})", 2000, -0.2, 0.2 ),
         eff_z_( "eff_z", "Eff(z vertex)", 120, -2000, 10000 ),
         eff_rmuv1_( "eff_rmuv1", "Eff(r muv 1)", 200, 0, 200 )
     {

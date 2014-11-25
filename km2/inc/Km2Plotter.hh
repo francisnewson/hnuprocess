@@ -52,6 +52,7 @@ namespace fn
             TH1D * h_m2m_pimu_;
 
             TH2D * h_p_m2m_kmu_;
+            TH2D * h_p_m2m_kmu_inner_;
             TH2D * h_p_m2m_kpi_;
             TH2D * h_p_m2m_pimu_;
 

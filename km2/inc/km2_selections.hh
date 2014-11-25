@@ -23,6 +23,23 @@ namespace fn
         Subscriber * create_subscriber<Km2NoBadCluster>
         (YAML::Node& instruct, RecoFactory& rf );
 
+    class Km2NoCluster : public CachedSelection
+    {
+        public:
+            Km2NoCluster( const Km2Clusters& km2c );
+
+        private:
+            bool do_check() const;
+            const Km2Clusters& km2c_;
+
+            REG_DEC_SUB( Km2NoCluster );
+    };
+
+    template<>
+        Subscriber * create_subscriber<Km2NoCluster>
+        (YAML::Node& instruct, RecoFactory& rf );
+
+
     //--------------------------------------------------
 
     class Km2M2Miss : public CachedSelection

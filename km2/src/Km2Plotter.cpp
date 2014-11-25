@@ -53,6 +53,10 @@ namespace fn
                 1000, -0.7, 0.3, "m^{2}_{miss} ( GeV^{2}/ c^{4} )",
                 100, 0, 100, "p (GeV/c)" );
 
+        h_p_m2m_kmu_inner_ = hs_.MakeTH2D( "h_p_m2m_kmu_inner", "Momentum vs K_{#mu2} missing mass",
+                1000, -0.01, 0.01, "m^{2}_{miss} ( GeV^{2}/ c^{4} )",
+                100, 0, 100, "p (GeV/c)" );
+
         h_p_m2m_kpi_ = hs_.MakeTH2D( "h_p_m2m_kpi", "Momentum vs K_{2#pi} missing mass",
                 1000, -0.7, 0.3, "m^{2}_{miss} ( GeV^{2}/ c^{4} )",
                 100, 0, 100, "p (GeV/c)" );
@@ -128,6 +132,7 @@ namespace fn
         h_m2m_pimu_->Fill( km2re.get_m2m_pimu(), wgt );
 
         h_p_m2m_kmu_->Fill( km2re.get_m2m_kmu(), km2re.get_muon_mom() , wgt );
+        h_p_m2m_kmu_inner_->Fill( km2re.get_m2m_kmu(), km2re.get_muon_mom() , wgt );
         h_p_m2m_kpi_->Fill( km2re.get_m2m_kpi(), km2re.get_muon_mom() , wgt );
         h_p_m2m_pimu_->Fill( km2re.get_m2m_pimu(), km2re.get_muon_mom() , wgt );
 

@@ -26,6 +26,24 @@ namespace fn
             return new Km2NoBadCluster( *km2c );
         }
 
+    REG_DEF_SUB( Km2NoCluster );
+
+    Km2NoCluster::Km2NoCluster( const Km2Clusters& km2c )
+        :km2c_( km2c ){}
+
+    bool Km2NoCluster::do_check() const
+    {
+        const Km2RecoClusters& km2rc  = km2c_.get_reco_clusters();
+        return ( km2rc.bad_size() < 1 && km2rc.associate_size() < 1);
+    }
+
+    template<>
+        Subscriber * create_subscriber<Km2NoCluster>
+        (YAML::Node& instruct, RecoFactory& rf )
+        {
+            const Km2Clusters* km2c  = get_km2_clusters( instruct, rf );
+            return new Km2NoCluster( *km2c );
+        }
     //--------------------------------------------------
 
     REG_DEF_SUB( Km2M2Miss);
