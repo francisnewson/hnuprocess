@@ -17,6 +17,7 @@ namespace fn
         return mc_;
     }
 
+
     GlobalStatus*& raw_global_status()
     {
         static GlobalStatus* gs = 0;

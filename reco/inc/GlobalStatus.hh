@@ -22,6 +22,8 @@ namespace fne
 
 namespace fn
 {
+    class K2piEventData;
+    
     //--------------------------------------------------
     //Hacky class for a few dependencies
     //--------------------------------------------------
@@ -47,8 +49,8 @@ namespace fn
             bool mc_;
     };
 
-    GlobalStatus*& raw_global_status();
 
+    GlobalStatus*& raw_global_status();
     GlobalStatus& global_status();
 }
 #endif

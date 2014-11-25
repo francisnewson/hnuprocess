@@ -24,6 +24,7 @@
 #include "k2pi_fitting.hh"
 #include "k2pi_reco_functions.hh"
 #include "EChain.hh"
+#include "GlobalStatus.hh"
 
 //A global bool which can be
 //used to store stop signals
@@ -184,6 +185,9 @@ int main( int argc, char * argv[] )
     boost::optional<bool> opt_mc = echain->get_is_mc();
     assert( opt_mc );
     bool is_mc = *opt_mc;
+
+    K2PIGStatus k2pigs{ echain->get_event_pointer(), is_mc };
+    raw_global_status() = &k2pigs;
 
     //**************************************************
     //Selections

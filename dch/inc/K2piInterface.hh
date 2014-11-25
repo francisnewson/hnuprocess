@@ -3,6 +3,7 @@
 #include "TLorentzVector.h"
 #include "K2piEventData.hh"
 #include "EHelp.hh"
+#include "GlobalStatus.hh"
 #if 0
 /*
  *  _  ______        _ ___       _             __
@@ -108,5 +109,19 @@ namespace fn
 
     template<>
         boost::optional<bool> is_mc<K2piEventData>( TTree * T );
+
+    class K2PIGStatus : public GlobalStatus
+    {
+        public:
+            K2PIGStatus( const fn::K2piEventData * e, bool mc );
+            virtual Long64_t get_run() const;
+            virtual bool is_mc() const;
+            virtual ~K2PIGStatus(){}
+
+        private:
+            const fn::K2piEventData * e_;
+            bool mc_;
+    };
+
 }
 #endif

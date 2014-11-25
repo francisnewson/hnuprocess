@@ -67,4 +67,18 @@ namespace fn
 
             return info->is_mc;
         }
+
+    K2PIGStatus::K2PIGStatus( const fn::K2piEventData * e, bool mc )
+        :e_( e ), mc_( mc )
+    {}
+
+         Long64_t K2PIGStatus::get_run() const
+    {
+        return e_->run;
+    }
+
+    bool K2PIGStatus::is_mc() const
+    {
+        return mc_;
+    }
 }
