@@ -33,10 +33,13 @@ namespace fn
             std::vector<const fne::RecoCluster *> associate_clusters_;
             std::vector<const fne::RecoCluster *> ignored_clusters_;
             std::vector<const fne::RecoCluster *> all_clusters_;
+            bool mc_;
 
         public:
-            void reset();
+            void reset( bool mc);
             void add_cluster( cluster_type ct, const fne::RecoCluster * cd );
+
+            bool is_mc()const { return mc_;}
 
             typedef std::vector<const fne::RecoCluster *>::size_type size_type;
             typedef std::vector<const fne::RecoCluster *>::iterator iterator;
@@ -89,6 +92,8 @@ namespace fn
             void new_event();
             const Km2RecoClusters& get_reco_clusters() const;
             virtual cluster_type id_cluster( const fne::RecoCluster* rc ) const;
+
+            bool is_mc(){ return mc_;}
 
         private:
             virtual void process_clusters() const;

@@ -1,5 +1,6 @@
 #include "ClusterEnergyCorr.hh"
 #include <stdexcept>
+#include "GlobalStatus.hh"
 
 namespace fn
 {
@@ -92,13 +93,20 @@ namespace fn
 
     //--------------------------------------------------
 
-    double ClusterEnergyCorr::operator()(const fne::RecoCluster& rc) const
+    double ClusterEnergyCorr::operator()(const fne::RecoCluster& rc, bool is_mc) const
     {
-        return correct_energy(rc);
+        return correct_energy(rc, is_mc);
     }
 
-    double ClusterEnergyCorr::correct_energy(const fne::RecoCluster& rc) const
+    double ClusterEnergyCorr::correct_energy(const fne::RecoCluster& rc, bool is_mc ) const
     {
+
+        if ( is_mc )
+        { return rc.energy; }
+
+        Long64_t run = global_status().get_run();
+        double corr_energy = user_lkrcalcor_SC( rc.energy, run, 1);
+
         //ints to receive cell information
         int cpd;
         int cell;
@@ -118,17 +126,19 @@ namespace fn
         //get correction
         double correction =  EopCorr[cpd][cell];
 
+        corr_energy /= correction;
+
         //apply correction
-        return rc.energy / correction;
+        return corr_energy;
     }
 
-    double correct_eop_energy( const fne::RecoCluster& re )
+    double correct_eop_energy( const fne::RecoCluster& re, bool is_mc )
     {
         static ClusterEnergyCorr
             cec { "/afs/cern.ch/user/f/fnewson/work/hnu"
                 "/gopher/data/detector/eopCorrfile.dat" };
 
-        return  cec( re );
+        return  cec( re, is_mc );
     }
 
     std::pair<int, int> get_cpd_cell_index( double pos_x, double pos_y)
@@ -142,5 +152,37 @@ namespace fn
         cec.GetCpdCellIndex( pos_x, pos_y, &cpd, &cell );
         return std::make_pair( cpd, cell );
     }
+
+    double user_lkrcalcor_SC(double energy, Long64_t run , int iflag) {
+        double ecorr;
+        /*
+         * energy scale
+         */
+        ecorr = 0.;
+        if(run>=13534 && run<13662) ecorr =  0.00062;
+        if(run>=13662 && run<13676) ecorr = -0.00038;
+        if(run>=13676 && run<13704) ecorr =  0.00076;
+        if(run>=13704 && run<13766) ecorr =  0.00019;
+        if(run>=13766 && run<13996) ecorr =  0.00071;
+        if(run>=13996 && run<14063) ecorr =  0.00090;
+        if(run>=14063 && run<14100) ecorr =  0.00088;
+        if(run>=14100 && run<14200) ecorr =  0.00080;
+
+        double result = energy *( 1.+ecorr );
+
+        /*
+         * DC threshold correction
+         */
+            double x= energy;
+            if(x <11.) {
+                ecorr=-0.00101009+0.000219228*x-1.61845E-05*x*x+4.17065E-07*x*x*x;
+                if(iflag==2) {
+                    ecorr=-0.00205335+0.000547472*x-4.8985E-05*x*x+1.4965E-06*x*x*x;
+                }
+                result *= (1.-19.*ecorr);
+            }
+        return result;
+    }
+
 
 }

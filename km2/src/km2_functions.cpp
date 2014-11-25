@@ -12,7 +12,7 @@ namespace fn
         }
 
         const fne::RecoCluster* tc = * (km2rc.associate_begin() );
-        TrackProjCorrCluster tcep( *tc );
+        TrackProjCorrCluster tcep( *tc, km2rc.is_mc()  );
         double track_cluster_energy = tcep.get_energy();
 
         double track_mom = srt.get_mom();

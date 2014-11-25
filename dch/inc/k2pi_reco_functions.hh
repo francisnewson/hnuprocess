@@ -24,7 +24,7 @@ namespace fn
     class K2piDchData;
     class K2piEventData;
 
-    double extract_eop( K2piEventData& event, K2piDchData& dch );
+    double extract_eop( K2piEventData& event, K2piDchData& dch, bool mc );
     double extract_photon_sep ( K2piLkrData &raw_lkr );
     double extract_min_track_cluster_sep ( K2piLkrData &raw_lkr, K2piDchData& dch );
 

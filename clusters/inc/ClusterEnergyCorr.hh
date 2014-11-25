@@ -2,6 +2,7 @@
 #define CLUSTERENERGYCORR_HH
 #include <string>
 #include "RecoCluster.hh"
+#include "Rtypes.h"
 #if 0
 /*
  *   ____ _           _            _____                            
@@ -32,8 +33,8 @@ namespace fn
     {
         public:
             ClusterEnergyCorr( std::string filename );
-            double operator()(const fne::RecoCluster& rc) const;
-            double correct_energy(const fne::RecoCluster& rc) const;
+            double operator()(const fne::RecoCluster& rc, bool is_mc ) const;
+            double correct_energy(const fne::RecoCluster& rc, bool is_mc) const;
 
 
             int GetCpdCellIndex
@@ -50,7 +51,9 @@ namespace fn
             float  CELLlength;
     };
 
-    double correct_eop_energy( const fne::RecoCluster& re );
+    double correct_eop_energy( const fne::RecoCluster& re, bool is_mc );
+
+    double user_lkrcalcor_SC(double energy, Long64_t run , int iflag);
 
     std::pair<int, int> get_cpd_cell_index( double pos_x, double pos_y);
 

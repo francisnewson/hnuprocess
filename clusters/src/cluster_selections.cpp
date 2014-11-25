@@ -66,7 +66,7 @@ namespace fn
         else
         {
             const fne::RecoCluster tc = k2pirc.track_cluster();
-            TrackProjCorrCluster tcep( tc );
+            TrackProjCorrCluster tcep( tc, k2pirc.is_mc() );
             double track_cluster_energy = tcep.get_energy();
 
             const SingleRecoTrack& srt = st_.get_single_track();
@@ -110,8 +110,8 @@ namespace fn
     {
         const K2piRecoClusters &  k2pirc = k2pic_.get_reco_clusters();
 
-        CorrCluster c1 { k2pirc.cluster1() };
-        CorrCluster c2 { k2pirc.cluster2() };
+        CorrCluster c1 { k2pirc.cluster1(), k2pirc.is_mc() };
+        CorrCluster c2 { k2pirc.cluster2(), k2pirc.is_mc()};
 
         double sep = fabs( ( c1.get_pos() - c2.get_pos() ).Mag() );
         return  (sep > min_sep_ );
@@ -141,8 +141,8 @@ namespace fn
     {
         //Extract clusters
         const K2piRecoClusters &  k2pirc = k2pic_.get_reco_clusters();
-        CorrCluster c1 { k2pirc.cluster1() };
-        CorrCluster c2 { k2pirc.cluster2() };
+        CorrCluster c1 { k2pirc.cluster1(), k2pirc.is_mc()  };
+        CorrCluster c2 { k2pirc.cluster2(), k2pirc.is_mc()  };
         TVector3 pos1 = c1.get_pos();
         TVector3 pos2 = c2.get_pos();
 

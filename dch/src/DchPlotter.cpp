@@ -126,7 +126,7 @@ namespace fn
     {
         if (event_data.found_track_cluster)
         {
-            heop_->Fill( extract_eop( event_data, dch_data) , weight );
+            heop_->Fill( extract_eop( event_data, dch_data, mc) , weight );
         }
 
         hphoton_sep_->Fill( extract_photon_sep( lkr_data), weight );

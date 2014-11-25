@@ -222,11 +222,11 @@ int main( int argc, char * argv[] )
     //--------------------
 
     //EOP CUT
-    auto raw_eop = [&event, &raw_dch]()
+    auto raw_eop = [&event, &raw_dch, &is_mc]()
     {
         if ( event.found_track_cluster )
         {
-            double eop = extract_eop( event, raw_dch );
+            double eop = extract_eop( event, raw_dch, is_mc );
             return ( 0.2 < eop && eop < 0.8 );
         }
         else

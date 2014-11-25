@@ -9,13 +9,13 @@
 
 namespace fn
 {
-    double extract_eop( K2piEventData& event, K2piDchData& dch )
+    double extract_eop( K2piEventData& event, K2piDchData& dch, bool mc )
     {
         fne::RecoCluster rc;
         rc.energy = event.TCE;
         rc.x = event.TCX;
         rc.y = event.TCY;
-        double energy = correct_eop_energy( rc );
+        double energy = correct_eop_energy( rc, mc );
         double momentum = dch.p;
         double eop = energy / momentum;
 

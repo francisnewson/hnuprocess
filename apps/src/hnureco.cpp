@@ -6,6 +6,7 @@
 #include "logging.hh"
 #include <boost/filesystem.hpp>
 #include <vector>
+#include "GlobalStatus.hh"
 
 /*
  *  _                                    
@@ -329,6 +330,10 @@ int main( int argc, char * argv[] )
     }
 
     reco_factory.set_output_prefix( output_prefix );
+
+    //Global connection
+    FNEGStatus fnegs{ reco_factory.get_event_ptr(), reco.is_mc() };
+    raw_global_status() = &fnegs;
 
     BOOST_LOG_SEV( slg, startup )
         << "Channel is: " <<  channel;

@@ -28,7 +28,7 @@ namespace fn
                     const fne::Event * event,
                     const KaonTrack& kt,
                     const SingleTrack& st,
-                    const K2piClusters& k2pic ) = 0;
+                    const K2piClusters& k2pic, bool mc ) = 0;
 
             virtual double get_zvertex() const = 0;
             virtual TVector3 get_vertex() const = 0;
@@ -121,7 +121,7 @@ namespace fn
                     const fne::Event * event,
                     const KaonTrack& kt,
                     const SingleTrack& st,
-                    const K2piClusters& k2pic );
+                    const K2piClusters& k2pic, bool mc );
 
             TLorentzVector get_p4pip() const;
             TLorentzVector get_p4pi0() const;

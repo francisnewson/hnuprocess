@@ -32,12 +32,19 @@ namespace fn
 
     class K2piRecoClusters
     {
+        private:
+        bool mc_;
+
         public:
+        K2piRecoClusters( bool mc):mc_( mc ){}
         virtual const fne::RecoCluster& cluster1() const = 0;
         virtual const fne::RecoCluster& cluster2() const = 0;
 
         virtual bool found_track_cluster() const = 0;
         virtual const fne::RecoCluster& track_cluster() const = 0;
+
+        bool is_mc() const { return mc_; }
+
     };
 
     class K2piClusters : public Subscriber
@@ -71,6 +78,7 @@ namespace fn
     class DefaultK2piRecoClusters : public K2piRecoClusters
     {
         public:
+            DefaultK2piRecoClusters( bool mc) :K2piRecoClusters( mc ){}
             void update( const fne::RecoCluster * c1, 
                     const fne::RecoCluster * c2,
                     bool found_track, const fne::RecoCluster * tc );
@@ -105,7 +113,7 @@ namespace fn
             DefaultK2piClusters( 
                     const fne::Event * event,
                     const SingleTrack * single_track,
-                    YAML::Node & instruct );
+                    YAML::Node & instruct, bool mc );
 
             enum failure
             {

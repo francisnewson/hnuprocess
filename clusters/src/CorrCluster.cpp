@@ -4,8 +4,8 @@
 
 namespace fn
 {
-    CorrCluster::CorrCluster( const fne::RecoCluster& rc )
-        :rc_( rc ){}
+    CorrCluster::CorrCluster( const fne::RecoCluster& rc, bool mc )
+        :rc_( rc ), mc_( mc ){}
 
     TVector3 CorrCluster::get_pos() const
     {
@@ -17,7 +17,7 @@ namespace fn
 
     double CorrCluster::get_energy() const
     {
-        return rc_.energy;
+        return correct_eop_energy( rc_, mc_ );
     }
 
     //--------------------------------------------------
@@ -38,8 +38,8 @@ namespace fn
 
     //--------------------------------------------------
 
-    PhotonProjCorrCluster::PhotonProjCorrCluster( const fne::RecoCluster& rc )
-        :CorrCluster( rc ){}
+    PhotonProjCorrCluster::PhotonProjCorrCluster( const fne::RecoCluster& rc, bool mc )
+        :CorrCluster( rc, mc ){}
 
     TVector3 PhotonProjCorrCluster::get_pos() const
     {
@@ -49,8 +49,8 @@ namespace fn
     //--------------------------------------------------
 
     TrackProjCorrCluster::TrackProjCorrCluster
-        ( const fne::RecoCluster& rc )
-        :CorrCluster( rc )
+        ( const fne::RecoCluster& rc, bool mc )
+        :CorrCluster( rc, mc )
         {}
 
     TVector3 TrackProjCorrCluster::get_pos() const
@@ -60,7 +60,7 @@ namespace fn
 
     double TrackProjCorrCluster::get_energy() const
     {
-        return correct_eop_energy( rc_ );
+        return correct_eop_energy( rc_, mc_ );
     }
 
     //--------------------------------------------------

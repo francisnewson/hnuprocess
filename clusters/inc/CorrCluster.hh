@@ -19,12 +19,13 @@ namespace fn
     class CorrCluster
     {
         public:
-            CorrCluster( const fne::RecoCluster& rc );
+            CorrCluster( const fne::RecoCluster& rc, bool mc );
             virtual TVector3 get_pos() const;
             virtual double get_energy() const;
 
         protected:
             const fne::RecoCluster & rc_;
+            bool mc_;
     };
 
     //--------------------------------------------------
@@ -36,7 +37,7 @@ namespace fn
     {
         public:
             PhotonProjCorrCluster
-                ( const fne::RecoCluster& rc );
+                ( const fne::RecoCluster& rc, bool mc );
 
             TVector3 get_pos() const;
     };
@@ -47,7 +48,7 @@ namespace fn
     {
         public:
             TrackProjCorrCluster
-                ( const fne::RecoCluster& rc );
+                ( const fne::RecoCluster& rc, bool mc );
 
             TVector3 get_pos() const;
             double get_energy() const;

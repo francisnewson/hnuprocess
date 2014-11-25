@@ -7,8 +7,9 @@
 
 namespace fn
 {
-    void Km2RecoClusters::reset()
+    void Km2RecoClusters::reset(bool mc)
     {
+        mc_ = mc;
         bad_clusters_.clear();
         associate_clusters_.clear();
         ignored_clusters_.clear();
@@ -92,7 +93,7 @@ namespace fn
 
         //Is it Brehmsstrahlung
         TVector3 brehm_trkLkr = srt.extrapolate_bf( na62const::zLkr );
-        PhotonProjCorrCluster photon_cluster{ *rc };
+        PhotonProjCorrCluster photon_cluster{ *rc, mc_ };
         TVector3 photon_pos = photon_cluster.get_pos();
         double brehm_sep =  (brehm_trkLkr - photon_pos).Mag();
 
@@ -103,7 +104,7 @@ namespace fn
             return  cluster_type::IGN;
 
         //Is it associated to the track
-        TrackProjCorrCluster track_cluster{ *rc };
+        TrackProjCorrCluster track_cluster{ *rc, mc_ };
         TVector3 cluster_pos = track_cluster.get_pos();
         TVector3 trkLkr = srt.extrapolate_ds( cluster_pos.Z() );
         double track_cluster_sep = (trkLkr - cluster_pos).Mag();
@@ -134,7 +135,7 @@ namespace fn
             <<"--------------------NEW Km2Clusters EVENT--------------------";
         }
 
-        km2rc_.reset();
+        km2rc_.reset( mc_);
 
         int nclusters = e_->detector.nclusters;
         auto& eclusters = e_->detector.clusters;

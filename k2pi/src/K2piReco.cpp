@@ -97,7 +97,7 @@ namespace fn
 
     void K2piRecoImp::process_event() const
     {
-        reco_event_->update( e_, kt_, st_, k2pic_ );
+        reco_event_->update( e_, kt_, st_, k2pic_, mc_ );
     }
 
     const SingleTrack& K2piRecoImp::get_single_track() const
@@ -114,7 +114,7 @@ namespace fn
             const fne::Event * event,
             const KaonTrack& kt,
             const SingleTrack& st,
-            const K2piClusters& k2pic )
+            const K2piClusters& k2pic, bool mc )
     {
         const K2piRecoClusters& k2pirc= k2pic.get_reco_clusters();
 
@@ -124,8 +124,8 @@ namespace fn
               &get_log(), log_level() );
 
         //Extract photon clusters
-        PhotonProjCorrCluster c1 {k2pirc.cluster1() };
-        PhotonProjCorrCluster c2 {k2pirc.cluster2() };
+        PhotonProjCorrCluster c1 {k2pirc.cluster1() , mc };
+        PhotonProjCorrCluster c2 {k2pirc.cluster2() , mc};
 
         c1_.update( c1 );
         c2_.update( c2 );
@@ -134,7 +134,7 @@ namespace fn
         found_track_cluster_ = k2pirc.found_track_cluster();
         if ( found_track_cluster_)
         {
-            TrackProjCorrCluster tc { k2pirc.track_cluster() };
+            TrackProjCorrCluster tc { k2pirc.track_cluster(), mc };
             tc_.update( tc );
         }
 

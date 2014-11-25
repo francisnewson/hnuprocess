@@ -62,9 +62,11 @@ namespace fn
             const fne::Event * event = rf.get_event_ptr();
             const SingleTrack * single_track = get_single_track( instruct, rf );
 
+            bool mc = rf.is_mc();
+
             if ( method == "Default" )
             {
-                return new DefaultK2piClusters{ event, single_track, instruct };
+                return new DefaultK2piClusters{ event, single_track, instruct, mc };
             }
             else
             {
@@ -114,8 +116,8 @@ namespace fn
     DefaultK2piClusters::DefaultK2piClusters( 
             const fne::Event * event,
             const SingleTrack * single_track,
-            YAML::Node & instruct )
-        :event_( event ), st_( single_track ),
+            YAML::Node & instruct, bool mc )
+        :event_( event ), st_( single_track ),reco_clusters_( mc ),
         cec_("/afs/cern.ch/user/f/fnewson/work/hnu"
                 "/gopher/data/detector/eopCorrfile.dat" )
     { 
@@ -182,7 +184,7 @@ namespace fn
             }
 
             //Energy cut
-            pc.corr_energy = cec_( *pc.rc  );
+            pc.corr_energy = cec_( *pc.rc, reco_clusters_.is_mc()  );
             if ( pc.corr_energy > min_cluster_energy_ )
             {
                 filtered_clusters_.push_back( pc );
@@ -279,7 +281,7 @@ namespace fn
             std::vector<double> track_cluster_dists;
             for ( auto& cluster : clusters )
             {
-                CorrCluster cc( *cluster.rc );
+                CorrCluster cc( *cluster.rc, reco_clusters_.is_mc() );
                 TVector3 pos = cc.get_pos();
                 TVector3 track_pos = srt.extrapolate_ds( pos.Z() );
                 double dist = fabs ( ( track_pos - pos).Mag() );

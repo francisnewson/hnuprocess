@@ -14,8 +14,8 @@ namespace fn
     
     k2pi_fitter::k2pi_fitter (
             const fne::Event * event, const KaonTrack& kt,
-            const SingleRecoTrack& srt, const K2piRecoClusters& k2pirc )
-        :e_( event), kt_( kt ), srt_( srt ), k2pirc_( k2pirc ),
+            const SingleRecoTrack& srt, const K2piRecoClusters& k2pirc, bool mc )
+        :e_( event), kt_( kt ), srt_( srt ), k2pirc_( k2pirc ), mc_( mc ),
         names_{ "E1", "E2", "C1_X", "C2_X", "C1_Y", "C2_Y",
             "PK_X", "PK_Y", "PK_Z", "posK_X", "posK_Y" }
     {
@@ -29,7 +29,7 @@ namespace fn
         //PARAMS
         //Extract cluster 1
         const fne::RecoCluster& cluster1 = k2pirc_.cluster1();
-        PhotonProjCorrCluster corr_cluster1{ cluster1 };
+        PhotonProjCorrCluster corr_cluster1{ cluster1, mc_ };
         measured_.E1() = corr_cluster1.get_energy();
         TVector3 cluster1_pos = corr_cluster1.get_pos();
         measured_.posC1_X() = cluster1_pos.X();
@@ -37,7 +37,7 @@ namespace fn
 
         //Extract cluster 2
         const fne::RecoCluster& cluster2 = k2pirc_.cluster2();
-        PhotonProjCorrCluster corr_cluster2{ cluster2 };
+        PhotonProjCorrCluster corr_cluster2{ cluster2, mc_ };
         measured_.E2() = corr_cluster2.get_energy();
         TVector3 cluster2_pos = corr_cluster2.get_pos();
         measured_.posC2_X() = cluster2_pos.X();
@@ -182,12 +182,12 @@ namespace fn
             const fne::Event * event,
             const KaonTrack& kt,
             const SingleTrack& st,
-            const K2piClusters& k2pic )
+            const K2piClusters& k2pic,bool mc )
     {
 
         //create fit object
         k2pi_fitter fit_object( event, kt, st.get_single_track(),
-                k2pic.get_reco_clusters() );
+                k2pic.get_reco_clusters(), mc );
 
         fit_object.init();
 
@@ -213,8 +213,8 @@ namespace fn
         const K2piRecoClusters& k2pirc = k2pic.get_reco_clusters();
 
         //Extract photon clusters
-        PhotonProjCorrCluster c1 {k2pirc.cluster1() };
-        PhotonProjCorrCluster c2 {k2pirc.cluster2() };
+        PhotonProjCorrCluster c1 {k2pirc.cluster1(), mc };
+        PhotonProjCorrCluster c2 {k2pirc.cluster2(), mc };
 
         c1_.update( c1 );
         c2_.update( c2 );
@@ -223,7 +223,7 @@ namespace fn
         found_track_cluster_ = k2pirc.found_track_cluster();
         if ( found_track_cluster_)
         {
-            TrackProjCorrCluster tc { k2pirc.track_cluster() };
+            TrackProjCorrCluster tc { k2pirc.track_cluster(), mc };
             tc_.update( tc );
         }
     }

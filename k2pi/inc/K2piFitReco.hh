@@ -44,7 +44,8 @@ namespace fn
                     const fne::Event * event,
                     const KaonTrack& kt,
                     const SingleRecoTrack& srt,
-                    const K2piRecoClusters& k2pirc );
+                    const K2piRecoClusters& k2pirc,
+                    bool mc);
 
             void init();
 
@@ -59,6 +60,7 @@ namespace fn
             const KaonTrack& kt_;
             const SingleRecoTrack& srt_;
             const K2piRecoClusters& k2pirc_ ;
+            bool mc_;
 
             k2pi_params measured_;
             k2pi_params fit_;
@@ -79,7 +81,7 @@ namespace fn
                     const fne::Event * event,
                     const KaonTrack& kt,
                     const SingleTrack& st,
-                    const K2piClusters& k2pic );
+                    const K2piClusters& k2pic, bool mc );
 
             TLorentzVector get_p4pip() const;
             TLorentzVector get_p4pi0() const;

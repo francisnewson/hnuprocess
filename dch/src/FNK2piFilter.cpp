@@ -113,8 +113,8 @@ namespace fn
         K2piLkrInterface lkr( dest );
 
         //Clusters ( no projection correction at this stage )
-        CorrCluster c1 {k2pirc.cluster1() };
-        CorrCluster c2 {k2pirc.cluster2() };
+        CorrCluster c1 {k2pirc.cluster1(), k2pirc.is_mc() };
+        CorrCluster c2 {k2pirc.cluster2(), k2pirc.is_mc() };
 
         //Energies don't need correcting
         lkr.E1() = c1.get_energy();

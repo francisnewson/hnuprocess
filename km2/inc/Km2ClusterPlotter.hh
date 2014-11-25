@@ -30,12 +30,13 @@ namespace fn
     class Km2ClusterPlots
     {
         public:
-            Km2ClusterPlots();
+            Km2ClusterPlots(bool mc);
             void Fill( const SingleRecoTrack& srt, 
                     const Km2RecoClusters& km2rc, double weight );
             void Write();
 
         private:
+            bool mc_;
             TH1D * h_eop_;
             TH1D * h_n_ass_cluster_;
             TH1D * h_n_bad_cluster_;
@@ -56,7 +57,8 @@ namespace fn
             Km2ClusterPlotter( const Selection& sel, 
                     TFile& tfile, std::string folder,
                     const Km2Event& km2_event,
-                    const  Km2Clusters& km2_clusters);
+                    const  Km2Clusters& km2_clusters,
+                    bool mc);
 
             void end_processing();
 
