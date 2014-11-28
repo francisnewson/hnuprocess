@@ -232,7 +232,7 @@
     #log_level: always_print
     type: Km2TrackClusterEP
     min_eop: 0.0
-    max_eop: 0.85
+    max_eop: 0.1
     inputs:
         km2clusters: rk_km2_clusters
         ogt: bf_st

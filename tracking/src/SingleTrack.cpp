@@ -150,7 +150,7 @@ namespace fn
         assert( proc_track_->orig_rt !=0  );
         const fne::RecoTrack& rt = *proc_track_->orig_rt;
         TVector3 unscatmom{ rt.bdxdz, rt.bdydz, 1};
-        return proc_track_->corr_mom  * unscatmom.Unit();
+        return proc_track_->unscattered_mom  * unscatmom.Unit();
     }
 
     TVector3 BFSingleRecoTrack::get_us_mom() const
@@ -172,7 +172,7 @@ namespace fn
     //BF
 
     processing_track::processing_track( const processing_track& other )
-        :corr_mom( other.corr_mom ), vert( other.vert ), good( other.good ),
+        :corr_mom( other.corr_mom ), unscattered_mom( other.unscattered_mom), vert( other.vert ), good( other.good ),
         rt_( other.rt_ ), rt( &rt_ ), orig_rt( other.orig_rt )
     {}
 
@@ -181,6 +181,7 @@ namespace fn
         {
             using std::swap;
             swap( first.corr_mom, second.corr_mom );
+            swap( first.unscattered_mom, second.unscattered_mom );
             swap( first.vert, second.vert );
             swap( first.good, second.good );
             swap( first.rt_, second.rt_ );
@@ -254,9 +255,8 @@ namespace fn
             assert( pt.rt->p == rt->p );
             assert( pt.orig_rt == rt );
 
-
-
             pt.corr_mom = p_corr_ab( pt.rt->p, pt.rt->q, alpha, beta  );
+            pt.unscattered_mom = pt.corr_mom;
             modify_processing_track( pt );
             pt.good = true;
 
@@ -500,6 +500,7 @@ namespace fn
             //mom kick
             double mom_roll = mom_dist( gen );
             double mom_kick = mom_roll * std::pow(mom,2 );
+            //std::cout << mom_kick << std::endl;
             mom += mom_kick;
         }
 

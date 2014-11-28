@@ -97,6 +97,7 @@ namespace fn
             ( processing_track& first, processing_track& second );
 
         double corr_mom;
+        double unscattered_mom;
         Vertex vert;
         bool good;
 

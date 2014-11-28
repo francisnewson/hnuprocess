@@ -17,3 +17,12 @@ p6:
     - p6.halo.kless.m-.pi+.b+
     - klesska+
     - klesspi+
+    - p5.wrong.halo.klesska+
+    - p5.wrong.halo.klesspi+
+    - klesska+.5000
+    - kless.m-.ka+.b-
+    - kless.m-.ka+.b+
+    - kless.m-.pi+.b-
+    - kless.m-.pi+.b+
+    - klesspi+.5000
+

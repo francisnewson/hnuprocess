@@ -7,7 +7,7 @@ namespace fn
     TrackPlotter::TrackPlotter( std::string name1, std::string name2)
     {
         h_dp_ = hs_.MakeTH1D( "h_dp", "#Delta P", 
-                1000, -10, 10, "#Delta P ( GeV )" );
+                1000, -50, 50, "#Delta P ( GeV )" );
 
         h_dpop2_ = hs_.MakeTH1D( "h_dpop2", "#Delta P", 
                 1000, -1, 1, "#Delta P ( GeV )" );
@@ -24,6 +24,8 @@ namespace fn
     {
         double p1 = mom_1.Mag();
         double p2 = mom_2.Mag();
+
+        //std::cerr << p1 << " " << p2 << " " << p1 - p2 << std::endl;
 
         double tx1 = mom_1.X() / mom_1.Z();
         double ty1 = mom_1.Y() / mom_1.Z();

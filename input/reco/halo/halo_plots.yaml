@@ -121,6 +121,44 @@
     allowed_status: [ 1, 2 ]
     ignore_classes: [ p6 ]
 
+#Track DHC1 ACC
+- selection:
+    name: dch1_acc
+    type: TrackRadialAcceptance
+    track_section: upstream
+    z: 9708.42 #zDCH1
+    inner: 12.0
+    outer: 115.0
+    inputs:
+        ogt: bf_st
+
+#Track DHC4 ACC
+- selection:
+    name: dch4_acc
+    type: TrackRadialAcceptance
+    track_section: downstream
+    z: 11888.0 #zDCH1
+    inner: 14.0
+    outer: 115.0
+    inputs:
+        ogt: bf_st
+
+- selection:
+    name: pzt_cut
+    type: TrackPZT
+    regions_file: "input/reco/km2/pzt.yaml"
+    inputs:
+        ogt: bf_st
+        kt: kaon_track
+
+#Track time
+- selection:
+    name: rk_dcht
+    type : TrackTime
+    max_dt: 20 #ns
+    inputs:
+        ogt: bf_st
+
 - selection:
     name: halo_selection
     type: CompositeSelection
@@ -154,11 +192,38 @@
         - cda_halo
         - fiducial_pz
 
+- selection:
+    name : hnu_selection
+    type: CompositeSelection
+    children:
+        - kaon_mom_weights
+        - gd_muv_brst
+        - muv_12
+        - good_trk
+        - pos_trk
+        - quality_7
+        - cda_halo
+        - dch1_acc
+        - dch4_acc
+        - rk_dcht
+        - pzt_cut
+        - nobadcluster
+
+- selection:
+    name: halo_loose
+    type: CompositeSelection
+    children:
+        - pre_halo
+        - quality_7
+        - dch1_acc
+        - dch4_acc
+        - rk_dcht
+          
 #--------------------------------------------------
 
 ##################################################
 #
-#   ANALYSES
+#  PZREGIONS 
 #
 ##################################################
 
@@ -222,7 +287,7 @@
 
 ##################################################
 #
-#   PZREGIONS
+# ANALYSES
 #
 ##################################################
 
@@ -258,6 +323,24 @@
     folder: halo_full
     tfile: tfout
     selection: halo_selection
+    inputs:
+        km2event: km2_event
+
+- analysis :
+    type: Km2Plotter
+    name: full_halo_tgt_plots
+    folder: halo_tgt
+    tfile: tfout
+    selection: hnu_selection
+    inputs:
+        km2event: km2_event
+
+- analysis :
+    type: Km2Plotter
+    name: full_halo_loose_plots
+    folder: halo_loose
+    tfile: tfout
+    selection: halo_loose
     inputs:
         km2event: km2_event
 

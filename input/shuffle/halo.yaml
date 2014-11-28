@@ -67,8 +67,8 @@ mass_windows:
 
 output:
     input_file:  data/halo_plots/all.halo_plots.root
-    plot_path: halo_full/h_m2m_kmu
-    rebin: 10
+    plot_path: halo_full/h_z
+    rebin: 1
 
     data_plot:
         channels:

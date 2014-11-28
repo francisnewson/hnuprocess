@@ -55,8 +55,8 @@
     angle_frequency: 3e-3
     #angle_frequency: 1.0
 
-    mom_sigma: 0.5
-    mom_frequency: 2e-2
+    mom_sigma: 0.1
+    mom_frequency: 1e-2
     #mom_frequency: 1.0
 
     inputs:
@@ -214,6 +214,16 @@
         ogt: bf_st
 
 - selection:
+    name : raw_hnu_selection
+    type: CompositeSelection
+    children:
+        - kaon_mom_weights
+        - gd_muv_brst
+        - muv_12
+        - good_trk
+        - pos_trk
+
+- selection:
     name : hnu_selection
     type: CompositeSelection
     children:
@@ -267,8 +277,6 @@
         - gd_muv_brst
         - good_trk
         - pos_trk
-#       - quality_7
-#       - wide_track_mom
 
 - analysis : 
     name : full_summary
@@ -313,6 +321,15 @@
     folder: full_km2_track
     tfile: tfout
     selection: hnu_selection
+    inputs:
+        ogt: bf_st
+
+- analysis :
+    type: SingleTrackPlotter
+    name: raw_km2_track_plots
+    folder: raw_km2_track
+    tfile: tfout
+    selection: raw_hnu_selection
     inputs:
         ogt: bf_st
 
