@@ -2,11 +2,12 @@
 #include "Reconstruction.hh"
 #include "Xcept.hh"
 #include "yaml_help.hh"
+#include "GlobalStatus.hh"
 
 namespace fn
 {
     RecoFactory::RecoFactory( Reconstruction& reco )
-        :reco_( reco), log_(0), next_sub_id_(0){}
+        :reco_( reco), log_(0), next_sub_id_(0), global_status_(0){}
 
     //logging
     void RecoFactory::set_log( logger& log )
@@ -227,5 +228,22 @@ namespace fn
         std::string raw_folder = get_yaml<std::string>( node, key );
         std::string channel = rf.get_channel();
         return ( channel + "/" + raw_folder );
+    }
+
+    //GLOBALSTATUS
+    void RecoFactory::set_global_status( const GlobalStatus * const gs )
+    {
+        global_status_ = gs;
+    }
+
+    const GlobalStatus * RecoFactory::get_global_status()
+    {
+        if ( global_status_ == 0 )
+        {
+            throw std::runtime_error(
+                    "RecoFactory::Request for GlobalStatus but none set" );
+        }
+
+        return global_status_;
     }
 }

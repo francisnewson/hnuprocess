@@ -29,6 +29,7 @@ namespace fn
     class KaonTrack;
     class K2piClusters;
     class K2piRecoClusters;
+    class ClusterCorrector;
     class SingleRecoTrack;
 
 
@@ -41,6 +42,7 @@ namespace fn
                     const fne::Event * event,
                     const SingleTrack & st ,
                     const K2piClusters& k2pi_clusters,
+                    const ClusterCorrector& cluster_corrector,
                     const KaonTrack& kt,
                     bool mc );
 
@@ -54,6 +56,7 @@ namespace fn
             const fne::Event * e_;
             const SingleTrack& st_;
             const K2piClusters& k2pi_clusters_;
+            const ClusterCorrector& cluster_corrector_;
             const KaonTrack& kt_;
 
             K2piEventData k2pi_event_data_;
@@ -74,7 +77,7 @@ namespace fn
 
     //--------------------------------------------------
 
-    void extract_raw_lkr( const K2piRecoClusters& k2pirc, 
+    void extract_raw_lkr( const K2piRecoClusters& k2pirc, const ClusterCorrector& cc,
             const KaonTrack& kt , K2piLkrData& dest );
 
     void extract_raw_dch( const SingleRecoTrack& srt, 
@@ -82,7 +85,7 @@ namespace fn
 
     void extract_k2pi_mc( const fne::Event& e, K2piMcData& mc );
 
-    double fit_lkr( const K2piLkrData& raw,  
+    double fit_lkr( const K2piLkrData& raw, const ClusterCorrector& cluster_corrector, 
             K2piLkrData& fit, K2piLkrData& err );
 
 

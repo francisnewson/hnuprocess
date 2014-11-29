@@ -21,6 +21,8 @@
 #endif
 namespace fn
 {
+#if 0
+
     class K2piRecoEvent
     {
         public:
@@ -162,5 +164,7 @@ namespace fn
 
     K2piReco * get_k2pi_reco
         ( YAML::Node& instruct, RecoFactory& rf );
+#endif
+
 }
 #endif

@@ -7,6 +7,7 @@
 #include "Rtypes.h"
 #include <boost/filesystem/path.hpp>
 #include "OSLoader.hh"
+#include "GlobalStatus.hh"
 
 #if 0
 /*  ____
@@ -33,6 +34,7 @@ namespace fne
 namespace fn
 {
     class Reconstruction;
+    class GlobalStatus;
 
     class RecoFactory
     {
@@ -71,6 +73,10 @@ namespace fn
             void set_channel( const std::string& channel);
             std::string get_channel() const;
 
+            //global status
+            void set_global_status( const GlobalStatus * const gs );
+            const GlobalStatus * get_global_status();
+
             bool is_mc() const;
 
             //stoppage
@@ -99,6 +105,9 @@ namespace fn
 
             //stoppage
             bool * remote_stop_;
+
+            //global status
+            const GlobalStatus * global_status_;
     };
 
     std::string get_folder( const YAML::Node& node, const RecoFactory& rf,

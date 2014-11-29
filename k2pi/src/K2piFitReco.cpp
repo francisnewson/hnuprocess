@@ -12,6 +12,7 @@
 namespace fn
 {
     
+#if 0
     k2pi_fitter::k2pi_fitter (
             const fne::Event * event, const KaonTrack& kt,
             const SingleRecoTrack& srt, const K2piRecoClusters& k2pirc, bool mc )
@@ -271,4 +272,5 @@ namespace fn
         { throw Xcept<EventDoesNotContain>( "track_cluster " __FILE__);}
         return tc_;
     }
+#endif
 }

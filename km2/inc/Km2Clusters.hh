@@ -34,12 +34,15 @@ namespace fn
             std::vector<const fne::RecoCluster *> ignored_clusters_;
             std::vector<const fne::RecoCluster *> all_clusters_;
             bool mc_;
+            const ClusterCorrector& cluster_corrector_;
 
         public:
+            Km2RecoClusters( const ClusterCorrector& cluster_corrector_);
             void reset( bool mc);
             void add_cluster( cluster_type ct, const fne::RecoCluster * cd );
 
-            bool is_mc()const { return mc_;}
+            bool is_mc() const { return mc_;}
+            const ClusterCorrector& get_cluster_corrector() const { return  cluster_corrector_;}
 
             typedef std::vector<const fne::RecoCluster *>::size_type size_type;
             typedef std::vector<const fne::RecoCluster *>::iterator iterator;
@@ -87,7 +90,8 @@ namespace fn
         public:
             Km2Clusters( const fne::Event* e, const SingleTrack& st ,
                     double noise_energy, double noise_time, 
-                    double brehm_radius, double track_cluster_radius, bool is_mc );
+                    double brehm_radius, double track_cluster_radius, 
+                    const ClusterCorrector& cluster_corrector, bool is_mc );
 
             void new_event();
             const Km2RecoClusters& get_reco_clusters() const;
@@ -101,11 +105,13 @@ namespace fn
             const SingleTrack& st_;
             mutable Km2RecoClusters km2rc_;
 
+
             double noise_energy_;
             double noise_time_;
             double brehm_radius_;
             double track_cluster_radius_;
 
+            const ClusterCorrector& cluster_corrector_;
             bool mc_;
 
             mutable bool dirty_;

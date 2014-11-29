@@ -3,6 +3,8 @@
 #include <string>
 #include "RecoCluster.hh"
 #include "Rtypes.h"
+#include "Subscriber.hh"
+#include "GlobalStatus.hh"
 #if 0
 /*
  *   ____ _           _            _____                            
@@ -36,6 +38,13 @@ namespace fn
             double operator()(const fne::RecoCluster& rc, bool is_mc ) const;
             double correct_energy(const fne::RecoCluster& rc, bool is_mc) const;
 
+            double correct_energy(const fne::RecoCluster& rc, 
+                    bool is_mc, Long64_t run) const;
+
+            double correct_energy( double x, double y, double energy,  bool is_mc ) const;
+
+            double correct_energy( double x, double y, double energy,  bool is_mc , Long64_t run ) const;
+
 
             int GetCpdCellIndex
                 (double pos_x, double pos_y,
@@ -56,6 +65,43 @@ namespace fn
     double user_lkrcalcor_SC(double energy, Long64_t run , int iflag);
 
     std::pair<int, int> get_cpd_cell_index( double pos_x, double pos_y);
+
+    //--------------------------------------------------
+
+    class ClusterCorrector : public Subscriber
+    {
+        public:
+            virtual double correct_energy( const fne::RecoCluster& rc, bool is_mc) const = 0 ;
+            virtual double correct_energy
+                ( double x, double y, double energy,  bool is_mc) const = 0;
+
+            virtual ~ClusterCorrector(){}
+        private:
+            REG_DEC_SUB( ClusterCorrector );
+    };
+
+    template<>
+        Subscriber * create_subscriber<ClusterCorrector>
+        (YAML::Node& instruct, RecoFactory& rf );
+
+    class DefaultClusterCorrector : public ClusterCorrector
+    {
+        public:
+            DefaultClusterCorrector( std::string filename, const GlobalStatus& gs );
+            virtual double correct_energy( const fne::RecoCluster& rc, bool is_mc) const;
+            virtual double correct_energy
+                ( double x, double y, double energy,  bool is_mc) const;
+
+            virtual ~DefaultClusterCorrector(){}
+
+        private:
+            const ClusterEnergyCorr cec_;
+            const GlobalStatus& global_status_;
+
+    };
+
+    ClusterCorrector * get_cluster_corrector
+        ( YAML::Node& instruct, RecoFactory& rf );
 
 }
 #endif

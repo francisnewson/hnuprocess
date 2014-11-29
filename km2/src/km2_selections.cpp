@@ -144,7 +144,8 @@ namespace fn
 
         for ( auto iclus = begin ; iclus != end ;  ++iclus )
         {
-            TrackProjCorrCluster corr_cluster( **iclus, km2rc.is_mc() );
+            CorrCluster cc( **iclus, km2rc.get_cluster_corrector(), km2rc.is_mc() );
+            TrackProjCorrCluster corr_cluster( cc);
             TVector3 vClus = corr_cluster.get_pos();
 
             if ( ( vLkr - vClus).Mag() < 10 )
@@ -204,7 +205,8 @@ namespace fn
                     "Km2TrackClusterEP called with more than one cluster");
         }
         const fne::RecoCluster* tc = * (km2rc.associate_begin() );
-        TrackProjCorrCluster tcep( *tc, km2rc.is_mc() );
+        CorrCluster cc ( *tc, km2rc.get_cluster_corrector() , km2rc.is_mc() );
+        TrackProjCorrCluster tcep( cc);
         double track_cluster_energy = tcep.get_energy();
 
         const SingleRecoTrack& srt = st_.get_single_track();

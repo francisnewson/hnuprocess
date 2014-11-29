@@ -33,17 +33,22 @@ namespace fn
     class K2piRecoClusters
     {
         private:
-        bool mc_;
+            bool mc_;
+            const ClusterCorrector& cluster_corrector_;
 
         public:
-        K2piRecoClusters( bool mc):mc_( mc ){}
-        virtual const fne::RecoCluster& cluster1() const = 0;
-        virtual const fne::RecoCluster& cluster2() const = 0;
+            K2piRecoClusters( bool mc, const ClusterCorrector& cluster_corrector)
+                :mc_( mc ), cluster_corrector_( cluster_corrector) {}
+            virtual const fne::RecoCluster& cluster1() const = 0;
+            virtual const fne::RecoCluster& cluster2() const = 0;
 
-        virtual bool found_track_cluster() const = 0;
-        virtual const fne::RecoCluster& track_cluster() const = 0;
+            virtual bool found_track_cluster() const = 0;
+            virtual const fne::RecoCluster& track_cluster() const = 0;
 
-        bool is_mc() const { return mc_; }
+
+            bool is_mc() const { return mc_; }
+            virtual const ClusterCorrector& get_cluster_corrector() const 
+            { return cluster_corrector_; }
 
     };
 
@@ -53,6 +58,7 @@ namespace fn
             void new_event();
             bool found_clusters() const;
             const K2piRecoClusters& get_reco_clusters() const;
+            virtual const ClusterCorrector& get_cluster_corrector() const = 0;
 
         protected:
             void set_reco_clusters( K2piRecoClusters * krc ) const;
@@ -78,7 +84,8 @@ namespace fn
     class DefaultK2piRecoClusters : public K2piRecoClusters
     {
         public:
-            DefaultK2piRecoClusters( bool mc) :K2piRecoClusters( mc ){}
+            DefaultK2piRecoClusters( bool mc, const ClusterCorrector& cluster_corrector )
+                : K2piRecoClusters( mc, cluster_corrector ) {}
             void update( const fne::RecoCluster * c1, 
                     const fne::RecoCluster * c2,
                     bool found_track, const fne::RecoCluster * tc );
@@ -113,7 +120,9 @@ namespace fn
             DefaultK2piClusters( 
                     const fne::Event * event,
                     const SingleTrack * single_track,
-                    YAML::Node & instruct, bool mc );
+                    YAML::Node & instruct, bool mc ,
+                    const ClusterCorrector& cluster_corrector
+                    );
 
             enum failure
             {
@@ -121,6 +130,8 @@ namespace fn
                 not_enough_good_clusters,
                 too_many_good_clusters,
             };
+
+            virtual const ClusterCorrector& get_cluster_corrector() const ;
 
         private:
             bool process_clusters() const;
@@ -143,7 +154,7 @@ namespace fn
                         std::vector<processing_cluster>& clusters) const;
 
             //Corrections
-            ClusterEnergyCorr cec_;
+            const ClusterCorrector& cluster_corrector_;
 
             //cluster parameters
             double min_track_cluster_time_;

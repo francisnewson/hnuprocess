@@ -7,6 +7,10 @@
 
 namespace fn
 {
+    Km2RecoClusters::Km2RecoClusters( const ClusterCorrector& cluster_corrector)
+        :cluster_corrector_( cluster_corrector)
+    {}
+
     void Km2RecoClusters::reset(bool mc)
     {
         mc_ = mc;
@@ -42,11 +46,12 @@ namespace fn
 
     Km2Clusters::Km2Clusters( const fne::Event* e, const SingleTrack& st ,
             double noise_energy, double noise_time, 
-            double brehm_radius, double track_cluster_radius, bool is_mc )
-        :e_ ( e ), st_( st ),
+            double brehm_radius, double track_cluster_radius,
+            const ClusterCorrector& cluster_corrector, bool is_mc )
+        :e_ ( e ), st_( st ), km2rc_( cluster_corrector),
         noise_energy_( noise_energy ), noise_time_( noise_time),
         brehm_radius_( brehm_radius), track_cluster_radius_( track_cluster_radius ),
-         mc_( is_mc )
+         cluster_corrector_( cluster_corrector), mc_( is_mc )
     { }
 
     void Km2Clusters::new_event()
@@ -91,9 +96,11 @@ namespace fn
         if( (!mc_) && (delta_t >= noise_time_)  )
             {return cluster_type::IGN;}
 
+        CorrCluster  cc{ *rc, cluster_corrector_, mc_ };
+
         //Is it Brehmsstrahlung
         TVector3 brehm_trkLkr = srt.extrapolate_bf( na62const::zLkr );
-        PhotonProjCorrCluster photon_cluster{ *rc, mc_ };
+        PhotonProjCorrCluster photon_cluster{ cc };
         TVector3 photon_pos = photon_cluster.get_pos();
         double brehm_sep =  (brehm_trkLkr - photon_pos).Mag();
 
@@ -104,7 +111,7 @@ namespace fn
             return  cluster_type::IGN;
 
         //Is it associated to the track
-        TrackProjCorrCluster track_cluster{ *rc, mc_ };
+        TrackProjCorrCluster track_cluster{ cc };
         TVector3 cluster_pos = track_cluster.get_pos();
         TVector3 trkLkr = srt.extrapolate_ds( cluster_pos.Z() );
         double track_cluster_sep = (trkLkr - cluster_pos).Mag();
@@ -174,10 +181,14 @@ namespace fn
             double noise_time = get_yaml<double>( instruct, "noise_time" );
             double brehm_radius = get_yaml<double>( instruct, "brehm_radius" );
             double track_cluster_radius = get_yaml<double>( instruct, "track_cluster_radius" );
+
+            const ClusterCorrector* cluster_corrector =
+                get_cluster_corrector( instruct, rf );
+
             bool is_mc = rf.is_mc();
 
             return new Km2Clusters( event, *st, noise_energy, noise_time,
-                    brehm_radius, track_cluster_radius, is_mc );
+                    brehm_radius, track_cluster_radius, *cluster_corrector, is_mc );
         }
 
     //--------------------------------------------------

@@ -26,17 +26,19 @@ namespace fn
     class Km2Clusters;
     class SingleRecoTrack;
     class Km2RecoClusters;
+    class ClusterCorrector;
 
     class Km2ClusterPlots
     {
         public:
-            Km2ClusterPlots(bool mc);
+            Km2ClusterPlots(bool mc, const ClusterCorrector& cluster_corrector);
             void Fill( const SingleRecoTrack& srt, 
                     const Km2RecoClusters& km2rc, double weight );
             void Write();
 
         private:
             bool mc_;
+            const ClusterCorrector& cluster_corrector_;
             TH1D * h_eop_;
             TH1D * h_n_ass_cluster_;
             TH1D * h_n_bad_cluster_;
@@ -58,6 +60,7 @@ namespace fn
                     TFile& tfile, std::string folder,
                     const Km2Event& km2_event,
                     const  Km2Clusters& km2_clusters,
+                    const ClusterCorrector& cluster_corrector,
                     bool mc);
 
             void end_processing();

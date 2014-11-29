@@ -23,7 +23,7 @@ my_libs = [
 'clusters',
 'kinfo',
 'km2',
-'k2pi',
+#'k2pi',
 'muons',
 'dch',
 'akl',

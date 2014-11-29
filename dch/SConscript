@@ -11,7 +11,7 @@ lenv.AddLibs( [
 'reco', 
 'tracking',
 'clusters',
-'k2pi',
+#'k2pi',
 ] )
 lenv.AddEvent( event_dir, 'event' )
 lenv.SetYaml( yaml_dir )

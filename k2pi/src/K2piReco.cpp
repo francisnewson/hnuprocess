@@ -10,6 +10,8 @@
 
 namespace fn
 {
+
+#if 0
     void K2piRecoEvent::set_log( logger& slg )
     { slg_ = &slg; }
 
@@ -69,10 +71,12 @@ namespace fn
             {
                 re = new K2piSimpleRecoEvent;
             }
+#if 0
             else if ( method == "fit" )
             {
                 re = new K2piFitRecoEvent;
             }
+#endif
             else 
             {
                 throw Xcept<UnknownK2piRecoMethod>( method );
@@ -222,5 +226,7 @@ namespace fn
 
             return k2pir;
         }
+
+#endif
 
 }

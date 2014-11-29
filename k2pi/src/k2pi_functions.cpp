@@ -19,8 +19,11 @@ namespace fn
         if ( slg ){ BOOST_LOG_SEV( *slg, sl )
             << "NEUT VERT: Extracting clusters"; }
 
-        PhotonProjCorrCluster p1 {k2pirc.cluster1(), k2pirc.is_mc() };
-        PhotonProjCorrCluster p2 {k2pirc.cluster2(), k2pirc.is_mc() };
+        CorrCluster c1( k2pirc.cluster1(), k2pirc.get_cluster_corrector(), k2pirc.is_mc() );
+        CorrCluster c2( k2pirc.cluster2(), k2pirc.get_cluster_corrector(), k2pirc.is_mc() );
+
+        PhotonProjCorrCluster p1{c1};
+        PhotonProjCorrCluster p2{c2};
 
         //Extract photon positions
         TVector3 pos1 = p1.get_pos();

@@ -7,8 +7,8 @@
 
 namespace fn
 {
-    Km2ClusterPlots::Km2ClusterPlots( bool mc )
-        :mc_( mc)
+    Km2ClusterPlots::Km2ClusterPlots( bool mc, const ClusterCorrector& cluster_corrector)
+        :mc_( mc), cluster_corrector_( cluster_corrector)
     {
         h_eop_ = hs_.MakeTH1D( "h_eop_", "E/p for single track in Lkr",
                 150, 0, 1.5 , "E/P");
@@ -38,11 +38,12 @@ namespace fn
         h_n_cluster_->Fill( km2rc.all_size(), weight );
 
         if ( km2rc.associate_size() == 1 )
-        {h_eop_->Fill( km2_eop( km2rc, srt), weight );}
+        {h_eop_->Fill( km2_eop( km2rc,cluster_corrector_,  srt), weight );}
 
         for( auto itclus = km2rc.all_begin() ; itclus != km2rc.all_end() ; ++itclus )
         {
-            TrackProjCorrCluster track_cluster{ **itclus, mc_ };
+            CorrCluster cc( **itclus,  cluster_corrector_, mc_ );
+            TrackProjCorrCluster track_cluster{ cc};
             h_cluster_energy_->Fill( track_cluster.get_energy() );
         }
     }
@@ -59,9 +60,11 @@ namespace fn
     Km2ClusterPlotter::Km2ClusterPlotter( const Selection& sel, 
             TFile& tfile, std::string folder,
             const Km2Event& km2_event,
-            const  Km2Clusters& km2_clusters, bool mc)
+            const  Km2Clusters& km2_clusters,
+            const ClusterCorrector& cluster_corrector, bool mc)
         :Analysis( sel ), tfile_( tfile ), folder_( folder ),
-        km2_event_( km2_event), km2_clusters_( km2_clusters ), km2_cluster_plots_( mc )
+        km2_event_( km2_event), km2_clusters_( km2_clusters ), 
+        km2_cluster_plots_( mc, cluster_corrector )
     {}
 
     void Km2ClusterPlotter::process_event()
@@ -95,9 +98,11 @@ namespace fn
 
             const Km2Event* km2_event = get_km2_event( instruct, rf );
             const Km2Clusters* km2c  = get_km2_clusters( instruct, rf );
+            const ClusterCorrector * cluster_corrector = get_cluster_corrector( instruct, rf );
 
             bool is_mc  = rf.is_mc();
 
-            return new Km2ClusterPlotter( *sel, tfile, folder, *km2_event, *km2c, is_mc);
+            return new Km2ClusterPlotter( *sel, tfile, folder, *km2_event,
+                    *km2c, *cluster_corrector, is_mc);
         }
 }

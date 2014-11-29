@@ -1,18 +1,27 @@
 #include "k2pi_fitting.hh"
+#include "Event.hh"
+#include "Track.hh"
+
 #include "K2piInterface.hh"
 #include "K2piEventData.hh"
+#include "k2pi_reco_functions.hh"
 #include "TVector3.h"
-#include "k2pi_functions.hh"
 #include "Xcept.hh"
 #include "NA62Constants.hh"
 #include "Math/Factory.h"
 #include "Math/Functor.h"
+#include "CorrCluster.hh"
+#include "ClusterEnergyCorr.hh"
 #include <cmath>
 #include <algorithm>
 #include <iomanip>
 
 namespace fn
 {
+    FNK2piFit::FNK2piFit ( const ClusterCorrector& cluster_corrector )
+        :cluster_corrector_( cluster_corrector)
+    {}
+
     void FNK2piFit::load_raw_data( const K2piLkrData& measured )
     {
         K2piLkrInterface measured_interface( const_cast<K2piLkrData&>(measured) );

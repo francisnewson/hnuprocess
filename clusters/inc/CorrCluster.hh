@@ -16,16 +16,45 @@
 #endif
 namespace fn
 {
+    struct calibrated_cluster_data
+    {
+        double energy;
+        TVector3 position;
+    };
+
+    struct uncalibrated_cluster_data
+    {
+        double energy;
+        TVector3 position;
+    };
+
     class CorrCluster
     {
         public:
-            CorrCluster( const fne::RecoCluster& rc, bool mc );
-            virtual TVector3 get_pos() const;
+            //CorrCluster( const fne::RecoCluster& rc, bool mc );
+            CorrCluster( const fne::RecoCluster& rc, const ClusterCorrector & cc, bool mc );
+
+            CorrCluster( calibrated_cluster_data cluster, bool mc);
+            CorrCluster( uncalibrated_cluster_data cluster, const ClusterCorrector& cc, bool mc);
+
+            virtual const TVector3& get_pos() const;
             virtual double get_energy() const;
 
-        protected:
-            const fne::RecoCluster & rc_;
+            bool has_recorded() const;
+            virtual const TVector3& get_recorded_position() const;
+            virtual double get_recorded_energy() const;
+
+
+        private:
+            void calibrate( const ClusterCorrector& cc );
             bool mc_;
+
+            double energy_;
+            TVector3 position_;
+
+            bool has_recorded_;
+            double rec_energy_;
+            TVector3 rec_position_;
     };
 
     //--------------------------------------------------
@@ -33,25 +62,29 @@ namespace fn
     TVector3 project_cluster
         ( TVector3 pos, double energy, double project_depth );
 
-    class PhotonProjCorrCluster : public CorrCluster
+    class PhotonProjCorrCluster 
     {
         public:
-            PhotonProjCorrCluster
-                ( const fne::RecoCluster& rc, bool mc );
-
+            PhotonProjCorrCluster( const CorrCluster& cc);
             TVector3 get_pos() const;
+            double get_energy() const;
+
+        private:
+            const CorrCluster& cc_;
     };
 
     //--------------------------------------------------
 
-    class TrackProjCorrCluster : public CorrCluster
+    class TrackProjCorrCluster
     {
         public:
-            TrackProjCorrCluster
-                ( const fne::RecoCluster& rc, bool mc );
+            TrackProjCorrCluster( const CorrCluster& cc);
 
             TVector3 get_pos() const;
             double get_energy() const;
+
+        private:
+            const CorrCluster& cc_;
     };
 
     //--------------------------------------------------

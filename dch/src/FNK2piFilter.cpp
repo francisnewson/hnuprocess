@@ -1,21 +1,27 @@
 #include "FNK2piFilter.hh"
+
+#include "K2piClusters.hh"
 #include "K2piInterface.hh"
+#include "CorrCluster.hh"
+#include "k2pi_fitting.hh"
+#include "k2pi_reco_functions.hh"
+
+#include "KaonTrack.hh"
 #include "SingleTrack.hh"
+
 #include "tracking_selections.hh"
 #include "cluster_selections.hh"
-#include "K2piClusters.hh"
-#include "KaonTrack.hh"
+
+#include "NA62Constants.hh"
+#include "RecoFactory.hh"
+
+#include "yaml_help.hh"
+
+#include "Math/Factory.h"
+#include "Math/Functor.h"
 #include "TTree.h"
 #include "TFile.h"
 #include "Xcept.hh"
-#include "RecoFactory.hh"
-#include "CorrCluster.hh"
-#include "yaml_help.hh"
-#include "NA62Constants.hh"
-#include "k2pi_extract.hh"
-#include "k2pi_fitting.hh"
-#include "Math/Factory.h"
-#include "Math/Functor.h"
 
 namespace fn
 {
@@ -25,10 +31,11 @@ namespace fn
     FNK2piExtractor::FNK2piExtractor( 
             const Selection& weighter,
             const fne::Event * event, const SingleTrack & st , 
-            const K2piClusters& k2pi_clusters, const KaonTrack& kt,
+            const K2piClusters& k2pi_clusters, 
+            const ClusterCorrector& cluster_corrector, const KaonTrack& kt,
             bool mc )
         :weighter_( weighter ),e_( event ), st_( st ), k2pi_clusters_( k2pi_clusters),
-        kt_( kt ), mc_( mc )
+        cluster_corrector_( cluster_corrector),  kt_( kt ), mc_( mc )
     {}
 
     const K2piEventData * FNK2piExtractor::get_k2pi_event_ptr()
@@ -56,7 +63,7 @@ namespace fn
         const K2piRecoClusters& k2pirc = k2pi_clusters_.get_reco_clusters();
 
         //Extract raw info
-        extract_raw_lkr(k2pirc, kt_, k2pi_event_data_.raw_lkr );
+        extract_raw_lkr(k2pirc, cluster_corrector_, kt_, k2pi_event_data_.raw_lkr );
         extract_raw_dch( srt, k2pi_event_data_.raw_dch );
 
         if ( mc_ )
@@ -65,7 +72,7 @@ namespace fn
         }
 
         //Do Lkr Fit
-        double chi2 = fit_lkr( k2pi_event_data_.raw_lkr,
+        double chi2 = fit_lkr( k2pi_event_data_.raw_lkr, cluster_corrector_,
                 k2pi_event_data_.fit_lkr, k2pi_event_data_.fit_lkr_err );
         k2pi_event_data_.lkr_fit_chi2 = chi2;
 
@@ -100,26 +107,31 @@ namespace fn
             const SingleTrack* st = get_single_track( instruct, rf );
             const K2piClusters* k2pic = get_k2pi_clusters( instruct, rf );
             const KaonTrack* kt = get_kaon_track( instruct, rf );
+
+            const ClusterCorrector * cluster_corrector = 
+                get_cluster_corrector( instruct, rf );
+
             bool mc = rf.is_mc();
 
-            return new FNK2piExtractor( *sel, event, *st, *k2pic, *kt, mc );
+            return new FNK2piExtractor( *sel, event, *st, *k2pic, *cluster_corrector,  *kt, mc );
         }
 
     //--------------------------------------------------
 
     void extract_raw_lkr( const K2piRecoClusters& k2pirc, 
-            const KaonTrack& kt , K2piLkrData& dest )
+            const ClusterCorrector& cc, const KaonTrack& kt , K2piLkrData& dest )
     {
         K2piLkrInterface lkr( dest );
 
         //Clusters ( no projection correction at this stage )
-        CorrCluster c1 {k2pirc.cluster1(), k2pirc.is_mc() };
-        CorrCluster c2 {k2pirc.cluster2(), k2pirc.is_mc() };
+        CorrCluster c1 {k2pirc.cluster1(), cc, k2pirc.is_mc() };
+        CorrCluster c2 {k2pirc.cluster2(), cc, k2pirc.is_mc() };
 
-        //Energies don't need correcting
+        //Fill with calibrated enerygies
         lkr.E1() = c1.get_energy();
         lkr.E2() = c2.get_energy();
 
+        //Fill with calibrated positions
         lkr.posC1_X() = c1.get_pos().X();
         lkr.posC1_Y() = c1.get_pos().Y();
 
@@ -160,10 +172,11 @@ namespace fn
         mc.p4g2() = particles.photons[1]->momentum;
     }
 
-    double fit_lkr( const K2piLkrData& raw,  K2piLkrData& fit, K2piLkrData& err )
+    double fit_lkr( const K2piLkrData& raw,
+            const ClusterCorrector& cluster_corrector, K2piLkrData& fit, K2piLkrData& err )
     {
         //create fit object
-        FNK2piFit fit_object;
+        FNK2piFit fit_object( cluster_corrector);
         fit_object.load_raw_data( raw );
         fit_object.prepare_errors();
 

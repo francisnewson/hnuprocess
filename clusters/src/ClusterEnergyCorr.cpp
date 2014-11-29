@@ -1,6 +1,8 @@
 #include "ClusterEnergyCorr.hh"
 #include <stdexcept>
 #include "GlobalStatus.hh"
+#include "RecoFactory.hh"
+#include "yaml_help.hh"
 
 namespace fn
 {
@@ -100,23 +102,40 @@ namespace fn
 
     double ClusterEnergyCorr::correct_energy(const fne::RecoCluster& rc, bool is_mc ) const
     {
-
         if ( is_mc )
         { return rc.energy; }
 
         Long64_t run = global_status().get_run();
-        double corr_energy = user_lkrcalcor_SC( rc.energy, run, 1);
 
-        //ints to receive cell information
-        int cpd;
-        int cell;
+        return correct_energy( rc, is_mc, run );
+    }
+
+    double ClusterEnergyCorr::correct_energy(const fne::RecoCluster& rc, bool is_mc, Long64_t run ) const
+    {
+        if ( is_mc )
+        { return rc.energy; }
 
         //extracted raw positions
         double pos_x = rc.x;
         double pos_y = rc.y;
 
+        return correct_energy( pos_x, pos_y, rc.energy, is_mc, run );
+    }
+
+    double ClusterEnergyCorr::correct_energy( double x, double y, double energy,
+            bool is_mc , Long64_t run ) const
+    {
+        if ( is_mc )
+        { return energy ;}
+
+        double corr_energy = user_lkrcalcor_SC( energy, run, 1);
+
+        //ints to receive cell information
+        int cpd;
+        int cell;
+
         //get cell
-        bool cellCheck =  GetCpdCellIndex( pos_x , pos_y, &cpd, &cell );
+        bool cellCheck =  GetCpdCellIndex( x , y, &cpd, &cell );
         if ( cellCheck)
         {
             throw std::runtime_error( 
@@ -173,16 +192,65 @@ namespace fn
         /*
          * DC threshold correction
          */
-            double x= energy;
-            if(x <11.) {
-                ecorr=-0.00101009+0.000219228*x-1.61845E-05*x*x+4.17065E-07*x*x*x;
-                if(iflag==2) {
-                    ecorr=-0.00205335+0.000547472*x-4.8985E-05*x*x+1.4965E-06*x*x*x;
-                }
-                result *= (1.-19.*ecorr);
+        double x= energy;
+        if(x <11.) {
+            ecorr=-0.00101009+0.000219228*x-1.61845E-05*x*x+4.17065E-07*x*x*x;
+            if(iflag==2) {
+                ecorr=-0.00205335+0.000547472*x-4.8985E-05*x*x+1.4965E-06*x*x*x;
             }
+            result *= (1.-19.*ecorr);
+        }
         return result;
     }
+
+    //--------------------------------------------------
+
+    REG_DEF_SUB( ClusterCorrector );
+
+    DefaultClusterCorrector::DefaultClusterCorrector( std::string filename, const GlobalStatus& gs )
+        :cec_( filename ), global_status_( gs )
+    {}
+
+    double DefaultClusterCorrector::correct_energy( const fne::RecoCluster& rc, bool is_mc) const 
+    {
+        return cec_.correct_energy( rc, is_mc, global_status_.get_run() );
+    }
+
+    double DefaultClusterCorrector::correct_energy
+        ( double x, double y, double energy,  bool is_mc) const
+        {
+            return cec_.correct_energy( x, y, energy,
+                    is_mc, global_status_.get_run() );
+        }
+
+    template<>
+        Subscriber * create_subscriber<ClusterCorrector>
+        (YAML::Node& instruct, RecoFactory& rf )
+        {
+            std::string filename = get_yaml<std::string>( instruct, "filename" );
+            const GlobalStatus * global_status = rf.get_global_status() ;
+
+            return new DefaultClusterCorrector( filename, *global_status );
+        }
+
+    ClusterCorrector * get_cluster_corrector
+        ( YAML::Node& instruct, RecoFactory& rf )
+        {
+            YAML::Node ycc = instruct["inputs"]["ClusterCorrector"];
+
+            if ( !ycc )
+            {
+                throw Xcept<MissingNode>( "ClusterCorrector");
+            }
+
+            ClusterCorrector * cluster_corrector = dynamic_cast<ClusterCorrector*>
+                ( rf.get_subscriber( ycc.as<std::string>() ) );
+
+            if ( !ycc )
+            { throw Xcept<BadCast>( "CLUSTERCORRECTOR" ); }
+
+            return cluster_corrector;
+        }
 
 
 }

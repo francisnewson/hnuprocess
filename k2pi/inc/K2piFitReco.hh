@@ -37,6 +37,7 @@ namespace fn
         double chi2;
     };
 
+#if 0
     class k2pi_fitter
     {
         public:
@@ -111,5 +112,8 @@ namespace fn
 
             k2pi_fit fit_result_;
     };
+
+#endif
+
 }
 #endif
