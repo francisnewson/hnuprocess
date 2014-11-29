@@ -103,6 +103,7 @@ namespace fn
         TVector3 pos1 = p1.get_pos();
         TVector3 pos2 = p2.get_pos();
 
+
         //Exract photon energies
         double E1 = p1.get_energy();
         double E2 = p2.get_energy();
@@ -128,6 +129,9 @@ namespace fn
 
         Track kaon_track{ kt.get_kaon_point(), kt.get_kaon_3mom() };
 
+        std::cout << "CNV: " << pos1.X() << " " << pos1.Y() << " " << pos1.Z() << " "  << E1 << " "
+            << pos2.X() << " " << pos2.Y() << " " << pos2.Z() <<  " " << E2  << std::endl;
+
         //Do the numerical bit
         best_z = bracket_solve_neutral_vertex
             ( kaon_track, E1, pos1, E2, pos2, slg, sl );
@@ -144,6 +148,10 @@ namespace fn
          double E2, const TVector3& pos2,
          logger * slg , severity_level sl )
         {
+#if 0
+        std::cout << "BSNV: " << pos1.X() << " " << pos1.Y() << " " << pos1.Z() << " "  << E1 << " "
+            << pos2.X() << " " << pos2.Y() << " " << pos2.Z() <<  " " << E2  << std::endl;
+#endif
 
             //what should cos_t be?
             double req_cos_t = pi0_cos_photon_opening( E1, E2 );

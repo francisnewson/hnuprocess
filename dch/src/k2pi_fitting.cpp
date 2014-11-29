@@ -18,14 +18,22 @@
 
 namespace fn
 {
-    FNK2piFit::FNK2piFit ( const ClusterCorrector& cluster_corrector )
-        :cluster_corrector_( cluster_corrector)
+    FNK2piFit::FNK2piFit ( const ClusterCorrector& cluster_corrector, bool mc )
+        :cluster_corrector_( cluster_corrector),  mc_( mc )
     {}
 
     void FNK2piFit::load_raw_data( const K2piLkrData& measured )
     {
         K2piLkrInterface measured_interface( const_cast<K2piLkrData&>(measured) );
         copy( measured_interface, measured_ );
+
+#if 0
+        std::cout  << "load_raw_data: " 
+            << measured_.posC1_X() << " " << measured_.posC1_Y() << " " << measured_.E1() << " "
+            << measured_.posC2_X() << " " << measured_.posC2_Y() << " " << measured_.E2() 
+            << std::endl;
+#endif
+
     }
 
     void FNK2piFit::prepare_errors()
@@ -63,17 +71,37 @@ namespace fn
 
     double compute_pion_mass( k2pi_params& fit, k2pi_fit& result )
     {
+#if 0
+        std::cout  << "incoming fit: " 
+            << fit.posC1_X() << " " << fit.posC1_Y() << " " << fit.E1() << " "
+            << fit.posC2_X() << " " << fit.posC2_Y() << " " << fit.E2() 
+            << std::endl;
+#endif
+
         //find neutral vertex
         TVector3 kaon_point = TVector3{ fit.pos0K_X(), fit.pos0K_Y(), 0};
         TVector3 kaon_3mom = TVector3{ fit.pK_X(), fit.pK_Y(), fit.pK_Z() };
 
         Track kt{ kaon_point , kaon_3mom };
 
+        CorrCluster c1{ calibrated_cluster_data { fit.E1(), 
+            { fit.posC1_X(), fit.posC1_Y(), na62const::zLkr  } } };
+        PhotonProjCorrCluster  ppcc1( c1 );
+
+        CorrCluster c2{ calibrated_cluster_data { fit.E2(), 
+            { fit.posC2_X(), fit.posC2_Y(), na62const::zLkr } } };
+        PhotonProjCorrCluster  ppcc2( c2 );
+
+        TVector3 pos1 =  ppcc1.get_pos();
+        TVector3 pos2 =  ppcc2.get_pos();
+
+#if 0
         TVector3 pos1{ fit.posC1_X(), fit.posC1_Y(), 
             na62const::zLkr + 20.8 + 4.3 * std::log( fit.E1() ) };
 
         TVector3 pos2{ fit.posC2_X(), fit.posC2_Y(), 
             na62const::zLkr + 20.8 + 4.3 * std::log( fit.E2() ) };
+#endif
 
         double neutral_z = bracket_solve_neutral_vertex
             ( kt, fit.E1(),  pos1, fit.E2(), pos2 );
@@ -98,40 +126,40 @@ namespace fn
 
         //compute pion mass
         return result.pip.M();
-    }
-
-    double FNK2piFit::compute_chi2(double pion_mass )
-    {
-        double result = 0;
-
-        //loop over fit parameters
-        for ( int i = 0 ; i != 11 ; ++ i )
-        {
-            result += std::pow(
-                    (fit_.par_[i] - measured_.par_[i]) / errors_.par_[i] , 2 );
         }
 
-        //Include pi+ constraint
-        result += std::pow( 10000*( pion_mass - na62const::mPi), 2 );
-        return result;
-    }
-
-    void FNK2piFit::set_variables(  ROOT::Math::Minimizer * minimizer )
-    {
-        for ( unsigned int i = 0 ; i != 11 ; ++i )
+        double FNK2piFit::compute_chi2(double pion_mass )
         {
-            double min_val = measured_.par_[i] - errors_.par_[i];
-            double max_val = measured_.par_[i] + errors_.par_[i];
+            double result = 0;
 
-            if ( i == 0 || i == 1 )
+            //loop over fit parameters
+            for ( int i = 0 ; i != 11 ; ++ i )
             {
-                min_val = std::max( min_val, 0.0 );
+                result += std::pow(
+                        (fit_.par_[i] - measured_.par_[i]) / errors_.par_[i] , 2 );
             }
 
-            minimizer->SetLimitedVariable
-                ( i, std::to_string( i ), measured_.par_[i], 0.1*errors_.par_[i],
-                  min_val, max_val );
+            //Include pi+ constraint
+            result += std::pow( 10000*( pion_mass - na62const::mPi), 2 );
+            return result;
         }
-    }
 
-}
+        void FNK2piFit::set_variables(  ROOT::Math::Minimizer * minimizer )
+        {
+            for ( unsigned int i = 0 ; i != 11 ; ++i )
+            {
+                double min_val = measured_.par_[i] - errors_.par_[i];
+                double max_val = measured_.par_[i] + errors_.par_[i];
+
+                if ( i == 0 || i == 1 )
+                {
+                    min_val = std::max( min_val, 0.0 );
+                }
+
+                minimizer->SetLimitedVariable
+                    ( i, std::to_string( i ), measured_.par_[i], 0.1*errors_.par_[i],
+                      min_val, max_val );
+            }
+        }
+
+        }

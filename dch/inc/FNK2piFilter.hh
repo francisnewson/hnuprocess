@@ -85,8 +85,9 @@ namespace fn
 
     void extract_k2pi_mc( const fne::Event& e, K2piMcData& mc );
 
-    double fit_lkr( const K2piLkrData& raw, const ClusterCorrector& cluster_corrector, 
-            K2piLkrData& fit, K2piLkrData& err );
+    double fit_lkr( const K2piLkrData& raw,
+            const ClusterCorrector& cluster_corrector, 
+            K2piLkrData& fit, K2piLkrData& err, bool mc );
 
 
     //--------------------------------------------------

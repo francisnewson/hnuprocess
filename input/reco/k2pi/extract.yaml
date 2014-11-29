@@ -44,6 +44,10 @@
     inputs:
         kt: kaon_track
 
+- input:
+    name: cluster_corrector
+    type: ClusterCorrector
+    filename: "/afs/cern.ch/user/f/fnewson/work/hnu/gopher/data/detector/eopCorrfile.dat"
 
 - input:
     name: k2pi_clusters
@@ -54,8 +58,10 @@
     min_cluster_energy: 5
     max_track_cluster_distance: 5
 
+
     inputs:
         ogt: bf_st
+        ClusterCorrector: cluster_corrector
             
 #-------------------------------------------------- 
 
@@ -199,6 +205,7 @@
         k2pic: k2pi_clusters
         kt: kaon_track
         ogt: bf_st
+        ClusterCorrector: cluster_corrector
 
 - analysis:
     name: k2pi_filter

@@ -334,6 +334,7 @@ int main( int argc, char * argv[] )
     //Global connection
     FNEGStatus fnegs{ reco_factory.get_event_ptr(), reco.is_mc() };
     raw_global_status() = &fnegs;
+    reco_factory.set_global_status( &fnegs );
 
     BOOST_LOG_SEV( slg, startup )
         << "Channel is: " <<  channel;

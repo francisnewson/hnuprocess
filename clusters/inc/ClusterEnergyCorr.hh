@@ -43,7 +43,8 @@ namespace fn
 
             double correct_energy( double x, double y, double energy,  bool is_mc ) const;
 
-            double correct_energy( double x, double y, double energy,  bool is_mc , Long64_t run ) const;
+            double correct_energy( double x, double y, double energy, 
+                    bool is_mc , Long64_t run ) const;
 
 
             int GetCpdCellIndex
@@ -71,9 +72,12 @@ namespace fn
     class ClusterCorrector : public Subscriber
     {
         public:
-            virtual double correct_energy( const fne::RecoCluster& rc, bool is_mc) const = 0 ;
+            virtual double correct_energy
+                ( const fne::RecoCluster& rc, bool is_mc) const = 0 ;
             virtual double correct_energy
                 ( double x, double y, double energy,  bool is_mc) const = 0;
+
+            virtual bool is_mc() const  = 0;
 
             virtual ~ClusterCorrector(){}
         private:
@@ -88,9 +92,16 @@ namespace fn
     {
         public:
             DefaultClusterCorrector( std::string filename, const GlobalStatus& gs );
+            virtual bool is_mc() const { return global_status_.is_mc() ; }
+
             virtual double correct_energy( const fne::RecoCluster& rc, bool is_mc) const;
             virtual double correct_energy
                 ( double x, double y, double energy,  bool is_mc) const;
+
+            virtual double correct_energy( const fne::RecoCluster& rc ) const
+            { return correct_energy( rc, is_mc() ); }
+            virtual double correct_energy ( double x, double y, double energy) const
+            { return correct_energy( x, y , energy, is_mc() ) ; }
 
             virtual ~DefaultClusterCorrector(){}
 

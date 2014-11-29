@@ -35,6 +35,7 @@ namespace fn
             CorrCluster( const fne::RecoCluster& rc, const ClusterCorrector & cc, bool mc );
 
             CorrCluster( calibrated_cluster_data cluster, bool mc);
+            CorrCluster( calibrated_cluster_data cluster);
             CorrCluster( uncalibrated_cluster_data cluster, const ClusterCorrector& cc, bool mc);
 
             virtual const TVector3& get_pos() const;

@@ -1,0 +1,35 @@
+---
+#-------------------------------------------------- 
+
+- output:
+    name: tfout
+    type: tfile
+    filename: cluster_plots.root
+
+- monitor:
+    name: counter
+    type: Counter
+
+- output:
+    name: sumout
+    type: ostream
+    filename: clusters.dat
+
+- input:
+    name: cluster_corrector
+    type: ClusterCorrector
+    filename: "/afs/cern.ch/user/f/fnewson/work/hnu/gopher/data/detector/eopCorrfile.dat"
+
+#Autopass
+- selection:
+    name: passer
+    type : auto_pass
+
+- analysis:
+    name: cluster_corr_plots
+    type: CorrClusterPlotter
+    selection: passer
+    tfile: tfout
+    folder: corr_cluster_plots
+    inputs:
+        ClusterCorrector: cluster_corrector

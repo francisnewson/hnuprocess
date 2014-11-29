@@ -125,6 +125,11 @@ namespace fn
     double ClusterEnergyCorr::correct_energy( double x, double y, double energy,
             bool is_mc , Long64_t run ) const
     {
+#if 0
+        std::cout << "CEC: Correcting energy " << energy  <<  ". MC is  "
+            <<  ( is_mc ? "true" : "false" ) << std::endl;
+#endif
+
         if ( is_mc )
         { return energy ;}
 

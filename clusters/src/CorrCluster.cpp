@@ -8,7 +8,13 @@ namespace fn
 
     void CorrCluster::calibrate( const ClusterCorrector& cc )
     {
-        energy_ = cc.correct_energy( rec_energy_, rec_position_.X(), rec_position_.Y(), mc_ );
+#if 0
+        std::cout << "Calibrating cluster." << "energy = " << rec_energy_ 
+            <<  " MC  = " <<  ( mc_ ? "true" : "false" )
+            << " Pos = " << rec_position_.X() << " " << rec_position_.Y() 
+            << std::endl;
+#endif
+        energy_ = cc.correct_energy( rec_position_.X(), rec_position_.Y(), rec_energy_,  mc_ );
 
         if ( mc_ )
         {
@@ -24,6 +30,13 @@ namespace fn
                     y + 0.300 - 0.87e-3*x,
                     na62const::zLkr );
         }
+
+#if 0
+        std::cout << "Calibrated cluster." << "energy = " << energy_ 
+            <<  " MC  = " <<  ( mc_ ? "true" : "false" ) 
+            << " Pos = " << position_.X() << " " << position_.Y() 
+            << std::endl;
+#endif
     }
 
     //CONSTRUCTORS ------------------------------
@@ -31,12 +44,20 @@ namespace fn
     CorrCluster::CorrCluster( const fne::RecoCluster& rc, const ClusterCorrector & cc, bool mc  )
         :mc_( mc) , rec_energy_( rc.energy ), rec_position_( rc.x, rc.y, na62const::zLkr )
     {
+        //std::cout << "About to calibrate cluster" << "energy = " << rec_energy_ 
+            //<<  " MC  = " <<  ( mc_ ? "true" : "false" ) << std::endl;
+
         calibrate( cc );
         has_recorded_ = true; 
     }
 
     CorrCluster::CorrCluster( calibrated_cluster_data cluster, bool mc)
-        :mc_( mc), energy_( cluster.energy), position_( cluster.energy), 
+        :mc_( mc), energy_( cluster.energy), position_( cluster.position), 
+        has_recorded_ (false )
+    {}
+
+    CorrCluster::CorrCluster( calibrated_cluster_data cluster)
+        :energy_( cluster.energy), position_( cluster.position), 
         has_recorded_ (false )
     {}
 

@@ -10,6 +10,8 @@
 
 namespace fn
 {
+#if 0
+
 
     TVector3 compute_neutral_vertex( const fne::Event * e,
             const KaonTrack& kt, const K2piRecoClusters & k2pirc ,
@@ -191,5 +193,7 @@ namespace fn
                 + std::pow( 0.06 * ce, 2 )
                 );
     }
+
+#endif
 
 }

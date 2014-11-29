@@ -71,9 +71,20 @@ namespace fn
             extract_k2pi_mc ( *e_ , k2pi_event_data_.mc );
         }
 
+#if 0
+        std::cout << "FNK2piEx:" 
+            << k2pi_event_data_.raw_lkr.X1 <<  " " 
+            << k2pi_event_data_.raw_lkr.Y1 <<  " " 
+            << k2pi_event_data_.raw_lkr.E1 <<  " " 
+            << k2pi_event_data_.raw_lkr.X2 <<  " " 
+            << k2pi_event_data_.raw_lkr.Y2 <<  " " 
+            << k2pi_event_data_.raw_lkr.E2 <<  " " 
+            << std::endl;
+#endif
+
         //Do Lkr Fit
         double chi2 = fit_lkr( k2pi_event_data_.raw_lkr, cluster_corrector_,
-                k2pi_event_data_.fit_lkr, k2pi_event_data_.fit_lkr_err );
+                k2pi_event_data_.fit_lkr, k2pi_event_data_.fit_lkr_err, mc_ );
         k2pi_event_data_.lkr_fit_chi2 = chi2;
 
         //Extract header
@@ -173,10 +184,10 @@ namespace fn
     }
 
     double fit_lkr( const K2piLkrData& raw,
-            const ClusterCorrector& cluster_corrector, K2piLkrData& fit, K2piLkrData& err )
+            const ClusterCorrector& cluster_corrector, K2piLkrData& fit, K2piLkrData& err, bool mc )
     {
         //create fit object
-        FNK2piFit fit_object( cluster_corrector);
+        FNK2piFit fit_object( cluster_corrector, mc  );
         fit_object.load_raw_data( raw );
         fit_object.prepare_errors();
 

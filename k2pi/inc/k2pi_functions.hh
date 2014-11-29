@@ -26,6 +26,8 @@ namespace fne
 }
 namespace fn
 {
+
+#if 0
     class KaonTrack;
     class K2piRecoClusters;
 
@@ -48,6 +50,8 @@ namespace fn
 
    double  lkr_energy_res( double energy);
    double  lkr_pos_res( double energy);
+
+#endif
     
     //--------------------------------------------------
     

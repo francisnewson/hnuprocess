@@ -55,7 +55,7 @@ namespace fn
     class FNK2piFit
     {
         public:
-            FNK2piFit ( const ClusterCorrector& cluster_corrector );
+            FNK2piFit ( const ClusterCorrector& cluster_corrector, bool mc );
             void load_raw_data( const K2piLkrData& measured );
             void prepare_errors();
             double operator()( const double * fit_params );
@@ -70,6 +70,7 @@ namespace fn
 
         private:
             const ClusterCorrector& cluster_corrector_;
+            bool mc_;
     };
 
     double compute_pion_mass( k2pi_params& fit, k2pi_fit& result );
