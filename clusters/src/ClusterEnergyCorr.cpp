@@ -212,20 +212,34 @@ namespace fn
 
     REG_DEF_SUB( ClusterCorrector );
 
-    DefaultClusterCorrector::DefaultClusterCorrector( std::string filename, const GlobalStatus& gs )
-        :cec_( filename ), global_status_( gs )
+    DefaultClusterCorrector::DefaultClusterCorrector( std::string filename, const GlobalStatus& gs ,
+            bool corr_active)
+        :cec_( filename ), global_status_( gs ), corr_active_( corr_active)
     {}
 
     double DefaultClusterCorrector::correct_energy( const fne::RecoCluster& rc, bool is_mc) const 
     {
+        if ( corr_active_ )
+        {
         return cec_.correct_energy( rc, is_mc, global_status_.get_run() );
+        }
+        else
+        {
+            return rc.energy;
+        }
     }
 
     double DefaultClusterCorrector::correct_energy
         ( double x, double y, double energy,  bool is_mc) const
         {
-            return cec_.correct_energy( x, y, energy,
-                    is_mc, global_status_.get_run() );
+            if ( corr_active_ )
+            {
+            return cec_.correct_energy( x, y, energy, is_mc, global_status_.get_run() );
+            }
+            else
+            {
+                return energy;
+            }
         }
 
     template<>
@@ -234,8 +248,13 @@ namespace fn
         {
             std::string filename = get_yaml<std::string>( instruct, "filename" );
             const GlobalStatus * global_status = rf.get_global_status() ;
+            bool enabled = instruct["enabled"].as<bool>( true );
 
-            return new DefaultClusterCorrector( filename, *global_status );
+            BOOST_LOG_SEV( rf.get_log(), startup )
+                << "ClusterCorrector " << get_yaml<std::string>( instruct, "name" )
+                << " is " << ( enabled ? "ENABLED" : "DISABLED" );
+
+            return new DefaultClusterCorrector( filename, *global_status, enabled );
         }
 
     ClusterCorrector * get_cluster_corrector

@@ -66,6 +66,7 @@ namespace fn
             std::string folder_;
 
             HistStore dths_;
+            TH1D * hchi2_ ;
             TH1D * heop_ ;
             TH1D * hphoton_sep_ ;
             TH1D * htrack_cluster_sep_ ;
@@ -78,7 +79,9 @@ namespace fn
     {
         public:
         DchAnalysis( Selection& sel, TFile& tf_, 
-                std::string folder_, K2piEventData& k2pi_data, bool is_mc );
+                std::string folder_, K2piEventData& k2pi_data,
+                std::string lkr_data_source,
+                bool is_mc );
         void end_processing();
 
         private:
@@ -86,6 +89,7 @@ namespace fn
         DchPlotter plots_;
         K2piEventPlotter event_plots_;
         K2piEventData& k2pi_data_;
+        K2piLkrData * lkr_data_;
         bool is_mc_;
 
         std::vector<DchPlotter> scatter_plots_;

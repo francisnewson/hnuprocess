@@ -91,7 +91,7 @@ namespace fn
     class DefaultClusterCorrector : public ClusterCorrector
     {
         public:
-            DefaultClusterCorrector( std::string filename, const GlobalStatus& gs );
+            DefaultClusterCorrector( std::string filename, const GlobalStatus& gs, bool corr_active );
             virtual bool is_mc() const { return global_status_.is_mc() ; }
 
             virtual double correct_energy( const fne::RecoCluster& rc, bool is_mc) const;
@@ -108,6 +108,7 @@ namespace fn
         private:
             const ClusterEnergyCorr cec_;
             const GlobalStatus& global_status_;
+            bool corr_active_;
 
     };
 

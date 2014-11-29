@@ -6,6 +6,7 @@
 #include <iostream>
 #include <boost/filesystem/path.hpp>
 #include "k2pi_reco_functions.hh"
+#include "NA62Constants.hh"
 
 using boost::filesystem::path;
 
@@ -35,6 +36,11 @@ namespace fn
             k2pi_fit data_fit;
             compute_pion_mass( lkr_param_data, data_fit );
 
+            //Kaon 4mom
+            TVector3 kaon_3mom {lkr_data.pkx, lkr_data.pky, lkr_data.pkz };
+            double kaon_energy = std::hypot( na62const::mK, kaon_3mom.Mag() );
+            TLorentzVector kaon_4mom { kaon_3mom, kaon_energy };
+
             //Lkr 4mom
             TLorentzVector& lkr_pip_4mom = data_fit.pip;
             TLorentzVector& lkr_pi0_4mom = data_fit.pi0;
@@ -46,7 +52,10 @@ namespace fn
 
             //Lkr Dch comparison
             lkr_dch_cmp_.Fill( lkr_pip_4mom, dch_pip_4mom, weight );
+            lkr_dch_cmp_.FillM2( lkr_pip_4mom, dch_pip_4mom, kaon_4mom, weight );
+
             uw_lkr_dch_cmp_.Fill( lkr_pip_4mom, dch_pip_4mom, 1.0);
+            uw_lkr_dch_cmp_.FillM2( lkr_pip_4mom, dch_pip_4mom, kaon_4mom, 1.0);
 
             TVector3 kaon_mom( lkr_interface.pK_X(), lkr_interface.pK_Y(), lkr_interface.pK_Z() );
             TVector3 dch_pip_3mom = dch_pip_4mom.Vect();
@@ -60,12 +69,16 @@ namespace fn
             K2piMcInterface mc_interface( *mc_data );
             const TLorentzVector& mc_pip_4mom = mc_interface.p4pip();
             mc_dch_cmp_.Fill(  mc_pip_4mom, dch_pip_4mom , weight );
+            mc_dch_cmp_.FillM2(  mc_pip_4mom, dch_pip_4mom, kaon_4mom, weight );
+
             lkr_mc_cmp_.Fill(  lkr_pip_4mom, mc_pip_4mom , weight );
+            lkr_mc_cmp_.FillM2(  lkr_pip_4mom, mc_pip_4mom , kaon_4mom,  weight );
 
             const TLorentzVector& mc_k_4mom = mc_interface.p4k();
 
-            lkr_tk_mc_cmp_.Fill( mc_k_4mom - lkr_pi0_4mom , 
-                    mc_pip_4mom , weight );
+            lkr_tk_mc_cmp_.Fill( mc_k_4mom - lkr_pi0_4mom , mc_pip_4mom , weight );
+
+            lkr_tk_mc_cmp_.FillM2( mc_k_4mom - lkr_pi0_4mom , mc_pip_4mom , kaon_4mom,  weight );
 #if 0
             mc_pip_4mom.Print();
             dch_pip_4mom.Print();
@@ -109,6 +122,9 @@ namespace fn
         heop_ = dths_.MakeTH1D( "heop", "Track Cluster E/p",
                 1500, 0.0 , 1.5,  "E/P", "#events" );
 
+        hchi2_ = dths_.MakeTH1D( "hchi2", "Fit Chi2",
+                10000, 0.0 , 10,  "Chi2", "#events" );
+
         hphoton_sep_ = dths_.MakeTH1D( "hphoton_sep", "Photon Cluster Separation",
                 1000, 0.0 , 200,  "Sep ( cm )", "#events" );
 
@@ -132,6 +148,7 @@ namespace fn
         hphoton_sep_->Fill( extract_photon_sep( lkr_data), weight );
         htrack_cluster_sep_->Fill( extract_min_track_cluster_sep( lkr_data, dch_data), weight );
         hmin_photon_radius_->Fill( extract_min_photon_radius( lkr_data), weight );
+        hchi2_->Fill( event_data.lkr_fit_chi2, weight );
     }
 
     void K2piEventPlotter::write()
@@ -144,11 +161,28 @@ namespace fn
     //--------------------------------------------------
 
     DchAnalysis::DchAnalysis( Selection& sel,  TFile& tf_,
-            std::string folder_, K2piEventData& k2pi_data, bool is_mc)
+            std::string folder_, K2piEventData& k2pi_data, 
+            std::string lkr_data_source, bool is_mc)
         :Analysis( sel ),
         plots_( tf_, folder_ ),event_plots_( tf_, folder_ ),
         k2pi_data_( k2pi_data), is_mc_( is_mc )
     {
+
+        if ( lkr_data_source == "fit" )
+        {
+            lkr_data_ = &k2pi_data_.fit_lkr;
+        }
+        else if ( lkr_data_source == "raw" )
+        {
+            lkr_data_ = &k2pi_data_.raw_lkr;
+        }
+        else
+        {
+            throw std::runtime_error
+                ( "DchAnalysis: Unknown lkr source " + lkr_data_source );
+        }
+
+
         for ( int i = 0 ; i != 11 ; ++ i )
         {
             double angle_sigma = 0.005;
@@ -161,7 +195,7 @@ namespace fn
             {
                 mom_frequency = 2e-2 * ( i - 5 );
             }
-            
+
             scatterers_.push_back( TrackScatterer( 
                         angle_sigma, angle_frequency,
                         mom_sigma, mom_frequency ) );
@@ -177,10 +211,10 @@ namespace fn
     {
         if( is_mc_ )
         {
-            plots_.plot_data( k2pi_data_, k2pi_data_.raw_lkr, k2pi_data_.raw_dch, 
+            plots_.plot_data( k2pi_data_, *lkr_data_, k2pi_data_.raw_dch, 
                     k2pi_data_.weight, true, &k2pi_data_.mc  );
 
-            event_plots_.plot_data( k2pi_data_, k2pi_data_.raw_lkr, k2pi_data_.raw_dch, 
+            event_plots_.plot_data( k2pi_data_, *lkr_data_ , k2pi_data_.raw_dch, 
                     k2pi_data_.weight, true, &k2pi_data_.mc  );
 
             for ( int i  = 0 ; i != 11 ; ++i )
@@ -189,16 +223,16 @@ namespace fn
                 scatterers_[i].scatter_track( k2pi_data_.compact_number, 
                         mod_dch.dxdz, mod_dch.dydz, mod_dch.p );
 
-                scatter_plots_[i].plot_data( k2pi_data_, k2pi_data_.raw_lkr, mod_dch, 
+                scatter_plots_[i].plot_data( k2pi_data_, *lkr_data_, mod_dch, 
                         k2pi_data_.weight, true, &k2pi_data_.mc );
             }
         }
         else
         {
-            plots_.plot_data( k2pi_data_, k2pi_data_.raw_lkr, k2pi_data_.raw_dch, 
+            plots_.plot_data( k2pi_data_, *lkr_data_, k2pi_data_.raw_dch, 
                     k2pi_data_.weight, false, 0 );
 
-            event_plots_.plot_data( k2pi_data_, k2pi_data_.raw_lkr, k2pi_data_.raw_dch, 
+            event_plots_.plot_data( k2pi_data_, *lkr_data_, k2pi_data_.raw_dch, 
                     k2pi_data_.weight, false, 0  );
         }
     }

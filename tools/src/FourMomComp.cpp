@@ -23,6 +23,19 @@ namespace fn
         hdty_ = hs_.MakeTH1D( "hdty",
                 ( name_ + " #Delta #theta_y").c_str() ,
                 1000, -0.05, 0.05, "#Delta #theta_y", "#events" );
+
+        hdm2_ = hs_.MakeTH1D( "hdm2",
+                ( name_ + " #Delta m^{2}_{miss}").c_str(),
+                1000, -0.1, 0.1, " #Delta m^{2}_{miss}" );
+    }
+
+    void FourMomComp::FillM2( const TLorentzVector& a, 
+            const TLorentzVector& b ,
+            const TLorentzVector& ref, double wgt )
+    {
+        double m2_a = ( ref - a ).M2();
+        double m2_b = ( ref - b ).M2();
+        hdm2_->Fill( m2_a - m2_b, wgt );
     }
 
     void FourMomComp::Fill( const TLorentzVector& a, const TLorentzVector& b,

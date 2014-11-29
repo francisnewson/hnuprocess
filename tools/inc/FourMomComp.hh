@@ -13,6 +13,11 @@ namespace fn
             FourMomComp();
             void Fill( const TLorentzVector& a,
                     const TLorentzVector& b , double wgt );
+
+            void FillM2( const TLorentzVector& a, 
+                    const TLorentzVector& b ,
+                    const TLorentzVector& ref,  double wgt );
+
             void Write();
 
             void SetColor( Color_t color );
@@ -23,6 +28,7 @@ namespace fn
             TH1D * hdtx_;
             TH1D * hdty_;
             TH2D * hdpvsp_;
+            TH1D * hdm2_;
 
             //Output properties
             std::string name_;

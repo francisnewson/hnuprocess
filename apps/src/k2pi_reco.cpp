@@ -25,6 +25,7 @@
 #include "k2pi_reco_functions.hh"
 #include "EChain.hh"
 #include "GlobalStatus.hh"
+#include "Summary.hh"
 
 //A global bool which can be
 //used to store stop signals
@@ -193,13 +194,18 @@ int main( int argc, char * argv[] )
     //Selections
     //**************************************************
 
+    int next_id = 0;
+
     //References
     auto& event = *event_data;
     auto& raw_lkr = event_data->raw_lkr;
+    auto& fit_lkr = event_data->fit_lkr;
     auto& raw_dch = event_data->raw_dch;
 
     auto pass_function = [](){ return true;};
     LambdaCut auto_pass{ pass_function };
+    auto_pass.set_name( "auto_pass" );
+    auto_pass.set_id( next_id++ );
 
     //M2M CUT
     auto m2m_pip = [&raw_lkr]()
@@ -222,6 +228,7 @@ int main( int argc, char * argv[] )
     };
 
     LambdaCut m2m_cut{ m2m_pip};
+    m2m_cut.set_id( next_id++ );
 
     //--------------------
 
@@ -240,9 +247,11 @@ int main( int argc, char * argv[] )
     };
 
     LambdaCut eop_cut{ raw_eop};
+    eop_cut.set_name( "eop_cut" );
+    eop_cut.set_id( next_id++ );
 
     //--------------------
-    
+
     //PHOTON SEPARATION
     auto photon_sep = [&raw_lkr]()
     {
@@ -250,6 +259,8 @@ int main( int argc, char * argv[] )
     };
 
     LambdaCut photon_sep_cut{ photon_sep};
+    photon_sep_cut.set_name( "photon_sep_cut" );
+    photon_sep_cut.set_id( next_id++ );
 
     //--------------------
 
@@ -260,9 +271,11 @@ int main( int argc, char * argv[] )
     };
 
     LambdaCut track_cluster_sep_cut{ track_cluster_sep};
+    track_cluster_sep_cut.set_name( "track_cluster_sep_cut" );
+    track_cluster_sep_cut.set_id( next_id++ );
 
     //--------------------
-    
+
     //MIN PHOTON RADIUS
     auto min_photon_radius = [&raw_lkr]
     {
@@ -271,24 +284,49 @@ int main( int argc, char * argv[] )
     };
 
     LambdaCut min_photon_radius_cut{ min_photon_radius };
+    min_photon_radius_cut.set_name( "min_photon_radius_cut" );
+    min_photon_radius_cut.set_id( next_id++ );
+
+    //CHI2 CUT
+    auto max_chi2 = [&event]
+    {
+        return event.lkr_fit_chi2 < 0.016 ;
+    };
+
+    LambdaCut chi2_cut{ max_chi2 };
+    chi2_cut.set_name( "chi2_cut" );
+    chi2_cut.set_id( next_id++);
 
     CompositeSelection full_selection( { &m2m_cut, &eop_cut, &track_cluster_sep_cut, &min_photon_radius_cut } );
+    full_selection.set_name( "full_selection" );
+    full_selection.set_id( next_id++);
+
+    CompositeSelection fit_selection( { &auto_pass, &chi2_cut, &eop_cut, &track_cluster_sep_cut, &min_photon_radius_cut} );
+    fit_selection.set_name( "fit_selection" );
+    fit_selection.set_id( next_id++);
 
     std::vector<Selection*> selections {
         &auto_pass, &m2m_cut, &eop_cut, 
-            &track_cluster_sep_cut, &full_selection, &min_photon_radius_cut
+            &track_cluster_sep_cut, &full_selection, &min_photon_radius_cut,
+            &chi2_cut, &fit_selection
     };
 
     //**************************************************
     //Analysis
     //**************************************************
 
-    DchAnalysis raw_dch_plotter( auto_pass, tfout, "raw_k2pi_plots", *event_data, is_mc );
-    DchAnalysis select_dch_plotter( full_selection, tfout, "select_k2pi_plots", *event_data, is_mc );
+    DchAnalysis raw_dch_plotter( auto_pass, tfout, "raw_k2pi_plots", *event_data, "raw", is_mc );
+    DchAnalysis raw_fit_dch_plotter( auto_pass, tfout, "raw_fit_k2pi_plots", *event_data, "fit", is_mc );
+    DchAnalysis select_dch_plotter( full_selection, tfout, "select_k2pi_plots", *event_data, "raw", is_mc );
+    DchAnalysis select_fit_dch_plotter( fit_selection, tfout, "select_fit_k2pi_plots", *event_data, "fit", is_mc );
 
+    Summary summary( auto_pass, fit_selection, std::cout );
+    summary.set_name( "FIT SELECTION SUMMARY" );
 
     std::vector<Analysis*> analyses { 
         &raw_dch_plotter, &select_dch_plotter,
+            &raw_fit_dch_plotter, &select_fit_dch_plotter ,
+            &summary,
     };
 
     for ( Int_t i = 0 ; i < event_count ; ++i )

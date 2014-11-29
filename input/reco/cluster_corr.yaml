@@ -16,9 +16,16 @@
     filename: clusters.dat
 
 - input:
-    name: cluster_corrector
+    name: cluster_corrector_on
     type: ClusterCorrector
     filename: "/afs/cern.ch/user/f/fnewson/work/hnu/gopher/data/detector/eopCorrfile.dat"
+    enabled: true
+
+- input:
+    name: cluster_corrector_off
+    type: ClusterCorrector
+    filename: "/afs/cern.ch/user/f/fnewson/work/hnu/gopher/data/detector/eopCorrfile.dat"
+    enabled: false
 
 #Autopass
 - selection:
@@ -26,10 +33,19 @@
     type : auto_pass
 
 - analysis:
-    name: cluster_corr_plots
+    name: cluster_corr_plots_on
     type: CorrClusterPlotter
     selection: passer
     tfile: tfout
-    folder: corr_cluster_plots
+    folder: corr_cluster_plots_on
     inputs:
-        ClusterCorrector: cluster_corrector
+        ClusterCorrector: cluster_corrector_on
+- analysis:
+
+    name: cluster_corr_plots_off
+    type: CorrClusterPlotter
+    selection: passer
+    tfile: tfout
+    folder: corr_cluster_plots_off
+    inputs:
+        ClusterCorrector: cluster_corrector_off

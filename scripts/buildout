@@ -3,7 +3,6 @@ ldd build_O3/apps/hnureco \
 		| ack  "build_O3" \
 		| awk '{print $3} END {
 			print "build_O3/apps/hnureco"
-			print "build_O3/apps/k2pi_plots"
 			print "build_O3/apps/k2pi_reco"
 			print "build_O3/apps/file_description"
 			print "input"

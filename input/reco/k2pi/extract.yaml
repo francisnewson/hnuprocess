@@ -48,6 +48,7 @@
     name: cluster_corrector
     type: ClusterCorrector
     filename: "/afs/cern.ch/user/f/fnewson/work/hnu/gopher/data/detector/eopCorrfile.dat"
+    enabled: true
 
 - input:
     name: k2pi_clusters
