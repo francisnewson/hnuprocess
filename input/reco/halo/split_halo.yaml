@@ -20,17 +20,18 @@
     crude_weights: input/reco/mod/kaon_crude_weights.dat
     fine_weights: input/reco/mod/kaon_fine_weights.dat
 
+- input:
+    name: kaon_track
+    type: KaonTrack
+    kaon_type: auto
+    beam_mapping: input/reco/beam/beam_mapping.yaml
+
 #MUV bursts
 - selection:
     name: gd_muv_brst
     type: BadBurst
     burst_list: "input/reco/conditions/bad_muv_burst.dat"
 
-- input:
-    name: kaon_track
-    type: KaonTrack
-    kaon_type: auto
-    beam_mapping: input/reco/beam/beam_mapping.yaml
 
 #Autopass
 - selection:
@@ -48,7 +49,7 @@
     init_min_mom: 3.0 
     init_max_mom: 80.0
 
-    init_max_cda: 15.0
+    init_max_cda: 10.0
 
     init_min_z: -50000.0
     init_max_z:  100000.0
@@ -75,13 +76,6 @@
         ogt: bf_st
 
 
-- selection:
-    name: cda_halo
-    type: TrackCda
-    min_cda: 3.0 #cm
-    max_cda: 7.0 #cm
-    inputs:
-        ogt: bf_st
 
 #Track quality
 - selection:
@@ -97,7 +91,7 @@
     type: TrackPZ
     shape: rectangles
     points:
-        - [  5, 70, -1000, 9000 ]
+        - [  5, 70, -2000, 9000 ]
     inputs:
         ogt: bf_st
 
@@ -149,14 +143,6 @@
     inputs:
         ogt: bf_st
 
-- selection:
-    name: pzt_cut
-    type: TrackPZT
-    regions_file: "input/reco/km2/pzt.yaml"
-    inputs:
-        ogt: bf_st
-        kt: kaon_track
-
 #Track time
 - selection:
     name: rk_dcht
@@ -165,8 +151,10 @@
     inputs:
         ogt: bf_st
 
+#--------------------------------------------------
+
 - selection:
-    name: halo_selection
+    name: pre_selection
     type: CompositeSelection
     children:
         - kaon_mom_weights
@@ -174,122 +162,57 @@
         - good_trk
         - pos_trk
         - quality_7
-        - cda_halo
         - muv_12
         - fiducial_pz
         - nobadcluster
 
-- selection:
-    name: pre_halo
-    type: CompositeSelection
-    children:
-        - kaon_mom_weights
-        - gd_muv_brst
-        - good_trk
-        - pos_trk
-        - muv_12
-        - nobadcluster
-
-- selection:
-    name: post_halo
-    type: CompositeSelection
-    children:
-        - quality_7
-        - cda_halo
-        - fiducial_pz
-
-- selection:
-    name : hnu_selection
-    type: CompositeSelection
-    children:
-        - kaon_mom_weights
-        - gd_muv_brst
-        - muv_12
-        - good_trk
-        - pos_trk
-        - quality_7
-        - cda_halo
-        - dch1_acc
-        - dch4_acc
-        - rk_dcht
-        - pzt_cut
-        - nobadcluster
-
-- selection:
-    name: halo_loose
-    type: CompositeSelection
-    children:
-        - pre_halo
-        - quality_7
-        - dch1_acc
-        - dch4_acc
-        - rk_dcht
-          
 #--------------------------------------------------
-
-##################################################
-#
-#  PZREGIONS 
-#
-##################################################
-
-#PZ upper
+            
 - selection:
-    name: pz_lower
+    name: upper_pz 
     type: TrackPZ
     shape: rectangles
     points:
-        - [  0, 20, -100000, 1000]
-        - [ 20, 40, -100000, 1500]
-        - [ 40, 60, -100000, 2000]
-        - [ 60, 80, -100000, 3000]
+        - [  5, 40, 2000, 8000 ]
     inputs:
         ogt: bf_st
 
 - selection:
-    name: halo_lower_sel
-    type: CompositeSelection
-    children:
-        - pre_halo
-        - pz_lower
-        - post_halo
-
-- selection:
-    name: pre_halo_lower_sel
-    type: CompositeSelection
-    children:
-        - pre_halo
-        - pz_lower
-
-#PZ lower
-- selection:
-    name: pz_upper
-    type: TrackPZ
-    shape: rectangles
-    points:
-        - [  0,  20,   1000,   100000]
-        - [ 20,  40,   1500,   100000]
-        - [ 40,  60,   2000,   100000]
-        - [ 60,  80,   3000,   100000]
+    name: upper_cda
+    type: TrackCda
+    min_cda: 3.0 #cm
+    max_cda: 6.0 #cm
     inputs:
         ogt: bf_st
 
 - selection:
-    name: halo_upper_sel
+    name: upper_sel
     type: CompositeSelection
-    children:
-        - pre_halo
-        - pz_upper
-        - post_halo
-          
-- selection:
-    name: pre_halo_upper_sel
-    type: CompositeSelection
-    children:
-        - pre_halo
-        - pz_upper
+    children: [ pre_selection, upper_pz, upper_cda ]
 
 #--------------------------------------------------
+
+- selection:
+    name: lower_pz 
+    type: TrackPZ
+    shape: rectangles
+    points:
+        - [  5, 60, -1800,  500 ]
+    inputs:
+        ogt: bf_st
+
+- selection:
+    name: lower_cda
+    type: TrackCda
+    min_cda: 0.0 #cm
+    max_cda: 3.0 #cm
+    inputs:
+        ogt: bf_st
+
+- selection:
+    name: lower_sel
+    type: CompositeSelection
+    children: [ pre_selection, lower_pz, lower_cda ]
 
 ##################################################
 #
@@ -321,54 +244,14 @@
 
 #--------------------------------------------------
 
-#FULL
-
-- analysis :
-    type: Km2Plotter
-    name: full_halo_plots
-    folder: halo_full
-    tfile: tfout
-    selection: halo_selection
-    inputs:
-        km2event: km2_event
-
-- analysis :
-    type: Km2Plotter
-    name: full_halo_tgt_plots
-    folder: halo_tgt
-    tfile: tfout
-    selection: hnu_selection
-    inputs:
-        km2event: km2_event
-
-- analysis :
-    type: Km2Plotter
-    name: full_halo_loose_plots
-    folder: halo_loose
-    tfile: tfout
-    selection: halo_loose
-    inputs:
-        km2event: km2_event
-
-#--------------------------------------------------
-
 #PRE
 
 - analysis :
     type: Km2Plotter
-    name: pre_upper_halo_plots
-    folder: pre_halo_upper
+    name: pre_halo_plots
+    folder: pre_halo
     tfile: tfout
-    selection: pre_halo_upper_sel
-    inputs:
-        km2event: km2_event
-
-- analysis :
-    type: Km2Plotter
-    name: pre_lower_halo_plots
-    folder: pre_halo_lower
-    tfile: tfout
-    selection: pre_halo_lower_sel
+    selection: pre_selection
     inputs:
         km2event: km2_event
 
@@ -381,7 +264,7 @@
     name: upper_halo_plots
     folder: halo_upper
     tfile: tfout
-    selection: halo_upper_sel
+    selection: upper_sel
     inputs:
         km2event: km2_event
 
@@ -390,7 +273,7 @@
     name: lower_halo_plots
     folder: halo_lower
     tfile: tfout
-    selection: halo_lower_sel
+    selection: lower_sel
     inputs:
         km2event: km2_event
 
@@ -402,19 +285,19 @@
     name : full_summary
     type: Summary
     base : passer
-    source : halo_selection 
+    source : pre_selection 
     ostream: stats_out
 
 - analysis : 
     name : upper_summary
     type: Summary
     base : passer
-    source : halo_upper_sel 
+    source : upper_sel 
     ostream: stats_out
 
 - analysis : 
     name : lower_summary
     type: Summary
     base : passer
-    source : halo_lower_sel 
+    source : lower_sel 
     ostream: stats_out

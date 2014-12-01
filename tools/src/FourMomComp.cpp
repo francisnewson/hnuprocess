@@ -10,7 +10,7 @@ namespace fn
                 1000, -50, 50, "#Delta p", "#events" );
 
         hdpop2_ = hs_.MakeTH1D( "hdpop2_", ( name_ + " #Delta p  / p^2").c_str() ,
-                1000, -1, 1, "#Delta p", "#events" );
+                1000, -0.2, 0.2, "#Delta p", "#events" );
 
         hdpvsp_ = hs_.MakeTH2D( "hdpvsp_", ( name_ + " #Delta p vs p").c_str(),
                 100, 0, 100, "p",

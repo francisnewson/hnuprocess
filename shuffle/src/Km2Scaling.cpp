@@ -22,6 +22,8 @@ namespace fn
         using std::vector;
         using std::string;
 
+        std::cout << "Scaling " << get_yaml<string>( scaling_config_, "name" ) << std::endl;
+
         //Channel definitions
         auto halo_channels = get_yaml<vector<string>>( scaling_config_, "halo_channels" );
         auto data_channels = get_yaml<vector<string>>( scaling_config_, "data_channels" );
@@ -45,6 +47,7 @@ namespace fn
             auto hsummed_data = get_summed_histogram( 
                     ce_halo, begin( data_channels ), end( data_channels ) );
 
+            std::cout << "Halo: " << hsummed_halo->GetEntries() << std::endl;
 
             //Do integrals
             double m2_min_halo = get_yaml<double>( halo_node, "min_mass" );
@@ -52,6 +55,9 @@ namespace fn
 
             double halo_halo_integral =  integral( *hsummed_halo, m2_min_halo, m2_max_halo );
             double halo_data_integral =  integral( *hsummed_data, m2_min_halo, m2_max_halo );
+
+            //std::cout << "Halo integral " << halo_halo_integral << std::endl;
+            //std::cout << "Data integral " << halo_data_integral << std::endl;
 
             halo_scale_ = halo_data_integral / halo_halo_integral;
 

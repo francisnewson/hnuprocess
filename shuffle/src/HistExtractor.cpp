@@ -48,6 +48,8 @@ namespace fn
     {
         double bmin = h.GetXaxis()->FindBin( min );
         double bmax = h.GetXaxis()->FindBin( max );
+        //std::cout << "min: " << min << " " << " max " << max << std::endl;
+        //std::cout << "bmin: " << bmin << " " << " bmax " << bmax << std::endl;
         return h.Integral( bmin, bmax );
     }
 }

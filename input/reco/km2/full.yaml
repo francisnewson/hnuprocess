@@ -18,6 +18,12 @@
     kaon_type: auto
     beam_mapping: input/reco/beam/beam_mapping.yaml
 
+- input:
+    name: cluster_corrector
+    type: ClusterCorrector
+    filename: "/afs/cern.ch/user/f/fnewson/work/hnu/gopher/data/detector/eopCorrfile.dat"
+    enabled: true
+
 - output:
     name: text_out
     type: ostream
@@ -71,6 +77,7 @@
     track_cluster_radius: 5 #cm
     inputs:
         ogt: bf_st
+        ClusterCorrector: cluster_corrector
 
 #Autopass
 - selection:
