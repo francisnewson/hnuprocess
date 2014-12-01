@@ -166,6 +166,13 @@
         - fiducial_pz
         - nobadcluster
 
+- input:
+    name: km2_event
+    type: Km2Event
+    inputs:
+        ogt: bf_st
+        kt: kaon_track
+
 #--------------------------------------------------
             
 - selection:
@@ -173,7 +180,7 @@
     type: TrackPZ
     shape: rectangles
     points:
-        - [  5, 40, 2000, 8000 ]
+        - [  13, 40, 2000, 7000 ]
     inputs:
         ogt: bf_st
 
@@ -186,9 +193,17 @@
         ogt: bf_st
 
 - selection:
+    name: upper_t
+    type: Km2Angle
+    min_t: 0
+    max_t: 0.013
+    inputs:
+        km2event: km2_event
+
+- selection:
     name: upper_sel
     type: CompositeSelection
-    children: [ pre_selection, upper_pz, upper_cda ]
+    children: [ pre_selection, upper_pz, upper_cda, upper_t ]
 
 #--------------------------------------------------
 
@@ -204,15 +219,23 @@
 - selection:
     name: lower_cda
     type: TrackCda
-    min_cda: 0.0 #cm
-    max_cda: 3.0 #cm
+    min_cda: 1.0 #cm
+    max_cda: 4.0 #cm
     inputs:
         ogt: bf_st
 
 - selection:
+    name: lower_t
+    type: Km2Angle
+    min_t: 0.003
+    max_t: 0.013
+    inputs:
+        km2event: km2_event
+
+- selection:
     name: lower_sel
     type: CompositeSelection
-    children: [ pre_selection, lower_pz, lower_cda ]
+    children: [ pre_selection, lower_pz, lower_cda, lower_t ]
 
 ##################################################
 #
@@ -220,12 +243,6 @@
 #
 ##################################################
 
-- input:
-    name: km2_event
-    type: Km2Event
-    inputs:
-        ogt: bf_st
-        kt: kaon_track
 
 - output:
     name: tfout

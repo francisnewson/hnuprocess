@@ -66,8 +66,14 @@ namespace fn
             TH1D * h_pt_;
 
             TH2D * h_p_t_;
+            TH2D * h_p_cda_;
+            TH2D * h_p_z_;
+            TH2D * h_z_t_;
+            TH2D * h_z_cda_;
+            TH2D * h_t_cda_;
+            TH2D * h_m2_cda_;
             TH2D * h_m2_t_;
-            TH2D * h_pz_;
+            TH2D * h_m2_z_;
 
             TH2D * h_xy_coll_;
             TH2D * h_xy_DCH1_;
@@ -76,8 +82,6 @@ namespace fn
             TH2D * h_xy_MUV1_;
 
             HistStore hs_;
-
-            PZTPlots pzt_plots_;
     };
 
     //--------------------------------------------------
@@ -104,6 +108,32 @@ namespace fn
 
     template<>
         Subscriber * create_subscriber<Km2Plotter>
+        (YAML::Node& instruct, RecoFactory& rf );
+
+    //--------------------------------------------------
+
+    class Km2PZTPlotter: public Analysis
+    {
+        public:
+            Km2PZTPlotter( const Selection& sel, 
+                    TFile& tfile, std::string folder,
+                    const Km2Event& km2_event);
+
+            void end_processing();
+
+        private:
+            void process_event();
+
+            TFile& tfile_;
+            std::string folder_;
+            const Km2Event& km2_event_;
+            PZTPlots pzt_plots_;
+
+            REG_DEC_SUB( Km2PZTPlotter);
+    };
+
+    template<>
+        Subscriber * create_subscriber<Km2PZTPlotter>
         (YAML::Node& instruct, RecoFactory& rf );
 }
 #endif

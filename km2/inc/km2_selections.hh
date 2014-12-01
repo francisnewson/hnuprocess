@@ -129,5 +129,26 @@ namespace fn
     template<>
         Subscriber * create_subscriber<Km2TrackClusterEP>
         (YAML::Node& instruct, RecoFactory& rf );
+
+    //--------------------------------------------------
+
+    class Km2Angle : public CachedSelection
+    {
+        public:
+            Km2Angle ( const Km2Event& km2_event, double min_t, double max_t );
+
+        private:
+            bool do_check() const;
+
+            const Km2Event& km2_event_;
+            double min_t_;
+            double max_t_;
+
+            REG_DEC_SUB( Km2Angle );
+    };
+
+    template<>
+        Subscriber * create_subscriber<Km2Angle>
+        (YAML::Node& instruct, RecoFactory& rf );
 }
 #endif

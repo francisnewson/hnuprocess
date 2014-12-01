@@ -229,4 +229,37 @@ namespace fn
             return new Km2TrackClusterEP( *km2c, *st, min_eop, max_eop );
 
         }
+
+    //--------------------------------------------------
+
+    REG_DEF_SUB( Km2Angle );
+
+    Km2Angle::Km2Angle ( const Km2Event& km2_event, double min_t, double max_t )
+        :km2_event_( km2_event), min_t_( min_t ), max_t_( max_t )
+    {}
+
+    bool Km2Angle::do_check() const
+    {
+        const Km2RecoEvent & km2re = km2_event_.get_reco_event();
+        double t = km2re.get_opening_angle() ;
+
+        return ( ( t > min_t_ ) && ( t < max_t_ ) );
+    }
+
+    template<>
+        Subscriber * create_subscriber<Km2Angle>
+        (YAML::Node& instruct, RecoFactory& rf )
+        {
+
+            double min_t = 
+                get_yaml<double>( instruct, "min_t" );
+
+            double max_t = 
+                get_yaml<double>( instruct, "max_t" );
+
+            const auto * km2_event = get_km2_event( instruct, rf );
+
+            return new Km2M2Miss( *km2_event, min_t, max_t );
+        }
+
 }
