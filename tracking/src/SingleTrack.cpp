@@ -505,4 +505,82 @@ namespace fn
         }
 
     }
+
+    //--------------------------------------------------
+
+    TrackPowerScatterer::TrackPowerScatterer(
+            double angle_cutoff, double angle_frequency, 
+            double mom_cutoff, double mom_frequency)
+    {
+        set_angle_params( angle_cutoff, angle_frequency);
+        set_mom_params( mom_cutoff, mom_frequency);
+    }
+
+    void TrackPowerScatterer::set_angle_params
+        ( double cutoff, double frequency)
+        {
+            angle_function_ = TF1( "f_angle", "pow(x,-4)", cutoff, 1 );
+            angle_function_.SetNpx( 100 );
+            angle_frequency_ = frequency;
+        }
+
+    void TrackPowerScatterer::set_mom_params
+        ( double cutoff, double frequency)
+        {
+            mom_function_ = TF1( "f_mom", "pow(x,-4)", cutoff, 1 );
+            mom_function_.SetNpx( 100 );
+            mom_frequency_ = frequency;
+        }
+
+    void TrackPowerScatterer::scatter_track( Long64_t seed, 
+            double& dxdz, double& dydz, double& mom ) const
+    {
+        //seed the random number generator with the event time stamp
+        std::mt19937 gen( seed );
+        std::uniform_real_distribution<double> uni_dist;
+        std::uniform_int_distribution<int> dir_dist( 0, 1 );
+
+        double uniform_roll = 0;
+
+        //should we generate an x kick
+        uniform_roll = uni_dist(gen);
+        if( uniform_roll < angle_frequency_ )
+        {
+            //xkick
+            double xanglekick = angle_function_.GetRandom();
+            int dir = dir_dist( gen );
+            if ( dir == 1)
+            {dxdz += xanglekick;}
+            else
+            {dxdz -= xanglekick;}
+        }
+
+        //should we generate an y kick
+        uniform_roll = uni_dist(gen);
+        if( uniform_roll < angle_frequency_ )
+        {
+            //ykick
+            double yanglekick = angle_function_.GetRandom();
+            int dir = dir_dist( gen );
+            if ( dir == 1)
+            {dydz += yanglekick;}
+            else
+            {dydz -= yanglekick;}
+        }
+
+        //should we generate a mom kick
+        uniform_roll = uni_dist(gen);
+        if ( uniform_roll < mom_frequency_ )
+        {
+            //mom kick
+            double mom_roll = mom_function_.GetRandom();
+            double mom_kick = mom_roll * mom ;
+            //std::cout << mom_kick << std::endl;
+            int dir = dir_dist( gen );
+            if ( dir == 1)
+            {mom += mom_kick;}
+            else
+            {mom -= mom_kick;}
+        }
+    }
 }

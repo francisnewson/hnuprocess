@@ -180,15 +180,15 @@
     type: TrackPZ
     shape: rectangles
     points:
-        - [  13, 40, 2000, 7000 ]
+        - [  11, 40, 2000, 7200 ]
     inputs:
         ogt: bf_st
 
 - selection:
     name: upper_cda
     type: TrackCda
-    min_cda: 3.0 #cm
-    max_cda: 6.0 #cm
+    min_cda: 2.5 #cm
+    max_cda: 6.5 #cm
     inputs:
         ogt: bf_st
 
@@ -199,6 +199,11 @@
     max_t: 0.013
     inputs:
         km2event: km2_event
+
+- selection:
+    name: upper_pre_sel
+    type: CompositeSelection
+    children: [ pre_selection, upper_pz ]
 
 - selection:
     name: upper_sel
@@ -212,7 +217,7 @@
     type: TrackPZ
     shape: rectangles
     points:
-        - [  5, 60, -1800,  500 ]
+        - [  10, 60, -1800,  500 ]
     inputs:
         ogt: bf_st
 
@@ -231,6 +236,11 @@
     max_t: 0.013
     inputs:
         km2event: km2_event
+
+- selection:
+    name: lower_pre_sel
+    type: CompositeSelection
+    children: [ pre_selection, lower_pz ]
 
 - selection:
     name: lower_sel
@@ -269,6 +279,24 @@
     folder: pre_halo
     tfile: tfout
     selection: pre_selection
+    inputs:
+        km2event: km2_event
+
+- analysis :
+    type: Km2Plotter
+    name: pre_upper_halo_plots
+    folder: pre_upper_halo
+    tfile: tfout
+    selection: upper_pre_sel
+    inputs:
+        km2event: km2_event
+
+- analysis :
+    type: Km2Plotter
+    name: pre_lower_halo_plots
+    folder: pre_lower_halo
+    tfile: tfout
+    selection: lower_pre_sel
     inputs:
         km2event: km2_event
 

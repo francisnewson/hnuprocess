@@ -243,7 +243,8 @@ namespace fn
         const Km2RecoEvent & km2re = km2_event_.get_reco_event();
         double t = km2re.get_opening_angle() ;
 
-        return ( ( t > min_t_ ) && ( t < max_t_ ) );
+        bool pass = ( ( t > min_t_ ) && ( t < max_t_ ) );
+        return  pass;
     }
 
     template<>
@@ -259,7 +260,7 @@ namespace fn
 
             const auto * km2_event = get_km2_event( instruct, rf );
 
-            return new Km2M2Miss( *km2_event, min_t, max_t );
+            return new Km2Angle( *km2_event, min_t, max_t );
         }
 
 }

@@ -8,6 +8,7 @@
 #include "BFCorrection.hh"
 #include "Track.hh"
 #include "KaonTrack.hh"
+#include "TF1.h"
 #if 0
 /*
  *  ____  _             _     _____               _
@@ -189,28 +190,54 @@ namespace fn
     };
 
     //--------------------------------------------------
-    
+
     class TrackScatterer
     {
         public:
-        TrackScatterer(){}
-        TrackScatterer(
-                double angle_sigma, double angle_frequency,
-                double mom_sigma, double mom_frequency );
+            TrackScatterer(){}
+            TrackScatterer(
+                    double angle_sigma, double angle_frequency,
+                    double mom_sigma, double mom_frequency );
 
-        void set_angle_params( double sigma, double frequency);
-        void set_mom_params( double sigma, double frequency);
+            void set_angle_params( double sigma, double frequency);
+            void set_mom_params( double sigma, double frequency);
 
-        void scatter_track( Long64_t seed, 
-                double& dxdz, double& dydz, double& mom ) const;
+            void scatter_track( Long64_t seed, 
+                    double& dxdz, double& dydz, double& mom ) const;
 
         private:
-        double angle_sigma_;
-        double angle_frequency_;
+            double angle_sigma_;
+            double angle_frequency_;
 
-        double mom_sigma_;
-        double mom_frequency_;
+            double mom_sigma_;
+            double mom_frequency_;
     };
+
+    //--------------------------------------------------
+
+    class TrackPowerScatterer
+    {
+        public:
+            TrackPowerScatterer(){}
+            TrackPowerScatterer(
+                    double angle_cutoff, double angle_frequency, 
+                    double mom_cutoff, double mom_frequency);
+
+            void set_angle_params( double cutoff, double frequency);
+            void set_mom_params( double cutoff, double frequency);
+
+            void scatter_track( Long64_t seed, 
+                    double& dxdz, double& dydz, double& mom ) const;
+
+        private:
+            mutable TF1 angle_function_;
+            double angle_frequency_;
+
+            mutable TF1 mom_function_;
+            double mom_frequency_;
+    };
+
+    //--------------------------------------------------
 
 
     class BFScatterSingleTrack : public BFSingleTrack

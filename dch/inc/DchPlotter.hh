@@ -93,7 +93,7 @@ namespace fn
         bool is_mc_;
 
         std::vector<DchPlotter> scatter_plots_;
-        std::vector<TrackScatterer> scatterers_;
+        std::vector<TrackPowerScatterer> scatterers_;
     };
 }
 #endif

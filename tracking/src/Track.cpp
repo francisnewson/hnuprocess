@@ -1,5 +1,6 @@
 #include "Track.hh"
 #include <stdexcept>
+#include <cmath>
 
 namespace fn
 {
@@ -43,7 +44,7 @@ namespace fn
             TVector3 nhat = n.Unit();
 
             //Check tracks aren't paralell
-            if ( ( n.Mag()  / v.Mag() / w.Mag() ) < 1e-20 )
+            if ( ( n.Mag()  / v.Mag() / w.Mag() ) < 1e-25 )
             {
                 throw std::domain_error( "Parallel tracks vertex requested" );
             }
@@ -60,6 +61,7 @@ namespace fn
 
             result.point =  r + lambda * v - nhat * (result.cda / 2) ;
 
+            result.cda = fabs( result.cda );
             return result;
         }
 

@@ -183,22 +183,17 @@ namespace fn
         }
 
 
-        for ( int i = 0 ; i != 11 ; ++ i )
+        for ( int i = 0 ; i != 5 ; ++ i )
         {
-            double angle_sigma = 0.005;
-            double angle_frequency = 3e-3 * ( (2.0*i) / 10 );
+            double angle_cutoff = 0.0002;
+            double angle_frequency = 1 * i;
 
-            double mom_sigma = ( i < 6 ) ? 0.2 : 0.5;
-            double mom_frequency = 2e-2 * i;
+            double mom_cutoff = 0.002;
+            double mom_frequency = 1 * i;
 
-            if ( i > 5 )
-            {
-                mom_frequency = 2e-2 * ( i - 5 );
-            }
-
-            scatterers_.push_back( TrackScatterer( 
-                        angle_sigma, angle_frequency,
-                        mom_sigma, mom_frequency ) );
+            scatterers_.push_back( TrackPowerScatterer( 
+                        angle_cutoff, angle_frequency,
+                        mom_cutoff, mom_frequency ) );
 
             path folder{ folder_};
             folder /= ("scatter" + std::to_string( i ) );
@@ -217,7 +212,7 @@ namespace fn
             event_plots_.plot_data( k2pi_data_, *lkr_data_ , k2pi_data_.raw_dch, 
                     k2pi_data_.weight, true, &k2pi_data_.mc  );
 
-            for ( int i  = 0 ; i != 11 ; ++i )
+            for ( int i  = 0 ; i != 5 ; ++i )
             {
                 K2piDchData mod_dch = k2pi_data_.raw_dch;
                 scatterers_[i].scatter_track( k2pi_data_.compact_number, 

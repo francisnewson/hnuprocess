@@ -9,12 +9,19 @@ namespace fn
         hdp_ = hs_.MakeTH1D( "hdp", ( name_ + " #Delta p").c_str() ,
                 1000, -50, 50, "#Delta p", "#events" );
 
+        hdpop_ = hs_.MakeTH1D( "hdpop_", ( name_ + " #Delta p  / p").c_str() ,
+                1000, -2, 2, "#Delta p", "#events" );
+
         hdpop2_ = hs_.MakeTH1D( "hdpop2_", ( name_ + " #Delta p  / p^2").c_str() ,
                 1000, -0.2, 0.2, "#Delta p", "#events" );
 
         hdpvsp_ = hs_.MakeTH2D( "hdpvsp_", ( name_ + " #Delta p vs p").c_str(),
                 100, 0, 100, "p",
                 1000, -50, 50, "#Delta p" );
+
+        hdpopvsp_ = hs_.MakeTH2D( "hdpopvsp_", ( name_ + " #Delta p/p vs p").c_str(),
+                100, 0, 100, "p",
+                1000, -5, 5, "#Delta p / p" );
 
         hdtx_ = hs_.MakeTH1D( "hdtx",
                 ( name_ + " #Delta #theta_x").c_str() ,
@@ -50,8 +57,12 @@ namespace fn
         hdp_->Fill( amag - bmag, wgt );
         hdtx_->Fill( amom.X()/amag -  bmom.X()/bmag, wgt );
         hdty_->Fill( amom.Y()/amag -  bmom.Y()/bmag, wgt );
+
         hdpop2_->Fill( ( amag - bmag ) / std::pow( ( amag + bmag )/2, 2 ), wgt );
+        hdpop_->Fill( ( amag - bmag ) / ( amag + bmag ), wgt );
+
         hdpvsp_->Fill( ( amag + bmag ) / 2 , amag - bmag , wgt );
+        hdpopvsp_->Fill( ( amag + bmag ) / 2 , (amag - bmag) / (amag + bmag) , wgt );
     }
 
     void FourMomComp::Write()

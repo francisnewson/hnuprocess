@@ -72,7 +72,7 @@ namespace fn
 
         //Kinematic shape
         h_cda_ = hs_.MakeTH1D( "h_cda", "CDA (cm)",
-                100, 0, 10, "CDA (cm)" );
+                100, -10, 10, "CDA (cm)" );
 
         h_t_ = hs_.MakeTH1D( "h_t", "Opening angle (rad)",
                 250, 0, 25e-3, "#Theta (rad)" );
@@ -114,11 +114,11 @@ namespace fn
                 1000, -0.7, 0.3, "m^{2}_{miss} ( GeV^{2}/ c^{4} )",
                 250, 0, 25e-3, "t( rad) ");
 
-        h_m2_z_ = hs_.MakeTH2D( "h_m2_t", "m^{2} vs Z" ,
+        h_m2_z_ = hs_.MakeTH2D( "h_m2_z", "m^{2} vs Z" ,
                 1000, -0.7, 0.3, "m^{2}_{miss} ( GeV^{2}/ c^{4} )",
                 150, -5000, 10000, "Z( cm) ");
 
-        h_m2_cda_ = hs_.MakeTH2D( "h_m2_t", "m^{2} vs CDA" ,
+        h_m2_cda_ = hs_.MakeTH2D( "h_m2_cda", "m^{2} vs CDA" ,
                 1000, -0.7, 0.3, "m^{2}_{miss} ( GeV^{2}/ c^{4} )",
                 100, 0, 10, "CDA (cm)" );
 
