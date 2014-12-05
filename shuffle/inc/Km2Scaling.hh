@@ -24,6 +24,10 @@ namespace fn
 
             void compute_scaling();
 
+            void region_scaling();
+
+            void m2_scaling();
+
             double get_halo_scale() const
             { return halo_scale_ ; }
 

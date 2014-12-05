@@ -37,6 +37,7 @@ weights/
 tmva/scripts
 runlists
 test
+halo_out
 
 #apps#
 apps/*

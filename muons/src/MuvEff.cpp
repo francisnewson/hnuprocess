@@ -3,6 +3,7 @@
 #include "Km2Reco.hh"
 #include "yaml_help.hh"
 #include "NA62Constants.hh"
+#include <string>
 
 namespace fn
 {
@@ -10,21 +11,34 @@ namespace fn
 
     //--------------------------------------------------
 
-    MuvGeom::MuvGeom(int status)
+    MuvGeom::MuvGeom( std::set<int> status)
         :status_( status )
     {
-        h_muv_hits_ = hs_.MakeTH2D( Form( "h_muv_hits_%d", status), 
-                Form( "MUV hits with status %d", status ),
+        std::string s_status ="";
+        auto n = status.begin();
+        s_status += std::to_string(*n );
+        ++n;
+        while ( n != status.end() )
+        {
+            s_status += "_" + std::to_string( *n );
+            ++n;
+        }
+
+
+        h_muv_hits_ = hs_.MakeTH2D( Form( "h_muv_hits_%s", s_status.c_str()), 
+                Form( "MUV hits with status %s",s_status.c_str() ),
                 150, -150 , 150, "X cm", 150, -150 , 150, "Y cm" );
 
-        h_muv_track_hits_ = hs_.MakeTH2D( Form( "h_muv_track_hits_%d", status), 
-                Form( "MUV hits with status %d extrapolated from track", status ),
+        h_muv_track_hits_ = hs_.MakeTH2D( Form( "h_muv_track_hits_%s", s_status.c_str()), 
+                Form( "MUV hits with status %s extrapolated from track", s_status.c_str() ),
                 150, -150 , 150, "X cm", 150, -150 , 150, "Y cm" );
     }
 
     void MuvGeom::Fill( const fne::RecoMuon& rm, const SingleRecoTrack& srt, double wgt )
     {
-        if ( rm.status != status_ ) { return; }
+        //std::cout << rm.plane[0] << "  " << rm.plane[1]  << std::endl;
+
+        if ( status_.find(rm.status) == status_.end() ) { return; }
 
         TVector3 extrap = srt.extrapolate_ds( na62const::zMuv1 );
         h_muv_hits_->Fill( rm.x, rm.y, wgt );
@@ -43,18 +57,23 @@ namespace fn
             TFile& tfile, std::string folder)
         :Analysis( sel), muv_selection_( muv_selection),
         km2e_( km2_event), e_( e ), tfile_( tfile), folder_( folder),
-        muvhits_1_( 1 ), muvhits_2_( 2 ),
-        muvhits_3_( 3 ), muvhits_4_( 4 ),
+        muvhits_1_( {1} ), muvhits_2_( {2} ),
+        muvhits_3_( {3} ), muvhits_4_( {4} ),
+        muvhits_muv1_( {1,2,4} ), muvhits_muv2_( { 1,2,3 } ),
         eff_mom_( "eff_mom", "Eff( muon momentum)", 100, 0, 100 ),
         eff_m2m_( "eff_m2m", "Eff( muon m^{2}_{miss})", 2000, -0.2, 0.2 ),
         eff_z_( "eff_z", "Eff(z vertex)", 120, -2000, 10000 ),
-        eff_rmuv1_( "eff_rmuv1", "Eff(r muv 1)", 200, 0, 200 )
-    {
-        eff_mom_.SetDirectory( 0 );
-        eff_m2m_.SetDirectory( 0 );
-        eff_z_.SetDirectory( 0 );
-        eff_rmuv1_.SetDirectory( 0 );
-    }
+        eff_rmuv1_( "eff_rmuv1", "Eff(r muv 1)", 200, 0, 200 ),
+        eff_x_( "eff_x", "Eff(x at MUV 1)", 200, -200 , 200 ),
+        eff_y_( "eff_y", "Eff(y at MUV 1)", 200, -200 , 200 )
+        {
+            eff_mom_.SetDirectory( 0 );
+            eff_m2m_.SetDirectory( 0 );
+            eff_z_.SetDirectory( 0 );
+            eff_rmuv1_.SetDirectory( 0 );
+            eff_x_.SetDirectory( 0 );
+            eff_y_.SetDirectory( 0 );
+        }
 
     void MuvEff::process_event()
     {
@@ -78,12 +97,15 @@ namespace fn
 
         TVector3 extrap = srt->extrapolate_ds( na62const::zMuv1 );
         double r_muv1 = extrap.Perp();
+        double x_muv1 = extrap.X();
+        double y_muv1 = extrap.Y();
 
         eff_mom_.Fill( pass, km2re.get_muon_mom() );
         eff_m2m_.Fill( pass, km2re.get_m2miss() );
         eff_z_.Fill( pass, km2re.get_zvertex() );
         eff_rmuv1_.Fill( pass, r_muv1 );
-
+        eff_x_.Fill( pass, x_muv1 );
+        eff_y_.Fill( pass, y_muv1 );
 
         const TClonesArray& muons = e_->detector.muons;
         Int_t nmuons = e_->detector.nmuons;
@@ -97,6 +119,8 @@ namespace fn
             muvhits_2_.Fill( *rm , *srt, weight );
             muvhits_3_.Fill( *rm , *srt, weight );
             muvhits_4_.Fill( *rm , *srt, weight );
+            muvhits_muv1_.Fill( *rm , *srt, weight );
+            muvhits_muv2_.Fill( *rm , *srt, weight );
         }
     }
 
@@ -116,6 +140,8 @@ namespace fn
         eff_m2m_.Write();
         eff_z_.Write();
         eff_rmuv1_.Write();
+        eff_x_.Write();
+        eff_y_.Write();
 
         cd_p( &tfile_, folder_ );
 
@@ -123,6 +149,8 @@ namespace fn
         muvhits_2_.Write();
         muvhits_3_.Write();
         muvhits_4_.Write();
+        muvhits_muv1_.Write();
+        muvhits_muv2_.Write();
 
     }
 

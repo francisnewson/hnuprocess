@@ -20,6 +20,13 @@
     crude_weights: input/reco/mod/kaon_crude_weights.dat
     fine_weights: input/reco/mod/kaon_fine_weights.dat
 
+- input:
+    name: cluster_corrector
+    type: ClusterCorrector
+    filename: "/afs/cern.ch/user/f/fnewson/work/hnu/gopher/data/detector/eopCorrfile.dat"
+    enabled: true
+
+
 #Autopass
 - selection:
     name: passer
@@ -106,6 +113,7 @@
     brehm_radius: 6 #cm
     track_cluster_radius: 10 #cm
     inputs:
+        ClusterCorrector: cluster_corrector
         ogt: bf_st
 
 - selection:
@@ -232,7 +240,7 @@
     #log_level: always_print
     type: Km2TrackClusterEP
     min_eop: 0.0
-    max_eop: 0.1
+    max_eop: 0.15
     inputs:
         km2clusters: rk_km2_clusters
         ogt: bf_st
@@ -331,6 +339,24 @@
     allowed_status: [ 1, 2 ]
     ignore_classes: [ p6 ]
 
+- selection:
+    name: muv_1_or_2
+    type : MuonReqStatus
+    allowed_status: [ 1, 2, 3, 4 ]
+    ignore_classes: [ p6 ]
+
+- selection:
+    name: muv_1
+    type : MuonReqStatus
+    allowed_status: [ 1, 2, 4 ]
+    ignore_classes: [ p6 ]
+
+- selection:
+    name: muv_2
+    type : MuonReqStatus
+    allowed_status: [ 1, 2, 3 ]
+    ignore_classes: [ p6 ]
+
 - output:
     name: tfout
     type: tfile
@@ -349,7 +375,7 @@
 
 - analysis :
     { type: Km2ClusterPlotter,  name: cluster_signal,  folder: muv_eff_signal,  tfile: tfout, 
-    selection: signal_rk_selection,  inputs: {km2event: km2_event, km2clusters: rk_km2_clusters } } 
+    selection: signal_rk_selection,  inputs: {km2event: km2_event, km2clusters: rk_km2_clusters, ClusterCorrector: cluster_corrector } } 
 
 ###
 
@@ -359,7 +385,7 @@
 
 - analysis :
     { type: Km2ClusterPlotter,  name: cluster_peak,  folder: muv_eff_peak,  tfile: tfout, 
-    selection: rk_peak,  inputs: {km2event: km2_event, km2clusters: rk_km2_clusters } } 
+    selection: rk_peak,  inputs: {km2event: km2_event, km2clusters: rk_km2_clusters, ClusterCorrector: cluster_corrector } } 
         
 ###
 
@@ -369,8 +395,9 @@
 
 - analysis :
     { type: Km2ClusterPlotter,  name: cluster_eop,  folder: muv_eff_eop,  tfile: tfout, 
-    selection: rk_eop,  inputs: {km2event: km2_event, km2clusters: rk_km2_clusters } } 
+    selection: rk_eop,  inputs: {km2event: km2_event, km2clusters: rk_km2_clusters, ClusterCorrector: cluster_corrector } } 
 
+        
 ###
 
 - analysis :
@@ -378,8 +405,28 @@
     selection: rk_eop_peak,  muv_selection: muv_12,  inputs: {km2event: km2_event } }
 
 - analysis :
+    { type: MuvEff,  name: muv_eff_eop_peak_1_or_2,  folder: muv_eff_eop_peak_1_or_2,  tfile: tfout, 
+    selection: rk_eop_peak,  muv_selection: muv_1_or_2,  inputs: {km2event: km2_event } }
+
+- analysis :
+    { type: MuvEff,  name: muv_eff_eop_peak_1,  folder: muv_eff_eop_peak_1,  tfile: tfout, 
+    selection: rk_eop_peak,  muv_selection: muv_1,  inputs: {km2event: km2_event } }
+
+- analysis :
+    { type: MuvEff,  name: muv_eff_eop_peak_2,  folder: muv_eff_eop_peak_2,  tfile: tfout, 
+    selection: rk_eop_peak,  muv_selection: muv_2,  inputs: {km2event: km2_event } }
+
+- analysis :
     { type: Km2ClusterPlotter,  name: cluster_eop_peak,  folder: muv_eff_eop_peak,  tfile: tfout, 
-    selection: rk_eop_peak,  inputs: {km2event: km2_event, km2clusters: rk_km2_clusters } } 
+    selection: rk_eop_peak,  inputs: {km2event: km2_event, km2clusters: rk_km2_clusters,ClusterCorrector: cluster_corrector } } 
+
+- analysis :
+    { type: MuvEff,  name: all_muv1,  folder: all_muv1,  tfile: tfout, 
+    selection: dch_veto,  muv_selection: muv_1,  inputs: {km2event: km2_event } }
+
+- analysis :
+    { type: MuvEff,  name: all_muv2,  folder: all_muv2,  tfile: tfout, 
+    selection: dch_veto,  muv_selection: muv_2,  inputs: {km2event: km2_event } }
 
 ###
 

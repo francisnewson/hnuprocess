@@ -217,7 +217,7 @@
     type: TrackPZ
     shape: rectangles
     points:
-        - [  10, 60, -1800,  500 ]
+        - [  10, 40, -1800,  500 ]
     inputs:
         ogt: bf_st
 

@@ -1,5 +1,6 @@
 scaling:
     - scaling_method:
+        strategy: regions
         name: mc_pos
 
         halo_channels:
@@ -12,50 +13,62 @@ scaling:
         km2_channels:
             - p5.km2.v2.pos
 
-        halo:
-            strategy: m2
-            input_file: data/split_halo_plots/all.split_halo.root
-            plot_path: halo_upper/h_m2m_kmu
 
-            min_mass: -0.3
-            max_mass: -0.1
-
-        km2:
-            strategy: m2
-            input_file: data/split_halo_plots/all.split_halo.root
-            plot_path: halo_upper/h_m2m_kmu
-
-            min_mass: -0.01
-            max_mass:  0.01
-
-    - scaling_method:
-        name: mc_neg
-
-        halo_channels:
-            - p6.data.km.q11t.v2.neg
-
-        data_channels:
-            - p5.data.q11t.v2.neg
-
-        km2_channels:
-            - p5.km2.v2.neg
+        input_file: data/split_halo_plots/all.split_halo.root
+        plot_path: halo_upper/h_m2m_kmu
+        
+        region:
+            min: -0.05
+            max: 0.05
 
         halo:
-            strategy: m2
             input_file: data/split_halo_plots/all.split_halo.root
-            plot_path: halo_upper/h_m2m_kmu
+            #plot_path: halo_upper/h_m2m_kmu
+            plot_path: halo_upper/h_cda
 
-            min_mass: -0.3
-            max_mass: -0.1
+            #min_mass: -0.2
+            #max_mass: -0.05
+            min_mass: 5.5 
+            max_mass: 6.5
 
         km2:
-            strategy: m2
             input_file: data/split_halo_plots/all.split_halo.root
-            plot_path: halo_upper/h_m2m_kmu
+            #plot_path: halo_upper/h_m2m_kmu
+            plot_path: halo_upper/h_cda
 
-            min_mass: -0.01
-            max_mass:  0.01
+            #min_mass: -0.01
+            #max_mass:  0.01
+            min_mass:  2.5
+            max_mass:  3.5
 
+#    - scaling_method:
+#        name: mc_neg
+#
+#        halo_channels:
+#            - p6.data.km.q11t.v2.neg
+#
+#        data_channels:
+#            - p5.data.q11t.v2.neg
+#
+#        km2_channels:
+#            - p5.km2.v2.neg
+#
+#        halo:
+#            strategy: m2
+#            input_file: data/split_halo_plots/all.split_halo.root
+#            plot_path: halo_upper/h_m2m_kmu
+#
+#            min_mass: -0.3
+#            max_mass: -0.1
+#
+#        km2:
+#            strategy: m2
+#            input_file: data/split_halo_plots/all.split_halo.root
+#            plot_path: halo_upper/h_m2m_kmu
+#
+#            min_mass: -0.01
+#            max_mass:  0.01
+#
 weights:
     fid_file: working/halo_plots/fids.dat
 
@@ -67,8 +80,8 @@ mass_windows:
 
 output:
     input_file:  data/split_halo_plots/all.split_halo.root
-    plot_path: halo_upper/h_t
-    rebin: 1
+    plot_path: halo_upper/h_p
+    rebin:  1
 
     data_plot:
         channels:
@@ -79,30 +92,6 @@ output:
 
     stack:
         - item:
-            name: km3_pos
-            scaling: mc_pos
-            type: km3
-            fid_weight: p5.km3.v2.pos
-            channels:
-                - p5.km3.v2.pos
-
-        - item:
-            name: k2pig_pos
-            scaling: mc_pos
-            type: k2pi
-            fid_weight: p5.k2pig.v2.pos
-            channels:
-                - p5.k2pig.v2.pos
-
-        - item:
-            name: k3pi_pos
-            scaling: mc_pos
-            fid_weight: p5.k3pi.v2.pos
-            type: k3pi
-            channels:
-                - p5.k3pi.v2.pos
-
-        - item:
             name: halo_pos
             scaling: mc_pos
             type: halo
@@ -110,15 +99,6 @@ output:
                 - halo_scale
             channels:
                 - p6.data.kless.q11t.v2.pos
-#               - p6.data.km.q11t.v2.pos
-
-        - item:
-            name: k3pi0_pos
-            scaling: mc_pos
-            fid_weight: p5.k3pi0.v2.pos
-            type: k3pi0
-            channels:
-                - p5.k3pi0.v2.pos
 
         - item:
             name: km2_pos
@@ -127,3 +107,40 @@ output:
             type: km2
             channels:
                 - p5.km2.v2.pos
+
+
+
+#       - item:
+#           name: km3_pos
+#           scaling: mc_pos
+#           type: km3
+#           fid_weight: p5.km3.v2.pos
+#           channels:
+#               - p5.km3.v2.pos
+
+#       - item:
+#           name: k2pig_pos
+#           scaling: mc_pos
+#           type: k2pi
+#           fid_weight: p5.k2pig.v2.pos
+#           channels:
+#               - p5.k2pig.v2.pos
+
+#       - item:
+#           name: k3pi_pos
+#           scaling: mc_pos
+#           fid_weight: p5.k3pi.v2.pos
+#           type: k3pi
+#           channels:
+#               - p5.k3pi.v2.pos
+
+#               - p6.data.km.q11t.v2.pos
+
+#       - item:
+#           name: k3pi0_pos
+#           scaling: mc_pos
+#           fid_weight: p5.k3pi0.v2.pos
+#           type: k3pi0
+#           channels:
+#               - p5.k3pi0.v2.pos
+

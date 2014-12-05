@@ -7,6 +7,7 @@
 #include "RecoMuon.hh"
 #include "Km2Plotter.hh"
 #include "Event.hh"
+#include <set>
 #if 0
 /*
  *  __  __             _____  __  __
@@ -28,14 +29,14 @@ namespace fn
 
     class MuvGeom {
         public:
-            MuvGeom( int status );
+            MuvGeom( std::set<int> status );
             void Fill( const fne::RecoMuon& rm, 
                     const SingleRecoTrack& srt,
                     double wgt);
             void Write();
 
         private:
-            int status_;
+            std::set<int> status_;
             TH2D * h_muv_hits_;
             TH2D * h_muv_track_hits_;
             HistStore hs_;
@@ -76,10 +77,15 @@ namespace fn
             MuvGeom muvhits_3_;
             MuvGeom muvhits_4_;
 
+            MuvGeom muvhits_muv1_;
+            MuvGeom muvhits_muv2_;
+
             TEfficiency eff_mom_;
             TEfficiency eff_m2m_;
             TEfficiency eff_z_;
             TEfficiency eff_rmuv1_;
+            TEfficiency eff_x_;
+            TEfficiency eff_y_;
     };
 
     //--------------------------------------------------

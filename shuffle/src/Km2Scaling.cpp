@@ -1,6 +1,7 @@
 #include "Km2Scaling.hh"
 #include "HistExtractor.hh"
 #include "TFile.h"
+#include "TFractionFitter.h"
 #include <boost/filesystem/path.hpp>
 #include <iostream>
 #include <iomanip>
@@ -18,6 +19,95 @@ namespace fn
     {}
 
     void Km2Scaling::compute_scaling()
+    {
+        using std::vector;
+        using std::string;
+
+        std::cout << "Scaling " << get_yaml<string>( scaling_config_, "name" ) << std::endl;
+
+        string scaling_strategy =  get_yaml<string>( scaling_config_, "strategy" );
+        if ( scaling_strategy == "m2" )
+        {
+            m2_scaling();
+        }
+        else if ( scaling_strategy == "regions" )
+        {
+            region_scaling();
+        }
+
+        //Record km2 fiducial weight and flux
+        auto km2_channels = get_yaml<vector<string>>( scaling_config_, "km2_channels" );
+        km2_fid_weight_ = 0;
+        for ( auto km2_channel : km2_channels )
+        {
+            km2_fid_weight_ += fiducial_weights_.at( km2_channel );
+        }
+
+        km2_br_ = brs_.at( "km2" );
+
+
+        std::cerr << "Estimated kaon flux: " << km2_scale_ * km2_fid_weight_ / km2_br_ << std::endl;
+    }
+
+    void Km2Scaling::region_scaling()
+    {
+        using std::vector;
+        using std::string;
+
+
+        //Channel definitions
+        auto halo_channels = get_yaml<vector<string>>( scaling_config_, "halo_channels" );
+        auto data_channels = get_yaml<vector<string>>( scaling_config_, "data_channels" );
+        auto km2_channels = get_yaml<vector<string>>( scaling_config_, "km2_channels" );
+
+        //Plot path
+        path input_file = get_yaml<std::string>( scaling_config_, "input_file" );
+        path plot_path = get_yaml<std::string>( scaling_config_, "plot_path" );
+
+        //regions
+        const YAML::Node region_node = scaling_config_["region"];
+
+        double region_min = region_node["min"].as<double>();
+        double region_max = region_node["max"].as<double>();
+
+        TFile tf( input_file.string().c_str() );
+        RootTFileWrapper rtfw( tf );
+
+        ChannelHistExtractor ce( rtfw );
+        ce.set_post_path( plot_path);
+
+        auto hsummed_halo = get_summed_histogram( 
+                ce, begin( halo_channels ), end( halo_channels ) );
+
+        auto hsummed_data = get_summed_histogram( 
+                ce, begin( data_channels ), end( data_channels ) );
+
+        auto hsummed_km2 = get_summed_histogram( 
+                ce, begin( km2_channels ), end( km2_channels ) );
+
+        TObjArray mc(2);
+        mc.Add( hsummed_halo.get() );
+        mc.Add( hsummed_km2.get() );
+
+        TFractionFitter fit( hsummed_data.get() , &mc );
+        fit.SetRangeX( hsummed_halo->FindBin( region_min), hsummed_halo->FindBin( region_max ) );
+        fit.Fit();
+
+        fit.GetResult( 0, halo_scale_, halo_scale_error_ );
+        fit.GetResult( 1,  km2_scale_,  km2_scale_error_ );
+
+        //absolute scale factor
+        double data_integral = integral( *hsummed_data, region_min, region_max );
+        double halo_integral = integral( *hsummed_halo,region_min, region_max );
+        double km2_integral = integral( *hsummed_km2,region_min, region_max );
+        double extra_scale = data_integral / ( halo_scale_ * halo_integral + km2_scale_* km2_integral );
+        halo_scale_ *= extra_scale;
+        km2_scale_ *= extra_scale;
+        halo_scale_error_ *= extra_scale;
+        km2_scale_error_ *= extra_scale;
+    }
+
+    void Km2Scaling::m2_scaling()
     {
         using std::vector;
         using std::string;
@@ -101,16 +191,6 @@ namespace fn
             km2_scale_error_ = km2_scale_ *
                 ( subtracted_km2_error / subtracted_km2 + 1 / sqrt( km2_km2_integral ) );
 
-            //Record km2 fiducial weight and flux
-            km2_fid_weight_ = 0;
-            for ( auto km2_channel : km2_channels )
-            {
-                km2_fid_weight_ += fiducial_weights_.at( km2_channel );
-            }
-
-            km2_br_ = brs_.at( "km2" );
-
-            std::cerr << "Estimated kaon flux: " << km2_scale_ * km2_fid_weight_ / km2_br_ << std::endl;
         }
     }
 
