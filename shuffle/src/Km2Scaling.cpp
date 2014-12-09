@@ -23,7 +23,7 @@ namespace fn
         using std::vector;
         using std::string;
 
-        std::cout << "Scaling " << get_yaml<string>( scaling_config_, "name" ) << std::endl;
+        std::cout << "Starting " << get_yaml<string>( scaling_config_, "name" ) << std::endl;
 
         string scaling_strategy =  get_yaml<string>( scaling_config_, "strategy" );
         if ( scaling_strategy == "m2" )
@@ -112,7 +112,7 @@ namespace fn
         using std::vector;
         using std::string;
 
-        std::cout << "Scaling " << get_yaml<string>( scaling_config_, "name" ) << std::endl;
+        std::cout << "Calculating scaling: " << get_yaml<string>( scaling_config_, "name" ) << std::endl;
 
         //Channel definitions
         auto halo_channels = get_yaml<vector<string>>( scaling_config_, "halo_channels" );
@@ -176,6 +176,7 @@ namespace fn
             auto hsummed_km2 = get_summed_histogram( 
                     ce_km2, begin( km2_channels ), end( km2_channels ) );
 
+
             //Do integrals
             double m2_min_km2 = get_yaml<double>( km2_node, "min_mass" );
             double m2_max_km2 = get_yaml<double>( km2_node, "max_mass" );
@@ -183,6 +184,10 @@ namespace fn
             double km2_halo_integral =  integral( *hsummed_halo, m2_min_km2, m2_max_km2 );
             double km2_data_integral =  integral( *hsummed_data, m2_min_km2, m2_max_km2 );
             double km2_km2_integral =  integral( *hsummed_km2, m2_min_km2, m2_max_km2 );
+
+            std::cout << "Halo integral: " << km2_halo_integral << std::endl;
+            std::cout << "Data integral: " << km2_data_integral << std::endl;
+            std::cout << "Km2  integral: " << km2_km2_integral << std::endl;
 
             double subtracted_km2 = km2_data_integral -  halo_scale_ * km2_halo_integral ;
             double subtracted_km2_error = std::sqrt( km2_data_integral + km2_halo_integral );
