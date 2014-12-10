@@ -29,7 +29,7 @@ namespace fn
 
     class MuvGeom {
         public:
-            MuvGeom( std::set<int> status );
+            MuvGeom( std::set<int> status, double muv_plane );
             void Fill( const fne::RecoMuon& rm, 
                     const SingleRecoTrack& srt,
                     double wgt);
@@ -39,6 +39,7 @@ namespace fn
             std::set<int> status_;
             TH2D * h_muv_hits_;
             TH2D * h_muv_track_hits_;
+            double muv_plane_;
             HistStore hs_;
     };
 
@@ -50,6 +51,7 @@ namespace fn
         public:
             MuvEff( const Selection& sel, const Selection& muv_selection,
                     const Km2Event& km2_event, const fne::Event * e,
+                    double muv_plane,
                     TFile& tfile, std::string folder);
 
             void end_processing();
@@ -64,6 +66,8 @@ namespace fn
             const Selection& muv_selection_;
             const Km2Event& km2e_;
             const fne::Event * e_;
+
+            double muv_plane_;
 
             TFile& tfile_;
             std::string folder_;

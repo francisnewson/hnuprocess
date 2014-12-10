@@ -42,7 +42,10 @@ namespace na62const
     constexpr double zMagnet = 10929.3;
     constexpr double zDch4 = 11888.0;
 
-    constexpr double zMuv1 = 12740.0;
+    //This is wrong in the ComPACT database
+    //constexpr double zMuv1 = 12740.0;
+    
+    constexpr double zMuv1 = 12778.0; //correct value from KM
     constexpr double zMuv2 = 12902.8;
     constexpr double zMuv3 = 13012.0;
 

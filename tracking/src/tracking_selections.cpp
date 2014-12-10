@@ -163,6 +163,139 @@ namespace fn
 
     //--------------------------------------------------
 
+    REG_DEF_SUB( TrackXAcceptance);
+
+    TrackXAcceptance::TrackXAcceptance(const SingleTrack& st, 
+            track_section ts, double z, 
+            double minX, double maxX )
+        :st_( st), ts_( ts), z_( z),
+        min_x_( minX), max_x_( maxX){}
+
+    bool TrackXAcceptance::do_check() const
+    {
+        const SingleRecoTrack& srt = st_.get_single_track();
+        if ( ts_ == track_section::us )
+        {
+            zpoint_ = srt.extrapolate_us( z_ );
+        }
+        else if ( ts_ == track_section::ds )
+        {
+            zpoint_ = srt.extrapolate_ds( z_ );
+        }
+        else if ( ts_ == track_section::bf )
+        {
+            zpoint_ = srt.extrapolate_bf( z_ );
+        }
+
+        double x = zpoint_.X();
+
+        return ( ( x > min_x_) && x < max_x_ );
+    }
+
+    template<>
+        Subscriber * create_subscriber<TrackXAcceptance>
+        (YAML::Node& instruct, RecoFactory& rf )
+        {
+            SingleTrack * st = get_single_track( instruct, rf );
+            std::string s_ts= instruct["track_section"].as<std::string>();
+
+            TrackXAcceptance::track_section ts;
+
+            if ( s_ts == "us" || s_ts == "upstream" )
+            {
+                ts = TrackXAcceptance::track_section::us;
+            }
+            else if ( s_ts == "ds" || s_ts == "downstream" )
+            {
+                ts = TrackXAcceptance::track_section::ds;
+            }
+            else if ( s_ts == "bf" || s_ts == "BlueField" )
+            {
+                ts = TrackXAcceptance::track_section::bf;
+            }
+            else
+            {
+                throw std::runtime_error(
+                        "Uknown track_section: " + s_ts );
+            }
+
+            double z = instruct["z"].as<double>();
+            double min_x = instruct["min_x"].as<double>();
+            double max_x = instruct["max_x"].as<double>();
+
+            return new TrackXAcceptance( *st, ts, z, min_x, max_x );
+
+        }
+
+//--------------------------------------------------
+
+
+    REG_DEF_SUB( TrackYAcceptance);
+
+    TrackYAcceptance::TrackYAcceptance(const SingleTrack& st, 
+            track_section ts, double z, 
+            double minY, double maxY )
+        :st_( st), ts_( ts), z_( z),
+        min_y_( minY), max_y_( maxY){}
+
+    bool TrackYAcceptance::do_check() const
+    {
+        const SingleRecoTrack& srt = st_.get_single_track();
+        if ( ts_ == track_section::us )
+        {
+            zpoint_ = srt.extrapolate_us( z_ );
+        }
+        else if ( ts_ == track_section::ds )
+        {
+            zpoint_ = srt.extrapolate_ds( z_ );
+        }
+        else if ( ts_ == track_section::bf )
+        {
+            zpoint_ = srt.extrapolate_bf( z_ );
+        }
+
+        double y = zpoint_.Y();
+
+        return ( ( y > min_y_) && y < max_y_ );
+    }
+
+    template<>
+        Subscriber * create_subscriber<TrackYAcceptance>
+        (YAML::Node& instruct, RecoFactory& rf )
+        {
+            SingleTrack * st = get_single_track( instruct, rf );
+            std::string s_ts= instruct["track_section"].as<std::string>();
+
+            TrackYAcceptance::track_section ts;
+
+            if ( s_ts == "us" || s_ts == "upstream" )
+            {
+                ts = TrackYAcceptance::track_section::us;
+            }
+            else if ( s_ts == "ds" || s_ts == "downstream" )
+            {
+                ts = TrackYAcceptance::track_section::ds;
+            }
+            else if ( s_ts == "bf" || s_ts == "BlueField" )
+            {
+                ts = TrackYAcceptance::track_section::bf;
+            }
+            else
+            {
+                throw std::runtime_error(
+                        "Uknown track_section: " + s_ts );
+            }
+
+            double z = instruct["z"].as<double>();
+            double min_y = instruct["min_y"].as<double>();
+            double max_y = instruct["max_y"].as<double>();
+
+            return new TrackYAcceptance( *st, ts, z, min_y, max_y );
+
+        }
+
+    //--------------------------------------------------
+
     REG_DEF_SUB( TrackPZ);
 
     TrackPZ::TrackPZ( const SingleTrack& st,

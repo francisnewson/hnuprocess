@@ -109,8 +109,61 @@ namespace fn
         Subscriber * create_subscriber<TrackRadialAcceptance>
         (YAML::Node& instruct, RecoFactory& rf );
 
+
+
     //--------------------------------------------------
 
+    class TrackXAcceptance : public CachedSelection
+    {
+        public:
+            enum class track_section { us, ds, bf };
+
+            TrackXAcceptance( const SingleTrack& st , track_section ts,
+                    double z, double minX, double maxX );
+
+        private:
+            bool do_check() const;
+            const SingleTrack& st_;
+            mutable TVector3 zpoint_;
+            track_section ts_;
+            double z_;
+            double min_x_;
+            double max_x_;
+
+            REG_DEC_SUB( TrackXAcceptance);
+    };
+
+    template<>
+        Subscriber * create_subscriber<TrackXAcceptance>
+        (YAML::Node& instruct, RecoFactory& rf );
+
+    //--------------------------------------------------
+
+    class TrackYAcceptance : public CachedSelection
+    {
+        public:
+            enum class track_section { us, ds, bf };
+
+            TrackYAcceptance( const SingleTrack& st , track_section ts,
+                    double z, double minY, double maxY );
+
+        private:
+            bool do_check() const;
+            const SingleTrack& st_;
+            mutable TVector3 zpoint_;
+            track_section ts_;
+            double z_;
+            double min_y_;
+            double max_y_;
+
+            REG_DEC_SUB( TrackYAcceptance);
+    };
+
+    template<>
+        Subscriber * create_subscriber<TrackYAcceptance>
+        (YAML::Node& instruct, RecoFactory& rf );
+
+    //--------------------------------------------------
     class TrackPZ : public CachedSelection
     {
         public:
@@ -194,8 +247,8 @@ namespace fn
         Subscriber * create_subscriber<TrackVertexZ>
         (YAML::Node& instruct, RecoFactory& rf );
 
-
     //--------------------------------------------------
+    
     class TrackTime : public CachedSelection
     {
 

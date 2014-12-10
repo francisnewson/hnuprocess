@@ -266,7 +266,7 @@
     name: muv1_radius
     type: TrackRadialAcceptance
     track_section: downstream
-    z: 12740.0 #zmuv1
+    z: 12778.0 #zmuv1
     inner: 22.0
     outer: 200
     inputs:
@@ -314,6 +314,26 @@
         - muv1_radius
 
 - selection:
+    name: muv1_x_left
+    type: TrackXAcceptance
+    track_section: downstream
+    z: 12778.0 #zmuv1
+    min_x: -75
+    max_x: -50
+    inputs:
+        ogt: bf_st
+
+- selection:
+    name: muv2_y_top
+    type: TrackYAcceptance
+    track_section: downstream
+    z: 12902.8 #zmuv2
+    min_y: 50
+    max_y: 75
+    inputs:
+        ogt: bf_st
+
+- selection:
     { name: signal_rk_selection, type: CompositeSelection, children: [ base_rk_selection,  rk_cda ] }
 
 - selection:
@@ -324,6 +344,12 @@
 
 - selection:
     { name:  rk_eop_peak, type: CompositeSelection, children: [ signal_rk_selection , rk_km2_eop , km2_peak_m2 ] }
+
+- selection:
+    { name:  rk_eop_peak_x_cut, type: CompositeSelection, children: [ signal_rk_selection , rk_km2_eop , km2_peak_m2, muv1_x_left ] }
+
+- selection:
+    { name:  rk_eop_peak_y_cut, type: CompositeSelection, children: [ signal_rk_selection , rk_km2_eop , km2_peak_m2, muv2_y_top ] }
 
 - selection:
     { name: rk_halo, type: CompositeSelection, children: [ base_rk_selection,  halo_cda, rk_km2_eop ] }
@@ -365,12 +391,12 @@
 ###
 
 - analysis :
-    { type: MuvEff,  name: raw_muv,  folder: raw_muv,  tfile: tfout, 
+    { type: MuvEff,  name: raw_muv,  folder: raw_muv,  tfile: tfout, muv_plane: 12778, #zmuv1
     selection: raw_sel,  muv_selection: muv_12,  inputs: {km2event: km2_event } }
 
 
 - analysis :
-    { type: MuvEff,  name: muv_eff_signal,  folder: muv_eff_signal,  tfile: tfout, 
+    { type: MuvEff,  name: muv_eff_signal,  folder: muv_eff_signal,  tfile: tfout, muv_plane: 12778, #zmuv1
     selection: signal_rk_selection,  muv_selection: muv_12,  inputs: {km2event: km2_event } }
 
 - analysis :
@@ -380,7 +406,7 @@
 ###
 
 - analysis :
-    { type: MuvEff,  name: muv_eff_peak,  folder: muv_eff_peak,  tfile: tfout, 
+    { type: MuvEff,  name: muv_eff_peak,  folder: muv_eff_peak,  tfile: tfout, muv_plane: 12778, #zmuv1
     selection: rk_peak,  muv_selection: muv_12,  inputs: {km2event: km2_event } }
 
 - analysis :
@@ -390,42 +416,42 @@
 ###
 
 - analysis :
-    { type: MuvEff,  name: muv_eff_eop,  folder: muv_eff_eop,  tfile: tfout, 
+    { type: MuvEff,  name: muv_eff_eop,  folder: muv_eff_eop,  tfile: tfout, muv_plane: 12778, #zmuv1
     selection: rk_eop,  muv_selection: muv_12,  inputs: {km2event: km2_event } }
 
 - analysis :
-    { type: Km2ClusterPlotter,  name: cluster_eop,  folder: muv_eff_eop,  tfile: tfout, 
+    { type: Km2ClusterPlotter,  name: cluster_eop,  folder: muv_eff_eop,  tfile: tfout, muv_plane: 12778, #zmuv1
     selection: rk_eop,  inputs: {km2event: km2_event, km2clusters: rk_km2_clusters, ClusterCorrector: cluster_corrector } } 
 
         
 ###
 
 - analysis :
-    { type: MuvEff,  name: muv_eff_eop_peak,  folder: muv_eff_eop_peak,  tfile: tfout, 
+    { type: MuvEff,  name: muv_eff_eop_peak,  folder: muv_eff_eop_peak,  tfile: tfout, muv_plane: 12778, #zmuv1
     selection: rk_eop_peak,  muv_selection: muv_12,  inputs: {km2event: km2_event } }
 
 - analysis :
-    { type: MuvEff,  name: muv_eff_eop_peak_1_or_2,  folder: muv_eff_eop_peak_1_or_2,  tfile: tfout, 
+    { type: MuvEff,  name: muv_eff_eop_peak_1_or_2,  folder: muv_eff_eop_peak_1_or_2,  tfile: tfout, muv_plane: 12778, #zmuv1
     selection: rk_eop_peak,  muv_selection: muv_1_or_2,  inputs: {km2event: km2_event } }
 
 - analysis :
-    { type: MuvEff,  name: muv_eff_eop_peak_1,  folder: muv_eff_eop_peak_1,  tfile: tfout, 
-    selection: rk_eop_peak,  muv_selection: muv_1,  inputs: {km2event: km2_event } }
+    { type: MuvEff,  name: muv_eff_eop_peak_1,  folder: muv_eff_eop_peak_1,  tfile: tfout, muv_plane: 12778, #zmuv1
+    selection: rk_eop_peak_x_cut,  muv_selection: muv_1,  inputs: {km2event: km2_event } }
 
 - analysis :
-    { type: MuvEff,  name: muv_eff_eop_peak_2,  folder: muv_eff_eop_peak_2,  tfile: tfout, 
-    selection: rk_eop_peak,  muv_selection: muv_2,  inputs: {km2event: km2_event } }
+    { type: MuvEff,  name: muv_eff_eop_peak_2,  folder: muv_eff_eop_peak_2,  tfile: tfout, muv_plane: 12902.8, #zmuv2
+    selection: rk_eop_peak_y_cut,  muv_selection: muv_2,  inputs: {km2event: km2_event } }
 
 - analysis :
-    { type: Km2ClusterPlotter,  name: cluster_eop_peak,  folder: muv_eff_eop_peak,  tfile: tfout, 
+    { type: Km2ClusterPlotter,  name: cluster_eop_peak,  folder: muv_eff_eop_peak,  tfile: tfout, muv_plane: 12778, #zmuv1
     selection: rk_eop_peak,  inputs: {km2event: km2_event, km2clusters: rk_km2_clusters,ClusterCorrector: cluster_corrector } } 
 
 - analysis :
-    { type: MuvEff,  name: all_muv1,  folder: all_muv1,  tfile: tfout, 
+    { type: MuvEff,  name: all_muv1,  folder: all_muv1,  tfile: tfout, muv_plane: 12778, #zmuv1
     selection: dch_veto,  muv_selection: muv_1,  inputs: {km2event: km2_event } }
 
 - analysis :
-    { type: MuvEff,  name: all_muv2,  folder: all_muv2,  tfile: tfout, 
+    { type: MuvEff,  name: all_muv2,  folder: all_muv2,  tfile: tfout, muv_plane: 12902.8, #zmuv2
     selection: dch_veto,  muv_selection: muv_2,  inputs: {km2event: km2_event } }
 
 ###

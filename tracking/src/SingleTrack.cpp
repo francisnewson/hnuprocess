@@ -519,8 +519,11 @@ namespace fn
     void TrackPowerScatterer::set_angle_params
         ( double cutoff, double frequency)
         {
-            angle_function_ = TF1( "f_angle", "tanh( pow(x/[0],6) )*pow(x,-4)", -0.01, 0.01 );
-            angle_function_.SetParameter( 0 ,cutoff );
+            angle_function_ = TF1( "f_angle", "tanh( pow(x*[0],4) )*pow(x,-2)",
+                    -5*cutoff, 5*cutoff );
+
+            double xscale = 1.021;
+            angle_function_.SetParameter( 0 , xscale/cutoff );
             angle_function_.SetNpx( 200 );
             angle_frequency_ = frequency;
         }
@@ -529,7 +532,10 @@ namespace fn
         ( double cutoff, double frequency)
         {
             //mom_function_ = TF1( "f_mom", "pow(x,-4)", cutoff, 1 );
-            mom_function_ = TF1( "f_mom", "tanh( pow(x/[0],6) )*pow(x,-4)", -0.01, 0.01 );
+            mom_function_ = TF1( "f_mom", "tanh( pow(x/[0],4) )*pow(x,-2)",
+                    -5*cutoff, 5*cutoff);
+
+            double xscale = 1.021;
             mom_function_.SetParameter(0, cutoff );
             mom_function_.SetNpx( 200 );
             mom_frequency_ = frequency;

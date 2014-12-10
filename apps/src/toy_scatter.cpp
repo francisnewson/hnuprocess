@@ -5,45 +5,36 @@
 #include "Counter.hh"
 #include <memory>
 
-std::unique_ptr<TF1> quadratic_scattering( std::string name, double magnitude, double peak )
+std::unique_ptr<TF1> quadratic_scattering( std::string name, double peak )
 {
     //Function tends to magnitude/x^2
     //Function peaks at peak
 
     std::unique_ptr<TF1> result{ new TF1
-        ( name.c_str(), "[0]/x**2 * tanh( pow( x*[1], 4 ) )", -5*peak, 5*peak )  };
-
+        ( name.c_str(), "1/x**2 * tanh( pow( x*[0], 4 ) )", -5*peak, 5*peak )  };
 
     //Magic number to get peak in the right place
     double xscale = 1.021;
-
-    double p0 = magnitude;
-    double p1 = xscale / peak;
+    double p0 = xscale / peak;
 
     result->SetParameter( 0, p0 );
-    result->SetParameter( 1, p1 );
-
     return result;
 }
 
-std::unique_ptr<TF1> quartic_scattering( std::string name, double magnitude, double peak )
+std::unique_ptr<TF1> quartic_scattering( std::string name, double peak )
 {
     //Function tends to magnitude/x^2
     //Function peaks at peak
 
     std::unique_ptr<TF1> result{ new TF1
-        ( name.c_str(), "[0]/x**4 * tanh( pow( x*[1], 6 ) )", -5*peak, 5*peak )  };
+        ( name.c_str(), "1/x**4 * tanh( pow( x*[0], 6 ) )", -5*peak, 5*peak )  };
 
 
     //Magic number to get peak in the right place
     double xscale = 0.965;
-
-    double p0 = magnitude;
-    double p1 = xscale / peak;
+    double p0 = xscale / peak;
 
     result->SetParameter( 0, p0 );
-    result->SetParameter( 1, p1 );
-
     return result;
 }
 
@@ -56,7 +47,9 @@ int main( int argc, char * argv[] )
         ( "help,h", "Display this help message")
         ( "nevents,n", po::value<int>(), "Number of events" )
         ( "width,w", po::value<double>(), "Width parameter")
-        ( "rate,r", po::value<double>(), "Rate parameter");
+        ( "tail,t", po::value<double>(), "Tail scale")
+        ( "gaus,g", po::value<double>(), "Gaus scale")
+        ( "sigma,s", po::value<double>(), "Gaussian width");
 
     po::options_description desc("Allowed options");
     desc.add( general );
@@ -65,39 +58,74 @@ int main( int argc, char * argv[] )
     po::variables_map vm;
     po::store( po::parse_command_line(argc, argv, desc), vm);
 
-    int n_events = 10000000;
+    std::cout 
+        << "--------------------------------------------------\n"
+        << "-             TOY MC SCATTERING                  -\n"
+        << "--------------------------------------------------\n"
+        << std::endl;
 
+    if ( vm.count( "help" ) )
+    {
+        std::cout << desc << std::endl;
+        return(0);
+    }
+
+    int n_events = 10000000;
     if ( vm.count( "nevents" ) )
     {
         n_events = vm["nevents"].as<int>();
     }
+    std::cout << "N events: " << n_events << std::endl;
 
-    double width_param = 0.006;
+    double sigma = 1.5e-4;
+    if ( vm.count("sigma") )
+    {
+        sigma = vm["sigma"].as<double>();
+    }
+    std::cout << "Gaussian sigma: " << sigma << std::endl;
+
+
+    double width_param = 4 * sigma;
     if ( vm.count("width") )
     {
         width_param = vm["width"].as<double>();
     }
+    std::cout << "Width param: " << width_param << std::endl;
 
-    double rate = 0.001;
-    if ( vm.count("rate") )
+    double tail = 0.01;
+    if ( vm.count("tail") )
     {
-        rate = vm["rate"].as<double>();
+        tail = vm["tail"].as<double>();
     }
+    std::cout << "Tail rate param: " << tail << std::endl;
+
+    double gaus_scale = 1.00;
+    if ( vm.count("gaus") )
+    {
+        gaus_scale = vm["gaus"].as<double>();
+    }
+
+    std::cout << "Gaus rate param: " << gaus_scale << std::endl;
 
     HistStore hs;
 
-    std::cout << "Hello, world!" << std::endl;
-
-
-    double sigma = 1.5e-4;
-    TF1 fgaus("fgaus", "[0]*exp(-0.5*((x-[1])/[2])**2)", -0.005, 0.005 );
+    //Gaussian
+    TF1 fgaus("fgaus", "exp(-0.5*((x/[0])**2))", -10*sigma, 10*sigma );
     fgaus.SetNpx( 2000 );
-    fgaus.SetParameters( 1, 0, sigma );
+    fgaus.SetParameter(  0, sigma );
+    double g_integral = fgaus.Integral( 0, 10*sigma );
+    std::cout << "Predicted gaussian integral: " << 0.5 * std::sqrt(2 * 3.1415) * sigma << std::endl;
+    std::cout << "Computed gaussian integral: " << g_integral << std::endl;
 
-    //TF1 ftail("ftail", "tanh( pow(x/[0], 6 ) ) * pow(x,-4) ", -0.005, 0.005 );
-    TF1 ftail("ftail", "tanh( pow(x/[0], 4 ) ) * pow(x,-2) ", -0.005, 0.005 );
-    ftail.SetNpx( 2000 );
-    ftail.SetParameter( 0, 3.85*sigma );
+    //Tail
+    auto ftail = quadratic_scattering( "ftail", width_param );
+    ftail->SetNpx( 2000 );
+    double t_integral = ftail->Integral( 0, 10 * width_param );
+    std::cout << "Computed tail integral: " << t_integral << std::endl;
+
+    //rate
+    double rate = (tail*t_integral) / (gaus_scale *g_integral);
+    std::cout << "Scattering rate: " << rate << std::endl;
 
     std::vector<double> rates;
     std::vector<TH1D*> hcombos;
@@ -105,7 +133,7 @@ int main( int argc, char * argv[] )
 
     for ( int i = 0; i != 10; ++i )
     {
-        double ratio = 0.2 * i * 0.009;
+        double ratio = 0.2 * i * rate;
         rates.push_back( ratio );
         hcombos.push_back( hs.MakeTH1D( Form( "hcombo_%d", i ), Form( "COMBO, %f", ratio ),
                     1000, -0.01, 0.01, "x" ) );
@@ -115,18 +143,10 @@ int main( int argc, char * argv[] )
 
         htails.back()->SetLineColor( kGreen+2 );
         hcombos.back()->SetLineColor( kRed+2 );
-
     }
 
     auto hgaus = hs.MakeTH1D( "hgaus", "Gaussian", 1000, -0.01, 0.01, "x" );
     hgaus->SetLineColor( kBlue+2 );
-
-#if 0
-    auto htail = hs.MakeTH1D( "htail", "Tail", 1000, -0.01, 0.01, "x" );
-    htail->SetLineColor( kGreen+2 );
-    auto hcombo = hs.MakeTH1D( "hcombo", "Combo", 1000, -0.01, 0.01, "x" );
-    hcombo->SetLineColor( kRed+2 );
-#endif
 
     logger slg;
     Counter c(  slg, n_events );
@@ -134,14 +154,13 @@ int main( int argc, char * argv[] )
     for ( unsigned int i = 0 ; i != n_events ; ++i )
     {
         c.new_event();
-        //std::cout<< "Gaus" << std::endl;
         double orig = fgaus.GetRandom();
         hgaus->Fill( orig );
 
         for (  int i = 0 ; i != 10 ; ++i )
         {
             //std::cout<< "Shift" << std::endl;
-            double shift = ftail.GetRandom();
+            double shift = ftail->GetRandom();
             htails[i]->Fill( shift );
 
             if ( gRandom->Uniform() < rates[i] )

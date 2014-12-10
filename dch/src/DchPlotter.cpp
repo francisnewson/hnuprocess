@@ -185,11 +185,11 @@ namespace fn
 
         for ( int i = 0 ; i != 5 ; ++ i )
         {
-            double angle_cutoff = 0.0005;
-            double angle_frequency = 0.002 * i;
+            double angle_cutoff = 0.0006;
+            double angle_frequency = 0.2 * i * 0.015;
 
-            double mom_cutoff = 0.05;
-            double mom_frequency = 0.1 * i;
+            double mom_cutoff = 0.06;
+            double mom_frequency = 0.2 * i * 0.015;
 
             scatterers_.push_back( TrackPowerScatterer( 
                         angle_cutoff, angle_frequency,

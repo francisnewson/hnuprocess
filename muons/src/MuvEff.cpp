@@ -3,6 +3,7 @@
 #include "Km2Reco.hh"
 #include "yaml_help.hh"
 #include "NA62Constants.hh"
+#include "TNamed.h"
 #include <string>
 
 namespace fn
@@ -11,8 +12,8 @@ namespace fn
 
     //--------------------------------------------------
 
-    MuvGeom::MuvGeom( std::set<int> status)
-        :status_( status )
+    MuvGeom::MuvGeom( std::set<int> status, double muv_plane)
+        :status_( status ), muv_plane_( muv_plane)
     {
         std::string s_status ="";
         auto n = status.begin();
@@ -40,32 +41,42 @@ namespace fn
 
         if ( status_.find(rm.status) == status_.end() ) { return; }
 
-        TVector3 extrap = srt.extrapolate_ds( na62const::zMuv1 );
+        TVector3 extrap = srt.extrapolate_ds( muv_plane_);
         h_muv_hits_->Fill( rm.x, rm.y, wgt );
         h_muv_track_hits_->Fill( extrap.X(), extrap.Y(), wgt );
+        //std::cout << "Fill extrap x: " << extrap.X() << std::endl;
     }
 
     void MuvGeom::Write()
     {
         hs_.Write();
+        TNamed s_muv_plane( "muv_plane",  Form( "%f", muv_plane_ ) );
+        s_muv_plane.Write();
     }
 
     //--------------------------------------------------
 
     MuvEff::MuvEff( const Selection& sel, const Selection& muv_selection,
             const Km2Event& km2_event, const fne::Event * e,
+            double muv_plane,
             TFile& tfile, std::string folder)
         :Analysis( sel), muv_selection_( muv_selection),
-        km2e_( km2_event), e_( e ), tfile_( tfile), folder_( folder),
-        muvhits_1_( {1} ), muvhits_2_( {2} ),
-        muvhits_3_( {3} ), muvhits_4_( {4} ),
-        muvhits_muv1_( {1,2,4} ), muvhits_muv2_( { 1,2,3 } ),
+        km2e_( km2_event), e_( e ), muv_plane_( muv_plane ),
+        tfile_( tfile), folder_( folder),
+        //Statuses 1 to 4 use muv_plane_parameter
+        muvhits_1_( {1}, muv_plane ), muvhits_2_( {2}, muv_plane ),
+        muvhits_3_( {3}, muv_plane ), muvhits_4_( {4}, muv_plane ),
+
+        //Statues for MUV1 and MUV2 use approprate z
+        muvhits_muv1_( {1,2,4}, na62const::zMuv1 ),
+        muvhits_muv2_( { 1,2,3 }, na62const::zMuv2 ),
+
         eff_mom_( "eff_mom", "Eff( muon momentum)", 100, 0, 100 ),
         eff_m2m_( "eff_m2m", "Eff( muon m^{2}_{miss})", 2000, -0.2, 0.2 ),
         eff_z_( "eff_z", "Eff(z vertex)", 120, -2000, 10000 ),
         eff_rmuv1_( "eff_rmuv1", "Eff(r muv 1)", 200, 0, 200 ),
-        eff_x_( "eff_x", "Eff(x at MUV 1)", 200, -200 , 200 ),
-        eff_y_( "eff_y", "Eff(y at MUV 1)", 200, -200 , 200 )
+        eff_x_( "eff_x", "Eff(x at MUV Plane)", 200, -200 , 200 ),
+        eff_y_( "eff_y", "Eff(y at MUV Plane)", 200, -200 , 200 )
         {
             eff_mom_.SetDirectory( 0 );
             eff_m2m_.SetDirectory( 0 );
@@ -95,10 +106,12 @@ namespace fn
             fail_plots_.Fill( km2re, weight );
         }
 
-        TVector3 extrap = srt->extrapolate_ds( na62const::zMuv1 );
+        TVector3 extrap = srt->extrapolate_ds( muv_plane_);
         double r_muv1 = extrap.Perp();
         double x_muv1 = extrap.X();
         double y_muv1 = extrap.Y();
+
+        //std::cout << "extrap x: " << x_muv1 << std::endl;
 
         eff_mom_.Fill( pass, km2re.get_muon_mom() );
         eff_m2m_.Fill( pass, km2re.get_m2miss() );
@@ -175,7 +188,9 @@ namespace fn
 
             const fne::Event * event = rf.get_event_ptr();
 
-            return new MuvEff( *sel, *muv_sel, *km2_event, event, tfile, folder);
+            double muv_plane = get_yaml<double>( instruct, "muv_plane" );
+
+            return new MuvEff( *sel, *muv_sel, *km2_event, event, muv_plane,  tfile, folder);
         }
 
 
