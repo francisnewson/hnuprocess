@@ -25,7 +25,6 @@ namespace fn
             ++n;
         }
 
-
         h_muv_hits_ = hs_.MakeTH2D( Form( "h_muv_hits_%s", s_status.c_str()), 
                 Form( "MUV hits with status %s",s_status.c_str() ),
                 150, -150 , 150, "X cm", 150, -150 , 150, "Y cm" );

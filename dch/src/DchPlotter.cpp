@@ -183,13 +183,13 @@ namespace fn
         }
 
 
-        for ( int i = 0 ; i != 5 ; ++ i )
+        for ( int i = 0 ; i != 4 ; ++ i )
         {
-            double angle_cutoff = 0.0006;
-            double angle_frequency = 0.2 * i * 0.015;
+            double angle_cutoff = 0.002;
+            double angle_frequency = 0.5 * i * 0.018;
 
-            double mom_cutoff = 0.06;
-            double mom_frequency = 0.2 * i * 0.015;
+            double mom_cutoff = 0.2;
+            double mom_frequency = 0.5 * i * 0.005;
 
             scatterers_.push_back( TrackPowerScatterer( 
                         angle_cutoff, angle_frequency,
@@ -212,7 +212,7 @@ namespace fn
             event_plots_.plot_data( k2pi_data_, *lkr_data_ , k2pi_data_.raw_dch, 
                     k2pi_data_.weight, true, &k2pi_data_.mc  );
 
-            for ( int i  = 0 ; i != 5 ; ++i )
+            for ( int i  = 0 ; i != 4 ; ++i )
             {
                 K2piDchData mod_dch = k2pi_data_.raw_dch;
                 scatterers_[i].scatter_track( k2pi_data_.compact_number, 

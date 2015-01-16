@@ -520,7 +520,7 @@ namespace fn
         ( double cutoff, double frequency)
         {
             angle_function_ = TF1( "f_angle", "tanh( pow(x*[0],4) )*pow(x,-2)",
-                    -5*cutoff, 5*cutoff );
+                    -7*cutoff, 7*cutoff );
 
             double xscale = 1.021;
             angle_function_.SetParameter( 0 , xscale/cutoff );
@@ -533,7 +533,7 @@ namespace fn
         {
             //mom_function_ = TF1( "f_mom", "pow(x,-4)", cutoff, 1 );
             mom_function_ = TF1( "f_mom", "tanh( pow(x/[0],4) )*pow(x,-2)",
-                    -5*cutoff, 5*cutoff);
+                    -7*cutoff, 7*cutoff);
 
             double xscale = 1.021;
             mom_function_.SetParameter(0, cutoff );

@@ -70,11 +70,12 @@ mass_windows:
 output:
     input_file:  data/km2_full/all.km2_full.root
     plot_path: full_km2/h_m2m_kmu
-    rebin: 10
+    rebin: 1
 
     data_plot:
         channels:
             - p5.data.q11t.v2.pos
+            - p5.data.q11t.v2.neg
         do_blind: true
         min_blind: 0.09
         max_blind: 0.3
@@ -89,6 +90,14 @@ output:
                 - p5.km3.v2.pos
 
         - item:
+            name: km3_neg
+            scaling: mc_neg
+            type: km3
+            fid_weight: p5.km3.v2.neg
+            channels:
+                - p5.km3.v2.neg
+
+        - item:
             name: k2pig_pos
             scaling: mc_pos
             type: k2pi
@@ -97,12 +106,28 @@ output:
                 - p5.k2pig.v2.pos
 
         - item:
+            name: k2pig_neg
+            scaling: mc_neg
+            type: k2pi
+            fid_weight: p5.k2pig.v2.neg
+            channels:
+                - p5.k2pig.v2.neg
+
+        - item:
             name: k3pi_pos
             scaling: mc_pos
             fid_weight: p5.k3pi.v2.pos
             type: k3pi
             channels:
                 - p5.k3pi.v2.pos
+
+        - item:
+            name: k3pi_neg
+            scaling: mc_neg
+            fid_weight: p5.k3pi.v2.neg
+            type: k3pi
+            channels:
+                - p5.k3pi.v2.neg
 
         - item:
             name: halo_pos
@@ -115,6 +140,15 @@ output:
                 - p6.data.km.q11t.v2.pos
 
         - item:
+            name: halo_neg
+            scaling: mc_neg
+            type: halo
+            errors:
+                - halo_scale
+            channels:
+                - p6.data.km.q11t.v2.neg
+
+        - item:
             name: k3pi0_pos
             scaling: mc_pos
             fid_weight: p5.k3pi0.v2.pos
@@ -123,9 +157,25 @@ output:
                 - p5.k3pi0.v2.pos
 
         - item:
+            name: k3pi0_neg
+            scaling: mc_neg
+            fid_weight: p5.k3pi0.v2.neg
+            type: k3pi0
+            channels:
+                - p5.k3pi0.v2.neg
+
+        - item:
             name: km2_pos
             scaling: mc_pos
             fid_weight: p5.km2.v2.pos
             type: km2
             channels:
                 - p5.km2.v2.pos
+
+        - item:
+            name: km2_neg
+            scaling: mc_neg
+            fid_weight: p5.km2.v2.neg
+            type: km2
+            channels:
+                - p5.km2.v2.neg
