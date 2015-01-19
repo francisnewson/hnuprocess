@@ -23,7 +23,7 @@ env_default = Environment()
 
 env = env_default.Clone()
 env['variantDir'] = 'build_O3'
-env.Append( CPPFLAGS = ['-O3'] )
+env.Append( CPPFLAGS = ['-O3', '-ggdb'] )
 VariantDir(env['variantDir'], '.' )
 SConscript( os.path.join( env['variantDir'], 'SConscript' ),
         exports = 'env')
