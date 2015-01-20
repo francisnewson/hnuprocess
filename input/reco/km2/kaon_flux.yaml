@@ -300,7 +300,7 @@
     type: CompositeSelection
     children:
         - rk_selection
-        - rk_cda
+        - fix_m2_002
 
 ###################################################
 # ANALYSES
@@ -314,6 +314,13 @@
     name: tfout
     type: tfile
     filename: km2_plots.root
+
+- analysis:
+    name: burst_count
+    type: BurstCount
+    tfile: tfout
+    folder: burstcount
+    selection: rk_selection
 
 - analysis:
     type: Km2Plotter
