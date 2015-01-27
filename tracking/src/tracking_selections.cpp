@@ -169,7 +169,8 @@ namespace fn
             track_section ts, double z, 
             double minX, double maxX )
         :st_( st), ts_( ts), z_( z),
-        min_x_( minX), max_x_( maxX){}
+        min_x_( minX), max_x_( maxX)
+    { }
 
     bool TrackXAcceptance::do_check() const
     {
@@ -227,7 +228,7 @@ namespace fn
 
         }
 
-//--------------------------------------------------
+    //--------------------------------------------------
 
 
     REG_DEF_SUB( TrackYAcceptance);
@@ -296,6 +297,100 @@ namespace fn
 
     //--------------------------------------------------
 
+    REG_DEF_SUB( TrackXYUVAcceptance);
+
+    TrackXYUVAcceptance::TrackXYUVAcceptance( 
+            const SingleTrack& st , track_section ts, double z,
+            double minX, double maxX,
+            double minY, double maxY,
+            double minU, double maxU,
+            double minV, double maxV 
+            )
+        :st_(st), ts_( ts), z_( z ),
+        min_x_( minX), max_x_( maxX), min_y_( minY), max_y_( maxY),
+        min_u_( minU), max_u_( maxU), min_v_( minV), max_v_( maxV)
+    {}
+
+    bool TrackXYUVAcceptance::do_check() const
+    {
+        const SingleRecoTrack& srt = st_.get_single_track();
+
+        if ( ts_ == track_section::us )
+        {
+            zpoint_ = srt.extrapolate_us( z_ );
+        }
+        else if ( ts_ == track_section::ds )
+        {
+            zpoint_ = srt.extrapolate_ds( z_ );
+        }
+        else if ( ts_ == track_section::bf )
+        {
+            zpoint_ = srt.extrapolate_bf( z_ );
+        }
+
+        double x = zpoint_.Y();
+        double y = zpoint_.Y();
+
+        double u = x * cospi4 - y * sinpi4;
+        double v = x * sinpi4 + y * cospi4;
+
+        return ( true
+                && ( x > min_x_) && (x < max_x_ )
+                && ( y > min_y_) && (y < max_y_ )
+                && ( u > min_u_) && (u < max_u_ )
+                && ( v > min_v_) && (v < max_v_ )
+               );
+    }
+
+    template<>
+        Subscriber * create_subscriber<TrackXYUVAcceptance>
+        (YAML::Node& instruct, RecoFactory& rf )
+        {
+            SingleTrack * st = get_single_track( instruct, rf );
+            std::string s_ts=get_yaml<std::string>( instruct, "track_section" );
+
+            TrackXYUVAcceptance::track_section ts;
+
+            if ( s_ts == "us" || s_ts == "upstream" )
+            {
+                ts = TrackXYUVAcceptance::track_section::us;
+            }
+            else if ( s_ts == "ds" || s_ts == "downstream" )
+            {
+                ts = TrackXYUVAcceptance::track_section::ds;
+            }
+            else if ( s_ts == "bf" || s_ts == "BlueField" )
+            {
+                ts = TrackXYUVAcceptance::track_section::bf;
+            }
+            else
+            {
+                throw std::runtime_error(
+                        "Uknown track_section: " + s_ts );
+            }
+
+            double z = instruct["z"].as<double>();
+
+            double min_x = get_yaml<double>( instruct, "min_x" );
+            double max_x = get_yaml<double>( instruct, "max_x" );
+
+            double min_y = get_yaml<double>( instruct, "min_y" );
+            double max_y = get_yaml<double>( instruct, "max_y" );
+
+            double min_u = get_yaml<double>( instruct, "min_u" );
+            double max_u = get_yaml<double>( instruct, "max_u" );
+
+            double min_v = get_yaml<double>( instruct, "min_v" );
+            double max_v = get_yaml<double>( instruct, "max_v" );
+
+            return new TrackXYUVAcceptance( *st, ts, z,
+                    min_x, max_x, min_y, max_y,
+                    min_u, max_u, min_v, max_v );
+
+        }
+
+    //--------------------------------------------------
+
     REG_DEF_SUB( TrackPZ);
 
     TrackPZ::TrackPZ( const SingleTrack& st,
@@ -344,7 +439,7 @@ namespace fn
     {
         const SingleRecoTrack& srt = st_.get_single_track();
         double cda = srt.get_cda();
-            return ( cda > min_cda_ ) && ( cda < max_cda_ );
+        return ( cda > min_cda_ ) && ( cda < max_cda_ );
     }
 
     template<>

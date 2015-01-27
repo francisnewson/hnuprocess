@@ -1,8 +1,8 @@
 #************************************************************
 #
-#       A loosish selection to estimate the total kaon flux
-#       without too much systematic error. It should include
-#       all bad burst cuts etc.
+#      An attempt to reproduce the selection used in
+#      presentation in Aug 2013. Previous code was here:
+#      ~/work/hnu/dingo/code/process/aps/src/hnureco.cpp
 #
 #************************************************************
 
@@ -25,18 +25,16 @@
     name: passer
     type : auto_pass
 
+
 - input:
     name: cluster_corrector
     type: ClusterCorrector
     filename: "/afs/cern.ch/user/f/fnewson/work/hnu/gopher/data/detector/eopCorrfile.dat"
     enabled: true
 
-
 ###################################################
 # CUTS
 ###################################################
-
-# Burts -------------------------------------------
         
 # 1]Bad bursts
 - selection:
@@ -111,8 +109,8 @@
 - selection:
     name: rk_track_mom
     type: TrackMomentum
-    min: 13 #GeV
-    max: 65 #GeV
+    min: 5 #GeV
+    max: 80 #GeV
     inputs:
         ogt: bf_st
 
@@ -122,7 +120,7 @@
     type: Km2Clusters
     noise_energy: 2 #GeV
     noise_time: 12 #ns
-    brehm_radius: 0 #cm don't allow brehmsstrahlung
+    brehm_radius: 0 #cm
     track_cluster_radius: 20 #cm
     inputs:
         ogt: bf_st
@@ -152,6 +150,7 @@
         - [ 60, 65,  1500, 9000 ]
     inputs:
         ogt: bf_st
+
 
 # 8] CDA
 - selection:
@@ -224,6 +223,22 @@
     inputs:
         ogt: bf_st
 
+- selection:
+    name: muv_acc
+    type: TrackXYUVAcceptance
+    track_section: ds
+    z: 13012.0 #MUV3
+    min_x: -135.0
+    max_x:  135.0
+    min_y: -135.0
+    max_y:  135.0
+    min_u: -135.0
+    max_u:  135.0
+    min_v: -135.0
+    max_v:  135.0
+    inputs:
+        ogt: bf_st
+
 #Specific cuts for km2
 # S1 ] Trigger - already applied
 
@@ -246,6 +261,18 @@
     inputs:
         km2event: km2_event
 
+# S3] E/p
+- selection:
+    name: rk_km2_eop
+    #log_level: always_print
+    type: Km2TrackClusterEP
+    min_eop: 0.0
+    max_eop: 0.85
+    inputs:
+        km2clusters: rk_km2_clusters
+        ogt: bf_st
+
+
 - selection:
     name: fiducial_z 
     type: TrackPZ
@@ -256,21 +283,34 @@
         ogt: bf_st
 
 - selection:
-    name: fix_m2_002
-    type: Km2PM2Miss
-    shape: rectangles
-    points:
-        - [ 13, 20, -2e-3, 2e-3 ]
-    inputs:
-        km2event: km2_event
+    name: muv_12
+    type : MuonReqStatus
+    allowed_status: [ 1, 2 ]
+    ignore_classes: [ p6 ]
 
 ###################################################
 # SELECTIONS
 ###################################################
 
+- selection:
+    name: debug_momentum
+    type: TrackMomentum
+    min: 10 #GeV
+    max: 15 #GeV
+    inputs:
+        ogt: bf_st
+
+- selection:
+    name: debug_m2m
+    type: Km2M2Miss
+    min_m2: 0.02
+    max_m2: 0.04
+    inputs:
+        km2event: km2_event
+
 #full RK selection
 - selection:
-    name: rk_selection
+    name: sel2013
     type: CompositeSelection
     children:
         - passer
@@ -281,72 +321,29 @@
         - quality_7
         - rk_track_mom
         - rk_lkr_veto
-        - rk_pz
         - rk_lkr_accep
         - rk_hot_lkr
+        - rk_ddead_cell
         - rk_dch1_acc
         - rk_dch4_acc
-        - rk_ddead_cell
-        - rk_dcht
-
-- selection:
-    name: fix_cda_selection
-    type: CompositeSelection
-    children:
-        - rk_selection
         - rk_cda
+        - rk_pz
+        - rk_dcht
+        - muv_acc
+        - muv_12
 
-- selection:
-    name: fix_m2_selection
-    type: CompositeSelection
-    children:
-        - rk_selection
-        - fix_m2_002
-
-###################################################
-# ANALYSES
-###################################################
-
-- monitor:
-    name: counter
-    type: Counter
 
 - output:
     name: tfout
     type: tfile
-    filename: km2_plots.root
-
-- analysis:
-    name: burst_count
-    type: BurstCount
-    tfile: tfout
-    folder: burstcount
-    selection: rk_selection
+    filename: km2_2013.root
 
 - analysis:
     type: Km2Plotter
-    name: km2_rk_
-    folder: km2_rk
+    name: km2_2013
+    folder: km2_2013
     tfile: tfout
-    selection: rk_selection
-    inputs: 
-        km2event: km2_event
-
-- analysis:
-    type: Km2Plotter
-    name: km2_rk_fix_cda
-    folder: km2_fix_cda
-    tfile: tfout
-    selection: fix_cda_selection
-    inputs: 
-        km2event: km2_event
-
-- analysis:
-    type: Km2Plotter
-    name: km2_rk_fix_m2
-    folder: km2_fix_m2
-    tfile: tfout
-    selection: fix_m2_selection
+    selection: sel2013
     inputs: 
         km2event: km2_event
 
@@ -359,5 +356,5 @@
     name : full_summary
     type: Summary
     base : passer
-    source : rk_selection 
+    source : sel2013 
     ostream: oscout

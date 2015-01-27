@@ -40,6 +40,9 @@ namespace fn
         h_pk_ = hs_.MakeTH1D( "h_pk", "Kaon Momentum", 
                 1000, 70, 80, "p_{K} GeV" );
 
+        h_wgt_ = hs_.MakeTH1D( "h_wgt", "Event weight",
+                1000, 0, 5, "Weight" );
+
         h_m2m_kmu_ = hs_.MakeTH1D( "h_m2m_kmu", "K_{#mu2} missing mass",
                 10000, -0.7, 0.3, "m^{2}_{miss} ( GeV^{2}/ c^{4} )", "#events" ); 
 
@@ -149,6 +152,7 @@ namespace fn
 
     void Km2Plots::Fill( const Km2RecoEvent& km2re, double wgt )
     {
+        h_wgt_->Fill( wgt );
         //Mass and momentum
         h_pk_->Fill( km2re.get_kaon_mom(), wgt );
         h_m2m_kmu_->Fill( km2re.get_m2m_kmu(), wgt );

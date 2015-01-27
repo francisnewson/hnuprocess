@@ -159,8 +159,52 @@ namespace fn
             REG_DEC_SUB( TrackYAcceptance);
     };
 
+    //--------------------------------------------------
+
     template<>
         Subscriber * create_subscriber<TrackYAcceptance>
+        (YAML::Node& instruct, RecoFactory& rf );
+
+    class TrackXYUVAcceptance : public CachedSelection
+    {
+        public:
+            enum class track_section { us, ds, bf };
+
+            TrackXYUVAcceptance( const SingleTrack& st , track_section ts,
+                    double z,
+                    double minX, double maxX,
+                    double minY, double maxY,
+                    double minU, double maxU,
+                    double minV, double maxV 
+                    );
+
+        private:
+            bool do_check() const;
+            const SingleTrack& st_;
+            mutable TVector3 zpoint_;
+            track_section ts_;
+            double z_;
+
+            double min_x_;
+            double max_x_;
+
+            double min_y_;
+            double max_y_;
+
+            double min_u_;
+            double max_u_;
+
+            double min_v_;
+            double max_v_;
+
+            const double cospi4 = std::cos( 3.141592654 / 4.0 );
+            const double sinpi4 = std::cos( 3.141592654 / 4.0 );
+
+            REG_DEC_SUB( TrackXYUVAcceptance);
+    };
+
+    template<>
+        Subscriber * create_subscriber<TrackXYUVAcceptance>
         (YAML::Node& instruct, RecoFactory& rf );
 
     //--------------------------------------------------
@@ -248,7 +292,7 @@ namespace fn
         (YAML::Node& instruct, RecoFactory& rf );
 
     //--------------------------------------------------
-    
+
     class TrackTime : public CachedSelection
     {
 

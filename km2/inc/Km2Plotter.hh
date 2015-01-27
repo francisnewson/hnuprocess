@@ -46,6 +46,7 @@ namespace fn
 
         private:
             TH1D * h_pk_;
+            TH1D * h_wgt_;
 
             TH1D * h_m2m_kmu_;
             TH1D * h_m2m_kpi_;
