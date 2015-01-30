@@ -59,8 +59,14 @@ namespace fn
             MuvPmtPlotter muv3_;
             MuvPmtPlotter muv_all_;
 
+
             HistStore hs_;
             TH1D * hpmt_ids_;
+
+            TH1D * htime_;
+            TH1D * hacc_time_;
+
+            TH2D * hchan_time_;
 
             REG_DEC_SUB( MuvPmtHits );
 

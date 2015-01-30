@@ -20,6 +20,8 @@
  */
 namespace fn
 {
+    class SingleTrack;
+
     class MuonReqStatus : public CachedSelection
     {
         public:
@@ -57,6 +59,32 @@ namespace fn
         (YAML::Node& instruct, RecoFactory& rf );
 
     //--------------------------------------------------
+
+    class FakeMuv : public CachedSelection
+    {
+        public:
+            FakeMuv( const SingleTrack& st,
+                    const fne::Event * e,
+                    std::vector<double> muv1_effs,
+                    std::vector<double> muv2_effs,
+                    std::set<int> allowed_status );
+
+        private:
+            bool do_check() const;
+            const SingleTrack& st_;
+            const fne::Event * e_;
+            std::vector<double> muv1_effs_;
+            std::vector<double> muv2_effs_;
+            std::set<int> allowed_status_;
+            mutable std::uniform_real_distribution<double> uni_dist_;
+            mutable std::default_random_engine generator_;
+
+            REG_DEC_SUB( FakeMuv );
+    };
+
+    template<>
+        Subscriber * create_subscriber<FakeMuv>
+        (YAML::Node& instruct, RecoFactory& rf );
 }
 
 #endif

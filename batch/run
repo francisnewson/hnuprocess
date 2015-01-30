@@ -24,5 +24,9 @@ printf "\n\n==================================================\n\n"
 
 mkdir -p output
 
+if grep --quiet castor $runlist; then
+    stager_get -f $runlist
+fi
+
 #run the command!
 $app -c $channel -l $runlist -m $mission --auto -p $prefix $count

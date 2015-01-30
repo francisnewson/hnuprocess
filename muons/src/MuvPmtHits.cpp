@@ -43,6 +43,19 @@ namespace fn
         hpmt_ids_ = hs_.MakeTH1D( 
                 "hpmt_ids", "MUV PMT HIT IDS",
                 60, -0.5, 59.5, "PMT ID" );
+
+        htime_ = hs_.MakeTH1D( 
+                "htime_", "PMT Hit Times",
+                100, -150, -150, "Time (ns)" );
+
+        hacc_time_ = hs_.MakeTH1D( 
+                "hacc_time_", "PMT Hit Times",
+                100, 10, -10, "Time (ns)" );
+
+        hchan_time_ = hs_.MakeTH2D( 
+                "h_chan_time", "Time vs Chan",
+                60, -0.5, 59.5, "Channel",
+                500, -100, 100, "Time" );
     }
 
     void MuvPmtHits::process_event()
@@ -59,11 +72,23 @@ namespace fn
 
         auto& emuon_hits = e_->detector.muon_hits;
         int nmuon_hits = e_->detector.nmuonhits;
+
+        double track_time = srt->get_time();
         for ( int imuon = 0 ; imuon != nmuon_hits ; ++imuon )
         {
             //copy reco track ( and point to it )
             fne::MuonHit * mh = static_cast<fne::MuonHit*>
                 ( emuon_hits[imuon] );
+
+            double rel_time = mh->time -track_time;
+
+            htime_->Fill(rel_time);
+
+            hchan_time_->Fill( mh->channel, rel_time );
+
+            if ( fabs( rel_time ) > 2 ) continue;
+
+            hacc_time_->Fill(rel_time);
 
             muv_all_.Fill( mh->channel, extrap1.X(), extrap1.Y(), weight );
 
