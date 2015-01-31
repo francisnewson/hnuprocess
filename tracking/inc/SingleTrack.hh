@@ -52,6 +52,8 @@ namespace fn
             //BF track
             virtual TVector3 extrapolate_bf( double z) const = 0 ;
 
+            virtual int get_compact_id() const = 0;
+
             virtual ~SingleRecoTrack(){}
     };
 
@@ -141,6 +143,8 @@ namespace fn
             TVector3 get_unscattered_3mom() const;
             TVector3 get_us_mom() const;
             TVector3 get_ds_mom() const;
+
+            int get_compact_id() const;
 
         private:
             BFCorrection& bfc_;

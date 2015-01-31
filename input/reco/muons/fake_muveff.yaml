@@ -332,26 +332,6 @@
         - muv_acc
 
 - selection:
-    name: muv1_x_left
-    type: TrackXAcceptance
-    track_section: downstream
-    z: 12778.0 #zmuv1
-    min_x: -75
-    max_x: -50
-    inputs:
-        ogt: bf_st
-
-- selection:
-    name: muv2_y_top
-    type: TrackYAcceptance
-    track_section: downstream
-    z: 12902.8 #zmuv2
-    min_y: 50
-    max_y: 75
-    inputs:
-        ogt: bf_st
-
-- selection:
     { name: signal_rk_selection, type: CompositeSelection, children: [ base_rk_selection,  rk_cda ] }
 
 - selection:
@@ -363,59 +343,43 @@
 - selection:
     { name:  rk_eop_peak, type: CompositeSelection, children: [ signal_rk_selection , rk_km2_eop , km2_peak_m2 ] }
 
-- selection:
-    { name:  rk_eop_peak_x_cut, type: CompositeSelection, children: [ signal_rk_selection , rk_km2_eop , km2_peak_m2, muv1_x_left ] }
-
-- selection:
-    { name:  rk_eop_peak_y_cut, type: CompositeSelection, children: [ signal_rk_selection , rk_km2_eop , km2_peak_m2, muv2_y_top ] }
-
-- selection:
-    { name: rk_halo, type: CompositeSelection, children: [ base_rk_selection,  halo_cda, rk_km2_eop ] }
-
 - monitor:
     name: counter
     type: Counter
 
+- subscriber:
+    name: fake_muv
+    type : MuonVeto
+    method: MC
+    muv1_effs: [ 0.990, 0.990, 0.990, 0.975, 0.980, 0.975, 0.980, 0.985, 0.990 , 0.990, 0.990 ]
+    muv2_effs: [ 0.989, 0.990, 0.986, 0.983, 0.977, 0.978, 0.983, 0.985, 0.987 , 0.988, 0.988 ]
+    inputs:
+        ogt:  bf_st
+
 #Muon status
 - selection:
-    name: muv_12
-    type : FakeMuv
-    muv1_effs: [ 0.95, 0.95, 0.95, 0.95, 0.95, 0.95, 0.95, 0.95, 0.95 , 0.95, 0.95 ]
-    muv2_effs: [ 0.95, 0.95, 0.95, 0.95, 0.95, 0.95, 0.95, 0.95, 0.95 , 0.95, 0.95 ]
-    allowed_status: [ 1, 2 ]
-    ignore_classes: [ p6 ]
-    inputs:
-        ogt: bf_st
-
-- selection:
-    name: muv_1_or_2
-    type : FakeMuv
-    muv1_effs: [ 0.95, 0.95, 0.95, 0.95, 0.95, 0.95, 0.95, 0.95, 0.95 , 0.95, 0.95 ]
-    muv2_effs: [ 0.95, 0.95, 0.95, 0.95, 0.95, 0.95, 0.95, 0.95, 0.95 , 0.95, 0.95 ]
-    allowed_status: [ 1, 2, 3, 4 ]
-    ignore_classes: [ p6 ]
-    inputs:
-        ogt: bf_st
-
-- selection:
-    name: muv_1
-    type : FakeMuv
-    muv1_effs: [ 0.95, 0.95, 0.95, 0.95, 0.95, 0.95, 0.95, 0.95, 0.95 , 0.95, 0.95 ]
-    muv2_effs: [ 0.95, 0.95, 0.95, 0.95, 0.95, 0.95, 0.95, 0.95, 0.95 , 0.95, 0.95 ]
+    name: muv_plane_1
+    type: MuonReqStatus
     allowed_status: [ 1, 2, 4 ]
     ignore_classes: [ p6 ]
     inputs:
-        ogt: bf_st
+        muv: fake_muv
 
 - selection:
-    name: muv_2
-    type : FakeMuv
-    muv1_effs: [ 0.95, 0.95, 0.95, 0.95, 0.95, 0.95, 0.95, 0.95, 0.95 , 0.95, 0.95 ]
-    muv2_effs: [ 0.95, 0.95, 0.95, 0.95, 0.95, 0.95, 0.95, 0.95, 0.95 , 0.95, 0.95 ]
+    name: muv_plane_2
+    type: MuonReqStatus
     allowed_status: [ 1, 2, 3 ]
     ignore_classes: [ p6 ]
     inputs:
-        ogt: bf_st
+        muv: fake_muv
+
+- selection:
+    name: muv_1_or_2
+    type: MuonReqStatus
+    allowed_status: [ 1, 2, 3, 4 ]
+    ignore_classes: [ p6 ]
+    inputs:
+        muv: fake_muv
 
 - output:
     name: tfout
@@ -425,68 +389,16 @@
 ###
 
 - analysis :
-    { type: MuvEff,  name: raw_muv,  folder: raw_muv,  tfile: tfout, muv_plane: 12778, #zmuv1
-    selection: raw_sel,  muv_selection: muv_12,  inputs: {km2event: km2_event } }
-
-
-- analysis :
-    { type: MuvEff,  name: muv_eff_signal,  folder: muv_eff_signal,  tfile: tfout, muv_plane: 12778, #zmuv1
-    selection: signal_rk_selection,  muv_selection: muv_12,  inputs: {km2event: km2_event } }
+    { type: MuvEff,  name: an_muv_plane_1,  folder: muv_plane_1,  tfile: tfout, muv_plane: 12778, #zmuv1
+    selection: rk_eop_peak,  muv_selection: muv_plane_1,  inputs: {km2event: km2_event } }
 
 - analysis :
-    { type: Km2ClusterPlotter,  name: cluster_signal,  folder: muv_eff_signal,  tfile: tfout, 
-    selection: signal_rk_selection,  inputs: {km2event: km2_event, km2clusters: rk_km2_clusters, ClusterCorrector: cluster_corrector } } 
-
-###
+    { type: MuvEff,  name: an_muv_plane_2,  folder: muv_plane_2,  tfile: tfout, muv_plane: 12902.8, #zmuv2
+    selection: rk_eop_peak,  muv_selection: muv_plane_2,  inputs: {km2event: km2_event } }
 
 - analysis :
-    { type: MuvEff,  name: muv_eff_peak,  folder: muv_eff_peak,  tfile: tfout, muv_plane: 12778, #zmuv1
-    selection: rk_peak,  muv_selection: muv_12,  inputs: {km2event: km2_event } }
-
-- analysis :
-    { type: Km2ClusterPlotter,  name: cluster_peak,  folder: muv_eff_peak,  tfile: tfout, 
-    selection: rk_peak,  inputs: {km2event: km2_event, km2clusters: rk_km2_clusters, ClusterCorrector: cluster_corrector } } 
-        
-###
-
-- analysis :
-    { type: MuvEff,  name: muv_eff_eop,  folder: muv_eff_eop,  tfile: tfout, muv_plane: 12778, #zmuv1
-    selection: rk_eop,  muv_selection: muv_12,  inputs: {km2event: km2_event } }
-
-- analysis :
-    { type: Km2ClusterPlotter,  name: cluster_eop,  folder: muv_eff_eop,  tfile: tfout, muv_plane: 12778, #zmuv1
-    selection: rk_eop,  inputs: {km2event: km2_event, km2clusters: rk_km2_clusters, ClusterCorrector: cluster_corrector } } 
-
-        
-###
-
-- analysis :
-    { type: MuvEff,  name: muv_eff_eop_peak,  folder: muv_eff_eop_peak,  tfile: tfout, muv_plane: 12778, #zmuv1
-    selection: rk_eop_peak,  muv_selection: muv_12,  inputs: {km2event: km2_event } }
-
-- analysis :
-    { type: MuvEff,  name: muv_eff_eop_peak_1_or_2,  folder: muv_eff_eop_peak_1_or_2,  tfile: tfout, muv_plane: 12778, #zmuv1
+    { type: MuvEff,  name: an_muv_plane_1_or_2,  folder: muv_plane_1_or_2,  tfile: tfout, muv_plane: 12902.8, #zmuv2
     selection: rk_eop_peak,  muv_selection: muv_1_or_2,  inputs: {km2event: km2_event } }
-
-- analysis :
-    { type: MuvEff,  name: muv_eff_eop_peak_1,  folder: muv_eff_eop_peak_1,  tfile: tfout, muv_plane: 12778, #zmuv1
-    selection: rk_eop_peak,  muv_selection: muv_1,  inputs: {km2event: km2_event } }
-
-- analysis :
-    { type: MuvEff,  name: muv_eff_eop_peak_2,  folder: muv_eff_eop_peak_2,  tfile: tfout, muv_plane: 12902.8, #zmuv2
-    selection: rk_eop_peak,  muv_selection: muv_2,  inputs: {km2event: km2_event } }
-
-- analysis :
-    { type: Km2ClusterPlotter,  name: cluster_eop_peak,  folder: muv_eff_eop_peak,  tfile: tfout, muv_plane: 12778, #zmuv1
-    selection: rk_eop_peak,  inputs: {km2event: km2_event, km2clusters: rk_km2_clusters,ClusterCorrector: cluster_corrector } } 
-
-- analysis :
-    { type: MuvEff,  name: all_muv1,  folder: all_muv1,  tfile: tfout, muv_plane: 12778, #zmuv1
-    selection: dch_veto,  muv_selection: muv_1,  inputs: {km2event: km2_event } }
-
-- analysis :
-    { type: MuvEff,  name: all_muv2,  folder: all_muv2,  tfile: tfout, muv_plane: 12902.8, #zmuv2
-    selection: dch_veto,  muv_selection: muv_2,  inputs: {km2event: km2_event } }
 
 ###
 

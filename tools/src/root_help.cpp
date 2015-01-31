@@ -45,10 +45,10 @@ namespace fn
 
     void add_file_protocol( std::string& file_string )
     {
-        //Assumes file could be one of castor of eos
+        //Assumes file could be one of castor or eos
         if ( file_string.find( "castor") != std::string::npos )
         {
-            file_string =  "root://castorpublic.cern.ch//" + file_string;
+            file_string =  "root://castorpublic.cern.ch//" + file_string+"SvcClass=na62";
         }
         if ( file_string.find( "eos") != std::string::npos )
         {

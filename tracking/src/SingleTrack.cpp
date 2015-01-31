@@ -167,6 +167,12 @@ namespace fn
         return proc_track_->corr_mom  * dsmom.Unit();
     }
 
+    int BFSingleRecoTrack::get_compact_id() const
+    {
+        const fne::RecoTrack& rt = *proc_track_->rt;
+        return rt.id;
+    }
+
     //--------------------------------------------------
 
     //BF

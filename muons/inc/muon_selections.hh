@@ -3,6 +3,7 @@
 #include "Selection.hh"
 #include "Event.hh"
 #include "RecoFactory.hh"
+#include "MuonVeto.hh"
 #include <set>
 
 /*
@@ -25,12 +26,12 @@ namespace fn
     class MuonReqStatus : public CachedSelection
     {
         public:
-            MuonReqStatus( const fne::Event * e ,
+            MuonReqStatus( const MuonVeto& muv, 
                     std::set<int> allowed_status );
 
         private:
             bool do_check() const;
-            const fne::Event * e_;
+            const MuonVeto& muv_;
             std::set<int> allowed_status_;
 
             REG_DEC_SUB( MuonReqStatus );
@@ -60,31 +61,6 @@ namespace fn
 
     //--------------------------------------------------
 
-    class FakeMuv : public CachedSelection
-    {
-        public:
-            FakeMuv( const SingleTrack& st,
-                    const fne::Event * e,
-                    std::vector<double> muv1_effs,
-                    std::vector<double> muv2_effs,
-                    std::set<int> allowed_status );
-
-        private:
-            bool do_check() const;
-            const SingleTrack& st_;
-            const fne::Event * e_;
-            std::vector<double> muv1_effs_;
-            std::vector<double> muv2_effs_;
-            std::set<int> allowed_status_;
-            mutable std::uniform_real_distribution<double> uni_dist_;
-            mutable std::default_random_engine generator_;
-
-            REG_DEC_SUB( FakeMuv );
-    };
-
-    template<>
-        Subscriber * create_subscriber<FakeMuv>
-        (YAML::Node& instruct, RecoFactory& rf );
 }
 
 #endif
