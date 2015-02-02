@@ -3,6 +3,15 @@
 #km2event: km2_event
 ---
 #-------------------------------------------------- 
+#
+###################################################
+# FILE MANAGEMENT
+###################################################
+
+- exec:
+    skipmcruns: [ 20410, 20411, 20412, 20413, 20414, 20451, 20452, 20453, 20454, 20455, 20456 ]
+    skipdatalist: input/reco/conditions/bad_lkr_files.dat
+
 - output:
     name: tfout
     type: tfile
@@ -11,6 +20,10 @@
 - monitor:
     name: counter
     type: Counter
+
+###################################################
+# STANDARD CORRECTIONS
+###################################################
 
 - input:
     name: kaon_track
@@ -38,6 +51,10 @@
     name: debug_out
     type: ostream
     filename: km2_debug.dat
+
+###################################################
+# CUTS
+###################################################
 
 #SingleTrack
 - input:
