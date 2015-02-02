@@ -97,7 +97,7 @@ def analyse_channel( folder, match_regex, batch_regex ):
     batches.sort()
     print( '{0:30}'.format( osp.split( folder )[-1]), batches )
 
-    #Add all mathcing files to summary
+    #Add all matching files to summary
     cs = CombinedSummary()
     for stats_file in matching_files:
         cs.process_summary_file( stats_file )
@@ -109,8 +109,8 @@ def analyse_channel( folder, match_regex, batch_regex ):
 channels = {
 'p5.data.nhod': 'p5.data.nhod.v2',
 'p5.data.nhod': 'p5.data.nhod.v2',
-'p5.data.q1' : 'p5.data.q1.v2',
-'p5.data.q11t' : 'p5.data.q11t.v2',
+'p5.data.q1' : 'p5.data.q1.v3',
+'p5.data.q11t' : 'p5.data.q11t.v3',
 'p5.k2pig' : 'p5.k2pig.v2',
 'p5.k3pi' : 'p5.k3pi.v2',
 'p5.k3pi0' : 'p5.k3pi0.v2',
@@ -124,9 +124,9 @@ channels = {
 'p6.data.km.q11t' : 'p6.data.km.q11t.v2',
 }
 
-
-analysis_folder= "/afs/cern.ch/user/f/fnewson/work/hnu/gopher/data/process/halo_plots/channels"
-output_folder =  osp.join( 'working', 'halo_plots' )
+analysis_name = 'model2013'
+analysis_folder= osp.join("/afs/cern.ch/user/f/fnewson/work/hnu/gopher/data/process/",analysis_name, "channels" )
+output_folder =  osp.join( 'working',  analysis_name)
 for sub in ["km2_stats", "fiducial_count"]:
     os.makedirs( osp.join( output_folder, sub ), exist_ok = True ) 
 

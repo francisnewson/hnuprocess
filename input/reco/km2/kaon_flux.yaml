@@ -260,7 +260,7 @@
     type: Km2PM2Miss
     shape: rectangles
     points:
-        - [ 13, 20, -2e-3, 2e-3 ]
+        - [ 13, 65, -2e-3, 2e-3 ]
     inputs:
         km2event: km2_event
 

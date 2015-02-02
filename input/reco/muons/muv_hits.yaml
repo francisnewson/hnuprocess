@@ -337,8 +337,12 @@
 
 ###
 
+#- analysis :
+    #{ type: MuvPmtHits,  name: muv_pmt_hits,  folder: muv_pmt_hits,  tfile: tfout,
+    #selection: rk_eop_peak,  inputs: {km2event: km2_event } }
+    
 - analysis :
-    { type: MuvPmtHits,  name: muv_pmt_hits,  folder: muv_pmt_hits,  tfile: tfout,
+    { type: MuonPmtTimings,  name: muv_pmt_timings,  folder: muv_pmt_timings,  tfile: tfout,
     selection: rk_eop_peak,  inputs: {km2event: km2_event } }
 
 ###

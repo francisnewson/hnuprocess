@@ -13,11 +13,30 @@ namespace fn
     BurstCount::BurstCount( const Selection& sel,
             TFile& tfile, std::string folder,
             const fne::Event * e )
-        :Analysis( sel ), tfile_( tfile), folder_( folder ), e_( e){}
+        :Analysis( sel ), tfile_( tfile), folder_( folder ), e_( e),
+        burst_tree_( "bursts", "Burst info")
+    {
+        TTree::SetMaxTreeSize(10000000000LL);
+        burst_tree_.Branch( "run", &burst_info_.run, "run/L" );
+        burst_tree_.Branch( "burst_time", &burst_info_.burst_time, "burst_time/L" );
+        burst_tree_.Branch( "events", &burst_info_.events, "events/L" );
+        }
+
+    void BurstCount::new_burst()
+    {
+        burst_info_.run = e_->header.run;
+        burst_info_.burst_time = e_->header.burst_time;
+        burst_info_.events = 0;
+    }
 
     void BurstCount::process_event()
     {
-        bursts_[ e_->header.burst_time] ++;
+        burst_info_.events++;
+    }
+
+    void BurstCount::end_burst()
+    {
+        burst_tree_.Fill();
     }
 
     void BurstCount::end_processing()
@@ -31,11 +50,8 @@ namespace fn
 #endif
 
         cd_p( &tfile_, folder_ );
-        TClass *c = gROOT->FindSTLClass("std::map<int,int>", true);
-        std::cout << "Class: " << c << std::endl;
-        c->Print();
-        int res = gDirectory->WriteObjectAny( &bursts_, c,"bursts");
-        std::cout << "Wrote: " << res << std::endl;
+        burst_tree_.Print();
+        burst_tree_.Write();
     }
 
     REG_DEF_SUB( BurstCount);

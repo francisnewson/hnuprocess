@@ -282,11 +282,18 @@
     inputs:
         ogt: bf_st
 
+- subscriber:
+    name: muon_veto
+    type: MuonVeto
+    method: Data
+
 - selection:
-    name: muv_12
+    name: muv_1_or_2
     type : MuonReqStatus
-    allowed_status: [ 1, 2 ]
+    allowed_status: [ 1, 2, 3, 4 ]
     ignore_classes: [ p6 ]
+    inputs:
+        muv: muon_veto
 
 ###################################################
 # SELECTIONS
@@ -330,7 +337,7 @@
         - rk_pz
         - rk_dcht
         - muv_acc
-        - muv_12
+        - muv_1_or_2
 
 
 - output:

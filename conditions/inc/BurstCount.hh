@@ -2,7 +2,7 @@
 #define BURSTCOUNT_HH
 #include "Analysis.hh"
 #include "Event.hh"
-#include <map>
+#include "TTree.h"
 #if 0
 /*
  *  ____                 _    ____                  _
@@ -19,6 +19,13 @@ class TFile;
 
 namespace fn
 {
+    struct burst_info
+    {
+        Long64_t run;
+        Long64_t burst_time;
+        Long64_t  events;
+    };
+
     class BurstCount : public Analysis
     {
         public:
@@ -26,6 +33,8 @@ namespace fn
                     TFile& tfile, std::string folder,
                     const fne::Event * e );
 
+            void new_burst();
+            void end_burst();
             void end_processing();
 
         private:
@@ -34,7 +43,8 @@ namespace fn
             TFile& tfile_;
             std::string folder_;
             const fne::Event * e_;
-            std::map<int, int> bursts_;
+            burst_info burst_info_;
+            TTree burst_tree_;
 
             REG_DEC_SUB( BurstCount);
     };
