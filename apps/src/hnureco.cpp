@@ -277,6 +277,16 @@ int main( int argc, char * argv[] )
     }
 
     BOOST_LOG_SEV( slg , startup) 
+        << "Filelist initial length " << filenames.size() ;
+
+    ExecParser exec_parser( slg );
+    exec_parser.parse( mission );
+    exec_parser.prune_filelist( filenames );
+
+    BOOST_LOG_SEV( slg , startup) 
+        << "Filelist pruned length " << filenames.size() ;
+
+    BOOST_LOG_SEV( slg , startup) 
         << "Give filelist to reconstruction" ;
 
     reco.set_filenames( filenames );

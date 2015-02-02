@@ -46,5 +46,29 @@ namespace fn
                 std::vector<std::string>> channel_classes_;
     };
 
+    /*****************************************************
+     * EXECPARSER
+     *
+     * Handles various mangly tasks that can't be 
+     * contained in subscribers.
+     *
+     *****************************************************/
+
+    class ExecParser
+    {
+        public:
+            ExecParser( logger& log );
+            void parse( boost::filesystem::path config);
+
+            void prune_filelist( std::vector<boost::filesystem::path>& filenames );
+
+            bool reject( boost::filesystem::path filename );
+
+        private:
+            std::vector<int> mc_skip_;
+            std::vector<std::string> data_skip_;
+            logger& log_;
+    };
+
 }
 #endif

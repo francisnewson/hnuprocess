@@ -2,6 +2,8 @@
 #include <cassert>
 #include "Xcept.hh"
 #include "stl_help.hh"
+#include <boost/regex.hpp>
+#include <iomanip>
 namespace fn
 {
     //Constructor takes a reference to a RecoFactory which
@@ -47,6 +49,13 @@ namespace fn
 
                 const YAML::Node& instruct = instruct_it->second;
                 std::string cat = instruct_it->first.as<std::string>();
+
+                if ( cat == "exec" )
+                {
+                    BOOST_LOG_SEV( log_, startup )
+                        << "RECOPARSER: Skipping exec item";
+                    continue;
+                }
 
                 if( cat == "output" )
                 {
@@ -190,4 +199,103 @@ namespace fn
             return false;
         }
 
+    //--------------------------------------------------
+
+    ExecParser::ExecParser( logger& log )
+        :log_( log )
+    {}
+
+    void ExecParser::parse( boost::filesystem::path config)
+    {
+        BOOST_LOG_SEV( log_, startup)
+            << "EXECPARSER: Parsing " << config;
+
+        //Load file
+        YAML::Node config_node = YAML::LoadFile( config.string() );
+        assert(config_node.Type() == YAML::NodeType::Sequence);
+
+        bool found_exec = false;
+
+        //Loop over items
+        for (YAML::const_iterator it=config_node.begin();
+                it!=config_node.end();++it)
+        {
+            assert(it->Type() == YAML::NodeType::Map);
+
+            YAML::const_iterator instruct_it  = it->begin();
+            assert(it->Type() == YAML::NodeType::Map);
+
+            const YAML::Node& instruct = instruct_it->second;
+            std::string cat = instruct_it->first.as<std::string>();
+
+            if ( cat == "exec" )
+            {
+                BOOST_LOG_SEV( log_, startup )
+                    << "EXECPARSER: Found exec item";
+                found_exec = true;
+
+                if ( instruct["skipmcruns"] )
+                {
+                BOOST_LOG_SEV( log_, startup )
+                    << "EXECPARSER: Found skipmcruns";
+                    mc_skip_ = instruct["skipmcruns"].as<std::vector<int>>();
+                }
+
+                if ( instruct["skipdatafiles"] )
+                {
+                BOOST_LOG_SEV( log_, startup )
+                    << "EXECPARSER: Found skipdatafiles";
+                    data_skip_ = instruct["skipdatafiles"].as<std::vector<std::string>>();
+                }
+                if ( instruct["skipdatalist"] )
+                {
+                BOOST_LOG_SEV( log_, startup )
+                    << "EXECPARSER: Found skipdatalist";
+                std::string data_list = instruct["skipdatalist"].as<std::string>();
+
+                std::ifstream ifdl( data_list );
+                std::copy( std::istream_iterator<std::string>( ifdl ),
+                        std::istream_iterator<std::string>(),
+                        std::back_inserter( data_skip_ ) );
+                }
+            }
+        }
+
+
+        if ( ! found_exec )
+        {
+            BOOST_LOG_SEV( log_, startup )
+                << "EXECPARSER: Didn't find exec config";
+        }
+    }
+
+
+    void ExecParser::prune_filelist( std::vector<boost::filesystem::path>& filenames )
+    {
+        filenames.erase( std::remove_if( filenames.begin(), filenames.end(),
+                    [this]( boost::filesystem::path p ){ return reject(p);} ), 
+            filenames.end() ) ;
+    }
+
+    bool ExecParser::reject( boost::filesystem::path filename )
+    {
+        //should we be matching filenames or run numbers
+        std::string  fstem = filename.stem().string();
+
+        if ( fstem.find( "goldcmp" ) != std::string::npos )
+        {
+            //data
+            bool found =  ( std::find( data_skip_.begin(), data_skip_.end(), fstem) != data_skip_.end() );
+            return found;
+        }
+        else
+        {
+            boost::regex run_regex("run([0-9]+)");
+            boost::smatch match;
+            bool found_match = boost::regex_search( fstem, match, run_regex );
+            int run = std::stoi( std::string( match[1].first, match[1].second ) );
+            bool found ( std::find( mc_skip_.begin(), mc_skip_.end(), run) != mc_skip_.end() );
+            return found;
+        }
+    }
 }
