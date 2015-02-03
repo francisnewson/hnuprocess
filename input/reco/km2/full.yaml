@@ -65,12 +65,12 @@
     #log_level: always_print
 
     init_min_mom: 3.0 
-    init_max_mom: 80.0
+    init_max_mom: 75.0
 
     init_max_cda: 15.0
 
-    init_min_z: -50000.0
-    init_max_z:  100000.0
+    init_min_z: -2000.0
+    init_max_z:  9000.0
 
     dch_merge_sep: 0.5
 
@@ -90,8 +90,8 @@
     type: Km2Clusters
     noise_energy: 5 #GeV
     noise_time: 12 #ns
-    brehm_radius: 5 #cm
-    track_cluster_radius: 5 #cm
+    brehm_radius: 0 #cm
+    track_cluster_radius: 20 #cm
     inputs:
         ogt: bf_st
         ClusterCorrector: cluster_corrector
@@ -107,11 +107,35 @@
     crude_weights: input/reco/mod/kaon_crude_weights.dat
     fine_weights: input/reco/mod/kaon_fine_weights.dat
 
-#MUV bursts
+# 1]Bad bursts
 - selection:
-    name: gd_muv_brst
+    name: good_phys_burst
+    type: BadBurst
+    burst_list: "input/reco/conditions/bad_phys_burst.dat"
+
+- selection:
+    name: good_dch_burst
+    type: BadBurst
+    burst_list: "input/reco/conditions/bad_dch_burst.dat"
+
+- selection:
+    name: good_muv_burst
     type: BadBurst
     burst_list: "input/reco/conditions/bad_muv_burst.dat"
+
+- selection:
+    name: good_bursts
+    type: CompositeSelection
+    children:
+        - good_phys_burst
+        - good_dch_burst
+        - good_muv_burst
+
+
+- subscriber:
+    name: muon_veto
+    type: MuonVeto
+    method: Data
 
 #Muon status
 - selection:
@@ -119,6 +143,16 @@
     type : MuonReqStatus
     allowed_status: [ 1, 2 ]
     ignore_classes: [ p6 ]
+    inputs:
+        muv: muon_veto
+
+- selection:
+    name: muv_1_or_2
+    type : MuonReqStatus
+    allowed_status: [ 1, 2, 3, 4 ]
+    ignore_classes: [ p6 ]
+    inputs:
+        muv: muon_veto
 
 #Found ogt
 - selection:
@@ -148,6 +182,13 @@
     name: cda_1cm
     type: TrackCda
     max_cda: 1.0 #cm
+    inputs:
+        ogt: bf_st
+
+- selection:
+    name: cda_15mm
+    type: TrackCda
+    max_cda: 1.5 #cm
     inputs:
         ogt: bf_st
 
@@ -189,12 +230,28 @@
     inputs:
         ogt: bf_st
 
+- selection:
+    name: rk_hot_lkr
+    type: Km2HotLkr
+    hot_cells: [ [ 134, 56 ], [ 134, 57 ] ]
+    inputs:
+        km2event: km2_event
+        km2clusters: full_km2clusters
+
 #NoBadClusters
 - selection:
-    name: nobadcluster
+    name: rk_lkr_veto
     type: Km2NoBadCluster
     inputs:
         km2clusters: full_km2clusters
+
+# 9] LKr acceptance
+- selection:
+    name: rk_lkr_accep
+    type: TrackLkrAcceptance
+    margin_parameter: 8 #cm
+    inputs:
+        ogt: bf_st
 
 - selection:
     name: pzt_cut
@@ -203,6 +260,15 @@
     inputs:
         ogt: bf_st
         kt: kaon_track
+
+- selection:
+    name: relaxed_pzt_cut
+    type: TrackPZT
+    regions_file: "input/reco/km2/relaxed_pzt.yaml"
+    inputs:
+        ogt: bf_st
+        kt: kaon_track
+
 
 - selection:
     name: wide_track_mom
@@ -230,30 +296,64 @@
         ogt: bf_st
 
 - selection:
-    name : hnu_selection
+    name: muv_acc
+    type: TrackXYUVAcceptance
+    track_section: ds
+    z: 13012.0 #MUV3
+    min_x: -135.0
+    max_x:  135.0
+    min_y: -135.0
+    max_y:  135.0
+    min_u: -135.0
+    max_u:  135.0
+    min_v: -135.0
+    max_v:  135.0
+    inputs:
+        ogt: bf_st
+
+- selection:
+    name : base_hnu_selection
     type: CompositeSelection
     children:
         - kaon_mom_weights
-        - gd_muv_brst
-        - muv_12
+        - good_bursts
         - good_trk
         - pos_trk
         - quality_7
-        - cda_1cm
+        - cda_15mm
         - dch1_acc
         - dch4_acc
+        - rk_lkr_veto
+        - rk_hot_lkr
+        - rk_lkr_accep
         - rk_dcht
+        - muv_acc
+        - muv_1_or_2
+
+- selection:
+    name : full_hnu_selection
+    type: CompositeSelection
+    children:
+        - base_hnu_selection
+        - cda_1cm
         - pzt_cut
-        - nobadcluster
+
+- selection:
+    name : relaxed_hnu_selection
+    type: CompositeSelection
+    children:
+        - base_hnu_selection
+        - relaxed_pzt_cut
 
 - selection:
     name: debug_selection
     type: CompositeSelection
     children:
         - kaon_mom_weights
-        - gd_muv_brst
+        - good_bursts
         - good_trk
         - debug_momentum
+        - muv_acc
         - muv_12
         - pos_trk
         - quality_7
@@ -262,14 +362,14 @@
         - dch4_acc
         - rk_dcht
         - pzt_cut
-        - nobadcluster
+        - rk_lkr_veto
 
 - selection:
     name: halo_selection
     type: CompositeSelection
     children:
         - kaon_mom_weights
-        - gd_muv_brst
+        - good_bursts
         - good_trk
         - pos_trk
         - quality_7
@@ -280,7 +380,7 @@
     type: CompositeSelection
     children:
         - kaon_mom_weights
-        - gd_muv_brst
+        - good_bursts
         - good_trk
         - pos_trk
 #       - quality_7
@@ -290,21 +390,29 @@
     name : full_summary
     type: Summary
     base : passer
-    source : hnu_selection 
+    source : full_hnu_selection 
     ostream: text_out
+
+- analysis : 
+    name : relaxed_summary
+    type: Summary
+    base : passer
+    source : relaxed_hnu_selection 
+    ostream: text_out
+
 
 - analysis : 
     name : full_summary_file
     type: Summary
     base : passer
-    source : hnu_selection 
+    source : full_hnu_selection 
     ostream: stats_out
 
 - analysis : 
-    name : hnu_summary_file
+    name : relaxed_summary_file
     type: Summary
     base : passer
-    source : halo_selection 
+    source : relaxed_hnu_selection 
     ostream: stats_out
 
 - analysis : 
@@ -319,16 +427,16 @@
     name: km2_full_plots
     folder: full_km2
     tfile: tfout
-    selection: hnu_selection
+    selection: full_hnu_selection
     inputs:
         km2event: km2_event
 
 - analysis :
     type: Km2Plotter
-    name: halo_full_plots
-    folder: halo_km2
+    name: relaxed_plots
+    folder: relaxed_km2
     tfile: tfout
-    selection: halo_selection
+    selection: relaxed_hnu_selection
     inputs:
         km2event: km2_event
 

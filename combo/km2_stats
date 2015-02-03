@@ -124,7 +124,7 @@ channels = {
 'p6.data.km.q11t' : 'p6.data.km.q11t.v2',
 }
 
-analysis_name = 'model2013'
+analysis_name = 'km2_full'
 analysis_folder= osp.join("/afs/cern.ch/user/f/fnewson/work/hnu/gopher/data/process/",analysis_name, "channels" )
 output_folder =  osp.join( 'working',  analysis_name)
 for sub in ["km2_stats", "fiducial_count"]:

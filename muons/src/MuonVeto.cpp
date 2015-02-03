@@ -14,7 +14,7 @@ namespace fn
 
     int get_muon_status( bool muv1, bool muv2, bool muv3 )
     {
-        if ( !muv1 && !muv2 ){ return 0; }
+        if ( (!muv1) && (!muv2) ){ return 0; }
         else if ( muv1 && muv2 && muv3 ){ return 1; }
         else if ( muv1 && muv2 && !muv3 ){ return 2; }
         else if ( !muv1 && muv2 && muv3 ){ return 3; }
@@ -68,6 +68,12 @@ namespace fn
             if ( method == "Data" )
             {
                 return new DataMuonVeto{ event };
+            }
+
+            else if ( method == "DataMatched" )
+            {
+                const SingleTrack* st = get_single_track( instruct, rf );
+                return new DataMatchedMuonVeto{ event, *st };
             }
 
             else if ( method == "MC" )

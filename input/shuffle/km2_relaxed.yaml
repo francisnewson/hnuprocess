@@ -16,7 +16,7 @@ scaling:
         halo:
             strategy: m2
             input_file: data/km2_full/all.km2_full.root
-            plot_path: full_km2/h_m2m_kmu
+            plot_path: relaxed_km2/h_m2m_kmu
 
             min_mass: -0.3
             max_mass: -0.1
@@ -24,7 +24,7 @@ scaling:
         km2:
             strategy: m2
             input_file: data/km2_full/all.km2_full.root
-            plot_path: full_km2/h_m2m_kmu
+            plot_path: relaxed_km2/h_m2m_kmu
 
             min_mass: -0.02
             max_mass:  0.02
@@ -45,7 +45,7 @@ scaling:
         halo:
             strategy: m2
             input_file: data/km2_full/all.km2_full.root
-            plot_path: full_km2/h_m2m_kmu
+            plot_path: relaxed_km2/h_m2m_kmu
 
             min_mass: -0.3
             max_mass: -0.1
@@ -53,7 +53,7 @@ scaling:
         km2:
             strategy: m2
             input_file: data/km2_full/all.km2_full.root
-            plot_path: full_km2/h_m2m_kmu
+            plot_path: relaxed_km2/h_m2m_kmu
 
             min_mass: -0.02
             max_mass:  0.02
@@ -69,7 +69,7 @@ mass_windows:
 
 output:
     input_file:  data/km2_full/all.km2_full.root
-    plot_path: full_km2/h_m2m_kmu
+    plot_path: relaxed_km2/h_m2m_kmu
     rebin: 10
 
     data_plot:

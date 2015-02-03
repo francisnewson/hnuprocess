@@ -1,0 +1,423 @@
+#************************************************************
+#
+# Using the 2013 model selection as a base to compare two
+# approaches to MUV. Requiring muons associated to track 
+# or not.
+#
+#************************************************************
+
+###################################################
+# FILE MANAGEMENT
+###################################################
+
+- exec:
+    skipmcruns: [ 20410, 20411, 20412, 20413, 20414, 20451, 20452, 20453, 20454, 20455, 20456 ]
+    skipdatalist: input/reco/conditions/bad_lkr_files.dat
+
+###################################################
+# STANDARD CORRECTIONS
+###################################################
+
+#Kaon track
+- input:
+    name: kaon_track
+    type: KaonTrack
+    kaon_type: auto
+    beam_mapping: input/reco/beam/beam_mapping.yaml
+
+#weight
+- selection:
+    name: kaon_mom_weights
+    type: KaonMomWeight
+    crude_weights: input/reco/mod/kaon_crude_weights.dat
+    fine_weights: input/reco/mod/kaon_fine_weights.dat
+
+#Autopass
+- selection:
+    name: passer
+    type : auto_pass
+
+
+- input:
+    name: cluster_corrector
+    type: ClusterCorrector
+    filename: "/afs/cern.ch/user/f/fnewson/work/hnu/gopher/data/detector/eopCorrfile.dat"
+    enabled: true
+
+###################################################
+# CUTS
+###################################################
+        
+# 1]Bad bursts
+- selection:
+    name: good_phys_burst
+    type: BadBurst
+    burst_list: "input/reco/conditions/bad_phys_burst.dat"
+
+- selection:
+    name: good_dch_burst
+    type: BadBurst
+    burst_list: "input/reco/conditions/bad_dch_burst.dat"
+
+- selection:
+    name: good_muv_burst
+    type: BadBurst
+    burst_list: "input/reco/conditions/bad_muv_burst.dat"
+
+- selection:
+    name: good_bursts
+    type: CompositeSelection
+    children:
+        - good_phys_burst
+        - good_dch_burst
+        - good_muv_burst
+
+# 2] SingleTrack
+- input:
+    name : bf_st
+    type : SingleTrack
+    method : BF
+
+    #log_level: always_print
+
+    init_min_mom: 3.0 
+    init_max_mom: 75.0
+
+    init_max_cda: 10.0
+
+    init_min_z: -2000.0
+    init_max_z:  9000.0
+
+    dch_merge_sep: 0.5
+
+    inputs:
+        kt: kaon_track
+
+- selection:
+    name: dch_veto
+    type : FoundGoodTrack
+
+    inputs :
+        ogt: bf_st
+
+
+# 3] Track charge
+- selection:
+    name: pos_trk
+    type : TrackCharge
+    charge: +1
+    inputs :
+        ogt: bf_st
+
+# 4] Track quality
+- selection:
+    name: quality_7
+    type: TrackQuality
+    quality: 0.7
+    inputs:
+        ogt: bf_st
+
+# 5] Track momentum
+- selection:
+    name: rk_track_mom
+    type: TrackMomentum
+    min: 5 #GeV
+    max: 80 #GeV
+    inputs:
+        ogt: bf_st
+
+# 6] LKr Veto
+- input:
+    name: rk_km2_clusters
+    type: Km2Clusters
+    noise_energy: 2 #GeV
+    noise_time: 12 #ns
+    brehm_radius: 0 #cm
+    track_cluster_radius: 20 #cm
+    inputs:
+        ogt: bf_st
+        ClusterCorrector: cluster_corrector
+
+- selection:
+    name: rk_lkr_veto
+    type: Km2NoBadCluster
+    inputs:
+        km2clusters: rk_km2_clusters
+
+# 7] Fiducial volume
+- selection:
+    name: rk_pz
+    type: TrackPZ
+    shape: rectangles
+    points:
+        - [ 13, 20, -1000, 9000 ]
+        - [ 20, 25, -1000, 9000 ]
+        - [ 25, 30,     0, 9000 ]
+        - [ 30, 35,   500, 9000 ]
+        - [ 35, 40,   500, 9000 ] 
+        - [ 40, 45,   500, 9000 ]
+        - [ 45, 50,  1000, 9000 ]
+        - [ 50, 55,  1000, 9000 ]
+        - [ 55, 60,  1500, 9000 ]
+        - [ 60, 65,  1500, 9000 ]
+    inputs:
+        ogt: bf_st
+
+
+# 8] CDA
+- selection:
+    name: rk_cda
+    type: TrackCda
+    max_cda: 3.5 #cm
+    inputs:
+        ogt: bf_st
+
+# 9] LKr acceptance
+- selection:
+    name: rk_lkr_accep
+    type: TrackLkrAcceptance
+    margin_parameter: 8 #cm
+    inputs:
+        ogt: bf_st
+
+# 10] LKr Hot cells
+
+- input:
+    name: km2_event
+    type: Km2Event
+    inputs:
+        ogt: bf_st
+        kt: kaon_track
+
+- selection:
+    name: rk_hot_lkr
+    type: Km2HotLkr
+    hot_cells: [ [ 134, 56 ], [ 134, 57 ] ]
+    inputs:
+        km2event: km2_event
+        km2clusters: rk_km2_clusters
+
+# 13] Track DHC1 ACC
+- selection:
+    name: rk_dch1_acc
+    type: TrackRadialAcceptance
+    track_section: upstream
+    z: 9708.42 #zDCH1
+    inner: 12.0
+    outer: 115.0
+    inputs:
+        ogt: bf_st
+
+# 14] Track DHC4 ACC
+- selection:
+    name: rk_dch4_acc
+    type: TrackRadialAcceptance
+    track_section: downstream
+    z: 11888.0 #zDCH1
+    inner: 14.0
+    outer: 115.0
+    inputs:
+        ogt: bf_st
+
+# 15] Track distance to LKr dead cell
+- selection:
+    name: rk_ddead_cell
+    type: TrackDDeadCell
+    min_ddead_cell: 2.0 #cm
+    inputs:
+        ogt: bf_st
+
+# 16] Track time
+- selection:
+    name: rk_dcht
+    type : TrackTime
+    max_dt: 20 #ns
+    inputs:
+        ogt: bf_st
+
+- selection:
+    name: muv_acc
+    type: TrackXYUVAcceptance
+    track_section: ds
+    z: 13012.0 #MUV3
+    min_x: -135.0
+    max_x:  135.0
+    min_y: -135.0
+    max_y:  135.0
+    min_u: -135.0
+    max_u:  135.0
+    min_v: -135.0
+    max_v:  135.0
+    inputs:
+        ogt: bf_st
+
+#Specific cuts for km2
+# S1 ] Trigger - already applied
+
+# S2] m2miss
+- selection:
+    name: rk_km2_m2m
+    type: Km2PM2Miss
+    shape: rectangles
+    points:
+        - [ 13, 20, -16e-3, 13e-3 ]
+        - [ 20, 25, -14e-3, 11e-3 ]
+        - [ 25, 30, -13e-3, 10e-3 ]
+        - [ 30, 35, -13e-3, 10e-3 ]
+        - [ 35, 40, -13e-3, 10e-3 ] 
+        - [ 40, 45, -13e-3, 10e-3 ]
+        - [ 45, 50, -13e-3, 10e-3 ]
+        - [ 50, 55, -14e-3, 11e-3 ]
+        - [ 55, 60, -15e-3, 12e-3 ]
+        - [ 60, 65, -16e-3, 12e-3 ]
+    inputs:
+        km2event: km2_event
+
+# S3] E/p
+- selection:
+    name: rk_km2_eop
+    #log_level: always_print
+    type: Km2TrackClusterEP
+    min_eop: 0.0
+    max_eop: 0.85
+    inputs:
+        km2clusters: rk_km2_clusters
+        ogt: bf_st
+
+
+- selection:
+    name: fiducial_z 
+    type: TrackPZ
+    shape: rectangles
+    points:
+        - [  5, 70, -1000, 9000 ]
+    inputs:
+        ogt: bf_st
+
+- subscriber:
+    name: muon_veto
+    type: MuonVeto
+    method: Data
+
+- subscriber:
+    name: track_muon_veto
+    type: MuonVeto
+    method: DataMatched
+    inputs:
+        ogt: bf_st
+
+- selection:
+    name: muv_1_or_2
+    type : MuonReqStatus
+    allowed_status: [ 1, 2, 3, 4 ]
+    ignore_classes: [ p6 ]
+    inputs:
+        muv: muon_veto
+
+- selection:
+    name: muv_1_or_2_track
+    type : MuonReqStatus
+    allowed_status: [ 1, 2, 3, 4 ]
+    ignore_classes: [ p6 ]
+    inputs:
+        muv: track_muon_veto
+
+###################################################
+# SELECTIONS
+###################################################
+
+- selection:
+    name: debug_momentum
+    type: TrackMomentum
+    min: 10 #GeV
+    max: 15 #GeV
+    inputs:
+        ogt: bf_st
+
+- selection:
+    name: debug_m2m
+    type: Km2M2Miss
+    min_m2: 0.02
+    max_m2: 0.04
+    inputs:
+        km2event: km2_event
+
+#full 2013
+- selection:
+    name: sel2013
+    type: CompositeSelection
+    children:
+        - passer
+        - kaon_mom_weights
+        - good_bursts
+        - dch_veto
+        - pos_trk
+        - quality_7
+        - rk_track_mom
+        - rk_lkr_veto
+        - rk_lkr_accep
+        - rk_hot_lkr
+        - rk_ddead_cell
+        - rk_dch1_acc
+        - rk_dch4_acc
+        - rk_cda
+        - rk_pz
+        - rk_dcht
+        - muv_acc
+
+
+- selection:
+    name: sel2013_muv
+    type: CompositeSelection
+    children:
+        - sel2013
+        - muv_1_or_2
+
+- selection:
+    name: sel2013_muv_track
+    type: CompositeSelection
+    children:
+        - sel2013
+        - muv_1_or_2_track
+
+- output:
+    name: tfout
+    type: tfile
+    filename: muv_comp.root
+
+- analysis:
+    type: Km2Plotter
+    name: any_muv
+    folder: km2_2013_any_muv
+    tfile: tfout
+    selection: sel2013_muv
+    inputs: 
+        km2event: km2_event
+
+- analysis:
+    type: Km2Plotter
+    name: track_muv
+    folder: km2_2013_track_muv
+    tfile: tfout
+    selection: sel2013_muv_track
+    inputs: 
+        km2event: km2_event
+
+- output:
+    name: oscout
+    type: ostream
+    filename: cout
+
+- analysis : 
+    name : full_summary_muv
+    type: Summary
+    base : passer
+    source : sel2013_muv
+    ostream: oscout
+
+- analysis : 
+    name : full_summary_track_muv
+    type: Summary
+    base : passer
+    source : sel2013_muv_track
+    ostream: oscout
