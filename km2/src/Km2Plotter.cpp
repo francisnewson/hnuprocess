@@ -89,6 +89,11 @@ namespace fn
         //----------
 
         //Kinematic correlations
+
+        h_pt_m2m_kmu_ = hs_.MakeTH2D( "h_pt_m2m_kmu", "Pt vs m2m",
+                100, 0, 0.5, "#P_T (GeV)",
+                1000, -0.7, 0.3, "m^{2}_{miss} ( GeV^{2}/ c^{4} )" );
+
         h_p_t_ = hs_.MakeTH2D( "h_p_t", "P vs angle" ,
                 100, 0, 100, "P( GeV )",
                 250, 0, 25e-3, "t( rad) ");
@@ -183,6 +188,7 @@ namespace fn
         h_m2_t_->Fill( km2re.get_m2m_kmu(), km2re.get_opening_angle(), wgt );
         h_m2_z_->Fill( km2re.get_m2m_kmu(), km2re.get_zvertex(), wgt );
         h_m2_cda_->Fill( km2re.get_m2m_kmu(), km2re.get_cda(), wgt );
+        h_pt_m2m_kmu_->Fill( km2re.get_pt(), km2re.get_m2m_kmu(), wgt );
 
         //Slices
         const SingleRecoTrack * srt = km2re.get_reco_track();

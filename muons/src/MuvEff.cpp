@@ -32,6 +32,14 @@ namespace fn
         h_muv_track_hits_ = hs_.MakeTH2D( Form( "h_muv_track_hits_%s", s_status.c_str()), 
                 Form( "MUV hits with status %s extrapolated from track", s_status.c_str() ),
                 150, -150 , 150, "X cm", 150, -150 , 150, "Y cm" );
+
+        h_dx = hs_.MakeTH1D( Form( "h_muv_dx_%s", s_status.c_str()), 
+                Form( "dX %s", s_status.c_str() ),
+                100, -50 , 50, "X cm" );
+
+        h_dy = hs_.MakeTH1D( Form( "h_muv_dy_%s", s_status.c_str()), 
+                Form( "dY %s", s_status.c_str() ),
+                100, -50 , 50, "Y cm" );
     }
 
     void MuvGeom::Fill( const fne::RecoMuon& rm, const SingleRecoTrack& srt, double wgt )
@@ -43,6 +51,8 @@ namespace fn
         TVector3 extrap = srt.extrapolate_ds( muv_plane_);
         h_muv_hits_->Fill( rm.x, rm.y, wgt );
         h_muv_track_hits_->Fill( extrap.X(), extrap.Y(), wgt );
+        h_dx->Fill( rm.x - extrap.X() , wgt );
+        h_dy->Fill( rm.y - extrap.Y() , wgt );
         //std::cout << "Fill extrap x: " << extrap.X() << std::endl;
     }
 

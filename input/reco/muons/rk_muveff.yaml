@@ -5,6 +5,14 @@
 #    http://goudzovs.web.cern.ch/goudzovs/ke2/selection.html
 #
 #************************************************************
+#
+###################################################
+# FILE MANAGEMENT
+###################################################
+
+- exec:
+    skipmcruns: [ 20410, 20411, 20412, 20413, 20414, 20451, 20452, 20453, 20454, 20455, 20456 ]
+    skipdatalist: input/reco/conditions/bad_lkr_files.dat
 
 #Kaon track
 - input:
@@ -358,30 +366,45 @@
     name: counter
     type: Counter
 
+- subscriber:
+    name: track_muon_veto
+    type: MuonVeto
+    method: DataMatched
+    inputs:
+        ogt: bf_st
+
 #Muon status
 - selection:
     name: muv_12
     type : MuonReqStatus
     allowed_status: [ 1, 2 ]
     ignore_classes: [ p6 ]
+    inputs:
+        muv: track_muon_veto
 
 - selection:
     name: muv_1_or_2
     type : MuonReqStatus
     allowed_status: [ 1, 2, 3, 4 ]
     ignore_classes: [ p6 ]
+    inputs:
+        muv: track_muon_veto
 
 - selection:
     name: muv_1
     type : MuonReqStatus
     allowed_status: [ 1, 2, 4 ]
     ignore_classes: [ p6 ]
+    inputs:
+        muv: track_muon_veto
 
 - selection:
     name: muv_2
     type : MuonReqStatus
     allowed_status: [ 1, 2, 3 ]
     ignore_classes: [ p6 ]
+    inputs:
+        muv: track_muon_veto
 
 - output:
     name: tfout

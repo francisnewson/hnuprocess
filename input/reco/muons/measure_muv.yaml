@@ -143,6 +143,8 @@
     type: TrackPZ
     shape: rectangles
     points:
+        - [  5, 10, -1000, 9000 ]
+        - [ 10, 13, -1000, 9000 ]
         - [ 13, 20, -1000, 9000 ]
         - [ 20, 25, -1000, 9000 ]
         - [ 25, 30,     0, 9000 ]
@@ -263,8 +265,8 @@
 - selection:
     name: km2_peak_m2
     type: Km2M2Miss
-    min_m2: -0.002
-    max_m2:   0.002
+    min_m2: -0.02
+    max_m2:   0.02
     inputs:
         km2event: km2_event
 
@@ -337,6 +339,33 @@
         - muv1_radius
 
 - selection:
+    name: base_wide_mom
+    type: CompositeSelection
+    children:
+        - passer
+        - good_bursts
+        - dch_veto
+        - pos_trk
+        - quality_7
+        - rk_lkr_veto
+        - rk_pz
+        - rk_lkr_accep
+        - rk_hot_lkr
+        - rk_dch1_acc
+        - rk_dch4_acc
+        - rk_ddead_cell
+        - rk_dcht
+        - muv1_radius
+
+- selection:
+    name: easy
+    type: CompositeSelection
+    children:
+        - passer
+        - dch_veto
+        - muv1_radius
+
+- selection:
     { name: signal_rk_selection, type: CompositeSelection, children: [ base_rk_selection,  rk_cda ] }
 
 - selection:
@@ -347,6 +376,9 @@
 
 - selection:
     { name:  rk_eop_peak, type: CompositeSelection, children: [ signal_rk_selection , rk_km2_eop , km2_peak_m2 ] }
+
+- selection:
+    { name:  rk_wide_mom, type: CompositeSelection, children: [ base_wide_mom ,rk_cda,  rk_km2_eop , km2_peak_m2 ] }
 
 
 - monitor:
@@ -359,6 +391,22 @@
     method: DataMatched
     inputs:
         ogt: bf_st
+
+- selection:
+    name: muv_1
+    type : MuonReqStatus
+    allowed_status: [ 1, 2,  4 ]
+    ignore_classes: [ p6 ]
+    inputs:
+        muv: track_muon_veto
+
+- selection:
+    name: muv_2
+    type : MuonReqStatus
+    allowed_status: [ 1, 2,  3 ]
+    ignore_classes: [ p6 ]
+    inputs:
+        muv: track_muon_veto
 
 - selection:
     name: muv_1_or_2
@@ -375,7 +423,7 @@
     ignore_classes: [ p6 ]
     inputs:
         muv: track_muon_veto
-
+            
 ###
 - output:
     name: tfout
@@ -384,9 +432,9 @@
 
 - analysis:
     type: MeasureMuv
-    name: measure_muv_or
+    name: measure_muv_or_full
     tfile: tfout
-    folder: muv_or
+    folder: muv_or_full
     selection: rk_eop_peak
     muv_selection: muv_1_or_2
     inputs:
@@ -394,13 +442,44 @@
 
 - analysis:
     type: MeasureMuv
-    name: measure_muv_and
+    name: measure_muv_or_wide_mom
     tfile: tfout
-    folder: muv_and
+    folder: muv_or_wide_mom
+    selection: rk_wide_mom
+    muv_selection: muv_1_or_2
+    inputs:
+        ogt: bf_st
+
+- analysis:
+    type: MeasureMuv
+    name: measure_muv_and_full
+    tfile: tfout
+    folder: muv_and_full
     selection: rk_eop_peak
     muv_selection: muv_1_and_2
     inputs:
         ogt: bf_st
+
+- analysis:
+    type: MeasureMuv
+    name: measure_muv_and_wide_mom
+    tfile: tfout
+    folder: muv_and_wide_mom
+    selection: rk_wide_mom
+    muv_selection: muv_1_and_2
+    inputs:
+        ogt: bf_st
+
+- analysis:
+    type: MuvEff
+    name: muv_eff
+    tfile: tfout
+    folder: easy_eff
+    selection: easy
+    muv_selection: muv_1
+    muv_plane: 1 
+    inputs:
+        km2event: km2_event
 
 - output:
     name: oselist

@@ -39,6 +39,8 @@ namespace fn
             std::set<int> status_;
             TH2D * h_muv_hits_;
             TH2D * h_muv_track_hits_;
+            TH1D * h_dx;
+            TH1D * h_dy;
             double muv_plane_;
             HistStore hs_;
     };

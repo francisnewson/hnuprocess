@@ -66,6 +66,7 @@ namespace fn
             TH1D * h_z_;
             TH1D * h_pt_;
 
+            TH2D * h_pt_m2m_kmu_;
             TH2D * h_p_t_;
             TH2D * h_p_cda_;
             TH2D * h_p_z_;

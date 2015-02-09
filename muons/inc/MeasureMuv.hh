@@ -37,8 +37,15 @@ namespace fn
             TH2D * h_xy_passed_;
             TH2D * h_xy_total_;
 
-            HistStore hs_;
+            TH1D * h_r_passed_;
+            TH1D * h_r_total_;
 
+            TH1D * h_p_passed_;
+            TH1D * h_p_total_;
+
+            TH2D * h_p_r_;
+
+            HistStore hs_;
 
             TFile& tfile_;
             std::string folder_;
