@@ -1,0 +1,160 @@
+#A minimal 1 track selection to filter the halo data
+
+#-------------------------------------------------- 
+
+###################################################
+# FILE MANAGEMENT
+###################################################
+
+- exec:
+    skipmcruns: [ 20410, 20411, 20412, 20413, 20414, 20451, 20452, 20453, 20454, 20455, 20456 ]
+    skipdatalist: input/reco/conditions/bad_lkr_files.dat
+
+
+- output:
+    name: tfout
+    type: tfile
+    filename: filtered.root
+
+- monitor:
+    name: counter
+    type: Counter
+
+# Burts -------------------------------------------
+        
+# 1]Bad bursts
+- selection:
+    name: good_phys_burst
+    type: BadBurst
+    burst_list: "input/reco/conditions/bad_phys_burst.dat"
+
+- selection:
+    name: good_dch_burst
+    type: BadBurst
+    burst_list: "input/reco/conditions/bad_dch_burst.dat"
+
+- selection:
+    name: good_muv_burst
+    type: BadBurst
+    burst_list: "input/reco/conditions/bad_muv_burst.dat"
+
+- selection:
+    name: good_bursts
+    type: CompositeSelection
+    children:
+        - good_phys_burst
+        - good_dch_burst
+        - good_muv_burst
+
+###################################################
+# CORRECTIONS
+###################################################
+
+- input:
+    name: kaon_track
+    type: KaonTrack
+    kaon_type: auto
+    beam_mapping: input/reco/beam/beam_mapping.yaml
+
+###################################################
+# CUTS
+###################################################
+
+#Autopass
+- selection:
+    name: passer
+    type : auto_pass
+
+#SingleTrack
+- input:
+    name : bf_st
+    type : SingleTrack
+    method : BF
+
+    #log_level: always_print
+
+    init_min_mom: 3.0 
+    init_max_mom: 80.0
+
+    init_max_cda: 15.0
+
+    init_min_z: -4000.0
+    init_max_z:  90000.0
+
+    dch_merge_sep: 0.5
+    inputs:
+        kt: kaon_track
+
+
+#Found ogt
+- selection:
+    name: dch_veto
+    type : FoundGoodTrack
+
+    inputs :
+        ogt: bf_st
+
+#Track charge
+- selection:
+    name: pos_trk
+    type : TrackCharge
+    charge: +1
+    inputs :
+        ogt: bf_st
+
+###################################################
+# SELECTIONS
+###################################################
+
+- selection:
+    name: dch_filter
+    type: CompositeSelection
+    children:
+        - passer
+        - good_bursts
+        - dch_veto
+        - pos_trk
+
+- analysis:
+    name: write_filter
+    type: Filter
+    selection: dch_filter
+    tfile: tfout
+
+- output:
+    name: oscout
+    type: ostream
+    filename: cout
+
+- output:
+    name: fout
+    type: ostream
+    filename: summary.dat
+
+- analysis : 
+    name : full_summary
+    type: Summary
+    base : passer
+    source : dch_filter 
+    ostream: oscout
+
+- analysis : 
+    name : f_full_summary
+    type: Summary
+    base : passer
+    source : dch_filter 
+    ostream: fout
+
+- analysis:
+    name: burst_count
+    type:  BurstCount
+    selection: dch_filter
+    tfile: tfout
+    folder: filter_count
+
+- analysis:
+    name: raw_burst_count
+    type:  BurstCount
+    selection: good_bursts
+    tfile: tfout
+    folder: good_burst_count

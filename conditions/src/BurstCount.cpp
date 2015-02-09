@@ -50,7 +50,7 @@ namespace fn
 #endif
 
         cd_p( &tfile_, folder_ );
-        burst_tree_.Print();
+        //burst_tree_.Print();
         burst_tree_.Write();
     }
 

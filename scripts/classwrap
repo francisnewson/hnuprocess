@@ -28,7 +28,7 @@ def wrap( classname ):
     strings.append( 'class ' + classname + '\n{\n};\n}')
     strings.append( '#endif')
     strings.append( '')
-    strings.append( '#include ' + classname +'.hh')
+    strings.append( '#include "' + classname +'.hh"')
     strings.append( 'namespace fn\n{')
     strings.append( '\n}')
     return "\n".join( strings )
