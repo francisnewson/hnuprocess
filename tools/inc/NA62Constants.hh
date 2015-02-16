@@ -51,5 +51,7 @@ namespace na62const
 
     constexpr double pi = 3.141592653589793238462643383279502884;
 
+    constexpr double mpn33_kick = 0.265;
+
 }
 #endif

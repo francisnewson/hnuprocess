@@ -111,14 +111,22 @@
     inputs:
         ogt: bf_st
 
+
+- output:
+    name: ose
+    type: ostream
+    filename: pol_check.dat
+
 - analysis : 
     name : full_summary_pos
     type: Summary
     base : passer
     source : pol_check_sel_pos
+    ostream:  ose
 
 - analysis : 
     name : full_summary_neg
     type: Summary
     base : passer
     source : pol_check_sel_neg
+    ostream:  ose

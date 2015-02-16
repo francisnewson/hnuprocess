@@ -3,6 +3,7 @@
 #include "Subscriber.hh"
 #include "PolarityFinder.hh"
 #include "RecoFactory.hh"
+#include <vector>
 #if 0
 /*
  *  __  __                __     __   _
@@ -17,6 +18,7 @@
 namespace fne
 {
     class Event;
+    class Mc;
 }
 namespace fn
 {
@@ -112,6 +114,52 @@ namespace fn
             mutable std::uniform_real_distribution<double> uni_dist_;
             mutable std::default_random_engine generator_;
     };
+
+    //--------------------------------------------------
+
+    //Handle efficiencies on a 2D grid
+
+    class Eff2D
+    {
+        public:
+            Eff2D( std::vector<double> xedges, 
+                    std::vector<double> yedges, 
+                    std::vector<double> effs );
+
+                double efficiency( double x, double y ) const;
+
+        private:
+            std::size_t get_bin( double val, const std::vector<double>& edges ) const;
+
+            std::vector<double> xedges_;
+            std::vector<double> yedges_;
+            std::vector<double> effs_;
+    };
+
+    //--------------------------------------------------
+
+    class MCXYMuonVeto : public MuonVeto
+    {
+        public:
+            MCXYMuonVeto( const fne::Event * e, 
+                    const SingleTrack& st , Eff2D muv_eff );
+
+        private:
+            void process_event() const;
+            const fne::Event * e_;
+            const SingleTrack& st_;
+
+            PolarityFinder pf_;
+            Eff2D muv_eff_;
+
+            mutable std::uniform_real_distribution<double> uni_dist_;
+            mutable std::default_random_engine generator_;
+    };
+
+    std::pair<double, double> muv_impact(
+            const fne::Mc & mce, std::size_t muon_pos, int polarity );
+
+    std::size_t find_muon( const fne::Mc& mce );
 
     //--------------------------------------------------
 
