@@ -98,11 +98,21 @@ namespace fn
 
                 return new MCMuonVeto{ event, *st, muv1_effs, muv2_effs };
             }
+            else if ( method == "MCXY") 
+            {
+                std::string eff_file = get_yaml<std::string>( instruct, "effs_file" );
+                const SingleTrack* st = get_single_track( instruct, rf );
+
+                YAML::Node eff_conf = YAML::LoadFile( eff_file );
+                return new MCXYMuonVeto( event, *st,
+                        Eff2D(  eff_conf["xbins"].as<std::vector<double>>(),
+                            eff_conf["ybins"].as<std::vector<double>>(),
+                            eff_conf["effs"].as<std::vector<double>>() ) );
+            }
             else
             {
                 throw Xcept<UnknownMuonVetoMethod>( method );
             }
-
         }
 
     //--------------------------------------------------
@@ -257,7 +267,7 @@ namespace fn
         std::size_t xbin = get_bin( x, xedges_ );
         std::size_t ybin = get_bin( y, yedges_ );
 
-        std::size_t eff_bin = ybin * xedges_.size() + xbin;
+        std::size_t eff_bin = ybin * ( xedges_.size() - 1 ) + xbin;
         return effs_.at( eff_bin );
     }
 
@@ -300,7 +310,23 @@ namespace fn
         //We simulate all or nothing
         if ( muv_hit )
         {
-            set_muvs( true, true, false);
+            //There was a hit. Was it associated with the track?
+            const SingleRecoTrack & srt = st_.get_single_track();
+
+            double track_x = srt.extrapolate_ds( na62const::zMuv2.X() );
+            double track_y = srt.extrapolate_ds( na62const::zMuv1.Y() );
+
+            double half_width - 12.5;//cm
+
+            if ( fabs(impact_point.X() - track_x) < half_width 
+                    && fabs( impact_point.Y() - track_y ) < half_width )
+            {
+                set_muvs( true, true, false);
+            }
+            else
+            {
+                set_muvs( false, false, false);
+            }
         }
         else
         {
