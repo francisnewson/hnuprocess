@@ -1,8 +1,7 @@
 HNU ANALYSIS
 ============
 
-_This document is in Markdown format so it can be read with a 
-Markdown editor._
+_This document is in Markdown format so it can be read with a Markdown editor._
 
 A set of libraries, applications and scripts for analysing data from
 the NA62 2007 experiment.

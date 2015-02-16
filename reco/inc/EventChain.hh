@@ -33,8 +33,8 @@ namespace fn
             bool load_next_event_header();
             void load_full_event();
 
-                //Tree information
-                int get_tree_number() const;
+            //Tree information
+            int get_tree_number() const;
             std::string get_filename() const;
 
             //Event queries
