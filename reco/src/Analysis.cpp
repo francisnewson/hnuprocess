@@ -8,8 +8,10 @@ namespace fn
 
     void Analysis::new_event()
     {
+        //If we pass selection
         if ( selection_.check() )
         {
+            //call virtual function
             process_event();
         }
     }

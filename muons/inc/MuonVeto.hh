@@ -57,6 +57,7 @@ namespace fn
             mutable bool muv3_;
     };
 
+    //factory function
     template<>
         Subscriber * create_subscriber<MuonVeto>
         (YAML::Node& instruct, RecoFactory& rf );
@@ -118,7 +119,6 @@ namespace fn
     //--------------------------------------------------
 
     //Handle efficiencies on a 2D grid
-
     class Eff2D
     {
         public:
@@ -138,6 +138,7 @@ namespace fn
 
     //--------------------------------------------------
 
+    //Simulates varying efficiency over XY plane
     class MCXYMuonVeto : public MuonVeto
     {
         public:
@@ -163,6 +164,7 @@ namespace fn
 
     //--------------------------------------------------
 
+    //Convenience function when creating other subscribers
     MuonVeto * get_muon_veto
         ( YAML::Node& instruct, RecoFactory& rf );
 

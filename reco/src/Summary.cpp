@@ -178,30 +178,6 @@ namespace fn
         Subscriber * create_subscriber<Summary>
         (YAML::Node& instruct, RecoFactory& rf )
         {
-#if 0
-            Selection * base = 0 ;
-            Selection * source = 0 ;
-            std::ostream& os = std::cerr;
-
-            //Extract burst list filename
-            if ( YAML::Node ybase = instruct["base"] )
-            {
-                base = rf.get_selection( ybase.as<std::string>() );
-            }
-            else
-            {
-                throw Xcept<MissingSelection>( "Summary: base" );
-            }
-
-            if ( YAML::Node ysource = instruct["source"] )
-            {
-                source = rf.get_selection( ysource.as<std::string>() );
-            }
-            else
-            {
-                throw Xcept<MissingSelection>( "Summary: source" );
-            }
-#endif
 
             Selection * base = rf.get_selection(
                     get_yaml<std::string>(instruct, "base" ));

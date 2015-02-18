@@ -12,6 +12,7 @@
 namespace fn
 {
 
+    //Convert muon planes into hit status
     int get_muon_status( bool muv1, bool muv2, bool muv3 )
     {
         if ( (!muv1) && (!muv2) ){ return 0; }
@@ -27,6 +28,7 @@ namespace fn
 
     void MuonVeto::new_event() { dirty_ = true; }
 
+    //Store result of Muon processing
     void MuonVeto::set_muvs(  bool muv1, bool muv2, bool muv3 ) const
     {
         muv1_ = muv1;
@@ -35,6 +37,7 @@ namespace fn
         status_ = get_muon_status( muv1, muv2, muv3 );
     }
 
+    //Implement cacheing
     int MuonVeto::get_muv_status()  const
     { 
         if ( dirty_ ){ process_event(); }
@@ -58,11 +61,14 @@ namespace fn
 
     //--------------------------------------------------
 
+    //factory function
     template<>
         Subscriber * create_subscriber<MuonVeto>
         (YAML::Node& instruct, RecoFactory& rf )
         {
             std::string method = instruct["method"].as<std::string>();
+
+            //all versions need an event pointer
             const fne::Event * event = rf.get_event_ptr();
 
             if ( method == "Data" )
@@ -137,6 +143,7 @@ namespace fn
 
             Int_t status = rm->status;
 
+            //any muon will do
             if ( status != 3 ){ muv1_ = true; }
             if ( status != 4 ){ muv2_ = true; }
             if ( status != 2 ){ muv3_ = true; }
@@ -170,6 +177,7 @@ namespace fn
             fne::RecoMuon * rm = static_cast<fne::RecoMuon*>
                 ( muons.At( imuon ) );
 
+            //only accept muons which are matched with track
             if ( rm->iTrk == track_compact )
             {
                 Int_t status = rm->status;
@@ -198,6 +206,8 @@ namespace fn
     void MCMuonVeto::process_event() const
     {
         const SingleRecoTrack & srt = st_.get_single_track();
+
+        //Get x coord from MUV2 and y coord from MUV1
         double xMuv2 = srt.extrapolate_ds( na62const::zMuv2 ).X();
         double yMuv1 = srt.extrapolate_ds( na62const::zMuv1 ).Y();
 
@@ -215,34 +225,6 @@ namespace fn
         set_muvs( muv1_, muv2_, muv3_);
     }
 
-
-    //--------------------------------------------------
-
-    MuonVeto * get_muon_veto
-        ( YAML::Node& instruct, RecoFactory& rf )
-        {
-            MuonVeto * mv = 0;
-            try
-            {
-                YAML::Node ymv = instruct["inputs"]["muv"];
-
-                if ( !ymv )
-                { throw Xcept<MissingNode>( "muv" ); }
-
-                mv = dynamic_cast<MuonVeto*>
-                    (rf.get_subscriber( ymv.as<std::string>() ) );
-
-                if ( !mv )
-                { throw Xcept<BadCast>( "MUV" );}
-
-            }
-            catch ( ... )
-            {
-                std::cerr << "Trying to get Muon Veto ( " __FILE__ ")\n";
-                throw;
-            }
-            return mv;
-        }
 
     //--------------------------------------------------
 
@@ -283,7 +265,9 @@ namespace fn
 
     MCXYMuonVeto::MCXYMuonVeto( const fne::Event * e, 
             const SingleTrack& st, Eff2D  muv_eff)
-        :e_( e ), st_( st ),  muv_eff_( muv_eff ),
+        :e_( e ), st_( st ), 
+        pf_( "input/reco/conditions/run_polarity.dat" ),
+        muv_eff_( muv_eff ),
         uni_dist_( 0.0, 1.0 )
     {}
 
@@ -302,6 +286,9 @@ namespace fn
         std::pair<double, double>  impact_point = muv_impact(
                 e_->mc, muon_pos, pf_.get_polarity( e_->header.run ) );
 
+        BOOST_LOG_SEV( get_log(), log_level() )
+            << impact_point.first << "  " << impact_point.second;
+
         double efficiency = muv_eff_.efficiency( 
                 impact_point.first, impact_point.second);
 
@@ -313,13 +300,13 @@ namespace fn
             //There was a hit. Was it associated with the track?
             const SingleRecoTrack & srt = st_.get_single_track();
 
-            double track_x = srt.extrapolate_ds( na62const::zMuv2.X() );
-            double track_y = srt.extrapolate_ds( na62const::zMuv1.Y() );
+            double track_x = srt.extrapolate_ds( na62const::zMuv2).X() ;
+            double track_y = srt.extrapolate_ds( na62const::zMuv1).Y() ;
 
-            double half_width - 12.5;//cm
+            double half_width = 12.5;//cm
 
-            if ( fabs(impact_point.X() - track_x) < half_width 
-                    && fabs( impact_point.Y() - track_y ) < half_width )
+            if ( fabs(impact_point.first - track_x) < 2*half_width 
+                    && fabs( impact_point.second - track_y ) < 2*half_width )
             {
                 set_muvs( true, true, false);
             }
@@ -340,7 +327,7 @@ namespace fn
         const auto& muon = 
             *static_cast<const fne::McParticle*>( mce.particles[muon_pos] );
 
-        Track muon_track{ muon.production_vertex, muon.momentum.P() };
+        Track muon_track{ muon.production_vertex, muon.momentum.Vect() };
 
         //if produced before MPN33 we have to apply kick
         if ( muon_track.get_point().Z() < na62const::zMagnet )
@@ -371,4 +358,32 @@ namespace fn
         }
         return mce.npart;
     }
+
+    //--------------------------------------------------
+
+    MuonVeto * get_muon_veto
+        ( YAML::Node& instruct, RecoFactory& rf )
+        {
+            MuonVeto * mv = 0;
+            try
+            {
+                YAML::Node ymv = instruct["inputs"]["muv"];
+
+                if ( !ymv )
+                { throw Xcept<MissingNode>( "muv" ); }
+
+                mv = dynamic_cast<MuonVeto*>
+                    (rf.get_subscriber( ymv.as<std::string>() ) );
+
+                if ( !mv )
+                { throw Xcept<BadCast>( "MUV" );}
+
+            }
+            catch ( ... )
+            {
+                std::cerr << "Trying to get Muon Veto ( " __FILE__ ")\n";
+                throw;
+            }
+            return mv;
+        }
 }

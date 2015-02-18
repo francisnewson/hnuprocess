@@ -46,5 +46,7 @@ namespace fn
 
     Vertex compute_cda
         ( const Track& a, const Track& b );
+
+    std::ostream& operator<<( std::ostream& os, const Track& t );
 }
 #endif

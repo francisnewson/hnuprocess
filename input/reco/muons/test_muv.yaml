@@ -197,8 +197,8 @@
     type: TrackRadialAcceptance
     track_section: upstream
     z: 9708.42 #zDCH1
-    inner: 5.0
-    outer: 200.0
+    inner: 12.0
+    outer: 115.0
     inputs:
         ogt: bf_st
 
@@ -208,8 +208,8 @@
     type: TrackRadialAcceptance
     track_section: downstream
     z: 11888.0 #zDCH1
-    inner: 5.0
-    outer: 200.0
+    inner: 14.0
+    outer: 115.0
     inputs:
         ogt: bf_st
 
@@ -284,8 +284,8 @@
     type: TrackRadialAcceptance
     track_section: downstream
     z: 12778.0 #zmuv1
-    inner: 5.0
-    outer: 250
+    inner: 22.0
+    outer: 200
     inputs:
         ogt: bf_st
 
@@ -294,14 +294,14 @@
     type: TrackXYUVAcceptance
     track_section: ds
     z: 13012.0 #MUV3
-    min_x: -150.0
-    max_x:  150.0
-    min_y: -150.0
-    max_y:  150.0
-    min_u: -150.0
-    max_u:  150.0
-    min_v: -150.0
-    max_v:  150.0
+    min_x: -135.0
+    max_x:  135.0
+    min_y: -135.0
+    max_y:  135.0
+    min_u: -135.0
+    max_u:  135.0
+    min_v: -135.0
+    max_v:  135.0
     inputs:
         ogt: bf_st
 
@@ -338,24 +338,6 @@
         - rk_dcht
         - muv1_radius
 
-#full RK selection
-- selection:
-    name: base_rk_selection_no_track_lkr
-    type: CompositeSelection
-    children:
-        - passer
-        - good_bursts
-        - dch_veto
-        - pos_trk
-        - quality_7
-        - rk_track_mom
-#       - rk_lkr_veto
-#       - rk_pz
-#       - rk_dch1_acc
-#       - rk_dch4_acc
-#       - rk_ddead_cell
-#       - rk_dcht
-
 - selection:
     name: base_wide_mom
     type: CompositeSelection
@@ -387,10 +369,7 @@
     { name: signal_rk_selection, type: CompositeSelection, children: [ base_rk_selection,  rk_cda ] }
 
 - selection:
-    { name: rk_peak_, type: CompositeSelection, children: [ signal_rk_selection , km2_peak_m2 ] }
-
-- selection:
-    { name: rk_peak, type: CompositeSelection, children: [ base_rk_selection_no_track_lkr , km2_peak_m2 ] }
+    { name: rk_peak, type: CompositeSelection, children: [ signal_rk_selection , km2_peak_m2 ] }
 
 - selection:
     { name: rk_eop, type: CompositeSelection, children: [ signal_rk_selection , rk_km2_eop ] }
@@ -407,9 +386,17 @@
     type: Counter
 
 - subscriber:
-    name: track_muon_veto
+    name: track_muon_veto_
     type: MuonVeto
     method: DataMatched
+    inputs:
+        ogt: bf_st
+
+- subscriber:
+    name: track_muon_veto
+    type: MuonVeto
+    method: MCXY
+    effs_file: input/reco/conditions/muv_effs.yaml
     inputs:
         ogt: bf_st
 
@@ -477,16 +464,6 @@
     tfile: tfout
     folder: muv_and_full
     selection: rk_eop_peak
-    muv_selection: muv_1_and_2
-    inputs:
-        ogt: bf_st
-
-- analysis:
-    type: MeasureMuv
-    name: measure_no_lkr
-    tfile: tfout
-    folder: muv_and_no_lkr
-    selection: rk_peak
     muv_selection: muv_1_and_2
     inputs:
         ogt: bf_st

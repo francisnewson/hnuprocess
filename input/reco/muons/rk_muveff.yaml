@@ -107,7 +107,8 @@
 - selection:
     name: rk_track_mom
     type: TrackMomentum
-    min: 13 #GeV
+    min: 3 #GeV
+    #min: 13 #GeV
     max: 65 #GeV
     inputs:
         ogt: bf_st
@@ -136,6 +137,7 @@
     type: TrackPZ
     shape: rectangles
     points:
+        - [ 3, 13, -1000, 9000 ]
         - [ 13, 20, -1000, 9000 ]
         - [ 20, 25, -1000, 9000 ]
         - [ 25, 30,     0, 9000 ]
@@ -229,6 +231,7 @@
     type: Km2PM2Miss
     shape: rectangles
     points:
+        - [ 3, 13, -16e-3, 13e-3 ]
         - [ 13, 20, -16e-3, 13e-3 ]
         - [ 20, 25, -14e-3, 11e-3 ]
         - [ 25, 30, -13e-3, 10e-3 ]

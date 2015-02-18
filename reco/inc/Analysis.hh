@@ -29,7 +29,7 @@ namespace fn
     {
         public:
             Analysis( const Selection&s );
-            void new_event();
+            void new_event(); //overrides Subscriber::new_event()
             double get_weight() const;
 
         private:

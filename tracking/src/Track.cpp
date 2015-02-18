@@ -1,6 +1,7 @@
 #include "Track.hh"
 #include <stdexcept>
 #include <cmath>
+#include <iostream>
 
 namespace fn
 {
@@ -65,4 +66,14 @@ namespace fn
             return result;
         }
 
+    std::ostream& operator<<( std::ostream& os, const Track& t )
+    {
+        TVector3 p = t.get_point();
+        TVector3 d = t.get_direction();
+
+        os << "p[ " << p.X() << ", " << p.Y() << ", " << p.Z()
+            << " ] d[ " <<  d.X() << ", " << d.Y() << ", " << d.Z() << " ]";
+
+        return os;
+    }
 }

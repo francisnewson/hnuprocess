@@ -44,6 +44,8 @@ namespace fn
     };
 
     struct SubscriberFactory {
+
+        //A map between strings and function pointers
         typedef std::map<std::string, Subscriber *(*)
             (  YAML::Node& instruct, RecoFactory& rf ) > map_type;
 
