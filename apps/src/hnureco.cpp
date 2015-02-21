@@ -376,6 +376,8 @@ int main( int argc, char * argv[] )
 
     reco.end_processing();
 
+    reco_factory.print_outputs( std::cerr );
+
     //if we stopped remotely, give a different return value
     int return_value = EXIT_SUCCESS;
     if ( remote_stop() ) { return_value = EXIT_FAILURE; }

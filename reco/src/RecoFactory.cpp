@@ -129,17 +129,21 @@ namespace fn
         {
             ostreams_.insert( 
                     make_pair( name,  &osl_.get_ostream( p ) ) );
+
         }
         else
         {
+            std::string munged_path = output_prefix_.string() + p;
+
             BOOST_LOG_SEV( get_log(), startup )
-                << name << " actually points to " <<
-                output_prefix_.string() + p ;
+                << name << " actually points to " << munged_path;
 
             //Add a prefix to physical files
             ostreams_.insert( 
                     make_pair( name,  &osl_.get_ostream(
-                            output_prefix_.string() + p ) ) );
+                            munged_path ) ) );
+
+            ostream_paths_.insert( make_pair( name, munged_path ) );
         }
 
     }
@@ -173,6 +177,8 @@ namespace fn
             tfiles_.insert( make_pair ( name,  &tfl_.get_tfile
                         ( munged_path  ) ) );
 
+            tfile_paths_.insert( make_pair( name, munged_path.string() ) );
+
             BOOST_LOG_SEV( get_log(), debug )
                 << name << " points to " << munged_path << std::endl;
         }
@@ -189,6 +195,21 @@ namespace fn
             std::cerr << "Can't find " << name << std::endl;
             throw std::out_of_range
                 (   std::string( e.what() ) + "name: " +  name );
+        }
+    }
+
+    void RecoFactory::print_outputs( std::ostream& os ) const
+    {
+        os << "OUTPUT STREAMS\n";
+        for ( const auto& kv : ostream_paths_ )
+        {
+            os << std::setw(20 ) << kv.first << ": " << kv.second << "\n";
+        }
+
+        os << "TFILES\n";
+        for ( const auto& kv : tfile_paths_ )
+        {
+            os << std::setw(20 ) << kv.first << ": " << kv.second << "\n";
         }
     }
 

@@ -69,6 +69,8 @@ namespace fn
 
             TFile& get_tfile( std::string name );
 
+            void print_outputs( std::ostream& os ) const;
+
             //channel management 
             void set_channel( const std::string& channel);
             std::string get_channel() const;
@@ -94,11 +96,13 @@ namespace fn
             //stream management
             boost::filesystem::path output_prefix_;
             std::map<std::string, std::ostream*> ostreams_;
+            std::map<std::string, std::string> ostream_paths_;
             OSLoader osl_;
 
             //tfile management
             TFileLoader tfl_;
             std::map<std::string, TFile*> tfiles_;
+            std::map<std::string, std::string> tfile_paths_;
 
             //channel management
             std::string channel_;

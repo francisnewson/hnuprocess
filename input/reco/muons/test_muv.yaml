@@ -380,6 +380,24 @@
 - selection:
     { name:  rk_wide_mom, type: CompositeSelection, children: [ base_wide_mom ,rk_cda,  rk_km2_eop , km2_peak_m2 ] }
 
+- selection:
+    name: rk_nolkr
+    type: CompositeSelection
+    children:
+        - passer
+        - good_bursts
+        - dch_veto
+        - pos_trk
+        - quality_7
+        - rk_track_mom
+        - rk_pz
+        - rk_lkr_accep
+        - rk_hot_lkr
+        - rk_dch1_acc
+        - rk_dch4_acc
+        - rk_ddead_cell
+        - rk_dcht
+        - muv1_radius
 
 - monitor:
     name: counter
@@ -447,6 +465,7 @@
     muv_selection: muv_1_or_2
     inputs:
         ogt: bf_st
+        muv : track_muon_veto
 
 - analysis:
     type: MeasureMuv
@@ -457,6 +476,7 @@
     muv_selection: muv_1_or_2
     inputs:
         ogt: bf_st
+        muv : track_muon_veto
 
 - analysis:
     type: MeasureMuv
@@ -467,6 +487,18 @@
     muv_selection: muv_1_and_2
     inputs:
         ogt: bf_st
+        muv : track_muon_veto
+
+- analysis:
+    type: MeasureMuv
+    name: measure_muv_nolkr
+    tfile: tfout
+    folder: muv_and_nolkr
+    selection: rk_nolkr
+    muv_selection: muv_1_and_2
+    inputs:
+        ogt: bf_st
+        muv : track_muon_veto
 
 - analysis:
     type: MeasureMuv
@@ -477,6 +509,7 @@
     muv_selection: muv_1_and_2
     inputs:
         ogt: bf_st
+        muv : track_muon_veto
 
 - analysis:
     type: MuvEff

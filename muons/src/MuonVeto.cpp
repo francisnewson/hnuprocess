@@ -121,7 +121,12 @@ namespace fn
             }
         }
 
+
     //--------------------------------------------------
+
+    //**************************************************
+    //Data Muon Veto
+    //**************************************************
 
     DataMuonVeto::DataMuonVeto( const fne::Event * e )
         :e_( e ){}
@@ -131,6 +136,9 @@ namespace fn
     {
         const TClonesArray& muons = e_->detector.muons;
         Int_t nmuons = e_->detector.nmuons;
+
+        if ( nmuons > 0 ){ found_muon_ = true; }
+        else { found_muon_ = false;}
 
         bool muv1_ = false;
         bool muv2_ = false;
@@ -153,8 +161,16 @@ namespace fn
         set_muvs( muv1_, muv2_, muv3_ );
     }
 
+    bool DataMuonVeto::found_muon() const
+    {
+        return found_muon_;
+    }
+
     //--------------------------------------------------
 
+    //**************************************************
+    //Data Matched Muon Veto
+    //**************************************************
     DataMatchedMuonVeto::DataMatchedMuonVeto( const fne::Event * e ,
             const SingleTrack& st )
         :e_( e ), st_(st ){}
@@ -171,11 +187,17 @@ namespace fn
         bool muv1_ = false;
         bool muv2_ = false;
         bool muv3_ = false;
+        found_muon_ = false;
+
+        muon_position_.SetXYZ( 0, 0, 0 );
 
         for ( Int_t imuon = 0 ; imuon != nmuons ; ++ imuon )
         {
             fne::RecoMuon * rm = static_cast<fne::RecoMuon*>
                 ( muons.At( imuon ) );
+
+            found_muon_ = true;
+            muon_position_.SetXYZ( rm->x, rm->y, 0 );
 
             //only accept muons which are matched with track
             if ( rm->iTrk == track_compact )
@@ -192,7 +214,22 @@ namespace fn
         set_muvs( muv1_, muv2_, muv3_ );
     }
 
+    TVector3 DataMatchedMuonVeto::get_muon_position() const
+    {
+        return muon_position_;
+    }
+
+    bool DataMatchedMuonVeto::found_muon() const
+    {
+        return found_muon_;
+    }
+
     //--------------------------------------------------
+
+    //**************************************************
+    //MC Muon Veto
+    //**************************************************
+
     MCMuonVeto::MCMuonVeto( const fne::Event * e,
             const SingleTrack& st, 
             std::vector<double> muv1_effs,
@@ -205,11 +242,15 @@ namespace fn
 
     void MCMuonVeto::process_event() const
     {
+        found_muon_ = false;
+
         const SingleRecoTrack & srt = st_.get_single_track();
 
         //Get x coord from MUV2 and y coord from MUV1
         double xMuv2 = srt.extrapolate_ds( na62const::zMuv2 ).X();
         double yMuv1 = srt.extrapolate_ds( na62const::zMuv1 ).Y();
+
+        muon_position_.SetXYZ( xMuv2, yMuv1, 0 );
 
         int muv1_strip = lround(5.0 + (5.5 * yMuv1 / 140.0) );
         double muv_1_eff = (muv1_strip >0 && muv1_strip < 11) ? muv1_effs_.at(muv1_strip) : 0;
@@ -222,11 +263,26 @@ namespace fn
         bool  muv2_ = uni_dist_( generator_ ) < muv_2_eff;
         bool  muv3_ = true;
 
+        if ( muv1_ || muv2_ ) { found_muon_ = true; }
+
         set_muvs( muv1_, muv2_, muv3_);
     }
 
+    TVector3 MCMuonVeto::get_muon_position() const
+    {
+        return muon_position_;
+    }
+
+    bool MCMuonVeto::found_muon() const
+    {
+        return found_muon_;
+    }
 
     //--------------------------------------------------
+
+    //**************************************************
+    //Eff2D
+    //**************************************************
 
     Eff2D::Eff2D( std::vector<double> xedges, 
             std::vector<double> yedges, 
@@ -238,30 +294,71 @@ namespace fn
         {
             throw std::runtime_error( "Eff2D: Wrong number of effs" );
         }
+
+        std::cout << "MUVEFFS\n";
+
+        for ( int j = yedges_.size()-2 ; j != 0 ; --j )
+        {
+            for ( int i = 0; i !=  xedges_.size() -2 ; ++i )
+
+            {
+                int bin = (j) * ( xedges_.size() -1 ) + (i );
+                try
+                {
+                double eff = effs_.at( bin );
+                std::cout << ( eff > 0.1 ) << " " ;
+                }
+                catch( std::out_of_range& e )
+                {
+                    std::cout << e.what() << std::endl;
+                    std::cout << i << " " << j << " "<< bin << std::endl;
+                }
+            }
+            std::cout << std::endl;
+        }
     }
 
     double Eff2D::efficiency( double x, double y ) const
     {
         //Check we are in range of grid
-        if ( x < xedges_.front() || x > xedges_.back() ){ return 0; }
-        if ( y < yedges_.front() || y > yedges_.back() ){ return 0; }
+        if ( x <= xedges_.front() || x >= xedges_.back() ){ return 0; }
+        if ( y <= yedges_.front() || y >= yedges_.back() ){ return 0; }
 
         std::size_t xbin = get_bin( x, xedges_ );
         std::size_t ybin = get_bin( y, yedges_ );
 
         std::size_t eff_bin = ybin * ( xedges_.size() - 1 ) + xbin;
-        return effs_.at( eff_bin );
+
+        double result = 0;
+        try {
+            result = effs_.at( eff_bin );
+        }
+        catch( std::out_of_range& e )
+        {
+            std::cout << e.what() << std::endl;
+            std::cout << "pos_x: " << x << "\npos_y: " << y <<"\n" ;
+            std::cout << "bin_x: " << xbin << "\nbin_y: " << ybin <<"\n" ;
+            std::cout << "min_x: " << xedges_.front() << "\nmax_x: " << xedges_.back()  <<"\n" ;
+            std::cout << "min_y: " << yedges_.front() << "\nmax_y: " << yedges_.back()  <<"\n" ;
+            throw;
+        }
+        return result;
     }
 
     std::size_t Eff2D::get_bin( double val, const std::vector<double>& edges ) const
     {
         auto it = edges.cbegin();
-        while ( val > *it ){ ++it; }
+        while (  val >= *it ){ ++it; }
+        --it;
         std::size_t bin = std::distance( edges.cbegin() , it );
         return bin;
     }
 
     //--------------------------------------------------
+
+    //**************************************************
+    //MCXY Muon Veto
+    //**************************************************
 
     MCXYMuonVeto::MCXYMuonVeto( const fne::Event * e, 
             const SingleTrack& st, Eff2D  muv_eff)
@@ -273,7 +370,10 @@ namespace fn
 
     void MCXYMuonVeto::process_event() const
     {
+        //set_log_level( always_print );
+
         std::size_t muon_pos = find_muon( e_->mc );
+        found_muon_ = false;
 
         //no muon -> no MUV hits
         if ( muon_pos == e_->mc.npart )
@@ -286,11 +386,17 @@ namespace fn
         std::pair<double, double>  impact_point = muv_impact(
                 e_->mc, muon_pos, pf_.get_polarity( e_->header.run ) );
 
+        muon_position_.SetXYZ( impact_point.first, impact_point.second, 0 );
+        found_muon_ = true;
+
         BOOST_LOG_SEV( get_log(), log_level() )
-            << impact_point.first << "  " << impact_point.second;
+            << "pos: " << impact_point.first << "  " << impact_point.second;
 
         double efficiency = muv_eff_.efficiency( 
                 impact_point.first, impact_point.second);
+
+        BOOST_LOG_SEV( get_log(), log_level() )
+            << "eff: " << efficiency;
 
         bool  muv_hit = uni_dist_( generator_ ) < efficiency;
 
@@ -312,11 +418,15 @@ namespace fn
             }
             else
             {
+                BOOST_LOG_SEV( get_log(), log_level() )
+                    << "Failed impact point cut" ;
                 set_muvs( false, false, false);
             }
         }
         else
         {
+            BOOST_LOG_SEV( get_log(), log_level() )
+                << "Failed efficiency cut" ;
             set_muvs( false, false, false);
         }
     }
@@ -357,6 +467,16 @@ namespace fn
                 return n;
         }
         return mce.npart;
+    }
+
+    TVector3 MCXYMuonVeto::get_muon_position() const
+    {
+        return muon_position_;
+    }
+
+    bool MCXYMuonVeto::found_muon() const
+    {
+        return found_muon_;
     }
 
     //--------------------------------------------------

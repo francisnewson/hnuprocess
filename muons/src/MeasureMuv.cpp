@@ -3,6 +3,7 @@
 #include "TFile.h"
 #include "TEfficiency.h"
 #include "SingleTrack.hh"
+#include "MuonVeto.hh"
 #include "tracking_selections.hh"
 #include "yaml_help.hh"
 namespace fn
@@ -10,10 +11,10 @@ namespace fn
     REG_DEF_SUB( MeasureMuv);
 
     MeasureMuv::MeasureMuv( const Selection& base, const Selection& muv, 
-            const SingleTrack& st,
+            const SingleTrack& st, const MuonVeto& mv,
             TFile& tfile, std::string folder
             )
-        :Analysis( base ), muv_( muv ), st_( st ),
+        :Analysis( base ), muv_( muv ), st_( st ), mv_( mv ),
         tfile_( tfile), folder_( folder)
     {
         h_xy_passed_ = hs_.MakeTH2D( "h_xy_passed", "XY at MUV Z ( Passed )",
@@ -39,10 +40,22 @@ namespace fn
         h_p_r_ = hs_.MakeTH2D( "h_p_r", "Momentum and radius" ,
                 100, 0, 100, "Momentum (GeV)",
                 250, 0, 250, "Radius (cm)" );
+
+        h_track_muon_separation_ = hs_.MakeTH2D( "h_track_muon_separation",
+                "Track-Muon separation",
+                99, -198, 198, "X (cm)",
+                99, -198, 198, "Y (cm)");
+
+        h_muon_pos_ = hs_.MakeTH2D( "h_muon_pos",
+                "Muon at MUV",
+                99, -396, 396, "X (cm)",
+                99, -396, 396, "Y (cm)");
     }
 
     void MeasureMuv::process_event()
     {
+        double wgt = get_weight();
+
         double average_muv_z = 0.5 * ( na62const::zMuv1 + na62const::zMuv2 );
         const SingleRecoTrack& srt = st_.get_single_track();
 
@@ -54,17 +67,30 @@ namespace fn
         double r = std::hypot( x, y );
         double p = srt.get_mom();
 
-        h_xy_total_->Fill( x, y) ;
-        h_r_total_->Fill( r );
-        h_p_total_->Fill( p );
+        h_xy_total_->Fill( x, y, wgt) ;
+        h_r_total_->Fill( r, wgt );
+        h_p_total_->Fill( p, wgt );
 
-        h_p_r_->Fill( p, r );
+        h_p_r_->Fill( p, r, wgt );
+
+        if ( mv_.found_muon() )
+        {
+            TVector3 muv_pos = mv_.get_muon_position();
+
+            h_muon_pos_->Fill(  muv_pos.X(), muv_pos.Y(), wgt );
+
+            h_track_muon_separation_->Fill( 
+                    x - muv_pos.X(), 
+                    y - muv_pos.Y(), 
+                    wgt );
+        }
 
         if ( muv_.check() )
         {
             h_xy_passed_->Fill( x, y );
             h_r_passed_->Fill( r );
             h_p_passed_->Fill( p );
+
         }
     }
 
@@ -91,6 +117,8 @@ namespace fn
             const Selection * muv_sel = rf.get_selection( 
                     get_yaml<std::string>( instruct, "muv_selection" ) );
 
+            const MuonVeto*  mv = get_muon_veto( instruct, rf );
+
             TFile & tfile = rf.get_tfile( 
                     get_yaml<std::string>( instruct, "tfile" ) );
 
@@ -98,7 +126,7 @@ namespace fn
 
             const SingleTrack * st = get_single_track( instruct, rf );
 
-            return new MeasureMuv( *sel, *muv_sel, *st, tfile, folder );
+            return new MeasureMuv( *sel, *muv_sel, *st, *mv, tfile, folder );
         }
 }
 

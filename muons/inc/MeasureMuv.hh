@@ -18,12 +18,13 @@ class Tfile;
 namespace fn
 {
     class SingleTrack;
+    class MuonVeto;
 
     class MeasureMuv : public Analysis
     {
         public:
             MeasureMuv( const Selection& base, const Selection& muv, 
-                    const SingleTrack& st,
+                    const SingleTrack& st, const MuonVeto& mv,
                     TFile& tfile, std::string folder
                     );
 
@@ -33,6 +34,7 @@ namespace fn
             void process_event();
             const Selection& muv_;
             const SingleTrack& st_;
+            const MuonVeto& mv_;
 
             TH2D * h_xy_passed_;
             TH2D * h_xy_total_;
@@ -44,6 +46,9 @@ namespace fn
             TH1D * h_p_total_;
 
             TH2D * h_p_r_;
+
+            TH2D * h_track_muon_separation_;
+            TH2D * h_muon_pos_;
 
             HistStore hs_;
 

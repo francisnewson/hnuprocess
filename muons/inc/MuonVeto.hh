@@ -4,6 +4,7 @@
 #include "PolarityFinder.hh"
 #include "RecoFactory.hh"
 #include <vector>
+#include "TVector3.h"
 #if 0
 /*
  *  __  __                __     __   _
@@ -41,6 +42,12 @@ namespace fn
             virtual bool get_muv2()  const;
             virtual bool get_muv3()  const;
 
+            virtual TVector3 get_muon_position() const 
+            { return TVector3(0,0,0); }
+            
+            virtual bool found_muon() const = 0;
+            virtual int nmuons() const { return -1; }
+
             REG_DEC_SUB( MuonVeto );
 
         protected:
@@ -69,10 +76,12 @@ namespace fn
     {
         public:
             DataMuonVeto( const fne::Event * e );
+             bool found_muon() const;
 
         private:
             void process_event() const;
             const fne::Event * e_;
+            mutable bool found_muon_;
     };
 
     //--------------------------------------------------
@@ -85,10 +94,15 @@ namespace fn
                     const SingleTrack& st
                     );
 
+            TVector3 get_muon_position() const;
+             bool found_muon()const;
+
         private:
             void process_event() const;
             const fne::Event * e_;
             const SingleTrack& st_;
+            mutable TVector3 muon_position_;
+            mutable bool found_muon_;
     };
 
     //--------------------------------------------------
@@ -104,6 +118,9 @@ namespace fn
                     std::vector<double> muv2_effs
                     );
 
+            TVector3 get_muon_position() const;
+             bool found_muon()const;
+
         private:
             void process_event() const;
             const fne::Event * e_;
@@ -114,6 +131,9 @@ namespace fn
             std::vector<double> muv2_effs_;
             mutable std::uniform_real_distribution<double> uni_dist_;
             mutable std::default_random_engine generator_;
+
+            mutable TVector3 muon_position_;
+            mutable bool found_muon_;
     };
 
     //--------------------------------------------------
@@ -145,6 +165,9 @@ namespace fn
             MCXYMuonVeto( const fne::Event * e, 
                     const SingleTrack& st , Eff2D muv_eff );
 
+            TVector3 get_muon_position() const;
+             bool found_muon()const;
+
         private:
             void process_event() const;
             const fne::Event * e_;
@@ -155,6 +178,8 @@ namespace fn
 
             mutable std::uniform_real_distribution<double> uni_dist_;
             mutable std::default_random_engine generator_;
+            mutable TVector3 muon_position_;
+            mutable bool found_muon_;
     };
 
     std::pair<double, double> muv_impact(
