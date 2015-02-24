@@ -173,6 +173,12 @@ namespace fn
         return rt.id;
     }
 
+    int BFSingleRecoTrack::get_muon_id() const
+    {
+        const fne::RecoTrack& rt = *proc_track_->rt;
+        return rt.iMuon;
+    }
+
     //--------------------------------------------------
 
     //BF

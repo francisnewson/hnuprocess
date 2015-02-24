@@ -53,6 +53,7 @@ namespace fn
             virtual TVector3 extrapolate_bf( double z) const = 0 ;
 
             virtual int get_compact_id() const = 0;
+            virtual int get_muon_id() const = 0;
 
             virtual ~SingleRecoTrack(){}
     };
@@ -145,6 +146,7 @@ namespace fn
             TVector3 get_ds_mom() const;
 
             int get_compact_id() const;
+            int get_muon_id() const;
 
         private:
             BFCorrection& bfc_;

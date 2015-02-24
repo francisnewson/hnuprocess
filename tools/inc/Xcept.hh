@@ -41,6 +41,7 @@ namespace fn
 
     //Missing methods
     struct UnknownSingleTrackMethod{};
+    struct UnknownSingleMuonMethod{};
     struct UnknownMuonVetoMethod{};
     struct UnknownK2piClustersMethod{};
     struct UnknownK2piRecoMethod{};

@@ -112,9 +112,9 @@
 
 # 5] Track momentum
 - selection:
-    name: rk_track_mom
+    name: tgt_track_mom
     type: TrackMomentum
-    min: 13 #GeV
+    min: 20 #GeV
     max: 65 #GeV
     inputs:
         ogt: bf_st
@@ -197,8 +197,8 @@
     type: TrackRadialAcceptance
     track_section: upstream
     z: 9708.42 #zDCH1
-    inner: 5.0
-    outer: 200.0
+    inner: 12.0
+    outer: 115.0
     inputs:
         ogt: bf_st
 
@@ -208,8 +208,8 @@
     type: TrackRadialAcceptance
     track_section: downstream
     z: 11888.0 #zDCH1
-    inner: 5.0
-    outer: 200.0
+    inner: 14.0
+    outer: 115.0
     inputs:
         ogt: bf_st
 
@@ -271,6 +271,14 @@
         km2event: km2_event
 
 - selection:
+    name: km2_tgt_m2
+    type: Km2M2Miss
+    min_m2: -0.01
+    max_m2:  0.01
+    inputs:
+        km2event: km2_event
+
+- selection:
     name: halo_m2
     type: Km2M2Miss
     min_m2: -0.2
@@ -284,8 +292,8 @@
     type: TrackRadialAcceptance
     track_section: downstream
     z: 12778.0 #zmuv1
-    inner: 5.0
-    outer: 250
+    inner: 22.0
+    outer: 200
     inputs:
         ogt: bf_st
 
@@ -294,41 +302,29 @@
     type: TrackXYUVAcceptance
     track_section: ds
     z: 13012.0 #MUV3
-    min_x: -150.0
-    max_x:  150.0
-    min_y: -150.0
-    max_y:  150.0
-    min_u: -150.0
-    max_u:  150.0
-    min_v: -150.0
-    max_v:  150.0
+    min_x: -135.0
+    max_x:  135.0
+    min_y: -135.0
+    max_y:  135.0
+    min_u: -135.0
+    max_u:  135.0
+    min_v: -135.0
+    max_v:  135.0
     inputs:
         ogt: bf_st
 
 
+#Base
 - selection:
-    name: raw_sel
+    name: base_selection
     type: CompositeSelection
     children:
         - passer
+        - kaon_mom_weights
         - good_bursts
         - dch_veto
         - pos_trk
         - quality_7
-        - rk_track_mom
-
-#full RK selection
-- selection:
-    name: base_rk_selection
-    type: CompositeSelection
-    children:
-        - passer
-        - good_bursts
-        - dch_veto
-        - pos_trk
-        - quality_7
-        - rk_track_mom
-        - rk_lkr_veto
         - rk_pz
         - rk_lkr_accep
         - rk_hot_lkr
@@ -336,195 +332,208 @@
         - rk_dch4_acc
         - rk_ddead_cell
         - rk_dcht
-        - muv1_radius
 
-#full RK selection
+#tight mom full muv
 - selection:
-    name: base_rk_selection_no_track_lkr
+    name: tight_mom_full_muv
     type: CompositeSelection
     children:
-        - passer
-        - good_bursts
-        - dch_veto
-        - pos_trk
-        - quality_7
-        - rk_track_mom
-#       - rk_lkr_veto
-#       - rk_pz
-#       - rk_dch1_acc
-#       - rk_dch4_acc
-#       - rk_ddead_cell
-#       - rk_dcht
-
-- selection:
-    name: base_wide_mom
-    type: CompositeSelection
-    children:
-        - passer
-        - good_bursts
-        - dch_veto
-        - pos_trk
-        - quality_7
+        - base_selection
         - rk_lkr_veto
-        - rk_pz
-        - rk_lkr_accep
-        - rk_hot_lkr
-        - rk_dch1_acc
-        - rk_dch4_acc
-        - rk_ddead_cell
-        - rk_dcht
-        - muv1_radius
+        - rk_km2_eop
+        - tgt_track_mom
+        - km2_peak_m2
 
+#tight muv full mom
 - selection:
-    name: easy
+    name: tight_muv_full_mom
     type: CompositeSelection
     children:
-        - passer
-        - dch_veto
+        - base_selection
+        - rk_lkr_veto
+        - rk_km2_eop
+        - muv_acc
         - muv1_radius
+        - km2_peak_m2
 
+
+#tight muv full mom tgt m2m
 - selection:
-    { name: signal_rk_selection, type: CompositeSelection, children: [ base_rk_selection,  rk_cda ] }
+    name: tight_muv_full_mom_tgt_m2m
+    type: CompositeSelection
+    children:
+        - base_selection
+        - rk_lkr_veto
+        - rk_km2_eop
+        - muv_acc
+        - muv1_radius
+        - km2_tgt_m2
 
+#tight mom full muv
 - selection:
-    { name: rk_peak_, type: CompositeSelection, children: [ signal_rk_selection , km2_peak_m2 ] }
+    name: tight_mom_full_muv_tgt_m2m
+    type: CompositeSelection
+    children:
+        - base_selection
+        - rk_lkr_veto
+        - rk_km2_eop
+        - tgt_track_mom
+        - km2_tgt_m2
 
-- selection:
-    { name: rk_peak, type: CompositeSelection, children: [ base_rk_selection_no_track_lkr , km2_peak_m2 ] }
-
-- selection:
-    { name: rk_eop, type: CompositeSelection, children: [ signal_rk_selection , rk_km2_eop ] }
-
-- selection:
-    { name:  rk_eop_peak, type: CompositeSelection, children: [ signal_rk_selection , rk_km2_eop , km2_peak_m2 ] }
-
-- selection:
-    { name:  rk_wide_mom, type: CompositeSelection, children: [ base_wide_mom ,rk_cda,  rk_km2_eop , km2_peak_m2 ] }
-
-
-- monitor:
-    name: counter
-    type: Counter
-
-- subscriber:
-    name: track_muon_veto
-    type: MuonVeto
-    method: DataMatched
+- input:
+    name: single_muon
+    type: SingleMuon
+    method: track
     inputs:
         ogt: bf_st
 
 - selection:
-    name: muv_1
-    type : MuonReqStatus
-    allowed_status: [ 1, 2,  4 ]
-    ignore_classes: [ p6 ]
-    inputs:
-        muv: track_muon_veto
-
-- selection:
-    name: muv_2
-    type : MuonReqStatus
-    allowed_status: [ 1, 2,  3 ]
-    ignore_classes: [ p6 ]
-    inputs:
-        muv: track_muon_veto
-
-- selection:
-    name: muv_1_or_2
-    type : MuonReqStatus
-    allowed_status: [ 1, 2, 3, 4 ]
-    ignore_classes: [ p6 ]
-    inputs:
-        muv: track_muon_veto
-
-- selection:
-    name: muv_1_and_2
-    type : CombinedMuonVeto
-    ignore_classes: [ p6 ]
-    effs_file: input/reco/conditions/muv_effs.yaml
+    name: muv_combo_1
+    type: CombinedMuonVeto
+    effs_file: input/reco/conditions/muv_effs.yaml 
+    range_scale: 1
     inputs:
         ogt: bf_st
+        sm: single_muon
 
-###
+- selection:
+    name: muv_combo_2
+    type: CombinedMuonVeto
+    effs_file: input/reco/conditions/muv_effs.yaml 
+    range_scale: 2
+    inputs:
+        ogt: bf_st
+        sm: single_muon
+
+- selection:
+    name: muv_combo_3
+    type: CombinedMuonVeto
+    effs_file: input/reco/conditions/muv_effs.yaml 
+    range_scale: 3
+    inputs:
+        ogt: bf_st
+        sm: single_muon
+
+- selection:
+    name: muv_combo_4
+    type: CombinedMuonVeto
+    effs_file: input/reco/conditions/muv_effs.yaml 
+    range_scale: 4
+    inputs:
+        ogt: bf_st
+        sm: single_muon
+
 - output:
     name: tfout
     type: tfile
-    filename: measure_muv.root
-
-- analysis:
-    type: MeasureMuv
-    name: measure_muv_or_full
-    tfile: tfout
-    folder: muv_or_full
-    selection: rk_eop_peak
-    muv_selection: muv_1_or_2
-    inputs:
-        ogt: bf_st
-        muv : track_muon_veto
-
-- analysis:
-    type: MeasureMuv
-    name: measure_muv_or_wide_mom
-    tfile: tfout
-    folder: muv_or_wide_mom
-    selection: rk_wide_mom
-    muv_selection: muv_1_or_2
-    inputs:
-        ogt: bf_st
-        muv : track_muon_veto
-
-- analysis:
-    type: MeasureMuv
-    name: measure_muv_and_full
-    tfile: tfout
-    folder: muv_and_full
-    selection: rk_eop_peak
-    muv_selection: muv_1_and_2
-    inputs:
-        ogt: bf_st
-        muv : track_muon_veto
-
-- analysis:
-    type: MeasureMuv
-    name: measure_no_lkr
-    tfile: tfout
-    folder: muv_and_no_lkr
-    selection: rk_peak
-    muv_selection: muv_1_and_2
-    inputs:
-        ogt: bf_st
-        muv : track_muon_veto
-
-- analysis:
-    type: MeasureMuv
-    name: measure_muv_and_wide_mom
-    tfile: tfout
-    folder: muv_and_wide_mom
-    selection: rk_wide_mom
-    muv_selection: muv_1_and_2
-    inputs:
-        ogt: bf_st
-        muv : track_muon_veto
-
-- analysis:
-    type: MuvEff
-    name: muv_eff
-    tfile: tfout
-    folder: easy_eff
-    selection: easy
-    muv_selection: muv_1
-    muv_plane: 1 
-    inputs:
-        km2event: km2_event
+    filename: muon_study.root
 
 - output:
-    name: oselist
+    name: oscout
     type: ostream
-    filename: km2_events.dat
+    filename: cout
 
-- analysis : 
-    name : full_summary
+- analysis:
+    name: study_wide_mom
+    type: StudySingleMuon
+    selection: tight_muv_full_mom
+    tfile: tfout
+    folder: study_wide_mom
+    muv: muv_combo_4
+    inputs:
+        ogt: bf_st
+        sm: single_muon
+        km2event: km2_event
+
+- analysis:
+    name: study_wide_mom_tgt_m2m
+    type: StudySingleMuon
+    selection: tight_muv_full_mom_tgt_m2m
+    tfile: tfout
+    folder: study_wide_mom_tgt_m2m
+    muv: muv_combo_4
+    inputs:
+        ogt: bf_st
+        sm: single_muon
+        km2event: km2_event
+
+- analysis:
+    name: study_wide_muv
+    type: StudySingleMuon
+    selection: tight_mom_full_muv
+    tfile: tfout
+    folder: study_wide_muv
+    muv: muv_combo_4
+    inputs:
+        ogt: bf_st
+        sm: single_muon
+        km2event: km2_event
+
+- analysis:
+    name: study_measure_1
+    type: StudySingleMuon
+    selection: tight_mom_full_muv_tgt_m2m
+    tfile: tfout
+    folder: measure_1
+    muv: muv_combo_1
+    inputs:
+        ogt: bf_st
+        sm: single_muon
+        km2event: km2_event
+
+- analysis:
+    name: study_measure_2
+    type: StudySingleMuon
+    selection: tight_mom_full_muv_tgt_m2m
+    tfile: tfout
+    folder: measure_2
+    muv: muv_combo_2
+    inputs:
+        ogt: bf_st
+        sm: single_muon
+        km2event: km2_event
+
+- analysis:
+    name: study_measure_3
+    type: StudySingleMuon
+    selection: tight_mom_full_muv_tgt_m2m
+    tfile: tfout
+    folder: measure_3
+    muv: muv_combo_3
+    inputs:
+        ogt: bf_st
+        sm: single_muon
+        km2event: km2_event
+
+- analysis:
+    name: study_measure_4
+    type: StudySingleMuon
+    selection: tight_mom_full_muv_tgt_m2m
+    tfile: tfout
+    folder: measure_4
+    muv: muv_combo_4
+    inputs:
+        ogt: bf_st
+        sm: single_muon
+        km2event: km2_event
+
+- analysis:
     type: Summary
-    base : passer
-    source : rk_eop_peak 
-    ostream: oselist
+    name: wide_mom_sum
+    ostream: oscout
+    base: passer
+    source: tight_muv_full_mom
+
+- analysis:
+    type: Summary
+    name: wide_muv_sum
+    ostream: oscout
+    base: passer
+    source: tight_mom_full_muv
+
+- analysis:
+    type: Summary
+    name: wide_mom_tgt_m2m_sum
+    ostream: oscout
+    base: passer
+    source: tight_muv_full_mom_tgt_m2m

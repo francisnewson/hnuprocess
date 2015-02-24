@@ -46,6 +46,21 @@ namespace fn
                 99, -198, 198, "X (cm)",
                 99, -198, 198, "Y (cm)");
 
+        h_track_muon_separation_passed_ = hs_.MakeTH2D( "h_track_muon_separation_passed",
+                "Track-Muon separation (passed)",
+                99, -198, 198, "X (cm)",
+                99, -198, 198, "Y (cm)");
+
+        h_track_muv_separation_ = hs_.MakeTH2D( "h_track_muv_separation",
+                "Track-Muon separation",
+                99, -198, 198, "X (cm)",
+                99, -198, 198, "Y (cm)");
+
+        h_track_muv_separation_passed_ = hs_.MakeTH2D( "h_track_muv_separation_passed",
+                "Track-Muon separation (passed)",
+                99, -198, 198, "X (cm)",
+                99, -198, 198, "Y (cm)");
+
         h_muon_pos_ = hs_.MakeTH2D( "h_muon_pos",
                 "Muon at MUV",
                 99, -396, 396, "X (cm)",
@@ -83,6 +98,14 @@ namespace fn
                     x - muv_pos.X(), 
                     y - muv_pos.Y(), 
                     wgt );
+
+            if ( muv_.check() )
+            {
+            h_track_muon_separation_passed_->Fill( 
+                    x - muv_pos.X(), 
+                    y - muv_pos.Y(), 
+                    wgt );
+            }
         }
 
         if ( muv_.check() )

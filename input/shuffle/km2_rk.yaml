@@ -1,5 +1,6 @@
 scaling:
     - scaling_method:
+        strategy: m2
         name: mc_pos
 
         halo_channels:
@@ -30,6 +31,7 @@ scaling:
 
     - scaling_method:
         name: mc_neg
+        strategy: m2
 
         halo_channels:
             - p6.data.km.q11t.v2.neg
@@ -61,7 +63,7 @@ weights:
 
 output:
     input_file:  data/km2_rk/all.km2_rk.root
-    plot_path: rk_eop_km2/h_m2m_kmu
+    plot_path: rk_eop_km2/h_p
 
     data_plot:
         channels:

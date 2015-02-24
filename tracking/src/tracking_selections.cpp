@@ -328,7 +328,7 @@ namespace fn
             zpoint_ = srt.extrapolate_bf( z_ );
         }
 
-        double x = zpoint_.Y();
+        double x = zpoint_.X();
         double y = zpoint_.Y();
 
         double u = x * cospi4 - y * sinpi4;

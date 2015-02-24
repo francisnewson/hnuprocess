@@ -2,6 +2,7 @@
 #include <cassert>
 #include "Xcept.hh"
 #include "stl_help.hh"
+#include "yaml_help.hh"
 #include <boost/regex.hpp>
 #include <iomanip>
 namespace fn
@@ -66,12 +67,12 @@ namespace fn
                 BOOST_LOG_SEV( log_, debug)
                     << "RECOPARSER: reading name  ...";
                 std::string name;
-                name = instruct["name"].as<std::string>();
+                name = get_yaml<std::string>( instruct, "name" );
 
                 BOOST_LOG_SEV( log_, debug)
                     << "RECOPARSER: reading type  ...";
                 std::string type;
-                type = instruct["type"].as<std::string>();
+                type = get_yaml<std::string>( instruct, "type" );
 
                 BOOST_LOG_SEV( log_, debug)
                     << "RECOPARSER: constructing subscriber  ...";
@@ -121,15 +122,17 @@ namespace fn
                 }
             }
 
-            catch( std::runtime_error& e )
-            {
-                std::cerr << "Trying to parse: " << *it << "\n";
-                throw ;
-            }
             catch( YAML::Exception& e )
             {
+                std::cerr << "YAML: " << e.what() << std::endl;
                 std::cerr << "Trying to parse: " << *it <<  "\n";
                 throw;
+            }
+            catch( std::runtime_error& e )
+            {
+                std::cerr << "RUNTIME: " << e.what() << std::endl;
+                std::cerr << "Trying to parse: " << *it << "\n";
+                throw ;
             }
         }
     }

@@ -182,11 +182,6 @@ namespace fn
             mutable bool found_muon_;
     };
 
-    std::pair<double, double> muv_impact(
-            const fne::Mc & mce, std::size_t muon_pos, int polarity );
-
-    std::size_t find_muon( const fne::Mc& mce );
-
     //--------------------------------------------------
 
     //Convenience function when creating other subscribers

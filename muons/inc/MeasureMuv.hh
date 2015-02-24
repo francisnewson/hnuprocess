@@ -48,6 +48,11 @@ namespace fn
             TH2D * h_p_r_;
 
             TH2D * h_track_muon_separation_;
+            TH2D * h_track_muon_separation_passed_;
+
+            TH2D * h_track_muv_separation_;
+            TH2D * h_track_muv_separation_passed_;
+
             TH2D * h_muon_pos_;
 
             HistStore hs_;

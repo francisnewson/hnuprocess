@@ -22,6 +22,7 @@
 namespace fn
 {
     class SingleTrack;
+    class SingleMuon;
 
     class MuonReqStatus : public CachedSelection
     {
@@ -60,6 +61,40 @@ namespace fn
         (YAML::Node& instruct, RecoFactory& rf );
 
     //--------------------------------------------------
+    
+    //Handles both data and MC as simply as possible
+    class CombinedMuonVeto : public CachedSelection
+    {
+        public:
+            CombinedMuonVeto( const fne::Event * e, 
+                    Eff2D muv_eff, const SingleMuon& sm,
+                    const SingleTrack& st, 
+                    double range_scale, bool mc );
+
+        private:
+            bool do_check() const;
+            double do_weight() const;
+
+            const fne::Event * e_;
+            const SingleMuon& sm_;
+            const SingleTrack& st_;
+
+            double range_scale_;
+
+            Eff2D muv_eff_;
+            PolarityFinder pf_;
+            bool mc_;
+
+            REG_DEC_SUB( CombinedMuonVeto );
+    };
+
+    template<>
+        Subscriber * create_subscriber<CombinedMuonVeto>
+        (YAML::Node& instruct, RecoFactory& rf );
+
+    //--------------------------------------------------
+
+    double mu_error_0902_sc( double mom, int muv_plane );
 
 }
 
