@@ -2,6 +2,7 @@
 #include "TF1.h"
 #include "HistStore.hh"
 #include "TRandom3.h"
+
 #include "Counter.hh"
 #include <memory>
 
@@ -11,7 +12,7 @@ std::unique_ptr<TF1> quadratic_scattering( std::string name, double peak )
     //Function peaks at peak
 
     std::unique_ptr<TF1> result{ new TF1
-        ( name.c_str(), "1/x**2 * tanh( pow( x*[0], 4 ) )", -5*peak, 5*peak )  };
+        ( name.c_str(), "1/x**2 * tanh( pow( x*[0], 4 ) )", -20*peak, 20*peak )  };
 
     //Magic number to get peak in the right place
     double xscale = 1.021;

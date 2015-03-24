@@ -20,6 +20,17 @@ namespace fn
 
         hpt_ = dths_.MakeTH1D( "hpt_", "Pi+ p_{T}",
                 1000, 0.0, 0.5,  "p_{T} ( GeV/c )", "#events" );
+
+        hcda_ = dths_.MakeTH1D( "hcda", "DCH CDA",
+                1000, 0.0, 10.0, "Cda( cm )", "#events" );
+
+        hm2_tx_ = dths_.MakeTH2D( "hm2_tx_", "Mass angle correlation" ,
+                100, -0.3, 0.2, "m^{2}_{miss}",
+                100, -0.01, 0.01, "dtx" );
+
+        hm2_ty_ = dths_.MakeTH2D( "hm2_ty_", "Mass angle correlation" ,
+                100, -0.3, 0.2, "m^{2}_{miss}",
+                100, -0.01, 0.01, "dty" );
     }
 
     void DchPlotter::plot_data
@@ -60,6 +71,18 @@ namespace fn
             TVector3 kaon_mom( lkr_interface.pK_X(), lkr_interface.pK_Y(), lkr_interface.pK_Z() );
             TVector3 dch_pip_3mom = dch_pip_4mom.Vect();
             hpt_->Fill( dch_pip_3mom.Perp( kaon_mom ), weight );
+
+            hcda_->Fill( extract_cda( dch_data, lkr_data ), weight );
+
+            TVector3 lkr3mom = lkr_pip_4mom.Vect();
+            TVector3 dch3mom = dch_pip_4mom.Vect();
+            double dtx = lkr3mom.X()/lkr3mom.Mag()  - dch3mom.X()/dch3mom.Mag();
+            double dty = lkr3mom.Y()/lkr3mom.Mag()  - dch3mom.Y()/dch3mom.Mag();
+            double dm2 = (kaon_4mom - lkr_pip_4mom).M2() - (kaon_4mom - dch_pip_4mom).M2();
+
+            hm2_tx_->Fill( dm2, dtx, weight );
+            hm2_ty_->Fill( dm2, dty, weight );
+
 
             if ( !mc )
             { return ; }
@@ -183,13 +206,22 @@ namespace fn
         }
 
 
-        for ( int i = 0 ; i != 4 ; ++ i )
+        for ( int i = 0 ; i != 5 ; ++ i )
         {
-            double angle_cutoff = 0.002;
-            double angle_frequency = 0.5 * i * 0.018;
+            double angle_cutoff = 0.00045;
+            double angle_frequency = (i == 0) ? 0 : 1 * 1 * 0.01;
 
-            double mom_cutoff = 0.2;
-            double mom_frequency = 0.5 * i * 0.005;
+            double mom_cutoff = 0.08;
+            //double mom_frequency = 1 * i * 0.001;
+            double mom_frequency = 1 * i * 0.001;
+
+            std::cout << "SCATTER " << i << std::endl;
+
+            std::cout << "angle_cutoff: " << angle_cutoff << "\n";
+            std::cout << "angle_frequency: " << angle_frequency << "\n";
+
+            std::cout << "mom_cutoff: " << mom_cutoff << "\n";
+            std::cout << "mom_frequency: " << mom_frequency << "\n";
 
             scatterers_.push_back( TrackPowerScatterer( 
                         angle_cutoff, angle_frequency,
@@ -204,31 +236,48 @@ namespace fn
 
     void DchAnalysis::process_event()
     {
+        double cda = extract_cda( k2pi_data_.raw_dch, *lkr_data_ );
+
         if( is_mc_ )
         {
-            plots_.plot_data( k2pi_data_, *lkr_data_, k2pi_data_.raw_dch, 
-                    k2pi_data_.weight, true, &k2pi_data_.mc  );
+            if ( cda < 2.5 )
+            {
+                plots_.plot_data( k2pi_data_, *lkr_data_, k2pi_data_.raw_dch, 
+                        k2pi_data_.weight, true, &k2pi_data_.mc  );
 
-            event_plots_.plot_data( k2pi_data_, *lkr_data_ , k2pi_data_.raw_dch, 
-                    k2pi_data_.weight, true, &k2pi_data_.mc  );
+                event_plots_.plot_data( k2pi_data_, *lkr_data_ , k2pi_data_.raw_dch, 
+                        k2pi_data_.weight, true, &k2pi_data_.mc  );
+            }
 
-            for ( int i  = 0 ; i != 4 ; ++i )
+            for ( int i  = 0 ; i != 5 ; ++i )
             {
                 K2piDchData mod_dch = k2pi_data_.raw_dch;
                 scatterers_[i].scatter_track( k2pi_data_.compact_number, 
                         mod_dch.dxdz, mod_dch.dydz, mod_dch.p );
 
-                scatter_plots_[i].plot_data( k2pi_data_, *lkr_data_, mod_dch, 
-                        k2pi_data_.weight, true, &k2pi_data_.mc );
+                double cda = extract_cda( mod_dch, *lkr_data_ );
+
+                if ( cda < 2.5 )
+                {
+                    scatter_plots_[i].plot_data( k2pi_data_, *lkr_data_, mod_dch, 
+                            k2pi_data_.weight, true, &k2pi_data_.mc );
+                }
             }
         }
         else
         {
-            plots_.plot_data( k2pi_data_, *lkr_data_, k2pi_data_.raw_dch, 
-                    k2pi_data_.weight, false, 0 );
 
-            event_plots_.plot_data( k2pi_data_, *lkr_data_, k2pi_data_.raw_dch, 
-                    k2pi_data_.weight, false, 0  );
+            //2015-03-18 I think in raw_dch here, raw means no extra kick, 
+            //rather than no kinematic fitting.
+
+            if ( cda < 2.5 )
+            {
+                plots_.plot_data( k2pi_data_, *lkr_data_, k2pi_data_.raw_dch, 
+                        k2pi_data_.weight, false, 0 );
+
+                event_plots_.plot_data( k2pi_data_, *lkr_data_, k2pi_data_.raw_dch, 
+                        k2pi_data_.weight, false, 0  );
+            }
         }
     }
 

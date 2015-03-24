@@ -416,7 +416,7 @@
     ostream: stats_out
 
 - analysis : 
-    name : preselction_summary_file
+    name : preselection_summary_file
     type: Summary
     base : passer
     source : pre_selection 

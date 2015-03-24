@@ -320,6 +320,12 @@ int main( int argc, char * argv[] )
     DchAnalysis select_dch_plotter( full_selection, tfout, "select_k2pi_plots", *event_data, "raw", is_mc );
     DchAnalysis select_fit_dch_plotter( fit_selection, tfout, "select_fit_k2pi_plots", *event_data, "fit", is_mc );
 
+    //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    //IMPORTANT
+    //DchAnalysis implements a cut on CDA!
+    //(in addition to anything in the selections above)
+    //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
     Summary summary( auto_pass, fit_selection, std::cout );
     summary.set_name( "FIT SELECTION SUMMARY" );
 

@@ -157,10 +157,11 @@ namespace fn
                         add_file_protocol( file_string);
 
                         //add file: NB we don't count entries
-                        int added = tch_->Add( root_file_string( file_string ) );
+                        int added = tch_->AddFile( root_file_string( file_string ) );
                         if ( added != 1 )
                         { throw std::runtime_error
-                            ("Could not add " + filename.string()  ); }
+                            ("Could not add " + filename.string() + "!\n"
+                             "Tried: " + file_string); }
 
                         BOOST_LOG_SEV( log_, debug ) << "Added: " << file_string;
                     }

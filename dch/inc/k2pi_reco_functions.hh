@@ -41,6 +41,8 @@ namespace fn
 
     double extract_min_photon_radius( K2piLkrData& raw_lkr );
 
+    double extract_cda( const K2piDchData& dch, const K2piLkrData& lkr );
+
 
 
     TVector3 compute_neutral_vertex( const fne::Event * e,

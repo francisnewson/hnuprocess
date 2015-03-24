@@ -58,11 +58,13 @@ namespace fn
         hdtx_->Fill( amom.X()/amag -  bmom.X()/bmag, wgt );
         hdty_->Fill( amom.Y()/amag -  bmom.Y()/bmag, wgt );
 
-        hdpop2_->Fill( ( amag - bmag ) / std::pow( ( amag + bmag )/2, 2 ), wgt );
-        hdpop_->Fill( ( amag - bmag ) / ( amag + bmag ), wgt );
+        auto reference_mag = amag; //(previously (amag + bmag) / 2  )
 
-        hdpvsp_->Fill( ( amag + bmag ) / 2 , amag - bmag , wgt );
-        hdpopvsp_->Fill( ( amag + bmag ) / 2 , (amag - bmag) / (amag + bmag) , wgt );
+        hdpop2_->Fill( ( amag - bmag ) / std::pow( reference_mag,  2 ), wgt );
+        hdpop_->Fill( ( amag - bmag ) / reference_mag, wgt );
+
+        hdpvsp_->Fill( reference_mag  , amag - bmag , wgt );
+        hdpopvsp_->Fill( reference_mag , (amag - bmag) / reference_mag , wgt );
     }
 
     void FourMomComp::Write()

@@ -46,6 +46,9 @@ namespace fn
             FourMomComp lkr_tk_mc_cmp_;
             FourMomComp mc_dch_cmp_;
             TH1D * hpt_;
+            TH1D * hcda_;
+            TH2D * hm2_tx_;
+            TH2D * hm2_ty_;
     };
 
     //--------------------------------------------------

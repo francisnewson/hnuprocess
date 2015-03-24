@@ -84,6 +84,13 @@ namespace fn
         return std::min( pos1.Perp(), pos2.Perp() );
     }
 
+    double extract_cda( const K2piDchData& dch, const K2piLkrData& lkr )
+    {
+        Track kaon{ lkr.kx0, lkr.ky0, 0, lkr.pkx, lkr.pky, lkr.pkz };
+        Track pion{ dch.x0, dch.y0, na62const::bz_tracking, dch.dxdz, dch.dydz, 1 };
+        return compute_cda( kaon, pion ).cda;
+    }
+
 
     TVector3 compute_neutral_vertex( const fne::Event * e,
             const KaonTrack& kt, const K2piRecoClusters & k2pirc ,
