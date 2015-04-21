@@ -20,6 +20,7 @@ namespace fn
         burst_tree_.Branch( "run", &burst_info_.run, "run/L" );
         burst_tree_.Branch( "burst_time", &burst_info_.burst_time, "burst_time/L" );
         burst_tree_.Branch( "events", &burst_info_.events, "events/L" );
+        burst_tree_.Branch( "weight", &burst_info_.weight, "weight/D" );
         }
 
     void BurstCount::new_burst()
@@ -27,11 +28,13 @@ namespace fn
         burst_info_.run = e_->header.run;
         burst_info_.burst_time = e_->header.burst_time;
         burst_info_.events = 0;
+        burst_info_.weight = 0;
     }
 
     void BurstCount::process_event()
     {
         burst_info_.events++;
+        burst_info_.weight +=  get_weight();
     }
 
     void BurstCount::end_burst()
@@ -41,6 +44,7 @@ namespace fn
 
     void BurstCount::end_processing()
     {
+        end_burst();
 
 #if 0
         for ( auto bc : bursts_ )

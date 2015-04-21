@@ -1,0 +1,409 @@
+---
+#This analysis is designed to show the effect of beam corrections
+
+#Autopass
+- selection:
+    name: passer
+    type : auto_pass
+
+###################################################
+# FILE MANAGEMENT
+###################################################
+
+#Runs to skip because of LKr
+- exec:
+    skipmcruns: [ 20410, 20411, 20412, 20413, 20414, 20451, 20452, 20453, 20454, 20455, 20456 ]
+    skipdatalist: input/reco/conditions/bad_lkr_files.dat
+
+- output:
+    name: tfout
+    type: tfile
+    filename: beam_corrections.root
+
+
+###################################################
+# STANDARD CORRECTIONS
+###################################################
+
+#automatically load the correct kind of kaon track
+#(including 1 + beta corrections)
+- input:
+    name: auto_kaon_track
+    type: KaonTrack
+    kaon_type: auto
+    beam_mapping: input/reco/beam/beam_mapping.yaml
+
+#use a kaon track without (1+beta) corrections
+#(doesn't work for halo)
+- input:
+    name: uc_kaon_track
+    type: KaonTrack
+    kaon_type: uckp
+    beam_mapping: input/reco/beam/beam_mapping.yaml
+
+#kaon weights
+- selection:
+    name: kaon_mom_weights
+    type: KaonMomWeight
+    crude_weights: "input/reco/mod/kaon_crude_weights.dat"
+    fine_weights: "input/reco/mod/kaon_fine_weights.dat"
+
+#standard cluster corretions
+- input:
+    name: cluster_corrector
+    type: ClusterCorrector
+    filename: "/afs/cern.ch/user/f/fnewson/work/hnu/gopher/data/detector/eopCorrfile.dat"
+    enabled: true
+
+- output:
+    name: os_cerr
+    type: ostream
+    filename: cerr
+
+- output:
+    name: os_stats
+    type: ostream
+    filename: beam_corr_stats.dat
+
+- output:
+    name: debug_out
+    type: ostream
+    filename: beam_corr_debug.dat
+
+###################################################
+# DATA SAMPLE DEFINITION
+###################################################
+
+# 1]Bad bursts
+- selection:
+    name: good_phys_burst
+    type: BadBurst
+    burst_list: "input/reco/conditions/bad_phys_burst.dat"
+
+- selection:
+    name: good_dch_burst
+    type: BadBurst
+    burst_list: "input/reco/conditions/bad_dch_burst.dat"
+
+- selection:
+    name: good_muv_burst
+    type: BadBurst
+    burst_list: "input/reco/conditions/bad_muv_burst.dat"
+
+- selection:
+    name: data_sample
+    type: CompositeSelection
+    children:
+        - good_phys_burst
+        - good_dch_burst
+        - good_muv_burst
+
+- selection:
+    name: weighted_data_sample
+    type: CompositeSelection
+    children:
+        - kaon_mom_weights
+        - good_phys_burst
+        - good_dch_burst
+        - good_muv_burst
+
+- selection:
+    name: mcz
+    type: MCZCut
+    min_z: -1800
+    max_z:  8000
+
+- selection:
+    name: weighted_mc_sample
+    type: CompositeSelection
+    children:
+        - weighted_data_sample
+        - mcz
+
+- selection:
+    name: mc_sample
+    type: CompositeSelection
+    children:
+        - data_sample
+        - mcz
+
+- analysis:
+    name: sample_burst_count
+    type: BurstCount
+    tfile: tfout
+    folder: sample_burst_count
+    selection: weighted_mc_sample
+
+- analysis:
+    type: Summary
+    name: uw_fid_summary
+    base: passer
+    source: mc_sample
+    ostream: debug_out
+
+- analysis:
+    type: Summary
+    name: weighted_fid_summary
+    base: passer
+    source: weighted_mc_sample
+    ostream: debug_out
+
+###################################################
+# INPUTS
+###################################################
+#everything is defined twice - with and without
+#pk corrections
+
+#SingleTrack
+- input: { name : uc_bf_st, type : SingleTrack,  method : BF,
+    init_min_mom: 3.0 , init_max_mom: 75.0,
+    init_max_cda: 15.0, init_min_z: -2000.0, init_max_z:  9000.0,
+    dch_merge_sep: 0.5,
+    inputs: { kt: uc_kaon_track } }
+
+- input: { name : auto_bf_st, type : SingleTrack,  method : BF,
+    init_min_mom: 3.0 , init_max_mom: 75.0,
+    init_max_cda: 15.0, init_min_z: -2000.0, init_max_z:  9000.0,
+    dch_merge_sep: 0.5,
+    inputs: { kt: auto_kaon_track } }
+
+#----------km2 event
+- input: { name: auto_km2_event, type: Km2Event,
+    inputs: { ogt: auto_bf_st, kt: auto_kaon_track } }
+
+- input: { name: uc_km2_event, type: Km2Event,
+    inputs: { ogt: uc_bf_st, kt: uc_kaon_track } }
+
+#---------km2 clusters
+- input: { name: auto_km2_clusters, type: Km2Clusters,
+    noise_energy: 5, noise_time: 12, brehm_radius: 0 ,
+    track_cluster_radius: 20,
+    inputs: { ogt: auto_bf_st, ClusterCorrector: cluster_corrector } }
+
+- input: { name: uc_km2_clusters, type: Km2Clusters,
+    noise_energy: 5, noise_time: 12, brehm_radius: 0 ,
+    track_cluster_radius: 20,
+    inputs: { ogt: uc_bf_st, ClusterCorrector: cluster_corrector } }
+
+###################################################
+# CUTS
+###################################################
+
+#--------Found ogt
+- selection: {name: auto_good_trk, type : FoundGoodTrack,
+  inputs : {ogt: auto_bf_st} }
+
+- selection: {name: uc_good_trk, type : FoundGoodTrack,
+  inputs : {ogt: uc_bf_st} }
+
+#--------Track charge
+- selection: { name: auto_pos_trk, type : TrackCharge,
+    charge: +1, inputs : {ogt: auto_bf_st} }
+
+- selection: { name: uc_pos_trk, type : TrackCharge,
+    charge: +1, inputs : {ogt: uc_bf_st} }
+
+#--------Track quality
+- selection: { name: auto_quality_7, type: TrackQuality,
+    quality: 0.7, inputs: { ogt: auto_bf_st} }
+
+- selection: { name: uc_quality_7, type: TrackQuality,
+    quality: 0.7, inputs: { ogt: uc_bf_st} }
+
+#--------CDA
+- selection: { name: auto_cda_30mm, type: TrackCda,
+    max_cda: 3.0 , inputs: { ogt: auto_bf_st } }
+
+- selection: { name: uc_cda_30mm, type: TrackCda,
+    max_cda: 3.0 , inputs: { ogt: uc_bf_st } }
+
+#--------Track DHC1 ACC
+- selection: { name: auto_dch1_acc, type: TrackRadialAcceptance,
+    track_section: upstream, z: 9708.42,
+    inner: 12.0, outer: 115.0,
+    inputs: { ogt: auto_bf_st} }
+
+- selection: { name: uc_dch1_acc, type: TrackRadialAcceptance,
+    track_section: upstream, z: 9708.42,
+    inner: 12.0, outer: 115.0,
+    inputs: { ogt: uc_bf_st} }
+
+#--------Track DHC4 ACC
+- selection: { name: auto_dch4_acc, type: TrackRadialAcceptance,
+    track_section: upstream, z: 11888.0,
+    inner: 14.0, outer: 115.0,
+    inputs: { ogt: auto_bf_st} }
+
+- selection: { name: uc_dch4_acc, type: TrackRadialAcceptance,
+    track_section: upstream, z: 11888.0,
+    inner: 14.0, outer: 115.0,
+    inputs: { ogt: uc_bf_st} }
+
+#--------Track time
+- selection: { name: auto_rk_dcht, type : TrackTime,
+    max_dt: 20,  inputs: { ogt: auto_bf_st } } 
+
+- selection: { name: uc_rk_dcht, type : TrackTime,
+    max_dt: 20,  inputs: { ogt: uc_bf_st } } 
+
+#--------NoBadClusters
+- selection: {name: auto_rk_lkr_veto, type: Km2NoBadCluster,
+    inputs: {km2clusters: auto_km2_clusters} }
+
+- selection: {name: uc_rk_lkr_veto, type: Km2NoBadCluster,
+    inputs: {km2clusters: uc_km2_clusters} }
+
+#--------LKr acceptance
+- selection: {name: auto_rk_lkr_accep, type: TrackLkrAcceptance,
+    margin_parameter: 8, inputs: { ogt: auto_bf_st } }
+
+- selection: {name: uc_rk_lkr_accep, type: TrackLkrAcceptance,
+    margin_parameter: 8, inputs: { ogt: uc_bf_st } }
+
+
+#--------PZ
+- selection:
+    name: auto_rk_pz
+    type: TrackPZ
+    shape: rectangles
+    points:
+        - [ 13, 20, -1000, 9000 ]
+        - [ 20, 25, -1000, 9000 ]
+        - [ 25, 30,     0, 9000 ]
+        - [ 30, 35,   500, 9000 ]
+        - [ 35, 40,   500, 9000 ] 
+        - [ 40, 45,   500, 9000 ]
+        - [ 45, 50,  1000, 9000 ]
+        - [ 50, 55,  1000, 9000 ]
+        - [ 55, 60,  1500, 9000 ]
+        - [ 60, 65,  1500, 9000 ]
+    inputs:
+        ogt: auto_bf_st
+
+- selection:
+    name: uc_rk_pz
+    type: TrackPZ
+    shape: rectangles
+    points:
+        - [ 13, 20, -1000, 9000 ]
+        - [ 20, 25, -1000, 9000 ]
+        - [ 25, 30,     0, 9000 ]
+        - [ 30, 35,   500, 9000 ]
+        - [ 35, 40,   500, 9000 ] 
+        - [ 40, 45,   500, 9000 ]
+        - [ 45, 50,  1000, 9000 ]
+        - [ 50, 55,  1000, 9000 ]
+        - [ 55, 60,  1500, 9000 ]
+        - [ 60, 65,  1500, 9000 ]
+    inputs:
+        ogt: uc_bf_st
+
+#-------E/P
+- selection: { name: auto_km2_eop, type: Km2TrackClusterEP,
+    min_eop: 0.0, max_eop: 0.85,
+    inputs: { km2clusters: auto_km2_clusters, ogt: auto_bf_st } }
+
+- selection: { name: uc_km2_eop, type: Km2TrackClusterEP,
+    min_eop: 0.0, max_eop: 0.85,
+    inputs: { km2clusters: uc_km2_clusters, ogt: uc_bf_st } }
+
+###################################################
+# SELECTIONS
+###################################################
+
+
+- selection:
+    name : auto_full_selection
+    type: CompositeSelection
+    children:
+        - data_sample
+        - auto_good_trk
+        - auto_pos_trk
+        - auto_quality_7
+        - auto_cda_30mm
+        - auto_dch1_acc
+        - auto_dch4_acc
+        - auto_rk_lkr_accep
+        - auto_rk_lkr_veto
+        - auto_rk_pz
+        - auto_km2_eop
+
+- selection:
+    name : weighted_auto_full_selection
+    type: CompositeSelection
+    children:
+        - weighted_data_sample
+        - auto_good_trk
+        - auto_pos_trk
+        - auto_quality_7
+        - auto_cda_30mm
+        - auto_dch1_acc
+        - auto_dch4_acc
+        - auto_rk_lkr_accep
+        - auto_rk_lkr_veto
+        - auto_rk_pz
+        - auto_km2_eop
+
+- selection:
+    name : uc_full_selection
+    type: CompositeSelection
+    children:
+        - data_sample
+        - uc_good_trk
+        - uc_pos_trk
+        - uc_quality_7
+        - uc_cda_30mm
+        - uc_dch1_acc
+        - uc_dch4_acc
+        - uc_rk_lkr_accep
+        - uc_rk_lkr_veto
+        - uc_rk_pz
+        - uc_km2_eop
+
+- analysis:
+    type: Summary
+    name: auto_summary
+    base: passer
+    source: auto_full_selection
+    ostream: debug_out
+
+- analysis:
+    type: Summary
+    name: weighted_auto_summary
+    base: passer
+    source: weighted_auto_full_selection
+    ostream: debug_out
+
+- analysis:
+    type: Summary
+    name: uc_summary
+    base: passer
+    source: uc_full_selection
+    ostream: debug_out
+
+- analysis :
+    type: Km2Plotter
+    name: km2_auto_full
+    folder: km2_auto_full
+    tfile: tfout
+    selection: auto_full_selection
+    inputs:
+        km2event: auto_km2_event
+
+- analysis :
+    type: Km2Plotter
+    name: weighted_km2_auto_full
+    folder: weighted_km2_auto_full
+    tfile: tfout
+    selection: weighted_auto_full_selection
+    inputs:
+        km2event: auto_km2_event
+
+- analysis :
+    type: Km2Plotter
+    name: km2_uc_full
+    folder: km2_uc_full
+    tfile: tfout
+    selection: uc_full_selection
+    inputs:
+        km2event: uc_km2_event

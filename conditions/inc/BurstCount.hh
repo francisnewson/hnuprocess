@@ -23,7 +23,8 @@ namespace fn
     {
         Long64_t run;
         Long64_t burst_time;
-        Long64_t  events;
+        Long64_t events;
+        Double_t weight;
     };
 
     class BurstCount : public Analysis

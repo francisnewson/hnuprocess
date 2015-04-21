@@ -1,23 +1,27 @@
 #Subscribers which run everytime
 
-- selection:
-    name: auto_passer
-    type : auto_pass
+- monitor:
+    name: auto_counter
+    type: Counter
 
-- output:
-    name: auto_stats_out
-    type: ostream
-    filename: auto_stats_out.dat
-
-- selection:
-    name: mcz
-    type: MCZCut
-    min_z: -1800
-    max_z:  8000
-
-- analysis:
-    name: mcz_summary
-    type: Summary
-    base: auto_passer
-    source: mcz
-    ostream: auto_stats_out
+#- selection:
+#    name: auto_passer
+#    type : auto_pass
+#
+#- output:
+#    name: auto_stats_out
+#    type: ostream
+#    filename: auto_stats_out.dat
+#
+#- selection:
+#    name: mcz
+#    type: MCZCut
+#    min_z: -1800
+#    max_z:  8000
+#
+#- analysis:
+#    name: mcz_summary
+#    type: Summary
+#    base: auto_passer
+#    source: mcz
+#    ostream: auto_stats_out
