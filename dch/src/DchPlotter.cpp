@@ -208,12 +208,14 @@ namespace fn
 
         for ( int i = 0 ; i != 5 ; ++ i )
         {
-            double angle_cutoff = 0.00045;
-            double angle_frequency = (i == 0) ? 0 : 1 * 1 * 0.01;
+            double angle_cutoff = 0.00085;
+            double angle_frequency = (i == 0) ? 0 : 2 * i * 0.001;
+            //double angle_frequency = (i == 0) ? 0 : 1 * 1 * 0.01;
 
             double mom_cutoff = 0.08;
             //double mom_frequency = 1 * i * 0.001;
-            double mom_frequency = 1 * i * 0.001;
+            //double mom_frequency = 1 * i * 0.001;
+            double mom_frequency = (i == 0) ? 0 : 1 * 4 * 0.001;
 
             std::cout << "SCATTER " << i << std::endl;
 
@@ -240,7 +242,8 @@ namespace fn
 
         if( is_mc_ )
         {
-            if ( cda < 2.5 )
+            //if ( cda < 2.5 )
+            if ( cda < 10.0 )
             {
                 plots_.plot_data( k2pi_data_, *lkr_data_, k2pi_data_.raw_dch, 
                         k2pi_data_.weight, true, &k2pi_data_.mc  );
@@ -257,7 +260,8 @@ namespace fn
 
                 double cda = extract_cda( mod_dch, *lkr_data_ );
 
-                if ( cda < 2.5 )
+                //if ( cda < 2.5 )
+                if ( cda < 10.0 )
                 {
                     scatter_plots_[i].plot_data( k2pi_data_, *lkr_data_, mod_dch, 
                             k2pi_data_.weight, true, &k2pi_data_.mc );

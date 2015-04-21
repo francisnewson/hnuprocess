@@ -80,7 +80,7 @@ namespace fn
             if ( in_range( nrun, cw.run_range ) )
             {
                 //do crude weighting
-                result *= 1.0 + cw.slope * std::pow( mom - 74.0, 2 );
+                result *= ( 1.0 + cw.slope * std::pow( mom - 74.0, 2 ) );
             }
         }
 
@@ -90,7 +90,7 @@ namespace fn
                     && in_range( mom, fw.mom_range ) )
             {
                 //do fine weighting
-                result *= 1.0 + fw.slope * ( mom + fw.central_mom );
+                result *= ( 1.0 + fw.slope * ( mom + fw.central_mom ) );
             }
         }
         return result;

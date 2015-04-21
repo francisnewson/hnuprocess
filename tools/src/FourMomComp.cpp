@@ -33,7 +33,7 @@ namespace fn
 
         hdm2_ = hs_.MakeTH1D( "hdm2",
                 ( name_ + " #Delta m^{2}_{miss}").c_str(),
-                1000, -0.1, 0.1, " #Delta m^{2}_{miss}" );
+                2000, -0.2, 0.2, " #Delta m^{2}_{miss}" );
     }
 
     void FourMomComp::FillM2( const TLorentzVector& a, 

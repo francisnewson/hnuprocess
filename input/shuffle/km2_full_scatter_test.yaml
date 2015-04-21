@@ -1,0 +1,123 @@
+scaling:
+    - scaling_method:
+        strategy: m2
+        name: mc_pos
+
+        halo_channels:
+            - p6.data.kless.q11t.v2.pos
+            - p6.data.km.q11t.v2.pos
+
+        data_channels:
+            - p5.data.q11t.v3.pos
+
+        km2_channels:
+            - p5.km2.v2.pos
+
+        halo:
+            strategy: m2
+            input_file: data/km2_hacking/all.full_scatter.root
+            plot_path: relaxed_km2/h_m2m_kmu
+
+            min_mass: -0.3
+            max_mass: -0.1
+
+        km2:
+            strategy: m2
+            input_file: data/km2_hacking/all.full_scatter.root
+            plot_path: relaxed_km2/h_m2m_kmu
+
+            min_mass: -0.02
+            max_mass:  0.02
+
+    - scaling_method:
+        strategy: m2
+        name: mc_neg
+
+        halo_channels:
+            - p6.data.km.q11t.v2.neg
+
+        data_channels:
+            - p5.data.q11t.v3.neg
+
+        km2_channels:
+            - p5.km2.v2.neg
+
+        halo:
+            strategy: m2
+            input_file: data/km2_hacking/all.full_scatter.root
+            plot_path: relaxed_km2/h_m2m_kmu
+
+            min_mass: -0.3
+            max_mass: -0.1
+
+        km2:
+            strategy: m2
+            input_file: data/km2_hacking/all.full_scatter.root
+            plot_path: relaxed_km2/h_m2m_kmu
+
+            min_mass: -0.02
+            max_mass:  0.02
+
+weights:
+    fid_file: working/km2_full_test/fids.dat
+
+mass_windows:
+    method: params
+    x0: 0.390
+    res0: 0.0035
+    offset: 0
+
+output:
+    input_file:  data/km2_hacking/all.full_scatter.root
+    plot_path: relaxed_km2/h_m2m_kmu
+    rebin: 10
+
+    data_plot:
+        channels:
+            - p5.data.q11t.v3.pos
+        do_blind: true
+        min_blind: 0.09
+        max_blind: 0.3
+
+    stack:
+        - item:
+            name: km3_pos
+            scaling: mc_pos
+            type: km3
+            fid_weight: p5.km3.v2.pos
+            channels:
+                - p5.km3.v2.pos
+
+        - item:
+            name: k2pig_pos
+            scaling: mc_pos
+            type: k2pi
+            fid_weight: p5.k2pig.v2.pos
+            channels:
+                - p5.k2pig.v2.pos
+
+        - item:
+            name: k3pi_pos
+            scaling: mc_pos
+            fid_weight: p5.k3pi.v2.pos
+            type: k3pi
+            channels:
+                - p5.k3pi.v2.pos
+
+        - item:
+            name: halo_pos
+            scaling: mc_pos
+            type: halo
+            errors:
+                - halo_scale
+            channels:
+                - p6.data.kless.q11t.v2.pos
+                - p6.data.km.q11t.v2.pos
+
+        - item:
+            name: km2_pos
+            scaling: mc_pos
+            fid_weight: p5.km2.v2.pos
+            type: km2
+            channels:
+                - p5.km2.v2.pos

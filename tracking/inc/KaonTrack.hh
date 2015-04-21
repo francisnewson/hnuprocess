@@ -20,24 +20,32 @@
 #endif
 namespace fn
 {
+    //Convenience functions to return track pos and dir
+    //(no momentum info)
     Track get_kp_track( const fne::Conditions c );
     Track get_km_track( const fne::Conditions c );
 
     //--------------------------------------------------
     
+    //Generate the appropriate yaml node based on channel
     YAML::Node auto_kaon_track( const YAML::Node& instruct, RecoFactory& rf );
 
     //--------------------------------------------------
 
+    //base class for kaon track objects
     class KaonTrack : public Subscriber
     {
         public:
             virtual void new_event() ;
+
+            //These are secondary methods which
+            //maintain the obvious relationships
             TVector3 get_kaon_3mom() const;
             TVector3 get_kaon_point() const;
             TLorentzVector get_kaon_4mom() const;
             TVector3 extrapolate_z( double z ) const;
 
+            //These methods actually define the track
             virtual const Track& get_kaon_track() const = 0;
             virtual double get_kaon_mom() const = 0;
 
@@ -55,20 +63,24 @@ namespace fn
     class CachedKaonTrack : public KaonTrack
     {
         public:
+            //These now return cached variables
             virtual const Track& get_kaon_track() const;
             virtual double get_kaon_mom() const;
             void new_event();
 
         private:
+            //The work is delegated to theses functions
             virtual Track load_kaon_track() const = 0;
             virtual double load_kaon_mom() const = 0;
 
+            //the cache
             Track kt_;
             double kmom_;
     };
 
     //--------------------------------------------------
 
+    //Return K+ track with beta correction
     class RawKPTrack : public CachedKaonTrack
     {
         public:
@@ -82,7 +94,23 @@ namespace fn
     };
 
     //--------------------------------------------------
+    
+    //Return K+ track without beta correction
+    class UCKPTrack : public CachedKaonTrack
+    {
+        public:
+            UCKPTrack ( const fne::Event * e , bool mc );
+            virtual Track load_kaon_track() const;
+            virtual double load_kaon_mom() const;
 
+        private:
+            const fne::Event * e_;
+            bool mc_;
+    };
+
+    //--------------------------------------------------
+
+    //Return K- track with beta correction
     class RawKMTrack : public CachedKaonTrack
     {
         public:
@@ -98,6 +126,7 @@ namespace fn
 
     //--------------------------------------------------
 
+    //kaon properties for WeightedKTrack
     struct kaon_properties
     {
         double dxdz;
@@ -113,6 +142,7 @@ namespace fn
 
     //--------------------------------------------------
 
+    //Return K+ track from list of tracks weighted within polarities
     class WeightedKTrack : public KaonTrack
     {
         public:

@@ -75,7 +75,7 @@
     dch_merge_sep: 0.5
 
     angle_sigma: 0.00045
-    angle_frequency: 0.01
+    angle_frequency: 0.002
     mom_sigma: 0.08
     mom_frequency: 0.004
 

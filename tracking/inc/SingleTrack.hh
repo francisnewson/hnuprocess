@@ -259,7 +259,7 @@ namespace fn
             //generate pseudo random numbers
             const fne::Event * event_;
 
-            TrackScatterer scatterer_;
+            TrackPowerScatterer scatterer_;
     };
 
 }

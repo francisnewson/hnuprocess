@@ -45,7 +45,6 @@ namespace fn
         for ( YAML::const_iterator it = channel_lists.begin();
                 it != channel_lists.end() ; ++ it )
         {
-
             //get list of channels for this period
             const YAML::Node& channel_list = *it;
             std::vector<std::string> channels = 
@@ -118,6 +117,10 @@ namespace fn
             if ( kaon_type == "rawkp" )
             {
                 return new RawKPTrack( event, is_mc );
+            }
+            else if ( kaon_type == "uckp" )
+            {
+                return new UCKPTrack( event, is_mc );
             }
             else if ( kaon_type == "rawkm" )
             {
@@ -213,6 +216,21 @@ namespace fn
 
     double RawKPTrack::load_kaon_mom() const
     {
+        return e_->conditions.pkp * ( 1 + e_->conditions.beta);
+    }
+
+    //--------------------------------------------------
+
+    UCKPTrack::UCKPTrack ( const fne::Event * e , bool mc )
+        :e_(e), mc_( mc ){}
+
+    Track UCKPTrack::load_kaon_track() const
+    {
+        return get_kp_track( e_->conditions );
+    }
+
+    double UCKPTrack::load_kaon_mom() const
+    {
         return e_->conditions.pkp;
     }
 
@@ -228,7 +246,7 @@ namespace fn
 
     double RawKMTrack::load_kaon_mom() const
     {
-        return e_->conditions.pkm;
+        return e_->conditions.pkm * ( 1 + e_->conditions.beta);
     }
 
     //--------------------------------------------------
