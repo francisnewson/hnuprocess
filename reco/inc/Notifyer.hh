@@ -92,8 +92,8 @@ namespace fn
                     new_run_ = false;
                     new_tree_ = false;
 
-                    new_burst_ =  ( current_burst_ != h.burst_time );
                     new_run_ = ( current_run_ != h.run );
+                    new_burst_ =  ( current_burst_ != h.burst_time ) || new_run_;
                     new_tree_ = ( current_tree_ != tree );
 
                     if ( new_run_ )

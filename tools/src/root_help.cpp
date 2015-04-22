@@ -52,7 +52,7 @@ namespace fn
         }
         if ( file_string.find( "eos") != std::string::npos )
         {
-            file_string = "root://eosna62//" + file_string;
+            file_string = "root://eosna62.cern.ch//" + file_string;
         }
     }
 
