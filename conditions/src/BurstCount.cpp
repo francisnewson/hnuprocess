@@ -56,6 +56,7 @@ namespace fn
         cd_p( &tfile_, folder_ );
         //burst_tree_.Print();
         burst_tree_.Write();
+        burst_tree_.SetDirectory(0);
     }
 
     REG_DEF_SUB( BurstCount);
