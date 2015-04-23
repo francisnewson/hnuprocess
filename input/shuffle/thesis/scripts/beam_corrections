@@ -1,0 +1,5 @@
+#!/bin/bash
+mkdir -p output/beam_corrections
+./build_O3/apps/shuffle -m input/shuffle/thesis/beam_corrections/corr_weighted.yaml -o output/note/beam_corrections/corr_weighted.root
+./build_O3/apps/shuffle -m input/shuffle/thesis/beam_corrections/corr.yaml -o output/note/beam_corrections/corr.root
+./build_O3/apps/shuffle -m input/shuffle/thesis/beam_corrections/uc.yaml -o output/note/beam_corrections/uc.root

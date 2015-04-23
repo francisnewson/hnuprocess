@@ -5,6 +5,7 @@
 #include <map>
 #include <set>
 #include <algorithm>
+#include <string>
 #if 0
 /*
  *      _   _   _          _       
@@ -56,5 +57,6 @@ namespace fn
             return m.find(k) != m.end();
         }
 
+    bool contains( const std::string& s1, const std::string& s2 );
 }
 #endif

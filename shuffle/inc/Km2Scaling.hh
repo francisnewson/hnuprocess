@@ -2,6 +2,7 @@
 #define KM2SCALING_HH
 #include "yaml_help.hh"
 #include "TH1.h"
+#include "TTree.h"
 #if 0
 /*
  *  _  __          ____  ____            _ _
@@ -15,6 +16,30 @@
 #endif
 namespace fn
 {
+    //function to extract fiducial counts from MC
+    std::map<std::string,double> extract_fiducial_weights
+        ( std::string filename, std::string pre, std::string post );
+
+    template <typename T>
+        double sum_variable( std::string branch, TTree* tt )
+        {
+            Long64_t nEntries = tt->GetEntries();
+            double total_weight = 0.0;
+            T  weight = 0;
+            tt->SetBranchAddress( branch.c_str(), &weight );
+            tt->SetBranchStatus( "*", 0 );
+            tt->SetBranchStatus( branch.c_str(), 1 );
+            for ( int i = 0 ; i != nEntries ; ++i )
+            {
+                tt->GetEntry(i);
+                total_weight += double(weight);
+            }
+            return  total_weight;
+        }
+
+    std::map<std::string,double> extract_root_fiducial_weights
+        ( const YAML::Node& fid_conf  );
+
     class Km2Scaling
     {
         public:

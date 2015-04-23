@@ -1,6 +1,7 @@
 #include "HistStacker.hh"
 #include "yaml_help.hh"
 #include "Rtypes.h"
+#include <iomanip>
 
 namespace fn
 {
@@ -50,7 +51,7 @@ namespace fn
     void HistFormatter::format( TH1& h , std::string type ) const
     { 
         Color_t color = type_colors_.at( type );
-        std::cerr << "Coloring " << type << " " << color << std::endl;
+        std::cerr << std::setw(15) << "Coloring " << std::setw(10) << type << " " << color << std::endl;
         h.SetFillColor( color );
         h.SetLineColor( color );
     }

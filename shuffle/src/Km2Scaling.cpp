@@ -2,14 +2,59 @@
 #include "HistExtractor.hh"
 #include "TFile.h"
 #include "TFractionFitter.h"
+#include "TKey.h"
+#include "TClass.h"
+#include <TROOT.h>
 #include <boost/filesystem/path.hpp>
 #include <iostream>
 #include <iomanip>
 
 using boost::filesystem::path;
 
+
 namespace fn
 {
+    std::map<std::string,double> extract_fiducial_weights
+        ( std::string filename, std::string pre, std::string post, std::string branch )
+        {
+            TFile tf( filename.c_str() );
+            tf.cd( pre.c_str() );
+            TDirectory * dir = tf.CurrentDirectory();
+            TIter next_object( dir->GetListOfKeys() ) ;
+            TKey *key;
+
+            std::map<std::string, double > result;
+
+            while ( ( key = (TKey*)next_object() ) )
+            {
+                TClass * cl = gROOT->GetClass( key->GetClassName() );
+                if ( ! cl->InheritsFrom( "TDirectory" ) ) continue;
+
+                TTree * tt = 0;
+                TDirectory * folder = static_cast<TDirectory*>( key->ReadObj() );
+                folder->GetObject( post.c_str(), tt );
+
+                double total_weight = 0.0;
+
+                if ( branch == "events" )
+                { total_weight = sum_variable<Long64_t>( branch,  tt ); }
+                else
+                { total_weight = sum_variable<Double_t>( branch,  tt ); }
+
+                result.insert( std::make_pair( std::string( folder->GetName() ), total_weight ) );
+            }
+
+            return result;
+        }
+
+    std::map<std::string,double> extract_root_fiducial_weights
+        ( const YAML::Node& fid_conf  )
+        {
+            return extract_fiducial_weights( 
+                    get_yaml<std::string>( fid_conf,"root_file"), get_yaml<std::string>( fid_conf,"pre")
+                    , get_yaml<std::string>(fid_conf,"post"), get_yaml<std::string>( fid_conf, "branch" ) );
+        }
+
     Km2Scaling::Km2Scaling( const YAML::Node& scaling_config , 
             const std::map<std::string, double>& fiducial_weights,
             const std::map<std::string, double>& brs
@@ -23,7 +68,7 @@ namespace fn
         using std::vector;
         using std::string;
 
-        std::cout << "Starting " << get_yaml<string>( scaling_config_, "name" ) << std::endl;
+        std::cout << "\n--Starting " << get_yaml<string>( scaling_config_, "name" ) << std::endl;
 
         string scaling_strategy =  get_yaml<string>( scaling_config_, "strategy" );
         if ( scaling_strategy == "m2" )
@@ -112,7 +157,7 @@ namespace fn
         using std::vector;
         using std::string;
 
-        std::cout << "Calculating scaling: " << get_yaml<string>( scaling_config_, "name" ) << std::endl;
+        std::cout << "   Calculating scaling: " << get_yaml<string>( scaling_config_, "name" ) << std::endl;
 
         //Channel definitions
         auto halo_channels = get_yaml<vector<string>>( scaling_config_, "halo_channels" );
@@ -137,7 +182,7 @@ namespace fn
             auto hsummed_data = get_summed_histogram( 
                     ce_halo, begin( data_channels ), end( data_channels ) );
 
-            std::cout << "Halo: " << hsummed_halo->GetEntries() << std::endl;
+            std::cout << std::setw(20) << "Halo entries: " << hsummed_halo->GetEntries() << std::endl;
 
             //Do integrals
             double m2_min_halo = get_yaml<double>( halo_node, "min_mass" );
@@ -185,9 +230,9 @@ namespace fn
             double km2_data_integral =  integral( *hsummed_data, m2_min_km2, m2_max_km2 );
             double km2_km2_integral =  integral( *hsummed_km2, m2_min_km2, m2_max_km2 );
 
-            std::cout << "Halo integral: " << km2_halo_integral << std::endl;
-            std::cout << "Data integral: " << km2_data_integral << std::endl;
-            std::cout << "Km2  integral: " << km2_km2_integral << std::endl;
+            std::cout << std::setw(25) << "Halo integral: " << km2_halo_integral << std::endl;
+            std::cout << std::setw(25) << "Data integral: " << km2_data_integral << std::endl;
+            std::cout << std::setw(25) << "Km2  integral: " << km2_km2_integral << std::endl;
 
             double subtracted_km2 = km2_data_integral -  halo_scale_ * km2_halo_integral ;
             double subtracted_km2_error = std::sqrt( km2_data_integral + km2_halo_integral );
@@ -217,9 +262,13 @@ namespace fn
             double br = brs_.at( type );
             scale_factor = km2_scale_ *  km2_fid_weight_  / fid_weight * br / km2_br_;
 
-            std::cerr << "Scaling " << type << " km2fid: " <<  km2_fid_weight_ 
-                << " km2_scale:" <<  km2_scale_  << " fid:" <<  fid_weight 
-                << " br:" <<  br << " km2br:" <<  km2_br_ << "  scale_factor: " << scale_factor << std::endl;
+            std::cerr << "Scaling " << type << "\n"
+                << std::setw(15) <<  "km2fid: " <<  km2_fid_weight_ 
+                << std::setw(15)  << " km2_scale: " <<  km2_scale_  
+                << std::setw(15) << " fid: " <<  fid_weight  << "\n"
+                << std::setw(15) << " br: " <<  br 
+                << std::setw(15) << " km2br: " <<  km2_br_ 
+                << std::setw(15) << "  scale_factor: " << scale_factor << std::endl;
         }
         h.Scale( scale_factor );
     }

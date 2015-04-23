@@ -126,6 +126,8 @@ channels = {
 
 analysis_name = 'km2_full_test'
 analysis_folder= osp.join("/afs/cern.ch/user/f/fnewson/work/hnu/gopher/data/process/",analysis_name, "channels" )
+analysis_name = 'beam_corrections'
+analysis_folder= osp.join("/afs/cern.ch/user/f/fnewson/work/hnu/gopher/data/thesis/",analysis_name, "channels" )
 output_folder =  osp.join( 'working',  analysis_name)
 for sub in ["km2_stats", "fiducial_count"]:
     os.makedirs( osp.join( output_folder, sub ), exist_ok = True ) 
@@ -139,13 +141,13 @@ for short_name, name_folder in channels.items():
         channel_name =  '.'.join( [name, pol] )
         if osp.isdir( channel_folder ):
             #Create summaries
-            summary = analyse_channel( channel_folder, "km2_stats", "batch(\d+)" ) 
+            summary = analyse_channel( channel_folder, "debug", "batch(\d+)" ) 
             output_filename = osp.join( output_folder,'km2_stats', channel_name ) 
             with open( output_filename, 'w' ) as fout:
                 fout.write( str( summary ) )
             #Do fiducial counts
             try:
-                fidsum = analyse_channel( channel_folder, "auto_stats_out", "batch(\d+)" )
+                fidsum = analyse_channel( channel_folder, "debug", "batch(\d+)" )
                 mcz =  fidsum.summaries['mcz_summary'].get_stats('mcz')
                 fid_filename = osp.join( output_folder, 'fiducial_count', channel_name )
                 all_fids[channel_name] = mcz[0]

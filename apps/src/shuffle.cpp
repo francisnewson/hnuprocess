@@ -96,7 +96,12 @@ int main( int argc, char * argv[] )
 
     //Load fiducial weights
     std::string fid_filename = get_yaml<std::string>( config_node["weights"], "fid_file" );
-    auto fiducial_weights = YAML::LoadFile(fid_filename).as<std::map<std::string, double>>();
+
+    bool from_root = fn::contains( fid_filename, "root" );
+
+    auto fiducial_weights = from_root ?
+        extract_root_fiducial_weights( config_node["weights"]  )
+        :  YAML::LoadFile(fid_filename).as<std::map<std::string, double>>();
 
     //Load branching ratios
     std::string br_filename = "input/shuffle/branching_ratios.yaml" ;
@@ -128,7 +133,7 @@ int main( int argc, char * argv[] )
 
     for ( const auto& scaling : scaling_info  )
     {
-        std::cout << scaling.second.get_km2_fid_weight() << std::endl;
+        //std::cout << scaling.second.get_km2_fid_weight() << std::endl;
     }
 
     //**************************************************
@@ -190,5 +195,5 @@ int main( int argc, char * argv[] )
     //**************************************************
 
     ce_stack.set_rebin( 1 );
-   // UpperLimitExtractor ule( config_node["output"], config_node["mass_window"], ce_stack, scaling_info );
+    // UpperLimitExtractor ule( config_node["output"], config_node["mass_window"], ce_stack, scaling_info );
 }
