@@ -15,9 +15,10 @@ namespace toymc
             void kick_tx( double txkick );
             void kick_ty( double tykick );
 
+            void transfer_z( double dz );
+
             const double get_mom(){ return p; };
 
-        private:
             double p;
             double x;
             double tx;
@@ -31,18 +32,18 @@ namespace toymc
     //Inhreitance hierarch for random number generators
     struct RNGBase
     {
-        virtual int operator()() = 0;
-        virtual double max() = 0;
-        virtual double min() = 0;
+        virtual uint_fast32_t operator()() = 0;
+        virtual uint_fast32_t max() = 0;
+        virtual uint_fast32_t min() = 0;
         virtual ~RNGBase(){};
     };
 
     template <class RNG >
         struct SmartRNG : RNGBase {
             RNG gen;
-            virtual int operator()() { return gen(); } 
-            virtual double max(){ return gen.max() ; }
-            virtual double min(){ return gen.min() ; }
+            virtual uint_fast32_t operator()() { return gen(); } 
+            virtual uint_fast32_t max(){ return gen.max() ; }
+            virtual uint_fast32_t min(){ return gen.min() ; }
         };
 
     //--------------------------------------------------
@@ -85,6 +86,7 @@ namespace toymc
 
     class ToyMCScatter : public ToyMC
     {
+        public:
         ToyMCScatter( RNGBase& gen, double rad_length, double length );
 
         virtual track_params transfer( track_params ) const;
@@ -106,6 +108,7 @@ namespace toymc
 
     class ToyMCDipoleBend : public ToyMC
     {
+        public:
         virtual track_params transfer( track_params ) const;
         virtual double get_length() const;
         private:

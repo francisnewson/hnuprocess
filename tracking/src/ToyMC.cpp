@@ -1,6 +1,7 @@
 #include "ToyMC.hh"
 #include "stl_help.hh"
 #include <functional>
+#include <iostream>
 namespace toymc
 {
 
@@ -9,6 +10,8 @@ namespace toymc
 
     void track_params::kick_tx( double txkick ) { tx += txkick; }
     void track_params::kick_ty( double tykick ) { ty += tykick; }
+
+    void track_params::transfer_z( double dz ){ z += dz; }
 
     //--------------------------------------------------
 
@@ -70,6 +73,9 @@ namespace toymc
 
         tp.shift_y( get_shift( y_r1, y_r2, theta_0, length_ ) );
         tp.kick_ty( get_kick(  y_r2, theta_0 ) );
+
+        tp.transfer_z( length_ ) ;
+
 
         return tp;
     }
