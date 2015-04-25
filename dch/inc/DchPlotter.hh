@@ -71,6 +71,7 @@ namespace fn
             HistStore dths_;
             TH1D * hchi2_ ;
             TH1D * heop_ ;
+            TH2D * heop_p_ ;
             TH1D * hphoton_sep_ ;
             TH1D * htrack_cluster_sep_ ;
             TH1D * hmin_photon_radius_;

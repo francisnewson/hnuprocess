@@ -305,10 +305,14 @@ int main( int argc, char * argv[] )
     fit_selection.set_name( "fit_selection" );
     fit_selection.set_id( next_id++);
 
+    CompositeSelection fit_no_eop_selection( { &auto_pass, &chi2_cut, &track_cluster_sep_cut, &min_photon_radius_cut} );
+    fit_selection.set_name( "fit_selection" );
+    fit_selection.set_id( next_id++);
+
     std::vector<Selection*> selections {
         &auto_pass, &m2m_cut, &eop_cut, 
             &track_cluster_sep_cut, &full_selection, &min_photon_radius_cut,
-            &chi2_cut, &fit_selection
+            &chi2_cut, &fit_selection, &fit_no_eop_selection
     };
 
     //**************************************************
@@ -319,6 +323,7 @@ int main( int argc, char * argv[] )
     DchAnalysis raw_fit_dch_plotter( auto_pass, tfout, "raw_fit_k2pi_plots", *event_data, "fit", is_mc );
     DchAnalysis select_dch_plotter( full_selection, tfout, "select_k2pi_plots", *event_data, "raw", is_mc );
     DchAnalysis select_fit_dch_plotter( fit_selection, tfout, "select_fit_k2pi_plots", *event_data, "fit", is_mc );
+    DchAnalysis select_fit_no_eop_dch_plotter( fit_no_eop_selection, tfout, "select_fit_no_eop_k2pi_plots", *event_data, "fit", is_mc );
 
     //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     //IMPORTANT
@@ -332,6 +337,7 @@ int main( int argc, char * argv[] )
     std::vector<Analysis*> analyses { 
         &raw_dch_plotter, &select_dch_plotter,
             &raw_fit_dch_plotter, &select_fit_dch_plotter ,
+            &select_fit_no_eop_dch_plotter ,
             &summary,
     };
 

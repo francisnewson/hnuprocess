@@ -145,6 +145,10 @@ namespace fn
         heop_ = dths_.MakeTH1D( "heop", "Track Cluster E/p",
                 1500, 0.0 , 1.5,  "E/P", "#events" );
 
+        heop_p_ = dths_.MakeTH2D( "heop", "Track Cluster E/p vs p",
+                100, 0.0 , 100,  "p",
+                100, 0.0 , 1.0,  "E/p" );
+
         hchi2_ = dths_.MakeTH1D( "hchi2", "Fit Chi2",
                 10000, 0.0 , 10,  "Chi2", "#events" );
 
@@ -166,6 +170,8 @@ namespace fn
         if (event_data.found_track_cluster)
         {
             heop_->Fill( extract_eop( event_data, dch_data, mc) , weight );
+            heop_p_->Fill( dch_data.p, extract_eop( event_data, dch_data, mc)
+                    , weight );
         }
 
         hphoton_sep_->Fill( extract_photon_sep( lkr_data), weight );
