@@ -145,9 +145,9 @@ namespace fn
         heop_ = dths_.MakeTH1D( "heop", "Track Cluster E/p",
                 1500, 0.0 , 1.5,  "E/P", "#events" );
 
-        heop_p_ = dths_.MakeTH2D( "heop", "Track Cluster E/p vs p",
+        heop_p_ = dths_.MakeTH2D( "heop_p", "Track Cluster E/p vs p",
                 100, 0.0 , 100,  "p",
-                100, 0.0 , 1.0,  "E/p" );
+                120, 0.0 , 1.2,  "E/p" );
 
         hchi2_ = dths_.MakeTH1D( "hchi2", "Fit Chi2",
                 10000, 0.0 , 10,  "Chi2", "#events" );
