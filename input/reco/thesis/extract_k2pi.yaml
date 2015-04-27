@@ -1,0 +1,273 @@
+#Extract k2pi data
+---
+
+#Autopass
+- selection:
+    name: passer
+    type : auto_pass
+
+###################################################
+# FILE MANAGEMENT
+###################################################
+
+#Runs to skip because of LKr
+- exec:
+    skipmcruns: [ 20410, 20411, 20412, 20413, 20414, 20451, 20452, 20453, 20454, 20455, 20456 ]
+    skipdatalist: input/reco/conditions/bad_lkr_files.dat
+
+
+- output:
+    name: tftree
+    type: tfile
+    filename: k2pi_tree.root
+
+- output:
+    name: sumout
+    type: ostream
+    filename: k2pi.dat
+
+- output:
+    name: os_cerr
+    type: ostream
+    filename: cerr
+
+#-------------------------------------------------- 
+
+###################################################
+# STANDARD CORRECTIONS
+###################################################
+
+
+#Kaon track
+- input:
+    name: kaon_track
+    type: KaonTrack
+    kaon_type: auto
+    beam_mapping: input/reco/beam/beam_mapping.yaml
+
+#weight
+- selection:
+    name: kaon_mom_weights
+    kt: kaon
+    type: KaonMomWeight
+    crude_weights: input/reco/mod/kaon_crude_weights.dat
+    fine_weights: input/reco/mod/kaon_fine_weights.dat
+
+- input:
+    name: cluster_corrector
+    type: ClusterCorrector
+    filename: "/afs/cern.ch/user/f/fnewson/work/hnu/gopher/data/detector/eopCorrfile.dat"
+    enabled: true
+
+###################################################
+# DATA SAMPLE DEFINITION
+###################################################
+
+# 1]Bad bursts
+- selection:
+    name: good_phys_burst
+    type: BadBurst
+    burst_list: "input/reco/conditions/bad_phys_burst.dat"
+
+- selection:
+    name: good_dch_burst
+    type: BadBurst
+    burst_list: "input/reco/conditions/bad_dch_burst.dat"
+
+- selection:
+    name: good_muv_burst
+    type: BadBurst
+    burst_list: "input/reco/conditions/bad_muv_burst.dat"
+
+- selection:
+    name: weighted_data_sample
+    type: CompositeSelection
+    children:
+        - kaon_mom_weights
+        - good_phys_burst
+        - good_dch_burst
+        - good_muv_burst
+
+
+- selection:
+    name: mcz
+    type: MCZCut
+    min_z: -1800
+    max_z:  8000
+        
+#-------------------------------------------------- 
+
+###################################################
+# INPUTS
+###################################################
+
+#SingleTrack
+- input:
+    name : bf_st
+    type : SingleTrack
+    method : BF
+
+    init_min_mom: 3.0 
+    init_max_mom: 80.0
+    kt: kaon
+    init_max_cda: 15.0
+    init_min_z: -5000.0
+    init_max_z:  10000.0
+    dch_merge_sep: 0.5
+    #log_level: always_print
+    inputs:
+        kt: kaon_track
+
+- input:
+    name: k2pi_clusters
+    type: K2piClusters
+    method: LooseTrack
+
+    max_track_cluster_time: 12
+    min_cluster_energy: 5
+    max_track_cluster_distance: 5
+
+    inputs:
+        ogt: bf_st
+        ClusterCorrector: cluster_corrector
+            
+###################################################
+# CUTS
+###################################################
+
+#Found ogt
+- selection:
+    name: good_trk
+    type : FoundGoodTrack
+    inputs :
+        ogt: bf_st
+
+#Found k2pic
+- selection:
+    name: good_clust
+    type: FoundK2piClusters
+    inputs:
+        k2pic: k2pi_clusters
+
+- selection:
+    name: photon_sep
+    type: PhotonSeparation
+    min_sep: 20
+    inputs:
+        k2pic: k2pi_clusters
+
+- selection:
+    name: photon_track_sep
+    type: PhotonTrackSeparation
+    min_sep: 30
+    inputs:
+        k2pic: k2pi_clusters
+        ogt: bf_st
+
+- selection:
+    name: muon_veto
+    type: NoMuv
+
+#Track charge
+- selection:
+    name: pos_trk
+    type : TrackCharge
+    charge: +1
+    inputs :
+        ogt: bf_st
+
+#Track quality
+- selection:
+    name: quality_7
+    type: TrackQuality
+    quality: 0.7
+    inputs:
+        ogt: bf_st
+
+#Track DHC1 ACC
+- selection:
+    name: dch1_acc
+    type: TrackRadialAcceptance
+    track_section: upstream
+    z: 9708.42 #zDCH1
+    inner: 12.0
+    outer: 115.0
+    inputs:
+        ogt: bf_st
+
+#Track DHC4 ACC
+- selection:
+    name: dch4_acc
+    type: TrackRadialAcceptance
+    track_section: downstream
+    z: 11888.0 #zDCH1
+    inner: 14.0
+    outer: 115.0
+    inputs:
+        ogt: bf_st
+
+#Track time
+- selection:
+    name: rk_dcht
+    type : TrackTime
+    max_dt: 20 #ns
+    inputs:
+        ogt: bf_st
+
+        #--------------------------------------------------
+        
+###################################################
+# SELECTIONS
+###################################################
+
+- selection:
+    name : k2pi_cuts
+    type: CompositeSelection
+    children:
+        - weighted_data_sample
+        - muon_veto
+        - good_trk
+        - pos_trk
+        - quality_7
+        - dch1_acc
+        - dch4_acc
+        - rk_dcht
+        - good_clust
+          
+###################################################
+# ANALYSES
+###################################################
+
+#summary
+- analysis : 
+    name : k2pi_summary
+    type: Summary
+    base : passer
+    source : k2pi_cuts 
+    ostream: sumout
+
+#summary
+- analysis : 
+    name : k2pi_summary_cerr
+    type: Summary
+    base : passer
+    source : k2pi_cuts 
+    ostream: os_cerr
+
+- analysis:
+    name: k2pi_extract
+    type: FNK2piExtractor
+    weighter: kaon_mom_weights
+    inputs:
+        k2pic: k2pi_clusters
+        kt: kaon_track
+        ogt: bf_st
+        ClusterCorrector: cluster_corrector
+
+- analysis:
+    name: k2pi_filter
+    type: FNK2piFilter
+    tfile: tftree
+    selection: k2pi_cuts
+    inputs:
+        k2pix: k2pi_extract

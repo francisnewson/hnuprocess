@@ -63,8 +63,9 @@ namespace fn
 
     //Copy only the intime clusters into a new vector
     std::vector<processing_cluster> get_intime_clusters
-        ( std::vector<processing_cluster> all_clusters, const SingleRecoTrack& srt, 
-          double max_dt );
+        ( const std::vector<processing_cluster> & all_clusters, 
+          const SingleRecoTrack& srt, 
+          double max_dt, bool mc );
 
     //Sort by energy and return threshold point
     std::vector<processing_cluster>::iterator sort_energy

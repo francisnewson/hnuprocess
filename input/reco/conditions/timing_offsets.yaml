@@ -1,0 +1,15 @@
+- output:
+    name: tfout
+    type: tfile
+    filename: timing.root
+
+- selection:
+    name: passer
+    type : auto_pass
+
+- analysis:
+    name: timing_offsets
+    type: TimingOffsets
+    selection: passer
+    tfile: tfout
+    folder: timingoffsets

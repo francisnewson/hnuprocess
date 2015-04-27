@@ -5,6 +5,7 @@ namespace fn
 {
     K2piLooseTrackCluster::K2piLooseTrackCluster( 
             const fne::Event * event,
+
             const SingleTrack * single_track,
             YAML::Node & instruct, bool mc ,
             const ClusterCorrector& cluster_corrector)
@@ -20,6 +21,9 @@ namespace fn
 
         max_track_cluster_distance_  = 
             get_yaml<double>( instruct, "max_track_cluster_distance");
+
+        BOOST_LOG_SEV( get_log(), startup )
+            << "max_track_cluster_time: " << max_track_cluster_time_ ;
     }
 
     const ClusterCorrector& K2piLooseTrackCluster::get_cluster_corrector() const
@@ -40,9 +44,15 @@ namespace fn
         auto all_clusters = extract_fne_clusters
             ( nclusters, eclusters, mc, cluster_corrector_ );
 
+        BOOST_LOG_SEV( get_log(), log_level() )
+            << "all_clusters: " << all_clusters.size();
+
         //remove out of time clusters
         auto intime_clusters = get_intime_clusters
-            ( all_clusters, srt, max_track_cluster_time_ );
+            ( all_clusters, srt, max_track_cluster_time_, mc );
+
+        BOOST_LOG_SEV( get_log(), log_level() )
+            << "intime_clusters: " << intime_clusters.size();
 
         //find high energy clusters
         auto first_high_E = sort_energy( intime_clusters, min_cluster_energy_ );
@@ -50,7 +60,13 @@ namespace fn
         std::vector<processing_cluster> low_E_clusters{ begin( intime_clusters ), first_high_E };
         assert( high_E_clusters.size() + low_E_clusters.size() == intime_clusters.size() );
 
+        BOOST_LOG_SEV( get_log(), log_level() )
+            << "high_E_clusters: " << high_E_clusters.size();
+
         int nclus = high_E_clusters.size();
+
+        BOOST_LOG_SEV( get_log(), log_level() )
+            << "Nclus: " << nclus ;
 
         //Must be 2 or 3 high E clusters
         if ( ! ( (nclus ==3 ) || (nclus == 2 ) ) ) { return false; }
@@ -126,15 +142,19 @@ namespace fn
     //----------
 
     std::vector<processing_cluster> get_intime_clusters
-        ( std::vector<processing_cluster> all_clusters, const SingleRecoTrack& srt, double max_dt )
+        ( const std::vector<processing_cluster>& all_clusters, const SingleRecoTrack& srt, double max_dt, bool mc )
         {
+            if ( mc ){ return all_clusters; }
+
             double track_time = srt.get_time();
             std::vector<processing_cluster> result;
 
             std::copy_if( begin( all_clusters), end( all_clusters ), 
                     std::back_inserter( result ),
                     [track_time, max_dt]( const processing_cluster& pc )
-                    { return (fabs(  pc.rc->time - track_time ) < max_dt ); } );
+                    { 
+                    return (fabs(  pc.rc->time - track_time ) < max_dt ); 
+                    } );
 
             return result;
         }
@@ -160,6 +180,8 @@ namespace fn
           double max_track_cluster_distance_, bool mc,
           const ClusterCorrector& cluster_corrector )
         {
+            if (clusters.size() == 0 ) { return end( clusters ); }
+
             //collect distances
             std::vector<double> track_cluster_dists;
             for ( auto& cluster : clusters )
