@@ -6,6 +6,7 @@
 #include "yaml_help.hh"
 #include "root_help.hh"
 #include <iomanip>
+#include "K2piLooseTrackCluster.hh"
 
 namespace fn
 {
@@ -68,6 +69,11 @@ namespace fn
             if ( method == "Default" )
             {
                 return new DefaultK2piClusters{ event, single_track,
+                    instruct, mc, *cluster_corrector };
+            }
+            else if ( method == "LooseTrack" )
+            {
+                return new K2piLooseTrackCluster{ event, single_track,
                     instruct, mc, *cluster_corrector };
             }
             else

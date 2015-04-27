@@ -30,6 +30,7 @@ namespace fn
      *
      *****************************************************/
 
+    //The cached object that gets returned
     class K2piRecoClusters
     {
         private:
@@ -52,6 +53,7 @@ namespace fn
 
     };
 
+    //The subscriber object that does the selection
     class K2piClusters : public Subscriber
     {
         public: 
@@ -81,6 +83,7 @@ namespace fn
     //--------------------------------------------------
 
 
+    //Default cache class
     class DefaultK2piRecoClusters : public K2piRecoClusters
     {
         public:
@@ -114,6 +117,7 @@ namespace fn
 
     class ClusterEnergyCorr;
 
+    //Default implementation of selection
     class DefaultK2piClusters :  public K2piClusters
     {
         public:
