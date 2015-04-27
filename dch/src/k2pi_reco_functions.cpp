@@ -42,7 +42,7 @@ namespace fn
     {
         K2piLkrInterface lkr( raw_lkr);
         TVector3 vec_sep = TVector3( lkr.posC1_X(), lkr.posC1_Y(), 0 ) 
-            - TVector3( lkr.posC2_X(), lkr.posC2_Y() );
+            - TVector3( lkr.posC2_X(), lkr.posC2_Y(), 0 );
         double sep = vec_sep.Mag();
         return sep ;
     };

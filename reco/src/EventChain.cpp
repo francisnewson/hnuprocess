@@ -77,7 +77,8 @@ namespace fn
             int added = tch_->Add( root_file_string( file_string ) );
             if ( added != 1 )
             { throw std::runtime_error
-                ("Could not add " + filename.string()  ); }
+                ("Could not add " + filename.string()  
+                 +"\ntried: "  + file_string ); }
         }
 
 

@@ -20,7 +20,7 @@ namespace fn
             Track downstream_track{
                 muon_track.extrapolate( na62const::zMagnet ),
                     muon_track.get_direction() 
-                        + TVector3( -1 * polarity * na62const::mpn33_kick) };
+                        + TVector3( -1 * polarity * na62const::mpn33_kick, 0, 0) };
 
             muon_track = std::move(downstream_track);
         }
