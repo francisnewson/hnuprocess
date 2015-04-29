@@ -300,11 +300,11 @@
 
 #-------E/P
 - selection: { name: auto_km2_eop, type: Km2TrackClusterEP,
-    min_eop: 0.0, max_eop: 0.85,
+    min_eop: 0.0, max_eop: 0.3,
     inputs: { km2clusters: auto_km2_clusters, ogt: auto_bf_st } }
 
 - selection: { name: uc_km2_eop, type: Km2TrackClusterEP,
-    min_eop: 0.0, max_eop: 0.85,
+    min_eop: 0.0, max_eop: 0.3,
     inputs: { km2clusters: uc_km2_clusters, ogt: uc_bf_st } }
 
 ###################################################
@@ -326,7 +326,7 @@
         - auto_rk_lkr_accep
         - auto_rk_lkr_veto
         - auto_rk_pz
-        - auto_km2_eop
+          #- auto_km2_eop
 
 - selection:
     name : weighted_auto_full_selection
@@ -342,7 +342,7 @@
         - auto_rk_lkr_accep
         - auto_rk_lkr_veto
         - auto_rk_pz
-        - auto_km2_eop
+#       - auto_km2_eop
 
 - selection:
     name : uc_full_selection
@@ -358,7 +358,7 @@
         - uc_rk_lkr_accep
         - uc_rk_lkr_veto
         - uc_rk_pz
-        - uc_km2_eop
+#       - uc_km2_eop
 
 ###################################################
 # ANALYSES

@@ -68,12 +68,14 @@ namespace fn
             uw_lkr_dch_cmp_.Fill( lkr_pip_4mom, dch_pip_4mom, 1.0);
             uw_lkr_dch_cmp_.FillM2( lkr_pip_4mom, dch_pip_4mom, kaon_4mom, 1.0);
 
+            //Other kinematics ( pt, cda )
             TVector3 kaon_mom( lkr_interface.pK_X(), lkr_interface.pK_Y(), lkr_interface.pK_Z() );
             TVector3 dch_pip_3mom = dch_pip_4mom.Vect();
-            hpt_->Fill( dch_pip_3mom.Perp( kaon_mom ), weight );
 
+            hpt_->Fill( dch_pip_3mom.Perp( kaon_mom ), weight );
             hcda_->Fill( extract_cda( dch_data, lkr_data ), weight );
 
+            //m2m
             TVector3 lkr3mom = lkr_pip_4mom.Vect();
             TVector3 dch3mom = dch_pip_4mom.Vect();
             double dtx = lkr3mom.X()/lkr3mom.Mag()  - dch3mom.X()/dch3mom.Mag();
@@ -100,14 +102,7 @@ namespace fn
             const TLorentzVector& mc_k_4mom = mc_interface.p4k();
 
             lkr_tk_mc_cmp_.Fill( mc_k_4mom - lkr_pi0_4mom , mc_pip_4mom , weight );
-
             lkr_tk_mc_cmp_.FillM2( mc_k_4mom - lkr_pi0_4mom , mc_pip_4mom , kaon_4mom,  weight );
-#if 0
-            mc_pip_4mom.Print();
-            dch_pip_4mom.Print();
-            lkr_pip_4mom.Print();
-#endif
-
         }
 
 
@@ -147,7 +142,7 @@ namespace fn
 
         heop_p_ = dths_.MakeTH2D( "heop_p", "Track Cluster E/p vs p",
                 100, 0.0 , 100,  "p",
-                120, 0.0 , 1.2,  "E/p" );
+                150, 0.0 , 2.0,  "E/p" );
 
         hchi2_ = dths_.MakeTH1D( "hchi2", "Fit Chi2",
                 10000, 0.0 , 10,  "Chi2", "#events" );
