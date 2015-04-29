@@ -36,16 +36,20 @@ namespace na62const
     //Z COORDINATES (cm)
     constexpr double zFinalCollimator = -1950;
 
-    constexpr double zLkr  = 12108.2;
-    constexpr double rLkrPojection = 10998.0;
-
     constexpr double bz_tracking =  9700.62;
     constexpr double z_tracking  =  11880.2;
+    constexpr double rLkrPojection = 10998.0;
 
     constexpr double zDch1   =  9708.42;
+    constexpr double zDch2   = 10627.45;
     constexpr double zMagnet = 10929.3;
     constexpr double zDch3   = 11166.4;
     constexpr double zDch4   = 11888.0;
+
+    constexpr double zAl     = 11938;
+    constexpr double zLkr    = 12108.2;
+    constexpr double zHac    = 12419.70;
+
 
     //This is wrong in the ComPACT database
     //constexpr double zMuv1 = 12740.0;
@@ -55,20 +59,22 @@ namespace na62const
     constexpr double zMuv3 = 13012.0;
 
     //SUB DETECTOR LENGTHS (cm)
-    constexpr double len_lkr       = 123.0;
-    constexpr double len_hac       = 120.0;
-    constexpr double len_muv_iron  =  80.0;
-
-    constexpr double muv_half_width = 12.5;
+    constexpr double len_lkr       = 123.0; //cm
+    constexpr double len_hac       = 120.0; //cm
+    constexpr double len_muv_iron  =  80.0; //cm
+    constexpr double muv_half_width = 12.5; //cm
 
     //MATERIAL PROPERTIES
     
     //radiation lengths (cm)
-    constexpr double X0_lkr  = 4.70;
-    constexpr double X0_iron = 1.76;
+    constexpr double X0_lkr  = 4.70; //cm
+    constexpr double X0_iron = 1.76; //cm
+    constexpr double X0_helium = 5.671e5; //cm
+    constexpr double X0_air = 3.039e4; //cm
 
     //FIELDS
     constexpr double mpn33_kick = 0.265;
 
 }
 #endif
+

@@ -2,6 +2,7 @@
 #include "stl_help.hh"
 #include <functional>
 #include <iostream>
+#include <cassert>
 namespace toymc
 {
 
@@ -15,13 +16,18 @@ namespace toymc
 
     //--------------------------------------------------
 
-    void ToyMCLibrary::add_toy( ToyMC * toymc )
+    ToyMC *  ToyMCLibrary::add_toy( std::unique_ptr<ToyMC>  toymc )
     {
         using namespace fn;
-        toy_lib_.push_back( std::unique_ptr<ToyMC>{ toymc } );
+        toy_lib_.push_back( std::move( toymc ) );
+        return  toy_lib_.back().get();
     }
 
     //--------------------------------------------------
+
+    ToyMCComposite::ToyMCComposite( const std::vector<ToyMC*>& children )
+        :children_( children )
+    {}
 
     track_params ToyMCComposite::transfer( track_params tp ) const
     {
@@ -41,7 +47,7 @@ namespace toymc
 
     void ToyMCComposite::add_child( ToyMC * child )
     {
-        children_.push_back( child );
+        children_.push_back( std::move(child) );
     }
 
     //--------------------------------------------------
@@ -50,7 +56,9 @@ namespace toymc
         :gen_( gen), rad_length_( rad_length), length_( length ),
         normal_( 0.0, 1.0 )
     {
+        assert( length_ > 0 );
         double nrad = length_ / rad_length_;
+        std::cout << "nrad: " << nrad << std::endl;
         multiplier_ = 13.6e-3 * std::sqrt( nrad ) * ( 1 + 0.038 * std::log( nrad ) );
     }
 
@@ -68,10 +76,21 @@ namespace toymc
         double y_r1 = normal_( gen_ );
         double y_r2 = normal_( gen_ );
 
+        //shift due to intial angle
+        tp.shift_x( length_ * tp.tx );
+
+        //shift due to scattering ( holds for small tx )
         tp.shift_x( get_shift( x_r1, x_r2, theta_0, length_  ) );
+
+        //angular kick
         tp.kick_tx( get_kick(  x_r2, theta_0 ) );
 
+        //shift due to intial angle
+        tp.shift_y( length_ * tp.ty );
+
+        //shift due to scattering ( holds for small tx )
         tp.shift_y( get_shift( y_r1, y_r2, theta_0, length_ ) );
+
         tp.kick_ty( get_kick(  y_r2, theta_0 ) );
 
         tp.transfer_z( length_ ) ;
@@ -91,4 +110,63 @@ namespace toymc
     }
 
     //--------------------------------------------------
+
+
+    ToyMCThickScatter::ToyMCThickScatter( RNGBase& gen, double rad_length, 
+            double length, int n_div )
+        :toy_scatter_( gen, rad_length, length / double( n_div ) ),
+        n_div_( n_div ), length_( length )
+    {}
+
+    double ToyMCThickScatter::get_length() const
+    { return length_ ;}
+
+    track_params ToyMCThickScatter::transfer( track_params tp ) const
+    {
+        for ( int i = 0 ; i != n_div_ ; ++ i )
+        {
+            tp = toy_scatter_.transfer( tp );
+        }
+
+        return tp;
+    }
+
+    //--------------------------------------------------
+    ToyMCDipoleBend::ToyMCDipoleBend( double mom_kick, int polarity )
+        :mom_kick_( mom_kick), polarity_( polarity )
+    {}
+
+    track_params ToyMCDipoleBend::transfer( track_params tp ) const
+    {
+        double px = tp.tx * tp.p;
+        px += mom_kick_ * tp.q;
+        tp.tx = px / tp.p;
+        return tp;
+    }
+
+    double ToyMCDipoleBend::get_length() const
+    {
+        return 0;
+    }
+
+    //--------------------------------------------------
+
+    ToyMCPropagate::ToyMCPropagate( double length )
+        :length_( length ){}
+
+    double ToyMCPropagate::get_length() const
+    { return length_; }
+
+    track_params ToyMCPropagate::transfer( track_params tp ) const
+    {
+        tp.x = tp.x + length_ * std::tan( tp.tx );
+        tp.y = tp.y + length_ * std::tan( tp.ty );
+        tp.z = tp.z + length_;
+
+        return tp;
+    }
+
+    //--------------------------------------------------
+
+
 }

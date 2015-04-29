@@ -20,6 +20,7 @@ namespace toymc
             const double get_mom(){ return p; };
 
             double p;
+            double q;
             double x;
             double tx;
             double y;
@@ -61,10 +62,11 @@ namespace toymc
     //components can easily be reused.
     class ToyMCLibrary
     {
-        void add_toy( ToyMC * toymc );
+        public:
+            ToyMC * add_toy( std::unique_ptr<ToyMC>  toymc );
 
         private:
-        std::vector<std::unique_ptr<ToyMC>> toy_lib_;
+            std::vector<std::unique_ptr<ToyMC>> toy_lib_;
     };
 
     //--------------------------------------------------
@@ -73,6 +75,7 @@ namespace toymc
     class ToyMCComposite : public ToyMC
     {
         public:
+            ToyMCComposite( const std::vector<ToyMC*>& children );
             track_params transfer( track_params tp ) const;
             double get_length() const;
             void add_child( ToyMC * child );
@@ -87,18 +90,18 @@ namespace toymc
     class ToyMCScatter : public ToyMC
     {
         public:
-        ToyMCScatter( RNGBase& gen, double rad_length, double length );
+            ToyMCScatter( RNGBase& gen, double rad_length, double length );
 
-        virtual track_params transfer( track_params ) const;
-        virtual double get_length() const;
+            virtual track_params transfer( track_params ) const;
+            virtual double get_length() const;
 
         private:
-        RNGBase& gen_;
+            RNGBase& gen_;
 
-        double rad_length_;  //cm
-        double length_; //cm
-        double multiplier_; //GeV
-        mutable std::normal_distribution<double> normal_;
+            double rad_length_;  //cm
+            double length_; //cm
+            double multiplier_; //GeV
+            mutable std::normal_distribution<double> normal_;
     };
 
     double get_shift( double r1, double r2, double theta_0, double dz );
@@ -106,13 +109,53 @@ namespace toymc
 
     //--------------------------------------------------
 
+    class ToyMCThickScatter : public ToyMC
+    {
+        public:
+            ToyMCThickScatter( RNGBase& gen, double rad_length, 
+                    double length, int n_div );
+
+            virtual track_params transfer( track_params ) const;
+            virtual double get_length() const;
+
+        private:
+            ToyMCScatter toy_scatter_;
+            int n_div_;
+            double length_;
+    };
+
+    //--------------------------------------------------
+
     class ToyMCDipoleBend : public ToyMC
     {
         public:
-        virtual track_params transfer( track_params ) const;
-        virtual double get_length() const;
+            ToyMCDipoleBend( double mom_kick, int polarity );
+            virtual track_params transfer( track_params tp ) const;
+            virtual double get_length() const;
+
         private:
+            double mom_kick_;
+            double polarity_;
     };
+
+    //--------------------------------------------------
+
+    class ToyMCPropagate : public ToyMC
+    {
+        public:
+            ToyMCPropagate( double length );
+
+            virtual track_params transfer( track_params ) const;
+            virtual double get_length() const;
+
+        private:
+            double length_;
+    };
+
+    //--------------------------------------------------
+
+    ToyMC * get_divided_scatter( RNGBase& gen, double rad_length,
+            double length, int n_divisions );
 
 }
 #endif

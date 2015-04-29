@@ -26,6 +26,8 @@
 #include "EChain.hh"
 #include "GlobalStatus.hh"
 #include "Summary.hh"
+#include "k2pi_selections.hh"
+#include "PionPlotter.hh"
 
 //A global bool which can be
 //used to store stop signals
@@ -88,7 +90,9 @@ int main( int argc, char * argv[] )
         ( "output-file,o", po::value<path>(), "Specify output file")
         ( "channel,c", po::value<std::string>(), "Specify channel name")
         ( "number,n", po::value<Long64_t>(), "Specify number of events")
-        ;
+        ( "study,s", po::value<std::vector<std::string>>(), "Studies" )
+        ( "view-studies,v", "Studies" )
+    ;
 
     po::options_description desc("Allowed options");
     desc.add( general );
@@ -106,6 +110,13 @@ int main( int argc, char * argv[] )
         std::cerr << desc << "\n";
         std::cerr << "Exiting because help was requested." << "\n";
         return false;
+    }
+
+    if ( vm.count( "view-studies" ) )
+    {
+        std::cerr <<  "Available studies: \n"
+            << "    dch\n" 
+            << "    pion\n" ;
     }
 
     //input file
@@ -135,6 +146,12 @@ int main( int argc, char * argv[] )
                 std::istream_iterator<std::string>() );
         input_description = file_list.string();
     }
+
+    if ( !vm.count( "study" ) )
+    {
+        std::cerr << "No studies selected. Exiting" << std::endl;
+    }
+    std::vector<std::string> studies =  vm["study"].as<std::vector<std::string>>();
 
     BOOST_LOG_SEV( slg, always_print) << "Reading from " << input_description;
 
@@ -190,156 +207,29 @@ int main( int argc, char * argv[] )
     K2PIGStatus k2pigs{ echain->get_event_pointer(), is_mc };
     raw_global_status() = &k2pigs;
 
-    //**************************************************
-    //Selections
-    //**************************************************
+    K2piRecoBag k2pirb( *event_data, is_mc, tfout );
 
-    int next_id = 0;
-
-    //References
-    auto& event = *event_data;
-    auto& raw_lkr = event_data->raw_lkr;
-    auto& fit_lkr = event_data->fit_lkr;
-    auto& raw_dch = event_data->raw_dch;
-
-    auto pass_function = [](){ return true;};
-    LambdaCut auto_pass{ pass_function };
-    auto_pass.set_name( "auto_pass" );
-    auto_pass.set_id( next_id++ );
-
-    //M2M CUT
-    auto m2m_pip = [&raw_lkr]()
+    //add studies
+    for( auto study: studies )
     {
-        //Copy data into parameter array
-        k2pi_params lkr_param_data;
-        K2piLkrInterface lkr_interface( raw_lkr);
-        copy( lkr_interface, lkr_param_data );
-
-        //Extract 'fit' result
-        k2pi_fit data_fit;
-        compute_pion_mass( lkr_param_data, data_fit );
-
-        //Lkr 4mom
-        TLorentzVector& lkr_pip_4mom = data_fit.pip;
-        double m2m =  lkr_pip_4mom.M2();
-        double delta_m2m = m2m - std::pow(na62const::mPi, 2 );
-
-        return ( fabs( delta_m2m ) <  0.005 ) ;
-    };
-
-    LambdaCut m2m_cut{ m2m_pip};
-    m2m_cut.set_id( next_id++ );
-
-    //--------------------
-
-    //EOP CUT
-    auto raw_eop = [&event, &raw_dch, &is_mc]()
-    {
-        if ( event.found_track_cluster )
+        if ( study == "dch" )
         {
-            double eop = extract_eop( event, raw_dch, is_mc );
-            return ( 0.2 < eop && eop < 0.8 );
+            std::cerr << "Adding dch study" << std::endl;
+            add_dch_study( k2pirb );
+        }
+        else if ( study == "pion" )
+        {
+            std::cerr << "Adding dch study" << std::endl;
+            add_pion_study( k2pirb );
         }
         else
         {
-            return true;
+            std::cerr << "Skipping unrecognized study: " << study << std::endl;
         }
-    };
+    }
 
-    LambdaCut eop_cut{ raw_eop};
-    eop_cut.set_name( "eop_cut" );
-    eop_cut.set_id( next_id++ );
-
-    //--------------------
-
-    //PHOTON SEPARATION
-    auto photon_sep = [&raw_lkr]()
-    {
-        return extract_photon_sep( raw_lkr ) > 20 ;
-    };
-
-    LambdaCut photon_sep_cut{ photon_sep};
-    photon_sep_cut.set_name( "photon_sep_cut" );
-    photon_sep_cut.set_id( next_id++ );
-
-    //--------------------
-
-    //TRACK CLUSTER SEPARATION
-    auto track_cluster_sep = [&raw_lkr, &raw_dch]()
-    {
-        return extract_min_track_cluster_sep( raw_lkr, raw_dch ) > 30 ;
-    };
-
-    LambdaCut track_cluster_sep_cut{ track_cluster_sep};
-    track_cluster_sep_cut.set_name( "track_cluster_sep_cut" );
-    track_cluster_sep_cut.set_id( next_id++ );
-
-    //--------------------
-
-    //MIN PHOTON RADIUS
-    auto min_photon_radius = [&raw_lkr]
-    {
-        return extract_min_photon_radius( raw_lkr ) > 15;
-
-    };
-
-    LambdaCut min_photon_radius_cut{ min_photon_radius };
-    min_photon_radius_cut.set_name( "min_photon_radius_cut" );
-    min_photon_radius_cut.set_id( next_id++ );
-
-    //CHI2 CUT
-    auto max_chi2 = [&event]
-    {
-        return event.lkr_fit_chi2 < 0.016 ;
-    };
-
-    LambdaCut chi2_cut{ max_chi2 };
-    chi2_cut.set_name( "chi2_cut" );
-    chi2_cut.set_id( next_id++);
-
-    CompositeSelection full_selection( { &m2m_cut, &eop_cut, &track_cluster_sep_cut, &min_photon_radius_cut } );
-    full_selection.set_name( "full_selection" );
-    full_selection.set_id( next_id++);
-
-    CompositeSelection fit_selection( { &auto_pass, &chi2_cut, &eop_cut, &track_cluster_sep_cut, &min_photon_radius_cut} );
-    fit_selection.set_name( "fit_selection" );
-    fit_selection.set_id( next_id++);
-
-    CompositeSelection fit_no_eop_selection( { &auto_pass, &chi2_cut, &track_cluster_sep_cut, &min_photon_radius_cut} );
-    fit_selection.set_name( "fit_selection" );
-    fit_selection.set_id( next_id++);
-
-    std::vector<Selection*> selections {
-        &auto_pass, &m2m_cut, &eop_cut, 
-            &track_cluster_sep_cut, &full_selection, &min_photon_radius_cut,
-            &chi2_cut, &fit_selection, &fit_no_eop_selection
-    };
-
-    //**************************************************
-    //Analysis
-    //**************************************************
-
-    DchAnalysis raw_dch_plotter( auto_pass, tfout, "raw_k2pi_plots", *event_data, "raw", is_mc );
-    DchAnalysis raw_fit_dch_plotter( auto_pass, tfout, "raw_fit_k2pi_plots", *event_data, "fit", is_mc );
-    DchAnalysis select_dch_plotter( full_selection, tfout, "select_k2pi_plots", *event_data, "raw", is_mc );
-    DchAnalysis select_fit_dch_plotter( fit_selection, tfout, "select_fit_k2pi_plots", *event_data, "fit", is_mc );
-    DchAnalysis select_fit_no_eop_dch_plotter( fit_no_eop_selection, tfout, "select_fit_no_eop_k2pi_plots", *event_data, "fit", is_mc );
-
-    //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    //IMPORTANT
-    //DchAnalysis implements a cut on CDA!
-    //(in addition to anything in the selections above)
-    //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-    Summary summary( auto_pass, fit_selection, std::cout );
-    summary.set_name( "FIT SELECTION SUMMARY" );
-
-    std::vector<Analysis*> analyses { 
-        &raw_dch_plotter, &select_dch_plotter,
-            &raw_fit_dch_plotter, &select_fit_dch_plotter ,
-            &select_fit_no_eop_dch_plotter ,
-            &summary,
-    };
+    //References
+    auto& event = *event_data;
 
     for ( Int_t i = 0 ; i < event_count ; ++i )
     {
@@ -355,16 +245,16 @@ int main( int argc, char * argv[] )
         echain->load_full_event();
 
         counter.new_event();
+        k2pirb.new_event();
 
-        for( auto& sel: selections ) { sel->new_event(); }
-        for( auto& an: analyses ) { an->new_event(); }
     }
 
     std::cerr << echain->read_info();
 
-    for( auto& an: analyses )
-    {
-        an->end_processing();
-    }
+    BOOST_LOG_SEV( slg, always_print) 
+        << "Wrote to   " << output_file.string() ;
+
+    k2pirb.end_processing();
+
     tfout.cd();
 }
