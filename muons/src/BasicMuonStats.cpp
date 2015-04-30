@@ -31,6 +31,10 @@ namespace fn
                 10, -0.5, 9.5, "N muons",
                 20, -0.5, 19.5, "N hits" );
 
+        h_muons_vs_tracks_ = hs_.MakeTH2D( "h_muons_vs_tracks", "Muonvs vs tracks",
+                10, -0.5, 9.5, "N muons",
+                10, -0.5, 9.5, "N tracks" );
+
         h_separation_ =  hs_.MakeTH2D( "h_separation", "Muon separation", 
                 150, -150, 150, "X",
                 150, -150, 150, "Y" );
@@ -67,6 +71,10 @@ namespace fn
 
         auto nmuon = my_muons.size();
         auto nhits = det.nmuonhits;
+
+        int ntracks = det.ntracks;
+
+        h_muons_vs_tracks_->Fill( nmuon, ntracks );
 
         h_nmuon_->Fill( nmuon );
         h_nhits_->Fill( nhits );

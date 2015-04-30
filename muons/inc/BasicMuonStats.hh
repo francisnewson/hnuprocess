@@ -48,6 +48,7 @@ namespace fn
             TH2D * h_separation_;
             TH1D * h_sep_x_;
             TH1D * h_sep_y_;
+            TH2D * h_muons_vs_tracks_;
 
             REG_DEC_SUB( BasicMuonStats );
     };

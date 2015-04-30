@@ -10,5 +10,4 @@ Implements roughly the r_K selection.
 
 basic_muon_stats.yaml
 ---------------------
-
 basic hit counting etc. to see how MUV works in MC and data
