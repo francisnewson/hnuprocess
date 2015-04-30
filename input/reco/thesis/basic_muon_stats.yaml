@@ -1,0 +1,28 @@
+---
+#Some basic muon info
+
+#Autopass
+- selection:
+    name: passer
+    type : auto_pass
+
+- output:
+    name: tfout
+    type: tfile
+    filename: beam_corrections.root
+
+- analysis:
+    type: BasicMuonStats
+    name: basic_muon_stats
+    folder: basic_muon_stats
+    tfile: tfout
+    selection: passer
+    filter: false
+
+- analysis:
+    type: BasicMuonStats
+    name: basic_muon_stats_filtered
+    folder: basic_muon_stats_filtered
+    tfile: tfout
+    selection: passer
+    filter: true

@@ -326,7 +326,7 @@
         - auto_rk_lkr_accep
         - auto_rk_lkr_veto
         - auto_rk_pz
-          #- auto_km2_eop
+#       - auto_km2_eop
 
 - selection:
     name : weighted_auto_full_selection

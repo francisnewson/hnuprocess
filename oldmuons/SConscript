@@ -1,0 +1,23 @@
+import os.path
+Import('env')
+Import('*')
+
+lenv = env.Clone()
+
+lenv.SetRoot( root_dir )
+lenv.SetBoost( boost_dir, boost_name )
+lenv.AddLibs( [
+'tools', 
+'reco', 
+'tracking',
+'km2',
+] )
+lenv.AddEvent( event_dir, 'event' )
+lenv.SetYaml( yaml_dir )
+
+
+lenv.Append( CPPPATH = 'inc' )
+lenv.SharedLibrary(
+        target = 'muons',
+        source = Glob( 'src/*.cpp' )
+        )
