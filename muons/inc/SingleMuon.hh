@@ -1,6 +1,8 @@
 #ifndef SINGLEMUON_HH
 #define SINGLEMUON_HH
 #include "Subscriber.hh"
+#include "MuonScatterSim.hh"
+#include "PolarityFinder.hh"
 #if 0
 /*
  *  ____  _             _      __  __
@@ -33,7 +35,6 @@ namespace fn
             REG_DEC_SUB( SingleMuon );
     };
 
-
     template<>
         Subscriber * create_subscriber<SingleMuon>
         (YAML::Node& instruct, RecoFactory& rf );
@@ -42,6 +43,7 @@ namespace fn
 
     //--------------------------------------------------
 
+    //Uses raw RecoMuons from event.detector.muons
     class RawSingleMuon : public SingleMuon
     {
         public:
@@ -64,6 +66,38 @@ namespace fn
             mutable bool dirty_;
             mutable const fne::RecoMuon * rm_;
             mutable bool found_muon_;
+    };
+
+    //--------------------------------------------------
+
+    //Uses MC muon particle and simulates scattering
+    class MCScatterSingleMuon : public SingleMuon
+    {
+        public:
+            MCScatterSingleMuon
+                ( const fne::Event * e, const SingleTrack& st);
+
+            virtual void new_event();
+            virtual void new_run();
+
+            bool found() const;
+            double weight() const;
+            double x() const;
+            double y() const;
+
+        private:
+            const fne::Event * e_;
+            const SingleTrack& st_;
+
+            void update() const;
+
+            mutable bool dirty_;
+            mutable bool found_muon_;
+            mutable double x_;
+            mutable double y_;
+
+            MuonScatterSim mss_;
+            PolarityFinder pf_;
     };
 }
 #endif

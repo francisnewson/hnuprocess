@@ -306,9 +306,16 @@
         - km2_tgt_m2
 
 - input:
-    name: single_muon
+    name: raw_single_muon
     type: SingleMuon
     method: raw
+    inputs:
+        ogt: bf_st
+
+- input:
+    name: auto_single_muon
+    type: SingleMuon
+    method: auto
     inputs:
         ogt: bf_st
 
@@ -317,14 +324,24 @@
 ###################################################
 
 - Analysis:
-    name: muon_shapes
+    name: muon_shapes_raw
     type: MuonShapes
     tfile: tfout
-    folder: muon_shapes
+    folder: muon_shapes_raw
     selection: tight_muv_full_mom
     inputs:
         ogt: bf_st
-        sm: single_muon
+        sm: raw_single_muon
+
+- Analysis:
+    name: muon_shapes_auto
+    type: MuonShapes
+    tfile: tfout
+    folder: muon_shapes_auto
+    selection: tight_muv_full_mom
+    inputs:
+        ogt: bf_st
+        sm: auto_single_muon
 
 - analysis:
     type: Summary

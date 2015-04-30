@@ -5,6 +5,8 @@
 #include "yaml_help.hh"
 #include "Xcept.hh"
 #include "tracking_selections.hh"
+#include "muon_functions.hh"
+#include "NA62Constants.hh"
 
 namespace fn
 {
@@ -18,9 +20,26 @@ namespace fn
             const fne::Event * event = rf.get_event_ptr();
             const SingleTrack * st = get_single_track( instruct, rf );
 
+            bool is_mc = rf.is_mc();
+
             if ( method == "raw" )
             {
                 return new RawSingleMuon( event, *st );
+            }
+            else if ( method == "mcscatter" )
+            {
+                return new MCScatterSingleMuon( event, *st );
+            }
+            else if ( method == "auto" )
+            {
+                if ( is_mc )
+                {
+                    return new MCScatterSingleMuon( event, *st );
+                }
+                else
+                {
+                    return new RawSingleMuon( event, *st );
+                }
             }
             else
             {
@@ -102,4 +121,75 @@ namespace fn
     double RawSingleMuon::weight() const { update(); return 1; }
     double RawSingleMuon::x() const { update(); return rm_->x; }
     double RawSingleMuon::y() const { update(); return rm_->y; }
+
+    //--------------------------------------------------
+
+    MCScatterSingleMuon::MCScatterSingleMuon( const fne::Event * e, const SingleTrack& st)
+        :e_( e ), st_( st ), pf_( "input/reco/conditions/run_polarity.dat" )
+    {}
+
+    void MCScatterSingleMuon::new_event()
+    {
+        dirty_ = true;
+    }
+
+    void MCScatterSingleMuon::new_run()
+    {
+        mss_.set_magnet_polarity( pf_.get_polarity( e_->header.run ) );
+    }
+
+    void MCScatterSingleMuon::update() const
+    {
+        if (!dirty_ ){ return ; }
+
+        //Extract MC muon
+        auto muon_id = find_muon( e_->mc );
+        fne::McParticle * rm = 
+            static_cast<fne::McParticle*>( e_->mc.particles.At( muon_id ) );
+
+        //set_log_level( always_print );
+
+        BOOST_LOG_SEV( get_log(), log_level() )
+            << "Muon id: " << muon_id ;
+
+        //check production and decay points
+        const TVector3& prod = rm->production_vertex;
+        const TLorentzVector& four_mom = rm->momentum;
+        double prod_z = prod.Z();
+        double decay_z = rm->decay_vertex.Z();
+
+        //No decay is indicated by COmPact as some negative value
+        if ( decay_z < prod_z )
+        {
+            decay_z = 100000;
+        }
+
+
+        BOOST_LOG_SEV( get_log(), log_level() )
+            << "Track: " << prod_z << " - " << decay_z ;
+
+
+        if ( prod_z < na62const::zLkr  &&  decay_z > na62const::zMuv2 )
+        {
+            //Propagate MC muon
+            std::pair<double, double> muv_hit_xy = mss_.transfer( 
+                    toymc::track_params{ four_mom.P(), +1, 
+                    prod.X(), four_mom.X() / four_mom.Z(),
+                    prod.Y(), four_mom.Y() / four_mom.Z(),
+                    prod.Z() } );
+
+            found_muon_ = true;
+            x_ = muv_hit_xy.first  - fmod( muv_hit_xy.first  , na62const::muv_half_width);
+            y_ = muv_hit_xy.second - fmod( muv_hit_xy.second , na62const::muv_half_width);
+        }
+        else
+        {
+            found_muon_  = false;
+        }
+    }
+
+    bool MCScatterSingleMuon::found()    const{ update(); return found_muon_; }
+    double MCScatterSingleMuon::weight() const{ update(); return 1.0; }
+    double MCScatterSingleMuon::x()      const{ update(); return x_; }
+    double MCScatterSingleMuon::y()      const{ update(); return y_; }
 }

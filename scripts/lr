@@ -1,0 +1,3 @@
+#!/bin/bash
+#open recent root file
+echo output/$(ls -t output/ | grep root | head -n1 )

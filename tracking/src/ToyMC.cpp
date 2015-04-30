@@ -45,10 +45,18 @@ namespace toymc
                 { return cum_total * mc->get_length(); } );
     }
 
+    void ToyMCComposite::set_length( double length)
+    {
+        throw std::runtime_error( "Set length not implemented for CoyMCComposite" );
+    }
+
     void ToyMCComposite::add_child( ToyMC * child )
     {
         children_.push_back( std::move(child) );
     }
+
+    ToyMCComposite * ToyMCComposite::clone()
+    { return new ToyMCComposite( *this ); }
 
     //--------------------------------------------------
 
@@ -63,6 +71,13 @@ namespace toymc
     }
 
     double ToyMCScatter::get_length() const { return length_; }
+
+    void ToyMCScatter::set_length(double length) 
+    {
+        length_ = length;
+        double nrad = length_ / rad_length_;
+        multiplier_ = 13.6e-3 * std::sqrt( nrad ) * ( 1 + 0.038 * std::log( nrad ) );
+    }
 
     track_params ToyMCScatter::transfer( track_params tp) const
     {
@@ -99,6 +114,11 @@ namespace toymc
         return tp;
     }
 
+    ToyMCScatter * ToyMCScatter::clone()
+    {
+        return new ToyMCScatter( *this );
+    }
+
     double get_shift( double r1, double r2, double theta_0, double dz )
     {
         return r1 * dz * theta_0  / std::sqrt( 12 ) + r2 * dz * theta_0 / 2;
@@ -121,6 +141,12 @@ namespace toymc
     double ToyMCThickScatter::get_length() const
     { return length_ ;}
 
+    void ToyMCThickScatter::set_length(double length)
+    {
+        length_ = length;
+        toy_scatter_.set_length( length_ );
+    }
+
     track_params ToyMCThickScatter::transfer( track_params tp ) const
     {
         for ( int i = 0 ; i != n_div_ ; ++ i )
@@ -131,15 +157,23 @@ namespace toymc
         return tp;
     }
 
+    ToyMCThickScatter * ToyMCThickScatter::clone()
+    {
+        return new ToyMCThickScatter( *this );
+    }
+
     //--------------------------------------------------
     ToyMCDipoleBend::ToyMCDipoleBend( double mom_kick, int polarity )
         :mom_kick_( mom_kick), polarity_( polarity )
     {}
 
+    void ToyMCDipoleBend::set_magnet_polarity( int polarity )
+    { polarity_ = polarity; }
+
     track_params ToyMCDipoleBend::transfer( track_params tp ) const
     {
         double px = tp.tx * tp.p;
-        px += mom_kick_ * tp.q;
+        px -= mom_kick_ * tp.q;
         tp.tx = px / tp.p;
         return tp;
     }
@@ -149,6 +183,14 @@ namespace toymc
         return 0;
     }
 
+    void ToyMCDipoleBend::set_length(double length)
+    {
+        throw std::runtime_error( "Attempt to set length of ToyMCDipoleBend");
+    }
+
+    ToyMCDipoleBend * ToyMCDipoleBend::clone()
+    { return new ToyMCDipoleBend( *this ); }
+
     //--------------------------------------------------
 
     ToyMCPropagate::ToyMCPropagate( double length )
@@ -156,6 +198,13 @@ namespace toymc
 
     double ToyMCPropagate::get_length() const
     { return length_; }
+
+
+    void ToyMCPropagate::set_length(double length)
+    {
+        length_ = length;
+    }
+
 
     track_params ToyMCPropagate::transfer( track_params tp ) const
     {
@@ -166,7 +215,10 @@ namespace toymc
         return tp;
     }
 
+    ToyMCPropagate * ToyMCPropagate::clone()
+    {
+        return new ToyMCPropagate( * this );
+    }
+
     //--------------------------------------------------
-
-
 }

@@ -4,6 +4,18 @@
 #include <memory>
 #include <random>
 
+#if 0
+/*
+ *  _____           __  __  ____
+ * |_   _|__  _   _|  \/  |/ ___|
+ *   | |/ _ \| | | | |\/| | |
+ *   | | (_) | |_| | |  | | |___
+ *   |_|\___/ \__, |_|  |_|\____|
+ *            |___/
+ *
+ */
+#endif
+
 namespace toymc
 {
     struct track_params
@@ -55,7 +67,9 @@ namespace toymc
         public:
             virtual track_params transfer( track_params ) const = 0;
             virtual double get_length() const = 0;
+            virtual void set_length(double length) = 0;
             virtual ~ToyMC(){};
+            virtual ToyMC * clone() = 0;
     };
 
     //Lifetime are handled separately so 
@@ -75,10 +89,13 @@ namespace toymc
     class ToyMCComposite : public ToyMC
     {
         public:
+            ToyMCComposite()  = default;
             ToyMCComposite( const std::vector<ToyMC*>& children );
             track_params transfer( track_params tp ) const;
             double get_length() const;
+            void set_length(double length);
             void add_child( ToyMC * child );
+            virtual ToyMCComposite * clone();
 
         private:
 
@@ -94,6 +111,8 @@ namespace toymc
 
             virtual track_params transfer( track_params ) const;
             virtual double get_length() const;
+            void set_length(double length);
+            virtual ToyMCScatter * clone();
 
         private:
             RNGBase& gen_;
@@ -117,6 +136,9 @@ namespace toymc
 
             virtual track_params transfer( track_params ) const;
             virtual double get_length() const;
+            void set_length(double length);
+
+            virtual ToyMCThickScatter * clone();
 
         private:
             ToyMCScatter toy_scatter_;
@@ -130,8 +152,12 @@ namespace toymc
     {
         public:
             ToyMCDipoleBend( double mom_kick, int polarity );
+            void set_magnet_polarity( int polarity );
             virtual track_params transfer( track_params tp ) const;
             virtual double get_length() const;
+            void set_length(double length);
+
+            virtual ToyMCDipoleBend * clone();
 
         private:
             double mom_kick_;
@@ -147,15 +173,12 @@ namespace toymc
 
             virtual track_params transfer( track_params ) const;
             virtual double get_length() const;
+            void set_length(double length);
+            virtual ToyMCPropagate * clone();
 
         private:
             double length_;
     };
-
-    //--------------------------------------------------
-
-    ToyMC * get_divided_scatter( RNGBase& gen, double rad_length,
-            double length, int n_divisions );
 
 }
 #endif

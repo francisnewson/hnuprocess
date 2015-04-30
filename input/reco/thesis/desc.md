@@ -17,3 +17,4 @@ muon_shapes.yaml
 
 use a km2 selection with tight mass cut
 to study muons with MuonShapes analysis
+with/without MC scattering

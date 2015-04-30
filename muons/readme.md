@@ -1,5 +1,5 @@
-Muon classes
-============
+Muon classes and functions
+==========================
 
 BasicMuonStats
 --------------
@@ -16,3 +16,7 @@ MuonShapes
 ----------
 Uses SingleMuon and SingleTrack objects
 to look at track muon separation etc
+
+muon_functions
+--------------
+includes find_muon to extract MC particle
