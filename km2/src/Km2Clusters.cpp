@@ -135,7 +135,7 @@ namespace fn
 
         auto save_log = log_level();
 
-        if ( counter < 50  ) 
+        if ( counter < 1  ) 
         {
             set_log_level( always_print );
         BOOST_LOG_SEV( get_log(), log_level() )

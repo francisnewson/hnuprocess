@@ -4,9 +4,48 @@
 #include "RecoMuon.hh"
 #include "yaml_help.hh"
 #include "Xcept.hh"
+#include "tracking_selections.hh"
 
 namespace fn
 {
+    REG_DEF_SUB( SingleMuon );
+
+    template<>
+        Subscriber * create_subscriber<SingleMuon>
+        (YAML::Node& instruct, RecoFactory& rf )
+        {
+            std::string method = get_yaml<std::string>( instruct, "method" );
+            const fne::Event * event = rf.get_event_ptr();
+            const SingleTrack * st = get_single_track( instruct, rf );
+
+            if ( method == "raw" )
+            {
+                return new RawSingleMuon( event, *st );
+            }
+            else
+            {
+                throw Xcept<UnknownSingleMuonMethod>( method );
+            }
+        }
+
+    SingleMuon * get_single_muon( YAML::Node& instruct, RecoFactory& rf )
+    {
+        YAML::Node muon_node = instruct["inputs"]["sm"];
+
+        if ( ! muon_node )
+        { throw Xcept<MissingNode>( "sm" ); }
+
+        SingleMuon * sm  = dynamic_cast<SingleMuon*>
+            ( rf.get_subscriber( muon_node.as<std::string>() ) );
+
+        if ( !sm )
+        { throw Xcept<BadCast>( "SM" ); }
+
+        return sm;
+    }
+
+    //--------------------------------------------------
+
     RawSingleMuon::RawSingleMuon( const fne::Event * e, const SingleTrack& st)
         :e_( e ), st_( st )
     {}
@@ -18,6 +57,8 @@ namespace fn
 
     void RawSingleMuon::update() const
     {
+        if (!dirty_ ){ return ; }
+
         //lookt at track info
         const auto & srt = st_.get_single_track();
         int muon_id = srt.get_muon_id();
@@ -57,8 +98,8 @@ namespace fn
         }
     }
 
-    bool RawSingleMuon::found(){ return found_muon_; }
-    double RawSingleMuon::weight(){ return 1; }
-    double RawSingleMuon::x(){ return rm_->x; }
-    double RawSingleMuon::y(){ return rm_->x; }
+    bool RawSingleMuon::found() const { update(); return found_muon_; }
+    double RawSingleMuon::weight() const { update(); return 1; }
+    double RawSingleMuon::x() const { update(); return rm_->x; }
+    double RawSingleMuon::y() const { update(); return rm_->y; }
 }

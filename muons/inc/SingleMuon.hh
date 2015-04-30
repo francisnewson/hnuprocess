@@ -24,12 +24,23 @@ namespace fn
     class SingleMuon : public Subscriber
     {
         public:
-            virtual bool found() = 0;
-            virtual double weight() = 0;
-            virtual double x() = 0;
-            virtual double y() = 0;
+            virtual bool found() const = 0;
+            virtual double weight() const = 0;
+            virtual double x() const = 0;
+            virtual double y() const = 0;
             virtual ~SingleMuon(){}
+
+            REG_DEC_SUB( SingleMuon );
     };
+
+
+    template<>
+        Subscriber * create_subscriber<SingleMuon>
+        (YAML::Node& instruct, RecoFactory& rf );
+
+    SingleMuon * get_single_muon( YAML::Node& instruct, RecoFactory& rf );
+
+    //--------------------------------------------------
 
     class RawSingleMuon : public SingleMuon
     {
@@ -39,10 +50,10 @@ namespace fn
 
             virtual void new_event();
 
-            bool found();
-            double weight();
-            double x();
-            double y();
+            bool found() const;
+            double weight() const;
+            double x() const;
+            double y() const;
 
         private:
             const fne::Event * e_;

@@ -11,3 +11,9 @@ Implements roughly the r_K selection.
 basic_muon_stats.yaml
 ---------------------
 basic hit counting etc. to see how MUV works in MC and data
+
+muon_shapes.yaml
+----------------
+
+use a km2 selection with tight mass cut
+to study muons with MuonShapes analysis
