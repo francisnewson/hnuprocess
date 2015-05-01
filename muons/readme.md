@@ -20,3 +20,21 @@ to look at track muon separation etc
 muon_functions
 --------------
 includes find_muon to extract MC particle
+and mu_error_0902SC for cutting
+
+muon_selections
+---------------
+MuonReq requires a muon with MUV1 and MUV2
+
+MuonScatterSim
+--------------
+Does the MC scattering of MC muons to 
+decide location of MUV hits 
+used by SingleMuon
+
+MuonEffiency
+------------
+Measure MUV efficiency using a MuonReq
+object, as a function of track momentum
+and extrapolated position
+(using SingleTrack)

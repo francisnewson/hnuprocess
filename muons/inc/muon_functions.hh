@@ -21,6 +21,7 @@ namespace fne
 namespace fn
 {
     std::size_t find_muon( const fne::Mc& mce );
+    double mu_error_0902_sc( double mom, int muv_plane );
 }
 
 #endif 
