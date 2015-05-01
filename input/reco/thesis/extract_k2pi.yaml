@@ -10,11 +10,6 @@
 # FILE MANAGEMENT
 ###################################################
 
-#Runs to skip because of LKr
-- exec:
-    skipmcruns: [ 20410, 20411, 20412, 20413, 20414, 20451, 20452, 20453, 20454, 20455, 20456 ]
-    skipdatalist: input/reco/conditions/bad_lkr_files.dat
-
 
 - output:
     name: tftree
@@ -87,6 +82,7 @@
         - good_phys_burst
         - good_dch_burst
         - good_muv_burst
+
 
 
 - selection:
@@ -164,9 +160,9 @@
         k2pic: k2pi_clusters
         ogt: bf_st
 
-- selection:
-    name: muon_veto
-    type: NoMuv
+#- selection:
+#    name: muon_veto
+#    type: NoMuv
 
 #Track charge
 - selection:
@@ -206,6 +202,14 @@
     inputs:
         ogt: bf_st
 
+#LKr acceptance
+- selection:
+    name: rk_lkr_accep
+    type: TrackLkrAcceptance
+    margin_parameter: 8 #cm
+    inputs:
+        ogt: bf_st
+
 #Track time
 - selection:
     name: rk_dcht
@@ -225,12 +229,13 @@
     type: CompositeSelection
     children:
         - weighted_data_sample
-        - muon_veto
+#       - muon_veto
         - good_trk
         - pos_trk
         - quality_7
         - dch1_acc
         - dch4_acc
+        - rk_lkr_accep
         - rk_dcht
         - good_clust
           

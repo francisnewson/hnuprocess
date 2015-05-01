@@ -36,6 +36,8 @@ namespace fn
     class Track;
 
     double extract_eop( K2piEventData& event, K2piDchData& dch, bool mc );
+    double extract_eop_E( K2piEventData& event, K2piDchData& dch, bool mc );
+
     double extract_photon_sep ( K2piLkrData &raw_lkr );
     double extract_min_track_cluster_sep ( K2piLkrData &raw_lkr, K2piDchData& dch );
 

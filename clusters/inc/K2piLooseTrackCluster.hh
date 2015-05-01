@@ -77,6 +77,10 @@ namespace fn
           double max_track_cluster_distance_, bool mc,
           const ClusterCorrector& cluster_corrector );
 
+    double get_track_cluster_distance
+        ( const fne::RecoCluster& c, const ClusterCorrector& clco, 
+          const SingleRecoTrack& srt, bool mc );
+
 
 }
 #endif

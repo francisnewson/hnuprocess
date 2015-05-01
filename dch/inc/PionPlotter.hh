@@ -34,7 +34,10 @@ namespace fn
             std::string folder_;
             HistStore hs_;
             TH1D * heop_;
+            TH1D * hp_;
+            TH1D * hE_;
             TH2D * heop_p_;
+            TH2D * hEp_;
     };
 
     //--------------------------------------------------

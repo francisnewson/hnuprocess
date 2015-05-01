@@ -22,7 +22,7 @@
 
 namespace fn
 {
-    double extract_eop( K2piEventData& event, K2piDchData& dch, bool mc )
+    double extract_eop_E( K2piEventData& event, K2piDchData& dch, bool mc )
     {
         fne::RecoCluster rc;
         rc.energy = event.TCE;
@@ -31,6 +31,12 @@ namespace fn
         CorrCluster cc{ calibrated_cluster_data{ event.TCE, { event.TCX, event.TCY, na62const::zLkr } }, mc };
 
         double energy = cc.get_energy();
+        return energy;
+    }
+
+    double extract_eop( K2piEventData& event, K2piDchData& dch, bool mc )
+    {
+        double energy = extract_eop_E( event, dch, mc );
         double momentum = dch.p;
         double eop = energy / momentum;
 

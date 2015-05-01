@@ -58,6 +58,7 @@ namespace fn
         auto first_high_E = sort_energy( intime_clusters, min_cluster_energy_ );
         std::vector<processing_cluster> high_E_clusters{ first_high_E, end( intime_clusters ) };
         std::vector<processing_cluster> low_E_clusters{ begin( intime_clusters ), first_high_E };
+
         assert( high_E_clusters.size() + low_E_clusters.size() == intime_clusters.size() );
 
         BOOST_LOG_SEV( get_log(), log_level() )
@@ -82,12 +83,20 @@ namespace fn
         {
             auto it_track_cluster = find_track_cluster( high_E_clusters, srt, 
                     max_track_cluster_distance_, mc, cluster_corrector_ );
-            if ( it_track_cluster == high_E_clusters.end() ){ return false; }
+
+            if ( it_track_cluster == high_E_clusters.end() )
+            { return false; }
+
+            tc = it_track_cluster->rc;
+
             high_E_clusters.erase( it_track_cluster );
             assert( high_E_clusters.size() == 2 );
 
-            tc = it_track_cluster->rc;
+            double dist = get_track_cluster_distance( *tc, cluster_corrector_, srt, mc );
+            assert( dist < max_track_cluster_distance_ );
         }
+
+        assert( high_E_clusters.size() == 2 );
 
         //Order photon clusters by energy
         if ( high_E_clusters[0].corr_energy > high_E_clusters[1].corr_energy )
@@ -100,16 +109,43 @@ namespace fn
         c2 = high_E_clusters[1].rc;
 
         //Can look for track cluster in left over clusters
-        if ( tc == 0 )
+        if ( tc == 0 && false )
         {
             auto it_track_cluster = find_track_cluster( low_E_clusters, srt,
                     max_track_cluster_distance_, mc, cluster_corrector_ );
+
             if ( it_track_cluster != low_E_clusters.end() )
             { 
                 tc = it_track_cluster->rc;   
+                assert ( low_E_clusters.size() != 0 );
             }
         }
         bool found_track = ( tc != 0 );
+
+        if ( found_track )
+        {
+            double dist = get_track_cluster_distance( *tc, cluster_corrector_, srt, mc );
+            assert( dist < max_track_cluster_distance_ );
+
+            double eop = tc->energy / srt.get_mom();
+
+            if ( eop > 1.2  )
+            {
+
+                CorrCluster cc( *tc, cluster_corrector_, mc );
+                TrackProjCorrCluster tpcc( cc );
+                TVector3 pos = tpcc.get_pos();
+                TVector3 track_pos = srt.extrapolate_ds( pos.Z() );
+                double dist = fabs ( ( track_pos - pos).Mag() );
+
+                BOOST_LOG_SEV( get_log(), always_print )
+                    << "--Unusually high E/p\n"
+                    << "E/p: " << eop <<"\n"
+                    << "E: " << tc->energy << "\n"
+                    << "p: " << srt.get_mom() <<"\n"
+                    << "dist: " << dist;
+            }
+        }
 
         //Save reco clusters
         reco_clusters_.update( c1, c2, found_track, tc );
@@ -142,7 +178,8 @@ namespace fn
     //----------
 
     std::vector<processing_cluster> get_intime_clusters
-        ( const std::vector<processing_cluster>& all_clusters, const SingleRecoTrack& srt, double max_dt, bool mc )
+        ( const std::vector<processing_cluster>& all_clusters, 
+          const SingleRecoTrack& srt, double max_dt, bool mc )
         {
             if ( mc ){ return all_clusters; }
 
@@ -186,11 +223,7 @@ namespace fn
             std::vector<double> track_cluster_dists;
             for ( auto& cluster : clusters )
             {
-                CorrCluster cc( *cluster.rc, cluster_corrector, mc );
-                TrackProjCorrCluster tpcc( cc );
-                TVector3 pos = tpcc.get_pos();
-                TVector3 track_pos = srt.extrapolate_ds( pos.Z() );
-                double dist = fabs ( ( track_pos - pos).Mag() );
+                double dist = get_track_cluster_distance( *cluster.rc, cluster_corrector, srt, mc );
                 track_cluster_dists.push_back(  dist );
             }
 
@@ -202,8 +235,13 @@ namespace fn
             //Check we are close enough
             if ( *min_distance < max_track_cluster_distance_ )
             {
-                unsigned int index =  std::distance(
+                std::vector<processing_cluster>::size_type index =  std::distance(
                         std::begin( track_cluster_dists), min_distance ) ;
+
+                double dist = get_track_cluster_distance( *clusters[index].rc , cluster_corrector, srt, mc );
+                assert( dist < max_track_cluster_distance_ );
+                auto result = std::begin( clusters ) + index;
+                assert( std::distance( std::begin( clusters ), result ) == index );
 
                 return std::begin( clusters) + index;
             }
@@ -211,5 +249,17 @@ namespace fn
             {
                 return std::end( clusters );
             }
+        }
+
+    double get_track_cluster_distance
+        ( const fne::RecoCluster& c, const ClusterCorrector& clco,
+          const SingleRecoTrack& srt, bool mc )
+        {
+            CorrCluster cc( c, clco, mc );
+            TrackProjCorrCluster tpcc( cc );
+            TVector3 pos = tpcc.get_pos();
+            TVector3 track_pos = srt.extrapolate_ds( pos.Z() );
+            double dist = fabs ( ( track_pos - pos).Mag() );
+            return dist;
         }
 }
