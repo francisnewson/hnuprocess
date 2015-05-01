@@ -92,6 +92,7 @@ namespace toymc
             ToyMCComposite()  = default;
             ToyMCComposite( const std::vector<ToyMC*>& children );
             track_params transfer( track_params tp ) const;
+            track_params noisy_transfer( track_params tp ) const;
             double get_length() const;
             void set_length(double length);
             void add_child( ToyMC * child );

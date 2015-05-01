@@ -29,6 +29,17 @@ namespace toymc
         :children_( children )
     {}
 
+    track_params ToyMCComposite::noisy_transfer( track_params tp ) const
+    {
+        for ( auto mc : children_ )
+        {
+            std::cout << tp.z << " " << mc->get_length() << " " ;
+            tp = mc->transfer( tp );
+            std::cout << tp.z << std::endl;
+        }
+        return tp;
+    }
+
     track_params ToyMCComposite::transfer( track_params tp ) const
     {
         for ( auto mc : children_ )
@@ -42,12 +53,12 @@ namespace toymc
     {
         return std::accumulate( begin( children_), end(children_ ), 0.0,
                 []( const double cum_total, const ToyMC* mc )
-                { return cum_total * mc->get_length(); } );
+                { return cum_total + mc->get_length(); } );
     }
 
     void ToyMCComposite::set_length( double length)
     {
-        throw std::runtime_error( "Set length not implemented for CoyMCComposite" );
+        throw std::runtime_error( "Set length not implemented for ToyMCComposite" );
     }
 
     void ToyMCComposite::add_child( ToyMC * child )
@@ -144,7 +155,7 @@ namespace toymc
     void ToyMCThickScatter::set_length(double length)
     {
         length_ = length;
-        toy_scatter_.set_length( length_ );
+        toy_scatter_.set_length( length_ /double( n_div_) );
     }
 
     track_params ToyMCThickScatter::transfer( track_params tp ) const

@@ -18,3 +18,6 @@ muon_shapes.yaml
 use a km2 selection with tight mass cut
 to study muons with MuonShapes analysis
 with/without MC scattering
+
+remove mass cut and lkr veto on km2 selection to 
+study pion muon sepration in k2pi 

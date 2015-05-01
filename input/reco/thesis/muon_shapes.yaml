@@ -305,6 +305,15 @@
         - muv1_radius
         - km2_tgt_m2
 
+#tight muv full mom
+- selection:
+    name: tight_muv_all_mass
+    type: CompositeSelection
+    children:
+        - base_selection
+        - muv_acc
+        - muv1_radius
+
 - input:
     name: raw_single_muon
     type: SingleMuon
@@ -339,6 +348,26 @@
     tfile: tfout
     folder: muon_shapes_auto
     selection: tight_muv_full_mom
+    inputs:
+        ogt: bf_st
+        sm: auto_single_muon
+
+- Analysis:
+    name: muon_shapes_raw_all_mass
+    type: MuonShapes
+    tfile: tfout
+    folder: muon_shapes_raw_all_mass
+    selection: tight_muv_all_mass
+    inputs:
+        ogt: bf_st
+        sm: raw_single_muon
+
+- Analysis:
+    name: muon_shapes_auto_all_mass
+    type: MuonShapes
+    tfile: tfout
+    folder: muon_shapes_auto_all_mass
+    selection: tight_muv_all_mass
     inputs:
         ogt: bf_st
         sm: auto_single_muon

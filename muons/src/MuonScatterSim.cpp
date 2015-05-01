@@ -3,6 +3,7 @@
 #include "stl_help.hh"
 #include <cassert>
 #include <iostream>
+#include <iomanip>
 
 namespace nc = na62const;
 
@@ -160,14 +161,39 @@ namespace fn
         ++this_toy;
 
 
-        //Create upstream compoiste
+        //Create upstream composite
         std::vector<ToyMC*> upstream_toys{ start_element.get() };
         std::copy( this_toy, end(us_toys_), std::back_inserter( upstream_toys ) ) ;
+
         ToyMCComposite upstream_sim{ upstream_toys };
 
         track_params lkr_params = upstream_sim.transfer( start_params );
         track_params muv1_params = downstream_sim_.transfer( lkr_params );
         track_params muv2_params = muv1_to_muv2_sim_.transfer( muv1_params );
+
+        //Debugging output if broken
+        if ( fabs( muv2_params.z - na62const::zMuv2 ) > 1 )
+        {
+            double cz = start_z;
+
+            std::cout << "upstream toys: " << std::endl;
+            for ( auto& mct : upstream_toys )
+            {
+                cz += mct->get_length();
+                std::cout << std::setw(10) << mct->get_length() << " " << std::setw(10) <<  cz << std::endl;
+            }
+
+            cz = 0;
+
+            std::cout << "us toys: " << std::endl;
+            for ( auto& mct : us_toys_ )
+            {
+                cz += mct->get_length();
+                std::cout << std::setw(10) << mct->get_length() << " " << std::setw(10) << cz << std::endl;
+            }
+
+        track_params test_lkr_params = upstream_sim.noisy_transfer( start_params );
+        }
 
         assert( fabs(muv2_params.z - na62const::zMuv2 ) < 1 );
 

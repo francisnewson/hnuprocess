@@ -144,6 +144,15 @@ namespace fn
 
         //Extract MC muon
         auto muon_id = find_muon( e_->mc );
+
+
+        if ( muon_id == e_->mc.npart )
+        {
+            found_muon_  = false;
+            dirty_ = false;
+            return;
+        }
+
         fne::McParticle * rm = 
             static_cast<fne::McParticle*>( e_->mc.particles.At( muon_id ) );
 
@@ -169,7 +178,7 @@ namespace fn
             << "Track: " << prod_z << " - " << decay_z ;
 
 
-        if ( prod_z < na62const::zLkr  &&  decay_z > na62const::zMuv2 )
+        if ( prod_z <  (na62const::zLkr - na62const::len_lkr) &&  decay_z > na62const::zMuv2 )
         {
             //Propagate MC muon
             std::pair<double, double> muv_hit_xy = mss_.transfer( 
