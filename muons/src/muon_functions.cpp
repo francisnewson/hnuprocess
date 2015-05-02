@@ -34,7 +34,7 @@ namespace fn
         {
             case 1: zMuv = na62const::zMuv1; break;
             case 2: zMuv = na62const::zMuv2; break; 
-            case 3: zMuv = na62const::zMuv2; break;
+            case 3: zMuv = na62const::zMuv3; break;
             default:
                     throw std::runtime_error(
                             "Unknown MUV plane: " + std::to_string( muv_plane ) );

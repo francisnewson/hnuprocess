@@ -45,6 +45,9 @@ namespace fn
             TH1D * h_dx_;
             TH1D * h_dy_;
 
+            TH2D * h_dxvsp_;
+            TH2D * h_dyvsp_;
+
             REG_DEC_SUB( MuonShapes );
     };
 

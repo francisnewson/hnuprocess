@@ -18,6 +18,18 @@ namespace fn
     {
         using namespace toymc;
 
+        //**************************************************
+        //nc::zX referes to FRONT face of detector X
+        //need to handle detector lengths appropriately
+        //
+        //   len_X                          len_Y
+        //  <------>                       <---->
+        //  |++++++|                       |++++|
+        //  ^       <--------------------->^
+        //  zX         (zY - zX - len_X)   zY 
+        //
+        //**************************************************
+
         //materials
         double dch_budget = 4e-3; //rad lengths
         double dch_depth = 5; //cm (guess)

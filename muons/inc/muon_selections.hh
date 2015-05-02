@@ -18,6 +18,7 @@ namespace fn
 
     class SingleMuon;
     class SingleTrack;
+    class SingleRecoTrack;
 
     //Require a muon associated with the track
     //Always needs MUV1 and MUV2
@@ -43,5 +44,13 @@ namespace fn
     template<>
         Subscriber * create_subscriber<MuonReq>
         (YAML::Node& instruct, RecoFactory& rf );
+
+    //--------------------------------------------------
+
+    bool check_muon_track_distance
+        ( const SingleMuon& sm, const SingleRecoTrack& srt, double multiplier );
+
+    std::pair<double,double> get_muon_track_separation
+        ( const SingleMuon& sm, const SingleRecoTrack& srt );
 }
 #endif

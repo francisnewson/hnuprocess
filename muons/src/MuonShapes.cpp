@@ -35,6 +35,14 @@ namespace fn
 
         h_dy_ = hs_.MakeTH1D( "h_dy_", "Muon - Track separation [Y]",
                 150, -150, 150, "y (cm)" );
+
+        h_dxvsp_ = hs_.MakeTH2D( "h_dxvsp", "Muon - Track separation vs momentum [x]", 
+                100, -100, 100, "x (cm)",
+                100, 0, 100, "p (GeV)" );
+
+        h_dyvsp_ = hs_.MakeTH2D( "h_dyvsp", "Muon - Track separation vs momentum [y]", 
+                100, -100, 100, "y (cm)",
+                100, 0, 100, "p (GeV)" );
     }
 
     void MuonShapes::process_event()
@@ -67,6 +75,9 @@ namespace fn
         h_ds_->Fill( ds );
         h_dx_->Fill( dx );
         h_dy_->Fill( dy );
+
+        h_dxvsp_->Fill( dx, mom, weight );
+        h_dyvsp_->Fill( dy, mom, weight );
     }
 
     void MuonShapes::end_processing()
