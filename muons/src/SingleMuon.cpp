@@ -90,6 +90,15 @@ namespace fn
             return;
         }
 
+        rm_ = static_cast<fne::RecoMuon*>( e_->detector.muons.At( muon_id ) );
+
+        //the muon must have status 1 or 2
+        if ( !( rm_->status == 1 || rm_->status == 2 ) )
+        {
+            found_muon_ = false;
+            return;
+        }
+
         //save muon
         found_muon_ = true;
         rm_ = static_cast<fne::RecoMuon*>( e_->detector.muons.At( muon_id ) );
