@@ -27,3 +27,7 @@ muv_xy.yaml
 -----------
 Measure MUV efficiency as a a function of
 position at MUV1 and MUV2, with high p muons.
+
+muv_bursts.yaml
+---------------
+Measure MUV efficiency burst by burst
