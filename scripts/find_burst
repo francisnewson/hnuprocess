@@ -1,0 +1,16 @@
+#!/bin/bash
+awk 'BEGIN {
+time = '$1' 
+flag = 0;
+}
+time > $2 && (flag == 0) {
+flag = 1;
+next;
+}
+time < $2 && (flag == 1) {
+flag = 2
+print $1;
+}
+END{
+if ( flag != 2 ) print "Not found" ;
+}' < input/aux/dates.dat
