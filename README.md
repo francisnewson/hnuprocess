@@ -12,6 +12,12 @@ data.
 
 Other programs perform ancillary tasks.
 
+Apps
+----
+* `hnureco` : the main anlysis program. Input in `input/reco/`
+* `extract_muv_xy` : A simple program for reformatting muv_xy efficiencies. Input in `input/extract_muv_xy`
+* `shuffle` : Arranges results into stacked histograms. Input in `input/shuffle`
+
 Source layout
 -------------
 The general structure is:

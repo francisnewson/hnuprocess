@@ -25,6 +25,7 @@ and mu_error_0902SC for cutting
 muon_selections
 ---------------
 MuonReq requires a muon with MUV1 and MUV2
+MuonXYWeight uses SingleTrack to apply weights
 
 MuonScatterSim
 --------------
