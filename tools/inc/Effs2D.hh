@@ -20,15 +20,15 @@ namespace fn
     //Handle efficiencies on a 2D grid
     //**************************************************
 
-    class Eff2D
+    class Effs2D
     {
         public:
-            Eff2D( std::vector<double> xedges, 
+            Effs2D() = default;
+            Effs2D( std::vector<double> xedges, 
                     std::vector<double> yedges, 
                     std::vector<double> effs );
 
             double efficiency( double x, double y ) const;
-
             void print_eff_map( std::ostream& os ) const;
 
         private:

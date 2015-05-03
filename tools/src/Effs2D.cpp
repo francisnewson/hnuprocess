@@ -5,10 +5,10 @@ namespace fn
 {
 
     //**************************************************
-    //Eff2D
+    //Effs2D
     //**************************************************
 
-    Eff2D::Eff2D( std::vector<double> xedges, 
+    Effs2D::Effs2D( std::vector<double> xedges, 
             std::vector<double> yedges, 
             std::vector<double> effs )
         :xedges_( xedges ), yedges_( yedges ), effs_( effs )
@@ -20,9 +20,9 @@ namespace fn
         }
     }
 
-    void Eff2D::print_eff_map( std::ostream& os ) const
+    void Effs2D::print_eff_map( std::ostream& os ) const
     {
-        os << "EFFS2D\n";
+        os << "Effs2D\n";
  
         for ( int j = yedges_.size()-2 ; j != 0 ; --j )
         {
@@ -45,7 +45,7 @@ namespace fn
         }
     }
 
-    double Eff2D::efficiency( double x, double y ) const
+    double Effs2D::efficiency( double x, double y ) const
     {
         //Check we are in range of grid
         if ( x <= xedges_.front() || x >= xedges_.back() ){ return 0; }
@@ -72,7 +72,7 @@ namespace fn
         return result;
     }
 
-    std::size_t Eff2D::get_bin( double val, const std::vector<double>& edges ) const
+    std::size_t Effs2D::get_bin( double val, const std::vector<double>& edges ) const
     {
         auto it = edges.cbegin();
         while (  val >= *it ){ ++it; }

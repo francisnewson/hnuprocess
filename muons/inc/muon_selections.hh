@@ -2,6 +2,7 @@
 #define MUON_SELECTIONS_HH
 #include "Selection.hh"
 #include "Event.hh"
+#include "Effs2D.hh"
 #if 0
 /*
  *                                           _           _   _
@@ -52,5 +53,28 @@ namespace fn
 
     std::pair<double,double> get_muon_track_separation
         ( const SingleMuon& sm, const SingleRecoTrack& srt );
+
+    //--------------------------------------------------
+
+    class MuonXYWeight : public CachedSelection
+    {
+        public:
+            MuonXYWeight( const SingleTrack& st,
+              std::string muon_effs_file );
+
+        private:
+            bool do_check() const;
+            double do_weight() const;
+
+            const SingleTrack& st_;
+            Effs2D effs_;
+
+            REG_DEC_SUB( MuonXYWeight );
+    };
+
+    template<>
+        Subscriber * create_subscriber<MuonXYWeight>
+        (YAML::Node& instruct, RecoFactory& rf );
+
 }
 #endif

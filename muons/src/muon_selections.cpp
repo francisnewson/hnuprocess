@@ -24,8 +24,8 @@ namespace fn
             return false;
         }
 
-            const auto& srt = st_.get_single_track();
-            return check_muon_track_distance( sm_, srt, multiplier_ );
+        const auto& srt = st_.get_single_track();
+        return check_muon_track_distance( sm_, srt, multiplier_ );
     }
 
     double MuonReq::do_weight() const
@@ -86,5 +86,49 @@ namespace fn
             double dy = track_y - muon_y;
 
             return std::make_pair( dx, dy );
+        }
+
+    //--------------------------------------------------
+
+    REG_DEF_SUB( MuonXYWeight );
+
+    MuonXYWeight::MuonXYWeight( const SingleTrack& st,
+            std::string muon_effs_file )
+        :st_( st )
+    {
+
+        YAML::Node eff_conf = YAML::LoadFile(muon_effs_file );
+
+        effs_ = Effs2D{ eff_conf["xbins"].as<std::vector<double>>(),
+            eff_conf["ybins"].as<std::vector<double>>(),
+            eff_conf["effs"].as<std::vector<double>>() };
+
+        effs_.print_eff_map( std::cerr );
+    }
+
+    bool MuonXYWeight::do_check() const { return true; }
+
+    double MuonXYWeight::do_weight() const 
+    { 
+        const SingleRecoTrack& srt = st_.get_single_track();
+
+        //extrapolate track
+        double x = srt.extrapolate_ds( na62const::zMuv2).X();
+        double y = srt.extrapolate_ds( na62const::zMuv1).Y();
+
+        double efficiency = effs_.efficiency( x, y );
+        return efficiency;
+    }
+
+    template<>
+        Subscriber * create_subscriber<MuonXYWeight>
+        (YAML::Node& instruct, RecoFactory& rf )
+        {
+            const SingleTrack * st = get_single_track( instruct, rf );
+            std::string effs_file = get_yaml<std::string>
+                ( instruct, "effs_file" );
+
+            return new MuonXYWeight( *st, effs_file );
+
         }
 }
