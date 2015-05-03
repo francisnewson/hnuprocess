@@ -50,21 +50,23 @@ namespace fn
         double y = impact_2.Y();
         double p = srt.get_mom();
 
-
         double weight = get_weight();
+
+        //Denominator does not get reweighted
+        h_xy_total_->Fill(  x, y , weight );
+        h_p_total_->Fill( p , weight );
+        h_track_pr_->Fill( p, std::hypot( x, y ), weight );
+
         bool found_muon = mr_.check();
 
         if ( found_muon )
         {
+            //numerator does get reweighted
             weight *= mr_.get_weight();
             h_xy_passed_->Fill(  x, y , weight );
             h_p_passed_->Fill( p , weight );
         }
 
-        h_xy_total_->Fill(  x, y , weight );
-        h_p_total_->Fill( p , weight );
-
-        h_track_pr_->Fill( p, std::hypot( x, y ), weight );
     }
 
     void MuonEfficiency::end_processing()

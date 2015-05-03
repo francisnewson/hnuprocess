@@ -334,10 +334,23 @@
         ogt: bf_st
 
 - selection:
-   { name: req_muon_40, type: MuonReq, multiplier: 4.0, inputs: {ogt: bf_st, sm: single_muon } }
+    name: muon_xy_wgt
+    type: MuonXYWeight
+    effs_file: input/reco/conditions/muv_xy_effs.yaml
+    inputs:
+        ogt: bf_st
 
 - selection:
-   { name: req_muon_38, type: MuonReq, multiplier: 3.8, inputs: {ogt: bf_st, sm: single_muon } }
+   { name: raw_req_muon_40, type: MuonReq, multiplier: 4.0, inputs: {ogt: bf_st, sm: single_muon } }
+
+- selection:
+    { name: req_muon_40, type: CompositeSelection, children: [raw_req_muon_40, muon_xy_wgt] }
+
+- selection:
+   { name: raw_req_muon_38, type: MuonReq, multiplier: 3.8, inputs: {ogt: bf_st, sm: single_muon } }
+
+- selection:
+    { name: req_muon_38, type: CompositeSelection, children: [raw_req_muon_38, muon_xy_wgt] }
 
 
 ###################################################
@@ -378,7 +391,6 @@
     ostream: oscout
     base: passer
     source: mom_sel_30_eop
-
 
 - analysis:
     type: Summary

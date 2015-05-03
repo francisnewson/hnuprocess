@@ -291,7 +291,6 @@
     children:
         - passer
         - kaon_mom_weights
-        - good_bursts
         - dch_veto
         - pos_trk
         - quality_7

@@ -5,6 +5,7 @@
 #include "tracking_selections.hh"
 #include "NA62Constants.hh"
 #include "yaml_help.hh"
+#include "FunctionCut.hh"
 
 namespace fn
 {
@@ -124,11 +125,12 @@ namespace fn
         Subscriber * create_subscriber<MuonXYWeight>
         (YAML::Node& instruct, RecoFactory& rf )
         {
+            if( !rf.is_mc() ){ return new FunctionCut<auto_pass>{{0}} ; }
+
             const SingleTrack * st = get_single_track( instruct, rf );
             std::string effs_file = get_yaml<std::string>
                 ( instruct, "effs_file" );
 
             return new MuonXYWeight( *st, effs_file );
-
         }
 }
