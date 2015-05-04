@@ -2,6 +2,7 @@
 #include "stl_help.hh"
 #include <functional>
 #include <iostream>
+#include <iomanip>
 #include <cassert>
 namespace toymc
 {
@@ -33,9 +34,10 @@ namespace toymc
     {
         for ( auto mc : children_ )
         {
-            std::cout << tp.z << " " << mc->get_length() << " " ;
+            std::cout << std::setw(10) << tp.z << "]"
+                << ">" << std::setw(10) << mc->get_length()<< ">" ;
             tp = mc->transfer( tp );
-            std::cout << tp.z << std::endl;
+            std::cout << "[" << std::setw(10) << tp.z << std::endl;
         }
         return tp;
     }

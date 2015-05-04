@@ -36,22 +36,22 @@ namespace fn
         double dch_rad_length = dch_depth / dch_budget;
 
         //drift lengths
-        double drift_dch1_to_dch2 = nc::zDch2 - nc::zDch1;
-        double drift_dch2_to_mag = nc::zMagnet - nc::zDch2;
-        double drift_mag_to_dch3 = nc::zDch3 - nc::zMagnet;
-        double drift_dch3_to_dch4 = nc::zDch4 - nc::zDch3;
-        double drift_dch4_to_al = nc::zAl - nc::zDch4;
-        double drift_al_to_lkr = nc::zLkr - nc::zAl;
-        double drift_lkr_to_hac = nc::zHac - nc::zLkr;
-        double drift_hac_to_muv1 = nc::zMuv1 - nc::zHac;
-        double drift_muv1_to_muv2 = nc::zMuv2 - nc::zMuv1;
+        double drift_dch1_to_dch2 = nc::zDch2 - nc::zDch1 - dch_depth;
+        double drift_dch2_to_mag = nc::zMagnet - nc::zDch2 - dch_depth;
+        double drift_mag_to_dch3 = nc::zDch3 - nc::zMagnet; //magnet has no depth
+        double drift_dch3_to_dch4 = nc::zDch4 - nc::zDch3 - dch_depth;
+        double drift_dch4_to_al = nc::zAl - nc::zDch4 - dch_depth;
+        double drift_al_to_lkr = nc::zLkr - nc::zAl; //al has no depth
+        double drift_lkr_to_hac = nc::zHac - nc::zLkr - nc::len_lkr;
+        double drift_hac_to_muv1 = nc::zMuv1 - nc::zHac  - nc::len_hac;
+        double drift_muv1_to_muv2 = nc::zMuv2 - nc::zMuv1 - nc::len_muv_iron;
 
         double drift_to_dch1 = nc::zDch1;
 
         //----------------------Upstream detectors (before LKr)----------------------------
 
         ToyMC * propagate_to_dch1 = library_.add_toy( 
-                make_unique<ToyMCPropagate> ( drift_to_dch1 - dch_depth ) );
+                make_unique<ToyMCPropagate> ( drift_to_dch1 ) );
         us_toys_.push_back(propagate_to_dch1);
 
         ToyMC *  scatter_in_dch1 = library_.add_toy(
@@ -59,7 +59,7 @@ namespace fn
         us_toys_.push_back(scatter_in_dch1);
 
         ToyMC * scatter_dch1_to_dch2 = library_.add_toy( 
-                make_unique<ToyMCThickScatter> ( gen_, nc::X0_helium, drift_dch1_to_dch2 - dch_depth, 10 ) );
+                make_unique<ToyMCThickScatter> ( gen_, nc::X0_helium, drift_dch1_to_dch2, 10 ) );
         us_toys_.push_back(scatter_dch1_to_dch2);
 
         ToyMC *  scatter_in_dch2 = library_.add_toy(
@@ -76,7 +76,7 @@ namespace fn
         us_toys_.push_back(bend_in_mag_);
 
         ToyMC * scatter_mag_to_dch3 = library_.add_toy( 
-                make_unique<ToyMCThickScatter> ( gen_, nc::X0_helium, drift_mag_to_dch3 - dch_depth , 10 ) );
+                make_unique<ToyMCThickScatter> ( gen_, nc::X0_helium, drift_mag_to_dch3, 10 ) );
         us_toys_.push_back(scatter_mag_to_dch3);
 
         ToyMC *  scatter_in_dch3 = library_.add_toy(
@@ -84,7 +84,7 @@ namespace fn
         us_toys_.push_back(scatter_in_dch3);
 
         ToyMC * scatter_dch3_to_dch4 = library_.add_toy( 
-                make_unique<ToyMCThickScatter> ( gen_, nc::X0_helium, drift_dch3_to_dch4 - dch_depth, 10 ) );
+                make_unique<ToyMCThickScatter> ( gen_, nc::X0_helium, drift_dch3_to_dch4, 10 ) );
         us_toys_.push_back(scatter_dch3_to_dch4);
 
         ToyMC *  scatter_in_dch4 = library_.add_toy(
@@ -96,7 +96,7 @@ namespace fn
         us_toys_.push_back(scatter_to_al_window);
 
         ToyMC * scatter_al_window_to_lkr = library_.add_toy(
-                make_unique<ToyMCThickScatter> ( gen_, nc::X0_air, drift_al_to_lkr - nc::len_lkr, 1 ) );
+                make_unique<ToyMCThickScatter> ( gen_, nc::X0_air, drift_al_to_lkr, 1 ) );
         us_toys_.push_back(scatter_al_window_to_lkr);
 
         //----------------------Downstream detector (LKr onwards)----------------------------
@@ -106,7 +106,7 @@ namespace fn
         ds_toys_.push_back(scatter_in_lkr);
 
         ToyMC * scatter_lkr_to_hac = library_.add_toy(
-                make_unique<ToyMCThickScatter> ( gen_, nc::X0_air, drift_lkr_to_hac - nc::len_hac, 1 ) );
+                make_unique<ToyMCThickScatter> ( gen_, nc::X0_air, drift_lkr_to_hac, 1 ) );
         ds_toys_.push_back(scatter_lkr_to_hac);
 
         ToyMC * scatter_in_hac = library_.add_toy(
@@ -114,7 +114,7 @@ namespace fn
         ds_toys_.push_back(scatter_in_hac);
 
         ToyMC * scatter_hac_to_muv1 = library_.add_toy(
-                make_unique<ToyMCThickScatter> ( gen_, nc::X0_air, drift_hac_to_muv1 - nc::len_muv_iron, 1 ) );
+                make_unique<ToyMCThickScatter> ( gen_, nc::X0_air, drift_hac_to_muv1, 1 ) );
         ds_toys_.push_back(scatter_hac_to_muv1);
 
         ToyMC * scatter_in_muv1 = library_.add_toy(
@@ -126,7 +126,7 @@ namespace fn
         //----------------------Scatter from MUV1 to MUV2----------------------------
 
         ToyMC * scatter_muv1_to_muv2 = library_.add_toy(
-                make_unique<ToyMCThickScatter> ( gen_, nc::X0_air, drift_muv1_to_muv2 - nc::len_muv_iron, 10) );
+                make_unique<ToyMCThickScatter> ( gen_, nc::X0_air, drift_muv1_to_muv2 , 10) );
         m2_toys_.push_back(scatter_muv1_to_muv2);
 
         ToyMC * scatter_in_muv2 = library_.add_toy(
@@ -184,7 +184,7 @@ namespace fn
         track_params muv2_params = muv1_to_muv2_sim_.transfer( muv1_params );
 
         //Debugging output if broken
-        if ( fabs( muv2_params.z - na62const::zMuv2 ) > 1 )
+        if ( fabs( muv2_params.z - ( na62const::zMuv2 + nc::len_muv_iron) ) > 1 )
         {
             double cz = start_z;
 
@@ -204,10 +204,19 @@ namespace fn
                 std::cout << std::setw(10) << mct->get_length() << " " << std::setw(10) << cz << std::endl;
             }
 
+            std::cout << "ds toys: " << std::endl;
+            for ( auto& mct : ds_toys_ )
+            {
+                cz += mct->get_length();
+                std::cout << std::setw(10) << mct->get_length() << " " << std::setw(10) << cz << std::endl;
+            }
+
         track_params test_lkr_params = upstream_sim.noisy_transfer( start_params );
+        track_params test_ds_params = downstream_sim_.noisy_transfer( test_lkr_params );
+        track_params test_m2m_params = muv1_to_muv2_sim_.noisy_transfer( test_ds_params );
         }
 
-        assert( fabs(muv2_params.z - na62const::zMuv2 ) < 1 );
+        assert( fabs(muv2_params.z - ( na62const::zMuv2 + nc::len_muv_iron) ) < 1 );
 
         return std::make_pair( muv2_params.x, muv1_params.y );
     }
