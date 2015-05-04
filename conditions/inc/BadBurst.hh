@@ -57,10 +57,50 @@ namespace fn
         (YAML::Node& instruct, RecoFactory& rf );
 
     //--------------------------------------------------
-    
+
+    /*****************************************************
+     * BADBURSTRANGE
+     *
+     * Reads a list of BadBurst ranges from a file.
+     * For each event, * checks we are not in a bad burst
+     * range, using an OrderedRanges object:
+     *****************************************************/
+    class BadBurstRange : public CachedSelection
+    {
+        public:
+            typedef BadBurst::BurstId BurstId;
+
+            //Constructor
+            template< class InputIterator>
+                BadBurstRange( InputIterator start,
+                        InputIterator finish,
+                        const fne::Event* e )
+                :event_( e )
+                {
+                    burst_ranges_.load_info( start, finish );
+                }
+
+        private: 
+            bool do_check() const;
+            const fne::Event* event_;
+            OrderedRanges<BurstId> burst_ranges_;
+
+
+            REG_DEC_SUB( BadBurstRange );
+    };
+
+    template<>
+        Subscriber * create_subscriber<BadBurstRange>
+        (YAML::Node& instruct, RecoFactory& rf );
+
+    //--------------------------------------------------
 
     std::istream& operator >> 
         ( std::istream& is , BadBurst::BurstId& bi);
+
+    std::istream& operator >> 
+        ( std::istream& is , 
+          std::pair<BadBurst::BurstId,BadBurst::BurstId>& bi_pair);
 
     std::ostream& operator << 
         ( std::ostream& os , const BadBurst::BurstId& bi);

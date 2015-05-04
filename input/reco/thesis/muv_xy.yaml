@@ -73,7 +73,12 @@
 - selection:
     name: good_muv_burst
     type: BadBurst
-    burst_list: "input/reco/conditions/bad_muv_burst.dat"
+    burst_list: "input/reco/conditions/bad_muv_burst.90.dat"
+
+- selection:
+    name: good_muv_burst_range
+    type: BadBurstRange
+    burst_range_list: "input/reco/conditions/bad_muv_burst_ranges.dat"
 
 - selection:
     name: good_bursts
@@ -82,6 +87,7 @@
         - good_phys_burst
         - good_dch_burst
         - good_muv_burst
+        - good_muv_burst_range
 
 # 2] SingleTrack
 - input:

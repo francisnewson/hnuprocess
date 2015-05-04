@@ -21,47 +21,92 @@ namespace fn
                     V val;
                 };
 
-                //Load info
+            //Load info
+            template <class InputIterator>
+                void load_info
+                ( InputIterator start, InputIterator finish )
+                {
+                    info_ = std::vector<Info>( start, finish );
+                    reset();
+                }
+
+            //Rest info
+            void reset() const
+            {
+                current_info_ = info_.begin();
+            }
+
+            //Ranges are inclusive
+            bool in_range( K key, Info info ) const
+            {
+                return ! ( key < info.min || key > info.max );
+            }
+
+            //Forward lookup K in ranges
+            V get_value( const K& key ) const
+            {
+                while ( !  in_range( key, *current_info_ ) )
+                {
+                    ++current_info_;
+                    if ( current_info_ == info_.end() )
+                    {
+                        throw std::runtime_error
+                            ( "OrderedRanger: Ran past end of info" );
+                    }
+                }
+                return current_info_->val;
+            }
+
+            private:
+            //Current position is preserved between calls
+            mutable typename std::vector<Info>::const_iterator current_info_;
+            std::vector<Info> info_;
+        };
+
+    //--------------------------------------------------
+
+    template <class K>
+        class OrderedRanges
+        {
+            public:
                 template <class InputIterator>
                     void load_info
-                    ( InputIterator start, InputIterator finish )
+                    (InputIterator start, InputIterator finish )
                     {
-                        info_ = std::vector<Info>( start, finish );
+                        ranges_ = std::vector<std::pair<K,K>>( start, finish );
                         reset();
                     }
 
-                //Rest info
                 void reset() const
                 {
-                    current_info_ = info_.begin();
+                    current_range_ = ranges_.begin();
                 }
 
                 //Ranges are inclusive
-                bool in_range( K key, Info info ) const
+                bool in_range( const K& key, const std::pair<K,K>& range ) const
                 {
-                    return ! ( key < info.min || key > info.max );
+                    return ! ( key < range.first || key > range.second );
                 }
 
-                //Forward lookup K in ranges
-                V get_value( const K& key ) const
+                bool in_any_range( const K& key ) const
                 {
-                    while ( !  in_range( key, *current_info_ ) )
+                    //catch up until upper limit is >= key
+                    while ( current_range_->second < key )
                     {
-                        ++current_info_;
-                        if ( current_info_ == info_.end() )
-                        {
-                            throw std::runtime_error
-                                ( "OrderedRanger: Ran past end of info" );
-                        }
+                        ++current_range_;
                     }
-                    return current_info_->val;
+
+                    //check if key is in this range
+                    return ( in_range( key, *current_range_ ) );
                 }
 
             private:
-                //Current position is preserved between calls
-                mutable typename std::vector<Info>::const_iterator current_info_;
-                std::vector<Info> info_;
+                //current positions is preserved between calls
+                std::vector<std::pair<K,K>> ranges_;
+                mutable typename std::vector<std::pair<K,K>>::const_iterator current_range_;
         };
+
+    //--------------------------------------------------
 
     template <class K>
         class OrderedTracker
