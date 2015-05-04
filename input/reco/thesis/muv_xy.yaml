@@ -286,6 +286,16 @@
     inputs:
         ogt: bf_st
 
+- selection:
+    name: tgt_muv1_radius
+    type: TrackRadialAcceptance
+    track_section: downstream
+    z: 12778.0 #zmuv1
+    inner: 25
+    outer: 70
+    inputs:
+        ogt: bf_st
+
 #Momentum cuts
 - selection:
     { name: mom20, type: TrackMomentum, min: 20,  max: 60, inputs: {ogt: bf_st } }
@@ -332,6 +342,9 @@
 - selection:
     { name: mom_sel_30_no_eop, type: CompositeSelection, children: [muon_selection, mom30 ] }
 
+- selection:
+    { name: tgt_muv_rad_no_eop, type: CompositeSelection, children: [muon_selection, tgt_muv1_radius ] }
+
 - input:
     name: single_muon
     type: SingleMuon
@@ -357,6 +370,12 @@
 
 - selection:
     { name: req_muon_38, type: CompositeSelection, children: [raw_req_muon_38, muon_xy_wgt] }
+
+- selection:
+   { name: raw_req_muon_25, type: MuonReq, multiplier: 2.5, inputs: {ogt: bf_st, sm: single_muon } }
+
+- selection:
+    { name: req_muon_25, type: CompositeSelection, children: [raw_req_muon_25, muon_xy_wgt] }
 
 
 ###################################################
@@ -389,6 +408,20 @@
     muv_selection: req_muon_38, 
     selection: mom_sel_30_no_eop,
     folder: muon_eff_r38_p30_no_eop,
+    tfile: tfout, inputs: {ogt: bf_st} }
+
+- analysis:
+    { name: muv_eff_r40_pfull_no_eop, type: MuonEfficiency,
+    muv_selection: req_muon_40,
+    selection: tgt_muv_rad_no_eop,
+    folder: muon_eff_r40_pfull,
+    tfile: tfout, inputs: {ogt: bf_st} }
+
+- analysis:
+    { name: muv_eff_r25_pfull_no_eop, type: MuonEfficiency,
+    muv_selection: req_muon_25,
+    selection: tgt_muv_rad_no_eop,
+    folder: muon_eff_r25_pfull,
     tfile: tfout, inputs: {ogt: bf_st} }
 
 - analysis:
