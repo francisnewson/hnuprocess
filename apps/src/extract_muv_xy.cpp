@@ -21,7 +21,7 @@ int main( int argc, char * argv[] )
     general.add_options()
         ( "help,h", "Display this help message")
         ( "mission,m", po::value<path>(),  "Specify mission yaml file")
-        ( "output,o", po::value<path>(),  "Specify output root file")
+        ( "output,o", po::value<path>(),  "Specify output file")
         ;
 
     po::options_description desc("Allowed options");
