@@ -426,6 +426,45 @@ namespace fn
                         "Unknown TrackPZShape" );
             }
         }
+    //--------------------------------------------------
+
+    REG_DEF_SUB( TrackMuvXYAcceptance );
+    
+    TrackMuvXYAcceptance::TrackMuvXYAcceptance( const SingleTrack& st,
+            std::vector<rectangle> recs )
+        :st_( st ), area_cut_( recs )
+    {}
+
+    bool TrackMuvXYAcceptance::do_check() const
+    {
+        const SingleRecoTrack& srt = st_.get_single_track();
+
+        double x = srt.extrapolate_ds( na62const::zMuv2 ).X();
+        double y = srt.extrapolate_ds( na62const::zMuv1 ).Y();
+
+        return area_cut_.allowed({ x, y});
+    }
+
+    template<>
+        Subscriber * create_subscriber<TrackMuvXYAcceptance>
+        (YAML::Node& instruct, RecoFactory& rf )
+        {
+            SingleTrack * st = get_single_track( instruct, rf );
+            std::string shape = get_yaml<std::string>( instruct, "shape");
+
+            if ( shape == "rectangles" )
+            {
+                std::vector<rectangle> recs=
+                    get_yaml<std::vector<rectangle>>( instruct, "points" );
+
+                return new TrackMuvXYAcceptance( *st, recs );
+            }
+            else
+            {
+                throw std::runtime_error(
+                        "Unknown TrackMuvXYAcceptance shape" );
+            }
+        }
 
     //--------------------------------------------------
 

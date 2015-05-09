@@ -113,6 +113,9 @@ int main( int argc, char * argv[] )
     //compute efficiency
     TEfficiency eff_xy( *h_pos_passed, *h_pos_total );
 
+    TFile tfout( "output/muv_effs.root", "RECREATE" );
+    eff_xy.Write( "eff_xy" );
+
     //extract axes
     TAxis * tx = h_pos_passed->GetXaxis();
     TAxis * ty = h_pos_passed->GetYaxis();

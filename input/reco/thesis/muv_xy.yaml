@@ -268,6 +268,17 @@
         ogt: bf_st
 
 - selection:
+    name: eop_90
+    #log_level: always_print
+    type: Km2TrackClusterEP
+    min_eop: 0.0
+    max_eop: 0.90
+    inputs:
+        km2clusters: rk_km2_clusters
+        ogt: bf_st
+
+
+- selection:
     name: km2_peak_m2
     type: Km2M2Miss
     min_m2: -0.005
@@ -295,6 +306,38 @@
     outer: 70
     inputs:
         ogt: bf_st
+- selection:
+    name: tgt_muv_xy
+    type: TrackMuvXYAcceptance
+    shape: rectangles
+    points:
+        - [ -30,  30,  80,  90 ]
+        - [ -50,  50,  70,  80 ]
+        - [ -60,  60,  60,  70 ]
+        - [ -70,  70,  50,  60 ]
+        - [ -80,  80,  40,  50 ]
+        - [ -80,  80,  30,  40 ]
+        - [ -90, -20,  20,  30 ]
+        - [  20,  90,  20,  30 ]
+        - [ -90, -30,  10,  20 ]
+        - [  30,  90,  10,  20 ]
+        - [ -90, -30,   0,  10 ]
+        - [  30,  90,   0,  10 ]
+        - [ -90, -30, -10,   0 ]
+        - [  30,  90, -10,   0 ]
+        - [ -90, -30, -20, -10 ]
+        - [  30,  90, -20, -10 ]
+        - [ -90, -20, -30, -20 ]
+        - [  20,  90, -30, -20 ]
+        - [ -80,  80, -40, -30 ]
+        - [ -80,  80, -50, -40 ]
+        - [ -70,  70, -60, -50 ]
+        - [ -60,  60, -70, -60 ]
+        - [ -50,  50, -80, -70 ]
+        - [ -30,  30, -90, -80 ]
+    inputs:
+        ogt: bf_st
+
 
 #Momentum cuts
 - selection:
@@ -335,15 +378,13 @@
         - rk_ddead_cell
         - rk_dcht
         - km2_peak_m2
+        - eop_90
 
 - selection:
-    { name: mom_sel_30_eop, type: CompositeSelection, children: [muon_selection, mom30, rk_km2_eop ] }
+    { name: mom_sel_30_eop, type: CompositeSelection, children: [muon_selection, mom30 ] }
 
 - selection:
-    { name: mom_sel_30_no_eop, type: CompositeSelection, children: [muon_selection, mom30 ] }
-
-- selection:
-    { name: tgt_muv_rad_no_eop, type: CompositeSelection, children: [muon_selection, tgt_muv1_radius ] }
+    { name: tgt_muv_rad_eop, type: CompositeSelection, children: [muon_selection, tgt_muv_xy] }
 
 - input:
     name: single_muon
@@ -384,24 +425,24 @@
 
 
 - analysis:
-    { name: muv_eff_r40_p30_no_eop, type: MuonEfficiency,
+    { name: muv_eff_r40_p30_eop, type: MuonEfficiency,
     muv_selection: req_muon_40, 
-    selection: mom_sel_30_no_eop,
-    folder: muon_eff_r40_p30_no_eop,
+    selection: mom_sel_30_eop,
+    folder: muon_eff_r40_p30_eop,
     tfile: tfout, inputs: {ogt: bf_st} }
 
 - analysis:
-    { name: muv_eff_r40_p30_no_eop_raw, type: MuonEfficiency,
+    { name: muv_eff_r40_p30_eop_raw, type: MuonEfficiency,
     muv_selection: raw_req_muon_40, 
-    selection: mom_sel_30_no_eop,
-    folder: muon_eff_r40_p30_no_eop_raw,
+    selection: mom_sel_30_eop,
+    folder: muon_eff_r40_p30_eop_raw,
     tfile: tfout, inputs: {ogt: bf_st} }
 
 - analysis:
-    { name: muv_eff_tgt_muv__pfull_no_eop, type: MuonEfficiency,
+    { name: muv_eff_tgt_muv__pfull_eop, type: MuonEfficiency,
     muv_selection: req_muon_40,
-    selection: tgt_muv_rad_no_eop,
-    folder: muon_eff_tgt_muv_pfull_no_eop,
+    selection: tgt_muv_rad_eop,
+    folder: muon_eff_tgt_muv_pfull_eop,
     tfile: tfout, inputs: {ogt: bf_st} }
 
 - analysis:
