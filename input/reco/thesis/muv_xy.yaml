@@ -382,12 +382,6 @@
 # ANALYSES
 ###################################################
 
-- analysis:
-    { name: muv_eff_r40_p30_eop, type: MuonEfficiency,
-    muv_selection: req_muon_40, 
-    selection: mom_sel_30_eop,
-    folder: muon_eff_r40_p30_eop,
-    tfile: tfout, inputs: {ogt: bf_st} }
 
 - analysis:
     { name: muv_eff_r40_p30_no_eop, type: MuonEfficiency,
@@ -397,31 +391,17 @@
     tfile: tfout, inputs: {ogt: bf_st} }
 
 - analysis:
-    { name: muv_eff_r38_p30_eop, type: MuonEfficiency,
-    muv_selection: req_muon_38, 
-    selection: mom_sel_30_eop,
-    folder: muon_eff_r38_p30_eop,
-    tfile: tfout, inputs: {ogt: bf_st} }
-
-- analysis:
-    { name: muv_eff_r38_p30_no_eop, type: MuonEfficiency,
-    muv_selection: req_muon_38, 
+    { name: muv_eff_r40_p30_no_eop_raw, type: MuonEfficiency,
+    muv_selection: raw_req_muon_40, 
     selection: mom_sel_30_no_eop,
-    folder: muon_eff_r38_p30_no_eop,
+    folder: muon_eff_r40_p30_no_eop_raw,
     tfile: tfout, inputs: {ogt: bf_st} }
 
 - analysis:
-    { name: muv_eff_r40_pfull_no_eop, type: MuonEfficiency,
+    { name: muv_eff_tgt_muv__pfull_no_eop, type: MuonEfficiency,
     muv_selection: req_muon_40,
     selection: tgt_muv_rad_no_eop,
-    folder: muon_eff_r40_pfull,
-    tfile: tfout, inputs: {ogt: bf_st} }
-
-- analysis:
-    { name: muv_eff_r25_pfull_no_eop, type: MuonEfficiency,
-    muv_selection: req_muon_25,
-    selection: tgt_muv_rad_no_eop,
-    folder: muon_eff_r25_pfull,
+    folder: muon_eff_tgt_muv_pfull_no_eop,
     tfile: tfout, inputs: {ogt: bf_st} }
 
 - analysis:

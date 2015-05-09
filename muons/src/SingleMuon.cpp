@@ -144,6 +144,10 @@ namespace fn
 
     void MCScatterSingleMuon::new_run()
     {
+        BOOST_LOG_SEV( get_log(), always_print)
+            << "New run " << e_->header.run
+            << ". Setting magnet polarity to " << pf_.get_polarity( e_->header.run);
+
         mss_.set_magnet_polarity( pf_.get_polarity( e_->header.run ) );
     }
 

@@ -186,7 +186,7 @@ namespace toymc
     track_params ToyMCDipoleBend::transfer( track_params tp ) const
     {
         double px = tp.tx * tp.p;
-        px -= mom_kick_ * tp.q;
+        px -= mom_kick_ * tp.q * polarity_;
         tp.tx = px / tp.p;
         return tp;
     }
