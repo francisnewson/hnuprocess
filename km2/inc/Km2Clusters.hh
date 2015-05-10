@@ -111,6 +111,8 @@ namespace fn
             double brehm_radius_;
             double track_cluster_radius_;
 
+            double margin_parameter_;
+
             const ClusterCorrector& cluster_corrector_;
             bool mc_;
 

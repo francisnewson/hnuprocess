@@ -83,7 +83,7 @@
 - selection:
     name: good_muv_burst
     type: BadBurst
-    burst_list: "input/reco/conditions/bad_muv_burst.dat"
+    burst_list: "input/reco/conditions/bad_muv_burst.90.dat"
 
 - selection:
     name: data_sample

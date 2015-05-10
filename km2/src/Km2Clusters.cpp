@@ -2,6 +2,7 @@
 #include "NA62Constants.hh"
 #include "yaml_help.hh"
 #include "root_help.hh"
+#include "lkraccep_2007.hh"
 #include "tracking_selections.hh"
 #include <boost/lexical_cast.hpp>
 
@@ -51,7 +52,7 @@ namespace fn
         :e_ ( e ), st_( st ), km2rc_( cluster_corrector),
         noise_energy_( noise_energy ), noise_time_( noise_time),
         brehm_radius_( brehm_radius), track_cluster_radius_( track_cluster_radius ),
-         cluster_corrector_( cluster_corrector), mc_( is_mc )
+        margin_parameter_( 8 ), cluster_corrector_( cluster_corrector), mc_( is_mc )
     { }
 
     void Km2Clusters::new_event()
@@ -82,6 +83,14 @@ namespace fn
 
         if ( energy <= noise_energy_ ) 
             return cluster_type::IGN;
+
+        //Is it ouside of LKr acceptance (i.e. masked channel )
+        if ( LKr_acc( e_->header.run, rc->x, rc->y, margin_parameter_ ) )
+        {
+        BOOST_LOG_SEV( get_log(), log_level() )
+            << "Cluster failed LKr_acc";
+            return cluster_type::IGN;
+        }
 
         //Is it an accidental
         double track_time = srt.get_time();
