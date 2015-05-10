@@ -47,7 +47,7 @@ namespace fn
         TVector3 impact_2 = srt.extrapolate_ds( na62const::zMuv2 );
 
         double x = impact_2.X();
-        double y = impact_2.Y();
+        double y = impact_1.Y();
         double p = srt.get_mom();
 
         double weight = get_weight();
