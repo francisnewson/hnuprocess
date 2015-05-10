@@ -306,6 +306,7 @@
     outer: 70
     inputs:
         ogt: bf_st
+
 - selection:
     name: tgt_muv_xy
     type: TrackMuvXYAcceptance
@@ -338,6 +339,14 @@
     inputs:
         ogt: bf_st
 
+- selection:
+    name: very_tgt_muv_xy
+    type: TrackMuvXYAcceptance
+    shape: rectangles
+    points:
+        - [ -70,  -50,  -30,  -10 ]
+    inputs:
+        ogt: bf_st
 
 #Momentum cuts
 - selection:
@@ -386,6 +395,9 @@
 - selection:
     { name: tgt_muv_rad_eop, type: CompositeSelection, children: [muon_selection, tgt_muv_xy] }
 
+- selection:
+    { name: very_tgt_muv_rad_eop, type: CompositeSelection, children: [muon_selection, very_tgt_muv_xy] }
+
 - input:
     name: single_muon
     type: SingleMuon
@@ -395,8 +407,9 @@
 
 - selection:
     name: muon_xy_wgt
-    type: MuonXYWeight
-    effs_file: input/reco/conditions/muv_xy_effs.yaml
+    type: MuonTHXYWeight
+    effs_file: input/reco/conditions/muv_xy.root
+    effs_hist: rat_xy
     inputs:
         ogt: bf_st
 
@@ -446,11 +459,25 @@
     tfile: tfout, inputs: {ogt: bf_st} }
 
 - analysis:
+    { name: muv_eff_very_tgt_muv__pfull_eop, type: MuonEfficiency,
+    muv_selection: req_muon_40,
+    selection: very_tgt_muv_rad_eop,
+    folder: muon_eff_very_tgt_muv_pfull_eop,
+    tfile: tfout, inputs: {ogt: bf_st} }
+
+- analysis:
     type: Summary
     name: sum_mom_sel_30_eop
     ostream: oscout
     base: passer
     source: mom_sel_30_eop
+
+- analysis:
+    type: Summary
+    name: sum_mom_very_tgt
+    ostream: oscout
+    base: passer
+    source:  very_tgt_muv_rad_eop
 
 - analysis:
     type: Summary

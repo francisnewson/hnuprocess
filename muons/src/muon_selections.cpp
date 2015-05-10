@@ -6,6 +6,8 @@
 #include "NA62Constants.hh"
 #include "yaml_help.hh"
 #include "FunctionCut.hh"
+#include "TH2D.h"
+#include "root_help.hh"
 
 namespace fn
 {
@@ -132,5 +134,48 @@ namespace fn
                 ( instruct, "effs_file" );
 
             return new MuonXYWeight( *st, effs_file );
+        }
+
+    //--------------------------------------------------
+
+    REG_DEF_SUB( MuonTHXYWeight );
+
+    MuonTHXYWeight::MuonTHXYWeight( const SingleTrack& st, const TH2D& heffs )
+        :st_(st), effs_(heffs)
+    {}
+
+    bool MuonTHXYWeight::do_check() const { return true; }
+
+    double MuonTHXYWeight::do_weight() const 
+    { 
+        const SingleRecoTrack& srt = st_.get_single_track();
+
+        //extrapolate track
+        double x = srt.extrapolate_ds( na62const::zMuv2).X();
+        double y = srt.extrapolate_ds( na62const::zMuv1).Y();
+
+        double efficiency = effs_.efficiency( x, y );
+        return efficiency;
+    }
+
+    template<>
+        Subscriber * create_subscriber<MuonTHXYWeight>
+        (YAML::Node& instruct, RecoFactory& rf )
+        {
+            if( !rf.is_mc() ){ return new FunctionCut<auto_pass>{{0}} ; }
+
+            const SingleTrack * st = get_single_track( instruct, rf );
+
+            std::string effs_file = get_yaml<std::string>
+                ( instruct, "effs_file" );
+
+            std::string effs_hist_path = get_yaml<std::string>
+                ( instruct, "effs_hist" );
+
+
+            TFile teffs( effs_file.c_str() );
+            auto eff_hist = extract_hist<TH2D>( teffs, effs_hist_path );
+
+            return new MuonTHXYWeight( *st, *eff_hist );
         }
 }

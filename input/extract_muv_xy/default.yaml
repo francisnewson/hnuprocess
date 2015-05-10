@@ -1,6 +1,6 @@
 input_file: /afs/cern.ch/work/f/fnewson/hnu/gopher/data/thesis/muv_xy/all.muv_xy.root
 rebin: 2
 channel: p5.data.q11t.v3
-hist_folder:  muon_eff_r40_p30_no_eop
+hist_folder:  muon_eff_r40_p30_eop
 passed_name: h_xy_passed
 total_name: h_xy_total

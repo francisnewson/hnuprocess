@@ -76,5 +76,28 @@ namespace fn
         Subscriber * create_subscriber<MuonXYWeight>
         (YAML::Node& instruct, RecoFactory& rf );
 
+    //--------------------------------------------------
+
+    class MuonTHXYWeight : public CachedSelection
+    {
+        public:
+            MuonTHXYWeight( const SingleTrack& st, const TH2D& heffs );
+
+        private:
+            bool do_check() const;
+            double do_weight() const;
+
+            const SingleTrack& st_;
+            EffsTH2D effs_;
+
+            REG_DEC_SUB( MuonTHXYWeight );
+    };
+
+    template<>
+        Subscriber * create_subscriber<MuonTHXYWeight>
+        (YAML::Node& instruct, RecoFactory& rf );
+
+    //--------------------------------------------------
+
 }
 #endif

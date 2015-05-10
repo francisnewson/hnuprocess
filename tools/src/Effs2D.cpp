@@ -1,6 +1,7 @@
 #include "Effs2D.hh"
 #include <iostream>
 #include "Xcept.hh"
+#include "root_help.hh"
 namespace fn
 {
 
@@ -23,7 +24,7 @@ namespace fn
     void Effs2D::print_eff_map( std::ostream& os ) const
     {
         os << "Effs2D\n";
- 
+
         for ( int j = yedges_.size()-2 ; j != 0 ; --j )
         {
             for ( int i = 0; i !=  xedges_.size() -2 ; ++i )
@@ -83,5 +84,17 @@ namespace fn
 
     //--------------------------------------------------
 
+    EffsTH2D::EffsTH2D( const TH2D &h )
+        :heffs_( h  ){}
+
+    void EffsTH2D::set_eff_hist( TH2D  h )
+    {
+        heffs_ = std::move(h);
+    }
+
+    double EffsTH2D::efficiency( double x, double y ) const
+    {
+        return heffs_.GetBinContent( heffs_.FindFixBin( x, y ) );
+    }
 
 }

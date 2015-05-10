@@ -2,6 +2,7 @@
 #define EFFS2D_HH
 #include <vector>
 #include <iosfwd>
+#include "TH2D.h"
 #if 0
 /*
  *  _____  __  __     ____  ____
@@ -38,6 +39,22 @@ namespace fn
             std::vector<double> xedges_;
             std::vector<double> yedges_;
             std::vector<double> effs_;
+    };
+
+    //--------------------------------------------------
+
+    class EffsTH2D
+    {
+        public:
+            EffsTH2D() = default;
+            EffsTH2D( const TH2D &h );
+            void set_eff_hist( TH2D h );
+
+            double efficiency( double x, double y ) const;
+
+
+        private:
+            TH2D heffs_;
     };
 }
 #endif
