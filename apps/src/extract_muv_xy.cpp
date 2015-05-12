@@ -4,17 +4,61 @@
 #include "TFile.h"
 #include "TEfficiency.h"
 #include "root_help.hh"
+#include "HistStore.hh"
+#include "TColor.h"
+#include "TROOT.h"
+#include "TGraphAsymmErrors.h"
 #include <boost/filesystem/path.hpp>
 
 using boost::filesystem::path;
 
-struct eff_plots
+struct eff_1d_plots
+{
+    std::unique_ptr<TH1D> htotal;
+    std::unique_ptr<TH1D> hpassed;
+};
+
+eff_1d_plots get_eff_1d_plots( TFile& tfin, path hist_folder, std::string channel, 
+        std::string passed_name, std::string total_name, int rebin )
+{
+    path pos_folder = path{channel + ".pos"} / hist_folder;
+    path neg_folder = path{channel + ".neg"} / hist_folder;
+
+    //Load histograms
+    auto h_pos_passed = extract_hist<TH1D>( tfin, pos_folder/ passed_name );
+    auto h_pos_total  = extract_hist<TH1D>( tfin, pos_folder/ total_name );
+
+    auto h_neg_passed = extract_hist<TH1D>( tfin, neg_folder/ passed_name );
+    auto h_neg_total  = extract_hist<TH1D>( tfin, neg_folder/ total_name );
+
+    //rebin
+    h_pos_passed->Rebin( rebin );
+    h_neg_passed->Rebin( rebin );
+    h_pos_total->Rebin( rebin );
+    h_neg_total->Rebin( rebin );
+
+    //combine
+    h_pos_passed->Add( h_neg_passed.get() );
+    h_pos_total->Add( h_neg_total.get() );
+
+    eff_1d_plots result{ 
+        std::unique_ptr<TH1D>{ static_cast<TH1D*>( h_pos_total->Clone("htotal") )},
+            std::unique_ptr<TH1D>{ static_cast<TH1D*>( h_pos_passed->Clone("hpassed") )}
+    };
+
+    result.htotal->SetDirectory(0);
+    result.hpassed->SetDirectory(0);
+
+    return result;
+}
+
+struct eff_2d_plots
 {
     std::unique_ptr<TH2D> htotal;
     std::unique_ptr<TH2D> hpassed;
 };
 
-eff_plots get_eff_plots( TFile& tfin, path hist_folder, std::string channel, std::string passed_name, std::string total_name, int rebin )
+eff_2d_plots get_eff_2d_plots( TFile& tfin, path hist_folder, std::string channel, std::string passed_name, std::string total_name, int rebin )
 {
     path pos_folder = path{channel + ".pos"} / hist_folder;
     path neg_folder = path{channel + ".neg"} / hist_folder;
@@ -36,7 +80,7 @@ eff_plots get_eff_plots( TFile& tfin, path hist_folder, std::string channel, std
     h_pos_passed->Add( h_neg_passed.get() );
     h_pos_total->Add( h_neg_total.get() );
 
-    eff_plots result{ 
+    eff_2d_plots result{ 
         std::unique_ptr<TH2D>{ static_cast<TH2D*>( h_pos_total->Clone("htotal") )},
             std::unique_ptr<TH2D>{ static_cast<TH2D*>( h_pos_passed->Clone("hpassed") )}
     };
@@ -46,6 +90,43 @@ eff_plots get_eff_plots( TFile& tfin, path hist_folder, std::string channel, std
 
     return result;
 }
+
+struct eff_plots
+{
+    std::unique_ptr<TH1> htotal;
+    std::unique_ptr<TH1> hpassed;
+};
+
+eff_plots get_eff_plots( const YAML::Node& config, TFile& tfin )
+{
+    int rebin               = get_yaml<int>( config, "rebin" );
+    std::string channel     = get_yaml<std::string>( config, "channel" );
+    std::string type        = get_yaml<std::string>( config, "type" );
+    path hist_folder        = get_yaml<std::string>( config, "hist_folder" );
+    std::string passed_name = get_yaml<std::string>( config, "passed_name" );
+    std::string total_name  = get_yaml<std::string>( config, "total_name" );
+
+    eff_plots result;
+
+    if ( type == "1d" )
+    {
+        eff_1d_plots temp_plots = get_eff_1d_plots( tfin, hist_folder, channel, passed_name, total_name, rebin );
+        result.htotal.reset( temp_plots.htotal.release() );
+        result.hpassed.reset( temp_plots.hpassed.release() );
+    }
+    else if ( type == "2d" )
+    {
+        eff_2d_plots temp_plots = get_eff_2d_plots( tfin, hist_folder, channel, passed_name, total_name, rebin );
+        result.htotal.reset( temp_plots.htotal.release() );
+        result.hpassed.reset( temp_plots.hpassed.release() );
+    }
+
+    result.htotal->Sumw2();
+    result.hpassed->Sumw2();
+
+    return result;
+}
+
 
 void print_effs( std::ostream& os,  TH2D& hpassed, TEfficiency& teff )
 {
@@ -103,6 +184,7 @@ int main( int argc, char * argv[] )
         ( "mission,m", po::value<path>(),  "Specify mission yaml file")
         ( "output,o", po::value<path>(),  "Specify output file")
         ( "root,r", po::value<path>(),  "Specify output root file")
+        ( "plots,p", po::value<path>(),  "Specify plots root file")
         ;
 
     po::options_description desc("Allowed options");
@@ -165,48 +247,101 @@ int main( int argc, char * argv[] )
     std::string input_file = get_yaml<std::string>( config_node, "input_file" );
     TFile tfin( input_file.c_str() );
 
-    int rebin = get_yaml<int>( config_node, "rebin" );
 
-    //Sort out folder names
-    std::string channel = get_yaml<std::string>( config_node, "channel" );
-    path hist_folder = get_yaml<std::string>( config_node, "hist_folder" );
-    std::string passed_name = get_yaml<std::string>( config_node, "passed_name" );
-    std::string total_name = get_yaml<std::string>( config_node, "total_name" );
 
     //--------------------------------------------------
+
+    std::unique_ptr<TFile> tfout;
+    std::string output_root_file;
+    if ( output_to_root )
+    {
+        output_root_file = vm["root"].as<path>().string();
+        tfout.reset( TFile::Open(  output_root_file.c_str() , "RECREATE" ) );
+    }
 
     //**************************************************
     //Load plots
     //**************************************************
 
-    //load plots
-    eff_plots ep = get_eff_plots( tfin, hist_folder, channel, passed_name, total_name, rebin );
+    const YAML::Node& channels = config_node["channels"];
+    const YAML::Node& plots = config_node["plots"];
 
-    //compute efficiency
-    TEfficiency eff_xy( *ep.hpassed, *ep.htotal );
-
-    std::unique_ptr<TH2D> rat_xy{ static_cast<TH2D*>( ep.hpassed->Clone("hrat_xy")) };
-    rat_xy->Divide( ep.htotal.get() );
-
-    if ( output_to_root )
+    for ( const auto& channel_node : channels )
     {
-        std::string output_root_file = vm["root"].as<path>().string();
-        TFile tfout( output_root_file.c_str() , "RECREATE" );
-        eff_xy.Write( "eff_xy" );
-        rat_xy->Write( "rat_xy" );
+        std::string channel = get_yaml<std::string>( channel_node, "name" );
+        int color = get_yaml<int>( channel_node, "color");
 
-        std::cerr << "Efficiencies written to " << output_root_file << std::endl;
+        for( const YAML::Node& plot_node : plots )
+        {
+            //get plots
+            YAML::Node plot = plot_node;
+            plot["channel"] = channel;
+            eff_plots ep = get_eff_plots( plot, tfin );
+
+            //compute efficiency
+            TEfficiency eff_xy( *ep.hpassed, *ep.htotal );
+
+            std::unique_ptr<TH1> rat_xy{ static_cast<TH1*>( ep.hpassed->Clone("hrat_xy")) };
+            rat_xy->Divide( ep.htotal.get() );
+            rat_xy->SetLineColor( color );
+
+            std::string plot_name = get_yaml<std::string>( plot, "name" );
+            auto plot_folder =  boost::filesystem::path{ plot_name } / channel;
+
+            if ( output_to_root )
+            {
+                cd_p( tfout.get(), plot_folder  );
+
+                eff_xy.Write( "eff" );
+                rat_xy->Write( "rat" );
+
+                if ( plot["type"].as<std::string>() == "1d" )
+                {
+                    TGraphAsymmErrors * g = eff_xy.CreateGraph();
+                    g->SetLineColor( color );
+                    g->Write("g");
+                }
+
+                std::cerr << "Efficiencies written to " << output_root_file << "::" << plot_folder << std::endl;
+            }
+
+            //print effs to file
+            if ( output_to_file )
+            {
+                os << "# MUV XY effs producted from " <<  mission.string() << std::endl;
+                print_effs( os, *static_cast<TH2D*>(ep.hpassed.get()),  eff_xy );
+
+                std::cerr << "Efficiencies written to " << output_location << std::endl;
+            }
+        }
     }
 
-    //print effs to file
-    if ( output_to_file )
+    //**************************************************
+    //Produce ratios
+    //**************************************************
+
+    tfout->ReOpen( "UPDATE");
+
+    const YAML::Node& ratios = config_node["ratios"];
+
+    for ( const YAML::Node& ratio : ratios )
     {
-        os << "# MUV XY effs producted from " <<  mission.string() << std::endl;
-        print_effs( os, *ep.hpassed,  eff_xy );
+        std::cout << ratio << std::endl;
+        auto source  = get_yaml<std::string>(ratio, "source" );
+        auto top     = get_yaml<std::string>( ratio,"top" );
+        auto bottom  = get_yaml<std::string>(ratio, "bottom" );
+        auto dest    = get_yaml<std::string>( ratio, "dest" );
 
-        std::cerr << "Efficiencies written to " << output_location << std::endl;
+        path ptop = path{ source } / top / "rat";
+        path pbottom = path{ source } / bottom / "rat";
+
+        auto htop = extract_hist<TH1D>( *tfout, ptop );
+        auto hbottom = extract_hist<TH1D>( *tfout, pbottom );
+
+        htop->Divide( hbottom.get() );
+
+        cd_p( tfout.get(), dest );
+        htop->Write("ratrat");
     }
-
-
 
 }

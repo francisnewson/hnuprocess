@@ -1,6 +1,33 @@
 input_file: /afs/cern.ch/work/f/fnewson/hnu/gopher/data/thesis/muv_xy/all.muv_xy.root
-rebin: 2
-channel: p5.data.q11t.v3
-hist_folder:  muon_eff_r40_p30_eop
-passed_name: h_xy_passed
-total_name: h_xy_total
+
+channels:
+    - { name: p5.data.q11t.v3, color : 634 }
+    - { name : p5.km2.v2 , color : 602  }
+
+plots:
+    - name: narrow_mom
+      rebin: 2
+      type: 2d
+      hist_folder:  muon_eff_r40_p30_eop
+      passed_name: h_xy_passed
+      total_name: h_xy_total
+
+    - name: geom_cut
+      rebin: 1
+      type: 1d
+      hist_folder: muon_eff_tgt_muv_pfull_eop
+      passed_name: h_p_passed
+      total_name: h_p_total
+
+    - name: v_tgt_geom_cut
+      rebin: 5
+      type: 1d
+      hist_folder: muon_eff_very_tgt_muv_pfull_eop
+      passed_name: h_p_passed
+      total_name: h_p_total
+
+ratios:
+    - source: geom_cut
+      top: p5.data.q11t.v3
+      bottom: p5.km2.v2
+      dest: pratio/geom_cut
