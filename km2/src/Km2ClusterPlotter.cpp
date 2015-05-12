@@ -27,6 +27,9 @@ namespace fn
 
         h_cluster_energy_ = hs_.MakeTH1D( "h_cluster_energy", "All cluster energies",
                 100, 0, 100 , "E( GeV )");
+
+        h_cluster_locations_ = hs_.MakeTH2D( "h_cluster_locations", "All cluster locations",
+                200, -200, 200 , "x(cm)", 200, -200, 200, "y(cm)" );
     }
 
     void Km2ClusterPlots::Fill( const SingleRecoTrack& srt, 
@@ -45,6 +48,7 @@ namespace fn
             CorrCluster cc( **itclus,  cluster_corrector_, mc_ );
             TrackProjCorrCluster track_cluster{ cc};
             h_cluster_energy_->Fill( track_cluster.get_energy() );
+            h_cluster_locations_->Fill( (*itclus)->x, (*itclus)->y );
         }
     }
 

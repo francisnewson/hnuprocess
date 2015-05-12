@@ -47,6 +47,8 @@ namespace fn
             TH1D * h_cluster_energy_;
 
             TH1D * h_n_cluster_;
+
+            TH2D * h_cluster_locations_;
             HistStore hs_;
 
     };

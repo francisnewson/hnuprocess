@@ -48,6 +48,31 @@ namespace fn
 
     //--------------------------------------------------
 
+    class NoAssMuon : public CachedSelection
+    {
+        public:
+            NoAssMuon( const SingleMuon& sm, 
+                    const SingleTrack& st, double multiplier );
+
+        private:
+            bool do_check() const;
+            double do_weight() const;
+
+            const SingleMuon& sm_;
+            const SingleTrack& st_;
+            double multiplier_;
+
+            REG_DEC_SUB( NoAssMuon );
+    };
+
+    template<>
+        Subscriber * create_subscriber<NoAssMuon>
+        (YAML::Node& instruct, RecoFactory& rf );
+
+
+
+    //--------------------------------------------------
+
     bool check_muon_track_distance
         ( const SingleMuon& sm, const SingleRecoTrack& srt, double multiplier );
 
@@ -60,7 +85,7 @@ namespace fn
     {
         public:
             MuonXYWeight( const SingleTrack& st,
-              std::string muon_effs_file );
+                    std::string muon_effs_file );
 
         private:
             bool do_check() const;

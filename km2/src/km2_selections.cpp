@@ -136,12 +136,14 @@ namespace fn
         const SingleRecoTrack * srt = km2re.get_reco_track();
         TVector3 vLkr = srt->extrapolate_ds( na62const::zLkr );
 
+        //save track clsuter
         cells_to_check.push_back( get_cpd_cell_index( vLkr.X(), vLkr.Y() ) );
 
         const Km2RecoClusters& km2rc = km2_clusters_.get_reco_clusters();
         Km2RecoClusters::const_iterator begin = km2rc.all_begin();
         Km2RecoClusters::const_iterator end = km2rc.all_end();
 
+        //save other clusters
         for ( auto iclus = begin ; iclus != end ;  ++iclus )
         {
             CorrCluster cc( **iclus, km2rc.get_cluster_corrector(), km2rc.is_mc() );

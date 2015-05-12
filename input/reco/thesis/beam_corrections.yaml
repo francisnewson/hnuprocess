@@ -209,6 +209,9 @@
 - selection: { name: auto_cda_30mm, type: TrackCda,
     max_cda: 3.0 , inputs: { ogt: auto_bf_st } }
 
+- selection: { name: auto_cda_35mm, type: TrackCda,
+    max_cda: 3.5 , inputs: { ogt: auto_bf_st } }
+
 - selection: { name: uc_cda_30mm, type: TrackCda,
     max_cda: 3.0 , inputs: { ogt: uc_bf_st } }
 
@@ -255,6 +258,21 @@
 - selection: {name: uc_rk_lkr_accep, type: TrackLkrAcceptance,
     margin_parameter: 8, inputs: { ogt: uc_bf_st } }
 
+#--------Hot Cells
+- selection: {name: auto_rk_hot_lkr, type: Km2HotLkr,
+    hot_cells: [ [ 134, 56 ], [ 134, 57 ] ],
+    inputs: { km2event: auto_km2_event, km2clusters: auto_km2_clusters } }
+
+- selection: {name: uc_rk_hot_lkr, type: Km2HotLkr,
+    hot_cells: [ [ 134, 56 ], [ 134, 57 ] ],
+    inputs: { km2event: uc_km2_event, km2clusters: uc_km2_clusters } }
+
+#--------Dead Cells
+- selection: { name: auto_ddead_cell, type: TrackDDeadCell, 
+    min_ddead_cell: 2.0,  inputs: {ogt: auto_bf_st } }
+
+- selection: { name: uc_ddead_cell, type: TrackDDeadCell, 
+    min_ddead_cell: 2.0,  inputs: {ogt: uc_bf_st } }
 
 #--------PZ
 - selection:
@@ -320,6 +338,8 @@
         - auto_dch4_acc
         - auto_rk_lkr_accep
         - auto_rk_lkr_veto
+        - auto_rk_hot_lkr
+        - auto_ddead_cell
         - auto_rk_pz
         - auto_km2_eop
 
@@ -336,8 +356,23 @@
         - auto_dch4_acc
         - auto_rk_lkr_accep
         - auto_rk_lkr_veto
+        - auto_rk_hot_lkr
+        - auto_ddead_cell
         - auto_rk_pz
         - auto_km2_eop
+
+- selection:
+    name : weighted_loose_selection
+    type: CompositeSelection
+    children:
+        - weighted_data_sample
+        - auto_good_trk
+        - auto_pos_trk
+        - auto_quality_7
+        - auto_cda_35mm
+        - auto_dch1_acc
+        - auto_dch4_acc
+        - auto_rk_pz
 
 - selection:
     name : uc_full_selection
@@ -352,6 +387,8 @@
         - uc_dch4_acc
         - uc_rk_lkr_accep
         - uc_rk_lkr_veto
+        - uc_rk_hot_lkr
+        - uc_ddead_cell
         - uc_rk_pz
         - uc_km2_eop
 
@@ -372,6 +409,14 @@
     base: passer
     source: weighted_auto_full_selection
     ostream: debug_out
+
+- analysis:
+    type: Summary
+    name: cerr_weighted_auto_summary
+    base: passer
+    source: weighted_auto_full_selection
+    ostream: os_cerr
+
 
 - analysis:
     type: Summary
@@ -397,6 +442,26 @@
     selection: weighted_auto_full_selection
     inputs:
         km2event: auto_km2_event
+
+- analysis :
+    type: Km2Plotter
+    name: weighted_km2_loose
+    folder: weighted_km2_loose
+    tfile: tfout
+    selection: weighted_loose_selection
+    inputs:
+        km2event: auto_km2_event
+
+- analysis :
+    type: Km2ClusterPlotter
+    name: weighted_km2_loose_clusters
+    folder: weighted_km2_loose_clusters
+    tfile: tfout
+    selection: weighted_loose_selection
+    inputs:
+        km2event: auto_km2_event
+        km2clusters: auto_km2_clusters
+        ClusterCorrector: cluster_corrector
 
 - analysis :
     type: Km2Plotter

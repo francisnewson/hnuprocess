@@ -50,6 +50,41 @@ namespace fn
 
     //--------------------------------------------------
 
+    REG_DEF_SUB( NoAssMuon );
+
+    NoAssMuon::NoAssMuon( const SingleMuon& sm, 
+            const SingleTrack& st, double multiplier )
+        :sm_(sm), st_(st), multiplier_( multiplier)
+    {}
+
+    bool NoAssMuon::do_check() const
+    {
+        //check if we have a muon
+        if ( ! sm_.found() )
+        {
+            return true;
+        }
+
+        const auto& srt = st_.get_single_track();
+        return ( !check_muon_track_distance( sm_, srt, multiplier_ ) );
+    }
+
+    double NoAssMuon::do_weight() const { return 1.0; }
+
+    template<>
+        Subscriber * create_subscriber<NoAssMuon>
+        (YAML::Node& instruct, RecoFactory& rf )
+        {
+            const SingleTrack * st = get_single_track( instruct, rf );
+            const SingleMuon * sm = get_single_muon( instruct, rf );
+            double multiplier = get_yaml<double>( instruct, "multiplier" );
+
+            return new NoAssMuon(*sm, *st, multiplier );
+        }
+
+
+
+    //--------------------------------------------------
     bool check_muon_track_distance
         ( const SingleMuon& sm, const SingleRecoTrack& srt, double multiplier )
         {

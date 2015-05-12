@@ -8,26 +8,26 @@ scaling:
             - p6.data.km.q11t.v2.pos
 
         data_channels:
-            - p5.data.q1.v2.pos
+            - p5.data.q11t.v3.pos
 
         km2_channels:
             - p5.km2.v2.pos
 
         halo:
             strategy: m2
-            input_file: tdata/beam_corrections/all.beam_corrections.root
-            plot_path: weighted_km2_auto_full/h_m2m_kmu
+            input_file: tdata/rk_selection/all.rk_selection.root
+            plot_path: km2_rk/h_m2m_kmu
 
             min_mass: -0.3
-            max_mass: -0.1
+            max_mass: -0.075
 
         km2:
             strategy: m2
-            input_file: tdata/beam_corrections/all.beam_corrections.root
-            plot_path: weighted_km2_auto_full/h_m2m_kmu
+            input_file: tdata/rk_selection/all.rk_selection.root
+            plot_path: km2_rk/h_m2m_kmu
 
             min_mass: -0.02
-            max_mass:  0.02
+            max_mass:  0.01
 
     - scaling_method:
         strategy: m2
@@ -37,30 +37,30 @@ scaling:
             - p6.data.km.q11t.v2.neg
 
         data_channels:
-            - p5.data.q1.v2.neg
+            - p5.data.q11t.v3.neg
 
         km2_channels:
             - p5.km2.v2.neg
 
         halo:
             strategy: m2
-            input_file: tdata/beam_corrections/all.beam_corrections.root
-            plot_path: weighted_km2_auto_full/h_m2m_kmu
+            input_file: tdata/rk_selection/all.rk_selection.root
+            plot_path: km2_rk/h_m2m_kmu
 
             min_mass: -0.3
             max_mass: -0.075
 
         km2:
             strategy: m2
-            input_file: tdata/beam_corrections/all.beam_corrections.root
-            plot_path: weighted_km2_auto_full/h_m2m_kmu
+            input_file: tdata/rk_selection/all.rk_selection.root
+            plot_path: km2_rk/h_m2m_kmu
 
-            min_mass: -0.04
-            max_mass:  0.00
+            min_mass: -0.02
+            max_mass:  0.01
 
 weights:
     fid_file: use_root
-    root_file: "tdata/beam_corrections/all.beam_corrections.root"
+    root_file: "tdata/rk_selection/all.rk_selection.root"
     pre : ""
     post: "sample_burst_count/bursts"
     branch:  "weight"
@@ -72,14 +72,14 @@ mass_windows:
     offset: 0
 
 output:
-    input_file: tdata/beam_corrections/all.beam_corrections.root
-    plot_path: weighted_km2_auto_full/h_m2m_kmu
+    input_file: tdata/rk_selection/all.rk_selection.root
+    plot_path: km2_rk/h_m2m_kmu
     rebin: 10
 
     data_plot:
         channels:
-            - p5.data.q1.v2.pos
-            - p5.data.q1.v2.neg
+            - p5.data.q11t.v3.pos
+            - p5.data.q11t.v3.neg
         do_blind: false
         min_blind: 0.09
         max_blind: 0.3

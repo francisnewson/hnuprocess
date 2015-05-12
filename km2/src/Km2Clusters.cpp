@@ -87,7 +87,7 @@ namespace fn
         //Is it ouside of LKr acceptance (i.e. masked channel )
         if ( LKr_acc( e_->header.run, rc->x, rc->y, margin_parameter_ ) )
         {
-        BOOST_LOG_SEV( get_log(), log_level() )
+        BOOST_LOG_SEV( get_log(), log_level()  )
             << "Cluster failed LKr_acc";
             return cluster_type::IGN;
         }
@@ -144,7 +144,7 @@ namespace fn
 
         auto save_log = log_level();
 
-        if ( counter < 1  ) 
+        if ( counter < 100  ) 
         {
             set_log_level( always_print );
         BOOST_LOG_SEV( get_log(), log_level() )

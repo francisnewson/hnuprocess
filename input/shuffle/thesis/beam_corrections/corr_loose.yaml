@@ -8,7 +8,7 @@ scaling:
             - p6.data.km.q11t.v2.pos
 
         data_channels:
-            - p5.data.q1.v2.pos
+            - p5.data.q11t.v3.pos
 
         km2_channels:
             - p5.km2.v2.pos
@@ -16,7 +16,7 @@ scaling:
         halo:
             strategy: m2
             input_file: tdata/beam_corrections/all.beam_corrections.root
-            plot_path: weighted_km2_auto_full/h_m2m_kmu
+            plot_path: weighted_km2_loose/h_m2m_kmu
 
             min_mass: -0.3
             max_mass: -0.1
@@ -24,10 +24,10 @@ scaling:
         km2:
             strategy: m2
             input_file: tdata/beam_corrections/all.beam_corrections.root
-            plot_path: weighted_km2_auto_full/h_m2m_kmu
+            plot_path: weighted_km2_loose/h_m2m_kmu
 
             min_mass: -0.02
-            max_mass:  0.02
+            max_mass:  0.00
 
     - scaling_method:
         strategy: m2
@@ -37,7 +37,7 @@ scaling:
             - p6.data.km.q11t.v2.neg
 
         data_channels:
-            - p5.data.q1.v2.neg
+            - p5.data.q11t.v3.neg
 
         km2_channels:
             - p5.km2.v2.neg
@@ -45,7 +45,7 @@ scaling:
         halo:
             strategy: m2
             input_file: tdata/beam_corrections/all.beam_corrections.root
-            plot_path: weighted_km2_auto_full/h_m2m_kmu
+            plot_path: weighted_km2_loose/h_m2m_kmu
 
             min_mass: -0.3
             max_mass: -0.075
@@ -53,7 +53,7 @@ scaling:
         km2:
             strategy: m2
             input_file: tdata/beam_corrections/all.beam_corrections.root
-            plot_path: weighted_km2_auto_full/h_m2m_kmu
+            plot_path: weighted_km2_loose/h_m2m_kmu
 
             min_mass: -0.04
             max_mass:  0.00
@@ -73,13 +73,13 @@ mass_windows:
 
 output:
     input_file: tdata/beam_corrections/all.beam_corrections.root
-    plot_path: weighted_km2_auto_full/h_m2m_kmu
+    plot_path: weighted_km2_loose/h_m2m_kmu
     rebin: 10
 
     data_plot:
         channels:
-            - p5.data.q1.v2.pos
-            - p5.data.q1.v2.neg
+            - p5.data.q11t.v3.pos
+            - p5.data.q11t.v3.neg
         do_blind: false
         min_blind: 0.09
         max_blind: 0.3
