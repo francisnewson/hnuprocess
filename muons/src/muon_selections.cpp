@@ -213,4 +213,46 @@ namespace fn
 
             return new MuonTHXYWeight( *st, *eff_hist );
         }
+
+    //--------------------------------------------------
+
+    REG_DEF_SUB( MuonTHPWeight );
+
+    MuonTHPWeight::MuonTHPWeight( const SingleTrack& st , const TH1D& heffs )
+        :st_( st ), effs_( heffs )
+    {}
+
+    bool MuonTHPWeight::do_check() const { return true; }
+
+    double MuonTHPWeight::do_weight() const 
+    { 
+        const SingleRecoTrack& srt = st_.get_single_track();
+        double mom = srt.get_mom();
+
+        double efficiency = effs_.efficiency( mom );
+        return efficiency;
+    }
+
+    template<>
+        Subscriber * create_subscriber<MuonTHPWeight>
+        (YAML::Node& instruct, RecoFactory& rf )
+        {
+            if( !rf.is_mc() ){ return new FunctionCut<auto_pass>{{0}} ; }
+
+            const SingleTrack * st = get_single_track( instruct, rf );
+
+            std::string effs_file = get_yaml<std::string>
+                ( instruct, "effs_file" );
+
+            std::string effs_hist_path = get_yaml<std::string>
+                ( instruct, "effs_hist" );
+
+
+            TFile teffs( effs_file.c_str() );
+            auto eff_hist = extract_hist<TH1D>( teffs, effs_hist_path );
+
+            return new MuonTHPWeight( *st, *eff_hist );
+        }
+
+
 }

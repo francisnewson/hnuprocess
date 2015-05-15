@@ -33,7 +33,8 @@ namespace fn
         public:
             Km2ClusterPlots(bool mc, const ClusterCorrector& cluster_corrector);
             void Fill( const SingleRecoTrack& srt, 
-                    const Km2RecoClusters& km2rc, double weight );
+                    const Km2RecoClusters& km2rc,  const Km2Clusters& km2_clusters,
+                    double weight );
             void Write();
 
         private:
@@ -49,6 +50,9 @@ namespace fn
             TH1D * h_n_cluster_;
 
             TH2D * h_cluster_locations_;
+
+            TH2D * h_non_Ep_;
+            TH2D * h_non_rp_;
             HistStore hs_;
 
     };

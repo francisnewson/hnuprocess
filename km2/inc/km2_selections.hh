@@ -114,7 +114,9 @@ namespace fn
         public:
             Km2TrackClusterEP
                 ( const Km2Clusters& km2c, const SingleTrack& st,
-                  double min_eop, double max_eop);
+                  double min_eop, double max_eop, 
+                  bool check_multiple);
+
         private:
             bool do_check() const;
             const Km2Clusters& km2_clusters_;
@@ -122,6 +124,7 @@ namespace fn
 
             double min_eop_;
             double max_eop_;
+            bool check_multiple_;
 
             REG_DEC_SUB( Km2TrackClusterEP );
     };

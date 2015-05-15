@@ -97,4 +97,19 @@ namespace fn
         return heffs_.GetBinContent( heffs_.FindFixBin( x, y ) );
     }
 
+
+    //--------------------------------------------------
+
+    EffsTH1D::EffsTH1D( const TH1D &h )
+        :heffs_( h  ){}
+
+    void EffsTH1D::set_eff_hist( TH1D  h )
+    {
+        heffs_ = std::move(h);
+    }
+
+    double EffsTH1D::efficiency(double mom) const
+    {
+        return heffs_.GetBinContent( heffs_.FindFixBin( mom ) );
+    }
 }

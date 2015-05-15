@@ -19,6 +19,13 @@ plots:
       passed_name: h_p_passed
       total_name: h_p_total
 
+    - name: geom_cut_xy
+      rebin: 1
+      type: 2d
+      hist_folder: muon_eff_tgt_muv_pfull_eop
+      passed_name: h_xy_passed
+      total_name: h_xy_total
+
     - name: v_tgt_geom_cut
       rebin: 5
       type: 1d
@@ -26,8 +33,23 @@ plots:
       passed_name: h_p_passed
       total_name: h_p_total
 
+    - name: pcorrp
+      rebin: 2
+      type: 2d
+      hist_folder: p_corr_restp
+      passed_name: h_xy_passed
+      total_name: h_xy_total
+
+
 ratios:
     - source: geom_cut
       top: p5.data.q11t.v3
       bottom: p5.km2.v2
       dest: pratio/geom_cut
+      external: output/muv_eff_p.root
+
+    - source: pcorrp
+      top: p5.data.q11t.v3
+      bottom: p5.km2.v2
+      dest: pratio/pcorrestp
+      external: output/muv_eff_xy.root

@@ -203,7 +203,7 @@
 
 #-------KM2 3.] E/P
 - selection: { name: auto_km2_eop, type: Km2TrackClusterEP,
-    min_eop: 0.0, max_eop: 0.85,
+    min_eop: 0.0, max_eop: 0.85, check_multiple: true,
     inputs: { km2clusters: auto_km2_clusters, ogt: auto_bf_st } }
 
 #------ k2pi region
@@ -214,6 +214,15 @@
     max_m2: 0.027
     inputs:
         km2event: auto_km2_event
+
+# 5] Track momentum
+- selection:
+    name: k2pi_problem_track_mom
+    type: TrackMomentum
+    min: 30 #GeV
+    max: 52 #GeV
+    inputs:
+        ogt: auto_bf_st
 
 #------ Muon VETO
 - input:
@@ -279,26 +288,24 @@
         - k2pi_m2
 
 - selection:
-    name : no_lkr_k2pi
+    name: k2pi_problem_selection
     type: CompositeSelection
-    children:
+    children :
         - weighted_data_sample
         - auto_good_trk
         - auto_pos_trk
         - auto_quality_7
         - auto_rk_pz
         - auto_cda_35mm
+        - auto_rk_lkr_accep
+        - auto_rk_hot_lkr
         - auto_dch1_acc
         - auto_dch4_acc
+        - auto_ddead_cell
+        - auto_km2_eop
         - k2pi_m2
+        - k2pi_problem_track_mom
 
-- selection:
-    name : no_lkr_k2pi_muv
-    type: CompositeSelection
-    children:
-        - no_lkr_k2pi
-        - muv_acc
-        - no_muon
 
 ###################################################
 # ANALYSES
@@ -338,12 +345,23 @@
 
 - analysis:
     type: Km2Plotter
-    name: k2pi_region_muv
-    folder: k2pi_region_muv
+    name: k2pi_problem_plots
+    folder: k2pi_problem_plots
     tfile: tfout
-    selection: no_lkr_k2pi_muv
+    selection: k2pi_problem_selection
     inputs:
         km2event: auto_km2_event
+
+- analysis:
+    type: Km2ClusterPlotter
+    name: k2pi_problem_clusters
+    folder: k2pi_problem_clusters
+    tfile: tfout
+    selection: k2pi_problem_selection
+    inputs:
+        km2event: auto_km2_event
+        km2clusters: auto_km2_clusters
+        ClusterCorrector: cluster_corrector
 
 - analysis:
     type: M2MChopPlot

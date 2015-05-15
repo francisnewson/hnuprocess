@@ -189,9 +189,10 @@ namespace fn
 
     Km2TrackClusterEP::Km2TrackClusterEP
         ( const Km2Clusters& km2c, const SingleTrack& st,
-          double min_eop, double max_eop)
+          double min_eop, double max_eop, bool check_multiple)
         :km2_clusters_( km2c), st_( st ),
-        min_eop_( min_eop), max_eop_( max_eop)
+        min_eop_( min_eop), max_eop_( max_eop),
+        check_multiple_(check_multiple)
     {}
 
     bool Km2TrackClusterEP::do_check() const
@@ -201,21 +202,29 @@ namespace fn
         {
             return true;
         }
-        if ( km2rc.associate_size() != 1 )
+        if ( km2rc.associate_size() != 1 && (!check_multiple_))
         {
             throw std::runtime_error(
                     "Km2TrackClusterEP called with more than one cluster");
         }
-        const fne::RecoCluster* tc = * (km2rc.associate_begin() );
-        CorrCluster cc ( *tc, km2rc.get_cluster_corrector() , km2rc.is_mc() );
-        TrackProjCorrCluster tcep( cc);
-        double track_cluster_energy = tcep.get_energy();
 
-        const SingleRecoTrack& srt = st_.get_single_track();
-        double track_mom = srt.get_mom();
-        double eop = track_cluster_energy / track_mom;
+        for ( auto itc = km2rc.associate_begin() ; itc != km2rc.associate_end() ; ++itc )
+        {
+            const fne::RecoCluster* tc = *itc; 
+            CorrCluster cc ( *tc, km2rc.get_cluster_corrector() , km2rc.is_mc() );
+            TrackProjCorrCluster tcep( cc);
+            double track_cluster_energy = tcep.get_energy();
 
-        return ( ( eop < max_eop_ ) && ( eop > min_eop_ ) );
+            const SingleRecoTrack& srt = st_.get_single_track();
+            double track_mom = srt.get_mom();
+            double eop = track_cluster_energy / track_mom;
+
+            bool in_range = ( ( eop < max_eop_ ) && ( eop > min_eop_ ) );
+
+            if (!in_range) return false;
+        }
+
+        return true;
     }
 
     template<>
@@ -228,8 +237,12 @@ namespace fn
             double min_eop = get_yaml<double>( instruct, "min_eop" );
             double max_eop = get_yaml<double>( instruct, "max_eop" );
 
-            return new Km2TrackClusterEP( *km2c, *st, min_eop, max_eop );
-
+            bool check_multiple = false;
+            if ( instruct["check_multiple"] )
+            {
+                check_multiple = true;
+            }
+            return new Km2TrackClusterEP( *km2c, *st, min_eop, max_eop, check_multiple );
         }
 
     //--------------------------------------------------

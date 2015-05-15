@@ -52,9 +52,23 @@ namespace fn
 
             double efficiency( double x, double y ) const;
 
-
         private:
             TH2D heffs_;
+    };
+
+    //--------------------------------------------------
+    
+    class EffsTH1D
+    {
+        public:
+            EffsTH1D() = default;
+            EffsTH1D( const TH1D &h );
+            void set_eff_hist( TH1D h );
+
+            double efficiency( double mom ) const;
+
+        private:
+            TH1D heffs_;
     };
 }
 #endif

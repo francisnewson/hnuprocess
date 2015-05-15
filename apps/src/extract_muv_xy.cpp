@@ -1,4 +1,5 @@
 #include "easy_app.hh"
+#include "stl_help.hh"
 #include "TH2D.h"
 #include "yaml_help.hh"
 #include "TFile.h"
@@ -173,6 +174,18 @@ int main( int argc, char * argv[] )
 {
 
     //**************************************************
+    //Introduction
+    //**************************************************
+    splash( "input/art/extract_splash.txt", std::cerr );
+    echo_launch ( argc, argv, std::cerr );
+
+    {
+        std::ofstream flaunch( "elaunch.log", std::ofstream::app );
+        write_launch ( argc, argv, flaunch );
+    }
+
+
+    //**************************************************
     //Option logic
     //**************************************************
 
@@ -278,8 +291,6 @@ int main( int argc, char * argv[] )
             plot["channel"] = channel;
             eff_plots ep = get_eff_plots( plot, tfin );
 
-            //compute efficiency
-            TEfficiency eff_xy( *ep.hpassed, *ep.htotal );
 
             std::unique_ptr<TH1> rat_xy{ static_cast<TH1*>( ep.hpassed->Clone("hrat_xy")) };
             rat_xy->Divide( ep.htotal.get() );
@@ -291,20 +302,26 @@ int main( int argc, char * argv[] )
             if ( output_to_root )
             {
                 cd_p( tfout.get(), plot_folder  );
-
-                eff_xy.Write( "eff" );
                 rat_xy->Write( "rat" );
 
-                if ( plot["type"].as<std::string>() == "1d" )
+                //compute efficiency
+                if ( true || TEfficiency::CheckConsistency( *ep.hpassed, *ep.htotal ) )
                 {
-                    TGraphAsymmErrors * g = eff_xy.CreateGraph();
-                    g->SetLineColor( color );
-                    g->Write("g");
+                    TEfficiency eff_xy( *ep.hpassed, *ep.htotal );
+                    eff_xy.Write( "eff" );
+
+                    if ( plot["type"].as<std::string>() == "1d" )
+                    {
+                        TGraphAsymmErrors * g = eff_xy.CreateGraph();
+                        g->SetLineColor( color );
+                        g->Write("g");
+                    }
                 }
 
                 std::cerr << "Efficiencies written to " << output_root_file << "::" << plot_folder << std::endl;
             }
 
+#if 0
             //print effs to file
             if ( output_to_file )
             {
@@ -313,6 +330,7 @@ int main( int argc, char * argv[] )
 
                 std::cerr << "Efficiencies written to " << output_location << std::endl;
             }
+#endif 
         }
     }
 
@@ -335,13 +353,20 @@ int main( int argc, char * argv[] )
         path ptop = path{ source } / top / "rat";
         path pbottom = path{ source } / bottom / "rat";
 
-        auto htop = extract_hist<TH1D>( *tfout, ptop );
-        auto hbottom = extract_hist<TH1D>( *tfout, pbottom );
+        auto htop = extract_hist<TH1>( *tfout, ptop );
+        auto hbottom = extract_hist<TH1>( *tfout, pbottom );
 
         htop->Divide( hbottom.get() );
 
         cd_p( tfout.get(), dest );
         htop->Write("ratrat");
-    }
 
+        if ( const auto& external = ratio["external"] )
+        {
+            std::string output_file = external.as<std::string>();
+            TFile texternal( output_file.c_str(), "RECREATE" );
+            htop->Write("rat_p");
+        }
+    }
 }
+

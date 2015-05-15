@@ -74,8 +74,12 @@ namespace fn
         cd_p( &tf_, folder_ );
         hs_.Write();
 
-        TEfficiency muv_eff_xy( *h_xy_passed_, *h_xy_total_ );
-        TEfficiency muv_eff_p( *h_p_passed_, *h_p_total_ );
+#if 0
+        TGraphAsymmErrors muv_eff_xy( h_xy_passed_, h_xy_total_, "b(0.5,0.5)" );
+        TGraphAsymmErrors muv_eff_p(  h_p_passed_,  h_p_total_, "b(0.5,0.5)" );
+        muv_eff_xy.Write( "muv_eff_xy" );
+        muv_eff_p.Write( "muv_eff_p" );
+#endif
 
         TH2D * h_xy_ratio = static_cast<TH2D*>
             ( h_xy_passed_->Clone( "h_xy_ratio" ) );
@@ -91,9 +95,6 @@ namespace fn
         h_p_ratio->Divide( h_p_passed_, h_p_total_, 1, 1, "B" );
         h_p_ratio->Write( "h_p_ratio" );
 
-
-        muv_eff_xy.Write( "muv_eff_xy" );
-        muv_eff_p.Write( "muv_eff_p" );
     }
 
     template<>

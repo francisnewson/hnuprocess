@@ -30,10 +30,17 @@ namespace fn
 
         h_cluster_locations_ = hs_.MakeTH2D( "h_cluster_locations", "All cluster locations",
                 200, -200, 200 , "x(cm)", 200, -200, 200, "y(cm)" );
+
+         h_non_Ep_ = hs_.MakeTH2D( "h_non_Ep_", "All non-track clusters" ,
+                100, 0, 100, "p(GeV)",  100, 0, 100 , "E (GeV)" );
+
+         h_non_rp_ = hs_.MakeTH2D( "h_non_rp_", "All non-track clusters" ,
+                100, 0, 100, "p(GeV)",  200, 0, 200 , "r (cm)" );
     }
 
     void Km2ClusterPlots::Fill( const SingleRecoTrack& srt, 
-            const Km2RecoClusters& km2rc, double weight )
+            const Km2RecoClusters& km2rc,  const Km2Clusters& km2_clusters,
+            double weight )
     {
         h_n_ass_cluster_->Fill( km2rc.associate_size(), weight );
         h_n_bad_cluster_->Fill( km2rc.bad_size(), weight );
@@ -49,6 +56,16 @@ namespace fn
             TrackProjCorrCluster track_cluster{ cc};
             h_cluster_energy_->Fill( track_cluster.get_energy() );
             h_cluster_locations_->Fill( (*itclus)->x, (*itclus)->y );
+
+            PhotonProjCorrCluster photon_cluster{ cc} ;
+            double x = (*itclus)->x;
+            double y = (*itclus)->y;
+
+            if (  km2_clusters.id_cluster( *itclus ) != cluster_type::ASS )
+            {
+                h_non_Ep_->Fill( srt.get_mom(), photon_cluster.get_energy(), weight );
+                h_non_rp_->Fill( srt.get_mom(), std::hypot( x, y ), weight );
+            }
         }
     }
 
@@ -78,7 +95,7 @@ namespace fn
         const Km2RecoClusters& km2rc = km2_clusters_.get_reco_clusters();
 
 
-        km2_cluster_plots_.Fill( *srt, km2rc, get_weight() );
+        km2_cluster_plots_.Fill( *srt, km2rc, km2_clusters_,  get_weight() );
     }
 
     void Km2ClusterPlotter::end_processing()

@@ -54,7 +54,6 @@ int main( int argc, char * argv[] )
     {
         std::ofstream flaunch( "launch.log", std::ofstream::app );
         write_launch ( argc, argv, flaunch );
-
     }
 
     //**************************************************

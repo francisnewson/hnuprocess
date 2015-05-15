@@ -124,5 +124,25 @@ namespace fn
 
     //--------------------------------------------------
 
+
+    class MuonTHPWeight : public CachedSelection 
+    {
+        public:
+            MuonTHPWeight( const SingleTrack& st , const TH1D& heffs );
+
+        private:
+            bool do_check() const;
+            double do_weight() const;
+
+            const SingleTrack& st_;
+            EffsTH1D effs_;
+
+            REG_DEC_SUB( MuonTHPWeight );
+    };
+
+    template<>
+        Subscriber * create_subscriber<MuonTHPWeight>
+        (YAML::Node& instruct, RecoFactory& rf );
+
 }
 #endif

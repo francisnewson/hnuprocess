@@ -361,6 +361,9 @@
 - selection:
     { name: mom35, type: TrackMomentum, min: 35,  max: 60, inputs: {ogt: bf_st } }
 
+- selection:
+    { name: mom_restp, type: TrackMomentum, min: 8,  max: 62, inputs: {ogt: bf_st } }
+
 ###################################################
 # SELECTIONS
 ###################################################
@@ -393,6 +396,9 @@
     { name: mom_sel_30_eop, type: CompositeSelection, children: [muon_selection, mom30 ] }
 
 - selection:
+    { name: muon_selection_rest_p, type: CompositeSelection, children: [muon_selection, mom_restp ] }
+
+- selection:
     { name: tgt_muv_rad_eop, type: CompositeSelection, children: [muon_selection, tgt_muv_xy] }
 
 - selection:
@@ -413,6 +419,7 @@
     inputs:
         ogt: bf_st
 
+
 - selection:
    { name: raw_req_muon_40, type: MuonReq, multiplier: 4.0, inputs: {ogt: bf_st, sm: single_muon } }
 
@@ -431,6 +438,16 @@
 - selection:
     { name: req_muon_25, type: CompositeSelection, children: [raw_req_muon_25, muon_xy_wgt] }
 
+- selection:
+    name: muon_p_wgt
+    type: MuonTHPWeight
+    effs_file: input/reco/conditions/muv_p.root
+    effs_hist: rat_p
+    inputs:
+        ogt: bf_st
+
+- selection:
+    { name: req_p_muon_40, type: CompositeSelection, children: [raw_req_muon_40, muon_p_wgt] }
 
 ###################################################
 # ANALYSES
@@ -463,6 +480,21 @@
     muv_selection: req_muon_40,
     selection: very_tgt_muv_rad_eop,
     folder: muon_eff_very_tgt_muv_pfull_eop,
+    tfile: tfout, inputs: {ogt: bf_st} }
+
+
+- analysis:
+    { name: muv_full_p_corr, type: MuonEfficiency,
+    muv_selection: req_p_muon_40,
+    selection: muon_selection,
+    folder: p_corr,
+    tfile: tfout, inputs: {ogt: bf_st} }
+
+- analysis:
+    { name: muv_full_p_corr_restp, type: MuonEfficiency,
+    muv_selection: req_p_muon_40,
+    selection: muon_selection_rest_p,
+    folder: p_corr_restp,
     tfile: tfout, inputs: {ogt: bf_st} }
 
 - analysis:

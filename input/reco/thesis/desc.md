@@ -31,3 +31,12 @@ position at MUV1 and MUV2, with high p muons.
 muv_bursts.yaml
 ---------------
 Measure MUV efficiency burst by burst
+
+rk_selection.yaml
+-----------------
+Reproducing the original rk selection
+to check we understand what's going on
+
+extract_k2pi.yaml
+-----------------
+To be reprocessed with k2pi_reco
