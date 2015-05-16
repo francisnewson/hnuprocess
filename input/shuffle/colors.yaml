@@ -15,6 +15,10 @@ channels:
         kcolor: kViolet
         colormod: +4
 
+    ke3:
+        kcolor: kGreen
+        colormod: +2
+
     k2pi:
         kcolor: kOrange
         colormod: -1

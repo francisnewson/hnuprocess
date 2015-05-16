@@ -86,6 +86,22 @@ output:
 
     stack:
         - item:
+            name: ke3_pos
+            scaling: mc_pos
+            type: ke3
+            fid_weight: p5.ke3.v2.pos
+            channels:
+                - p5.ke3.v2.pos
+
+        - item:
+            name: ke3_neg
+            scaling: mc_neg
+            type: ke3
+            fid_weight: p5.ke3.v2.neg
+            channels:
+                - p5.ke3.v2.neg
+
+        - item:
             name: km3_pos
             scaling: mc_pos
             type: km3
@@ -100,7 +116,6 @@ output:
             fid_weight: p5.km3.v2.neg
             channels:
                 - p5.km3.v2.neg
-
 
         - item:
             name: k3pi_pos

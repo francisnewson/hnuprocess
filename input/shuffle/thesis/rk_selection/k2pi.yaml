@@ -73,7 +73,13 @@ mass_windows:
 
 output:
     input_file: tdata/rk_selection/all.rk_selection.root
-    plot_path: k2pi_region/h_p
+    plots:
+        - path: k2pi_problem_clusters/h_n_bad
+          name: bad_clusters
+        - path: km2_rk/h_m2m_kmu
+          name:  rk_m2m
+        - path: km2_rk_single_track/h_m2m_kmu
+          name:  rk_m2m_st
     rebin: 1
 
     data_plot:
@@ -100,6 +106,22 @@ output:
             fid_weight: p5.km3.v2.neg
             channels:
                 - p5.km3.v2.neg
+
+        - item:
+            name: ke3_pos
+            scaling: mc_pos
+            type: ke3
+            fid_weight: p5.ke3.v2.pos
+            channels:
+                - p5.ke3.v2.pos
+
+        - item:
+            name: ke3_neg
+            scaling: mc_neg
+            type: ke3
+            fid_weight: p5.ke3.v2.neg
+            channels:
+                - p5.ke3.v2.neg
 
 
         - item:

@@ -189,7 +189,7 @@
 
 #--------14.] Track DHC4 ACC
 - selection: { name: auto_dch4_acc, type: TrackRadialAcceptance,
-    track_section: upstream, z: 11888.0,
+    track_section: downstream, z: 11888.0,
     inner: 14.0, outer: 115.0,
     inputs: { ogt: auto_bf_st} }
 

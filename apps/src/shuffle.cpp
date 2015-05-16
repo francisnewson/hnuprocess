@@ -145,7 +145,6 @@ int main( int argc, char * argv[] )
     TFile tfstackin( stack_input_file.string().c_str() );
     RootTFileWrapper rtfw_stack( tfstackin );
     ChannelHistExtractor ce_stack( rtfw_stack );
-    ce_stack.set_post_path( get_yaml<std::string>( config_node["output"], "plot_path") );
 
     if ( const auto& rebin_node = config_node["output"]["rebin"] )
     {
@@ -154,41 +153,54 @@ int main( int argc, char * argv[] )
 
     HistFormatter formatter( "input/shuffle/colors.yaml" );
 
+    auto data_channels = get_yaml<std::vector<std::string>>(
+            config_node["output"]["data_plot"], "channels" );
+
     //Setup output
     TFile tfout( output_filename.string().c_str() , "RECREATE" );
 
-    HistStacker hs( config_node["output"] , ce_stack, scaling_info, formatter );
-    hs.create_stack();
+    //get plot list
+    const YAML::Node& plots = config_node["output"]["plots"];
+    for ( const auto& plot_node : plots )
+    {
+        std::string name = get_yaml<std::string>( plot_node, "name");
+        std::string path = get_yaml<std::string>( plot_node, "path");
 
-    std::cout << "Stack size: " << hs.size() <<  std::endl;
-    TH1 * start = (*hs.begin());
+        ce_stack.set_post_path( path );
+
+        HistStacker hs( config_node["output"] , ce_stack, scaling_info, formatter );
+        hs.create_stack();
+
+        std::cout << "Stack size: " << hs.size() <<  std::endl;
+        TH1 * start = (*hs.begin());
+
+        //Write stack
+        cd_p( &tfout, name );
+        hs.write( "hnu_stack" );
+        cd_p( &tfout, boost::filesystem::path{ name }/ "hnu_stack_hists" );
+        for ( auto& h : hs ) { h->Write(); }
+
+        cd_p( &tfout, name );
+        hs.write_total("hbg") ;
+
+        auto hdata =  get_summed_histogram( ce_stack,
+                begin( data_channels), end( data_channels ) );
+
+        format_data_hist( *hdata, config_node["output"]["data_plot"] );
+
+        cd_p( &tfout, name );
+        hdata->Write( "hdata" );
+    }
+
+    exit(0);
 
 
-    //Write stack
-    tfout.cd();
-    hs.write( "hnu_stack" );
-    cd_p( &tfout, "hnu_stack_hists" );
-    for ( auto& h : hs ) { h->Write(); }
-
-    tfout.cd();
-
-    hs.write_total("hbg") ;
 
 
     //**************************************************
     //Save data plots
     //**************************************************
 
-    auto data_channels = get_yaml<std::vector<std::string>>(
-            config_node["output"]["data_plot"], "channels" );
-
-    auto hdata =  get_summed_histogram( ce_stack,
-            begin( data_channels), end( data_channels ) );
-
-    format_data_hist( *hdata, config_node["output"]["data_plot"] );
-
-    tfout.cd();
-    hdata->Write( "hdata" );
 
     //**************************************************
     //Compute limits
