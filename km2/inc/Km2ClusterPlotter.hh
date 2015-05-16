@@ -2,6 +2,7 @@
 #define KM2_HH
 #include "Analysis.hh"
 #include "HistStore.hh"
+#include "Km2Clusters.hh"
 #if 0
 /*
  *  _  __          ____
@@ -28,6 +29,24 @@ namespace fn
     class Km2RecoClusters;
     class ClusterCorrector;
 
+    class ClusterHists
+    {
+        public:
+        void init( HistStore& hs, std::string prefix, std::string name);
+
+        void fill( Km2RecoClusters::const_iterator begin, 
+                Km2RecoClusters::const_iterator end,
+                double track_momentum,  const ClusterCorrector& cluster_corrector,
+                bool mc, double weight );
+
+        private:
+        TH1D * h_n;
+        TH1D * h_E;
+        TH2D * h_xy;
+        TH2D * h_Ep;
+        TH2D * h_pr;
+    };
+
     class Km2ClusterPlots
     {
         public:
@@ -40,19 +59,13 @@ namespace fn
         private:
             bool mc_;
             const ClusterCorrector& cluster_corrector_;
+
+            ClusterHists all_clusters_;
+            ClusterHists bad_clusters_;
+            ClusterHists ign_clusters_;
+            ClusterHists ass_clusters_;
+
             TH1D * h_eop_;
-            TH1D * h_n_ass_cluster_;
-            TH1D * h_n_bad_cluster_;
-            TH1D * h_n_ign_cluster_;
-
-            TH1D * h_cluster_energy_;
-
-            TH1D * h_n_cluster_;
-
-            TH2D * h_cluster_locations_;
-
-            TH2D * h_non_Ep_;
-            TH2D * h_non_rp_;
             HistStore hs_;
 
     };

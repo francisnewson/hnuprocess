@@ -4,6 +4,7 @@
 #include "root_help.hh"
 #include "lkraccep_2007.hh"
 #include "tracking_selections.hh"
+#include "km2_functions.hh"
 #include <boost/lexical_cast.hpp>
 
 namespace fn
@@ -48,11 +49,13 @@ namespace fn
     Km2Clusters::Km2Clusters( const fne::Event* e, const SingleTrack& st ,
             double noise_energy, double noise_time, 
             double brehm_radius, double track_cluster_radius,
+            bool do_extra_lkr_check,
             const ClusterCorrector& cluster_corrector, bool is_mc )
         :e_ ( e ), st_( st ), km2rc_( cluster_corrector),
         noise_energy_( noise_energy ), noise_time_( noise_time),
         brehm_radius_( brehm_radius), track_cluster_radius_( track_cluster_radius ),
-        margin_parameter_( 8 ), cluster_corrector_( cluster_corrector), mc_( is_mc )
+        margin_parameter_( 8 ), do_extra_lkr_check_( do_extra_lkr_check),
+        cluster_corrector_( cluster_corrector), mc_( is_mc )
     { }
 
     void Km2Clusters::new_event()
@@ -87,9 +90,20 @@ namespace fn
         //Is it ouside of LKr acceptance (i.e. masked channel )
         if ( LKr_acc( e_->header.run, rc->x, rc->y, margin_parameter_ ) )
         {
-        BOOST_LOG_SEV( get_log(), log_level()  )
-            << "Cluster failed LKr_acc";
+            BOOST_LOG_SEV( get_log(), log_level()  )
+                << "Cluster failed LKr_acc";
             return cluster_type::IGN;
+        }
+
+        if ( do_extra_lkr_check_ )
+        {
+            bool allowed = extra_lkr_acc( rc->x, rc->y );
+            if ( ! allowed )
+            {
+                BOOST_LOG_SEV( get_log(), log_level()  )
+                    << "Cluster failed extra_lkr_acc";
+                return cluster_type::IGN;
+            }
         }
 
         //Is it an accidental
@@ -103,7 +117,7 @@ namespace fn
             << "MC? : " << ( mc_ ? "YES" : "NO" );
 
         if( (!mc_) && (delta_t >= noise_time_)  )
-            {return cluster_type::IGN;}
+        {return cluster_type::IGN;}
 
         CorrCluster  cc{ *rc, cluster_corrector_, mc_ };
 
@@ -147,8 +161,8 @@ namespace fn
         if ( counter < 100  ) 
         {
             set_log_level( always_print );
-        BOOST_LOG_SEV( get_log(), log_level() )
-            <<"--------------------NEW Km2Clusters EVENT--------------------";
+            BOOST_LOG_SEV( get_log(), log_level() )
+                <<"--------------------NEW Km2Clusters EVENT--------------------";
         }
 
         km2rc_.reset( mc_);
@@ -166,7 +180,7 @@ namespace fn
             if ( ct == cluster_type::ASS )
             { 
                 BOOST_LOG_SEV( get_log(), log_level() )
-                << "Found associated cluster!" ;
+                    << "Found associated cluster!" ;
             }
 
             km2rc_.add_cluster( ct, rc );
@@ -191,13 +205,21 @@ namespace fn
             double brehm_radius = get_yaml<double>( instruct, "brehm_radius" );
             double track_cluster_radius = get_yaml<double>( instruct, "track_cluster_radius" );
 
+
+            bool do_extra_lkr_check = false;
+            if ( instruct["extra_lkr_check"] )
+            {
+                do_extra_lkr_check = true;
+            }
+
             const ClusterCorrector* cluster_corrector =
                 get_cluster_corrector( instruct, rf );
 
             bool is_mc = rf.is_mc();
 
             return new Km2Clusters( event, *st, noise_energy, noise_time,
-                    brehm_radius, track_cluster_radius, *cluster_corrector, is_mc );
+                    brehm_radius, track_cluster_radius, do_extra_lkr_check, 
+                    *cluster_corrector, is_mc );
         }
 
     //--------------------------------------------------

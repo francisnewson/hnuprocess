@@ -125,7 +125,7 @@
 #---------km2 clusters
 - input: { name: auto_km2_clusters, type: Km2Clusters,
     noise_energy: 2, noise_time: 12, brehm_radius: 6 ,
-    track_cluster_radius: 8,
+    track_cluster_radius: 8, extra_lkr_check: true,
     inputs: { ogt: auto_bf_st, ClusterCorrector: cluster_corrector } }
 
 ###################################################
@@ -263,20 +263,26 @@
 
 
 - selection:
-    name : weighted_rk_selection
+    name: weighted_rk_track_selection
     type: CompositeSelection
     children:
         - weighted_data_sample
         - auto_good_trk
         - auto_pos_trk
         - auto_quality_7
-        - auto_rk_lkr_veto
         - auto_rk_pz
         - auto_cda_35mm
-        - auto_rk_lkr_accep
-        - auto_rk_hot_lkr
         - auto_dch1_acc
         - auto_dch4_acc
+
+- selection:
+    name : weighted_rk_selection
+    type: CompositeSelection
+    children:
+        - weighted_rk_track_selection
+        - auto_rk_lkr_accep
+        - auto_rk_hot_lkr
+        - auto_rk_lkr_veto
         - auto_ddead_cell
         - auto_km2_eop
 
@@ -291,16 +297,9 @@
     name: k2pi_problem_selection
     type: CompositeSelection
     children :
-        - weighted_data_sample
-        - auto_good_trk
-        - auto_pos_trk
-        - auto_quality_7
-        - auto_rk_pz
-        - auto_cda_35mm
+        - weighted_rk_track_selection
         - auto_rk_lkr_accep
         - auto_rk_hot_lkr
-        - auto_dch1_acc
-        - auto_dch4_acc
         - auto_ddead_cell
         - auto_km2_eop
         - k2pi_m2
@@ -331,6 +330,15 @@
     folder: km2_rk
     tfile: tfout
     selection: weighted_rk_selection
+    inputs:
+        km2event: auto_km2_event
+
+- analysis:
+    type: Km2Plotter
+    name: km2_single_track
+    folder: km2_rk_single_track
+    tfile: tfout
+    selection: weighted_rk_track_selection
     inputs:
         km2event: auto_km2_event
 

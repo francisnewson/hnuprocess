@@ -1,5 +1,6 @@
 #include "km2_functions.hh"
 #include "CorrCluster.hh"
+#include "ClusterEnergyCorr.hh"
 #include "Km2Clusters.hh"
 #include "SingleTrack.hh"
 
@@ -21,5 +22,22 @@ namespace fn
         double track_mom = srt.get_mom();
         double eop = track_cluster_energy / track_mom;
         return eop;
+    }
+
+
+    bool extra_lkr_acc( double pos_x, double pos_y)
+    {
+        //ignore inner radius
+        double radius = std::hypot( pos_x, pos_y );
+        if ( radius < 20.0 ){ return false; }
+
+        //ignore hot cells
+        std::pair<int, int> cpd_cell = get_cpd_cell_index( pos_x, pos_y );
+        if ( cpd_cell.first == 134 && ( cpd_cell.second == 56 || cpd_cell.second == 57 ) )
+        {
+            return false;
+        }
+
+        return true;
     }
 }

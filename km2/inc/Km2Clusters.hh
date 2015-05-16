@@ -91,6 +91,7 @@ namespace fn
             Km2Clusters( const fne::Event* e, const SingleTrack& st ,
                     double noise_energy, double noise_time, 
                     double brehm_radius, double track_cluster_radius, 
+                    bool do_extra_lkr_check,
                     const ClusterCorrector& cluster_corrector, bool is_mc );
 
             void new_event();
@@ -112,6 +113,9 @@ namespace fn
             double track_cluster_radius_;
 
             double margin_parameter_;
+
+            bool do_extra_lkr_check_;
+
 
             const ClusterCorrector& cluster_corrector_;
             bool mc_;

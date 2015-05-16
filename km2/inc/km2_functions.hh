@@ -9,5 +9,7 @@ namespace fn
     double km2_eop( const Km2RecoClusters& km2rc, 
             const ClusterCorrector& cluster_corrector, const SingleRecoTrack& srt );
 
+
+    bool extra_lkr_acc( double pos_x, double pos_y);
 }
 #endif
