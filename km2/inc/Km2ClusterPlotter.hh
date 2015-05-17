@@ -24,6 +24,7 @@ class TFile;
 namespace fn
 {
     class Km2Event;
+    class Km2RecoEvent;
     class Km2Clusters;
     class SingleRecoTrack;
     class Km2RecoClusters;
@@ -36,14 +37,20 @@ namespace fn
 
         void fill( Km2RecoClusters::const_iterator begin, 
                 Km2RecoClusters::const_iterator end,
-                double track_momentum,  const ClusterCorrector& cluster_corrector,
+                double track_momentum,  double m2m, double track_time,
+                const SingleRecoTrack& srt, const TVector3& vertex,
+                const ClusterCorrector& cluster_corrector,
                 bool mc, double weight );
 
         private:
         TH1D * h_n;
         TH1D * h_E;
+        TH1D * h_t;
+        TH1D * h_gt;
+        TH1D * h_ds;
         TH2D * h_xy;
         TH2D * h_Ep;
+        TH2D * h_Em2m;
         TH2D * h_pr;
     };
 
@@ -51,7 +58,7 @@ namespace fn
     {
         public:
             Km2ClusterPlots(bool mc, const ClusterCorrector& cluster_corrector);
-            void Fill( const SingleRecoTrack& srt, 
+            void Fill( const SingleRecoTrack& srt, const Km2RecoEvent& km2re,
                     const Km2RecoClusters& km2rc,  const Km2Clusters& km2_clusters,
                     double weight );
             void Write();
@@ -64,6 +71,7 @@ namespace fn
             ClusterHists bad_clusters_;
             ClusterHists ign_clusters_;
             ClusterHists ass_clusters_;
+            ClusterHists not_ass_clusters_;
 
             TH1D * h_eop_;
             HistStore hs_;

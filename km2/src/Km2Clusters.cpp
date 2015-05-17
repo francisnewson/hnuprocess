@@ -18,6 +18,7 @@ namespace fn
         mc_ = mc;
         bad_clusters_.clear();
         associate_clusters_.clear();
+        not_associate_clusters_.clear();
         ignored_clusters_.clear();
         all_clusters_.clear();
     }
@@ -38,6 +39,9 @@ namespace fn
                 associate_clusters_.push_back( cd );
                 break;
         }
+
+        if ( ct != cluster_type::ASS )
+            {not_associate_clusters_.push_back( cd );}
 
         all_clusters_.push_back( cd );
     }

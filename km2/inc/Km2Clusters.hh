@@ -31,6 +31,7 @@ namespace fn
         private:
             std::vector<const fne::RecoCluster *> bad_clusters_;
             std::vector<const fne::RecoCluster *> associate_clusters_;
+            std::vector<const fne::RecoCluster *> not_associate_clusters_;
             std::vector<const fne::RecoCluster *> ignored_clusters_;
             std::vector<const fne::RecoCluster *> all_clusters_;
             bool mc_;
@@ -60,6 +61,9 @@ namespace fn
             size_type all_size() const 
             { return all_clusters_.size(); }
 
+            size_type not_associate_size() const
+            { return not_associate_clusters_.size() ;}
+
             const_iterator bad_begin() const
             { return bad_clusters_.begin() ; }
 
@@ -72,6 +76,9 @@ namespace fn
             const_iterator all_begin() const 
             { return all_clusters_.begin() ; }
 
+            const_iterator not_associate_begin() const 
+            { return not_associate_clusters_.begin() ; }
+
             const_iterator bad_end() const 
             { return bad_clusters_.end() ; }
 
@@ -83,6 +90,9 @@ namespace fn
 
             const_iterator all_end() const 
             { return all_clusters_.end() ; }
+
+            const_iterator not_associate_end() const 
+            { return not_associate_clusters_.end() ; }
     };
 
     class Km2Clusters : public Subscriber
