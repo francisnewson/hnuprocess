@@ -216,26 +216,52 @@ namespace fn
 
     //--------------------------------------------------
 
+    Km2MiniPlots::Km2MiniPlots()
+    {
+        std::cout << "Km2MiniPlots constructor" << std::endl;
+
+        h_m2m_kmu_ = hs_.MakeTH1D( "h_mini_m2m_kmu", "K_{#mu2} missing mass",
+                10000, -0.7, 0.3, "m^{2}_{miss} ( GeV^{2}/ c^{4} )", "#events" ); 
+
+        h_p_ = hs_.MakeTH1D( "h_mini_p", "Momentum (GeV)",
+                100, 0, 100, "p (GeV)" );
+    }
+
+    void Km2MiniPlots::Fill( const Km2RecoEvent& km2re, double wgt )
+    {
+        h_m2m_kmu_->Fill( km2re.get_m2m_kmu(), wgt );
+        h_p_->Fill( km2re.get_muon_mom(), wgt );
+    }
+
+    void Km2MiniPlots::Write()
+    {
+        hs_.Write();
+    }
+
+    //--------------------------------------------------
+
     REG_DEF_SUB( Km2Plotter);
 
     Km2Plotter::Km2Plotter( const Selection& sel, 
             TFile& tfile, std::string folder,
+            std::unique_ptr<Km2BasePlots> km2_plots,
             const Km2Event& km2_event)
         :Analysis( sel), tfile_(tfile),folder_( folder ), km2_event_( km2_event )
     {
+        km2_plots_ =  std::move( km2_plots );
     }
 
     void Km2Plotter::process_event()
     {
         const Km2RecoEvent& km2re = km2_event_.get_reco_event();
-        km2_plots_.Fill( km2re, get_weight() );
+        km2_plots_->Fill( km2re, get_weight() );
 
     }
 
     void Km2Plotter::end_processing()
     {
         cd_p( &tfile_, folder_ );
-        km2_plots_.Write();
+        km2_plots_->Write();
     }
 
     template<>
@@ -252,7 +278,26 @@ namespace fn
 
             const Km2Event* km2_event = get_km2_event( instruct, rf );
 
-            return new Km2Plotter( *sel, tfile, folder, *km2_event);
+
+            bool mini = false;
+            if ( instruct["mini"] )
+            {
+                mini = instruct["mini"].as<bool>();
+                std::cout << get_yaml<std::string>( instruct, "name")
+                    << " mini: " << std::boolalpha << mini << std::noboolalpha << std::endl;
+            }
+
+            std::unique_ptr<Km2BasePlots> km2_plots;
+            if ( mini )
+            {
+                km2_plots.reset( new Km2MiniPlots() );
+            }
+            else
+            {
+                km2_plots.reset( new Km2Plots() );
+            }
+
+            return new Km2Plotter( *sel, tfile, folder, std::move( km2_plots) ,  *km2_event);
         }
 
     //--------------------------------------------------

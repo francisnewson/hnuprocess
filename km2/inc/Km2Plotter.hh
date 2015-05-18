@@ -36,13 +36,22 @@ namespace fn
             HistStore hs_;
     };
 
+    class Km2BasePlots
+    {
+        public:
+        virtual void Fill( const Km2RecoEvent& km2re, double wgt  ) = 0;
+        virtual void Write() = 0;
+        virtual ~Km2BasePlots(){}
+    };
+
     //Class to do actual plotting
-    class Km2Plots
+    class Km2Plots : public Km2BasePlots
     {
         public:
             Km2Plots();
             void Fill( const Km2RecoEvent& km2re, double wgt  );
             void Write();
+            ~Km2Plots(){}
 
         private:
             TH1D * h_pk_;
@@ -87,12 +96,30 @@ namespace fn
     };
 
     //--------------------------------------------------
+    
+    class Km2MiniPlots : public Km2BasePlots
+    {
+        public:
+            Km2MiniPlots();
+            void Fill( const Km2RecoEvent& km2re, double wgt  );
+            void Write();
+            ~Km2MiniPlots(){}
+
+        private:
+            TH1D * h_p_;
+            TH1D * h_m2m_kmu_;
+            HistStore hs_;
+    };
+
+
+    //--------------------------------------------------
 
     class Km2Plotter : public Analysis
     {
         public:
             Km2Plotter( const Selection& sel, 
                     TFile& tfile, std::string folder,
+                    std::unique_ptr<Km2BasePlots> km2_plots,
                     const Km2Event& km2_event);
 
             void end_processing();
@@ -103,7 +130,7 @@ namespace fn
             TFile& tfile_;
             std::string folder_;
             const Km2Event& km2_event_;
-            Km2Plots km2_plots_;
+            std::unique_ptr<Km2BasePlots> km2_plots_;
 
             REG_DEC_SUB( Km2Plotter);
     };

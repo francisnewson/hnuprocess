@@ -163,8 +163,17 @@ output:
           rebin: 1
 
         - path: k2pi_selection_st_high/h_p
-          name: k2pi_high_p
+          name: k2pi_high_st_p
           rebin: 1
+
+        - path: k2pi_selection_rk_high/h_p
+          name: k2pi_high_rk_p
+          rebin: 1
+
+        - path: k2pi_selection_rk_loose_lkr_high/h_p
+          name: k2pi_high_loose_lkr_rk_p
+          rebin: 1
+
 
     data_plot:
         channels:

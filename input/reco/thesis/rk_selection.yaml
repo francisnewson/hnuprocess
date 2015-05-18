@@ -128,10 +128,29 @@
     track_cluster_radius: 8, extra_lkr_check: false,
     inputs: { ogt: auto_bf_st, ClusterCorrector: cluster_corrector } }
 
-#---------km2 clusters
 - input: { name: loose_km2_clusters, type: Km2Clusters,
     noise_energy: 10, noise_time: 12, brehm_radius: 6 ,
     track_cluster_radius: 25, extra_lkr_check: true,
+    inputs: { ogt: auto_bf_st, ClusterCorrector: cluster_corrector } }
+
+- input: { name: km2_clusters_E_10_r20, type: Km2Clusters,
+    noise_energy: 10, noise_time: 12, brehm_radius: 6 ,
+    track_cluster_radius: 20, extra_lkr_check: true,
+    inputs: { ogt: auto_bf_st, ClusterCorrector: cluster_corrector } }
+
+- input: { name: km2_clusters_E_10_r30, type: Km2Clusters,
+    noise_energy: 10, noise_time: 12, brehm_radius: 6 ,
+    track_cluster_radius: 30, extra_lkr_check: true,
+    inputs: { ogt: auto_bf_st, ClusterCorrector: cluster_corrector } }
+
+- input: { name: km2_clusters_E_10_r40, type: Km2Clusters,
+    noise_energy: 10, noise_time: 12, brehm_radius: 6 ,
+    track_cluster_radius: 40, extra_lkr_check: true,
+    inputs: { ogt: auto_bf_st, ClusterCorrector: cluster_corrector } }
+
+- input: { name: km2_clusters_E_10_r50, type: Km2Clusters,
+    noise_energy: 10, noise_time: 12, brehm_radius: 6 ,
+    track_cluster_radius: 50, extra_lkr_check: true,
     inputs: { ogt: auto_bf_st, ClusterCorrector: cluster_corrector } }
 
 ###################################################
@@ -156,6 +175,18 @@
 
 - selection: {name: loose_rk_lkr_veto, type: Km2NoBadCluster,
     inputs: {km2clusters: loose_km2_clusters} }
+
+- selection: {name: lkr_veto_E_10_r20, type: Km2NoBadCluster,
+    inputs: {km2clusters: km2_clusters_E_10_r20} }
+
+- selection: {name: lkr_veto_E_10_r30, type: Km2NoBadCluster,
+    inputs: {km2clusters: km2_clusters_E_10_r30} }
+
+- selection: {name: lkr_veto_E_10_r40, type: Km2NoBadCluster,
+    inputs: {km2clusters: km2_clusters_E_10_r40} }
+
+- selection: {name: lkr_veto_E_10_r50, type: Km2NoBadCluster,
+    inputs: {km2clusters: km2_clusters_E_10_r50} }
 
 #-------- 7.] PZ (FIDUCIAL VOLUME)
 - selection:
@@ -193,6 +224,22 @@
 - selection: {name: loose_rk_hot_lkr, type: Km2HotLkr,
     hot_cells: [ [ 134, 56 ], [ 134, 57 ] ],
     inputs: { km2event: auto_km2_event, km2clusters: loose_km2_clusters } }
+
+- selection: {name: hot_lkr_E10_r20, type: Km2HotLkr,
+    hot_cells: [ [ 134, 56 ], [ 134, 57 ] ],
+    inputs: { km2event: auto_km2_event, km2clusters: km2_clusters_E_10_r20 } }
+
+- selection: {name: hot_lkr_E10_r30, type: Km2HotLkr,
+    hot_cells: [ [ 134, 56 ], [ 134, 57 ] ],
+    inputs: { km2event: auto_km2_event, km2clusters: km2_clusters_E_10_r20 } }
+
+- selection: {name: hot_lkr_E10_r40, type: Km2HotLkr,
+    hot_cells: [ [ 134, 56 ], [ 134, 57 ] ],
+    inputs: { km2event: auto_km2_event, km2clusters: km2_clusters_E_10_r40 } }
+
+- selection: {name: hot_lkr_E10_r50, type: Km2HotLkr,
+    hot_cells: [ [ 134, 56 ], [ 134, 57 ] ],
+    inputs: { km2event: auto_km2_event, km2clusters: km2_clusters_E_10_r50 } }
 
 #--------13.] Track DHC1 ACC
 - selection: { name: auto_dch1_acc, type: TrackRadialAcceptance,
@@ -335,6 +382,38 @@
         - loose_rk_lkr_veto
 
 - selection:
+    name : weighted_rk_lkr_E_10_r20
+    type: CompositeSelection
+    children:
+        - weighted_rk_track_selection
+        - hot_lkr_E10_r20
+        - lkr_veto_E_10_r20
+
+- selection:
+    name : weighted_rk_lkr_E_10_r30
+    type: CompositeSelection
+    children:
+        - weighted_rk_track_selection
+        - hot_lkr_E10_r30
+        - lkr_veto_E_10_r30
+
+- selection:
+    name : weighted_rk_lkr_E_10_r40
+    type: CompositeSelection
+    children:
+        - weighted_rk_track_selection
+        - hot_lkr_E10_r40
+        - lkr_veto_E_10_r40
+
+- selection:
+    name : weighted_rk_lkr_E_10_r50
+    type: CompositeSelection
+    children:
+        - weighted_rk_track_selection
+        - hot_lkr_E10_r50
+        - lkr_veto_E_10_r50
+
+- selection:
     name : weighted_loose_lkr_rk_selection_k2pi_low
     type: CompositeSelection
     children:
@@ -436,6 +515,20 @@
     selection: weighted_loose_lkr_rk_selection_k2pi_low
     inputs:
         km2event: auto_km2_event
+
+#--------
+
+- analysis: { type: Km2Plotter, name: plot_km2_E_10_r20, folder: km2_rk_lkr/E_10_r20, mini: true,
+    tfile: tfout, selection: weighted_rk_lkr_E_10_r20, inputs: { km2event: auto_km2_event } }
+
+- analysis: { type: Km2Plotter, name: plot_km2_E_10_r30, folder: km2_rk_lkr/E_10_r30, mini: true,
+    tfile: tfout, selection: weighted_rk_lkr_E_10_r30, inputs: { km2event: auto_km2_event } }
+
+- analysis: { type: Km2Plotter, name: plot_km2_E_10_r40, folder: km2_rk_lkr/E_10_r40, mini: true,
+    tfile: tfout, selection: weighted_rk_lkr_E_10_r40, inputs: { km2event: auto_km2_event } }
+
+- analysis: { type: Km2Plotter, name: plot_km2_E_10_r50, folder: km2_rk_lkr/E_10_r50, mini: true,
+    tfile: tfout, selection: weighted_rk_lkr_E_10_r50, inputs: { km2event: auto_km2_event } }
 
 #--------
 

@@ -117,6 +117,8 @@ int main( int argc, char * argv[] )
         std::cerr <<  "Available studies: \n"
             << "    dch\n" 
             << "    pion\n" ;
+
+        return 0;
     }
 
     //input file
