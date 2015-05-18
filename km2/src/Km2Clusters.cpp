@@ -213,7 +213,7 @@ namespace fn
             bool do_extra_lkr_check = false;
             if ( instruct["extra_lkr_check"] )
             {
-                do_extra_lkr_check = true;
+                do_extra_lkr_check = instruct["extra_lkr_check"].as<bool>();
             }
 
             const ClusterCorrector* cluster_corrector =

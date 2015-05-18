@@ -146,10 +146,6 @@ int main( int argc, char * argv[] )
     RootTFileWrapper rtfw_stack( tfstackin );
     ChannelHistExtractor ce_stack( rtfw_stack );
 
-    if ( const auto& rebin_node = config_node["output"]["rebin"] )
-    {
-        ce_stack.set_rebin( rebin_node.as<int>() );
-    }
 
     HistFormatter formatter( "input/shuffle/colors.yaml" );
 
@@ -165,6 +161,15 @@ int main( int argc, char * argv[] )
     {
         std::string name = get_yaml<std::string>( plot_node, "name");
         std::string path = get_yaml<std::string>( plot_node, "path");
+
+        if ( const auto& rebin_node = plot_node["rebin"] )
+        {
+            ce_stack.set_rebin( rebin_node.as<int>() );
+        }
+        else
+        {
+            ce_stack.set_rebin( 1 );
+        }
 
         ce_stack.set_post_path( path );
 

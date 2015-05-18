@@ -308,17 +308,16 @@
         - auto_cda_35mm
         - auto_dch1_acc
         - auto_dch4_acc
+        - auto_rk_lkr_accep
+        - auto_ddead_cell
 
 - selection:
     name : weighted_rk_selection
     type: CompositeSelection
     children:
         - weighted_rk_track_selection
-        - auto_rk_lkr_accep
         - auto_rk_hot_lkr
         - auto_rk_lkr_veto
-        - auto_ddead_cell
-        - auto_km2_eop
 
 - selection:
     name : weighted_rk_selection_k2pi_low
@@ -332,11 +331,8 @@
     type: CompositeSelection
     children:
         - weighted_rk_track_selection
-        - auto_rk_lkr_accep
         - loose_rk_hot_lkr
         - loose_rk_lkr_veto
-        - auto_ddead_cell
-        - loose_km2_eop
 
 - selection:
     name : weighted_loose_lkr_rk_selection_k2pi_low
@@ -360,11 +356,24 @@
         - k2pi_m2m_high
 
 - selection:
+    name: k2pi_selection_rk_high
+    type: CompositeSelection
+    children :
+        - weighted_rk_selection
+        - k2pi_m2m_high
+
+- selection:
+    name: k2pi_selection_rk_loose_lkr_high
+    type: CompositeSelection
+    children :
+        - weighted_loose_lkr_rk_selection
+        - k2pi_m2m_high
+
+- selection:
     name: k2pi_problem_selection_low
     type: CompositeSelection
     children :
         - weighted_rk_track_selection
-        - auto_rk_lkr_accep
         - auto_rk_hot_lkr
         - auto_ddead_cell
         - auto_km2_eop
@@ -481,6 +490,24 @@
     folder: k2pi_selection_st_high
     tfile: tfout
     selection: k2pi_selection_st_high
+    inputs:
+        km2event: auto_km2_event
+
+- analysis:
+    type: Km2Plotter
+    name: plot_k2pi_selection_rk_high
+    folder: k2pi_selection_rk_high
+    tfile: tfout
+    selection: k2pi_selection_rk_high
+    inputs:
+        km2event: auto_km2_event
+
+- analysis:
+    type: Km2Plotter
+    name: plot_k2pi_selection_rk_loose_lkr_high
+    folder: k2pi_selection_rk_loose_lkr_high
+    tfile: tfout
+    selection: k2pi_selection_rk_loose_lkr_high
     inputs:
         km2event: auto_km2_event
 

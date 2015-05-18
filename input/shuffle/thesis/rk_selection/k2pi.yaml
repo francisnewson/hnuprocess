@@ -16,7 +16,7 @@ scaling:
         halo:
             strategy: m2
             input_file: tdata/rk_selection/all.rk_selection.root
-            plot_path: km2_rk/h_m2m_kmu
+            plot_path: km2_rk_full/h_m2m_kmu
 
             min_mass: -0.3
             max_mass: -0.075
@@ -24,7 +24,7 @@ scaling:
         km2:
             strategy: m2
             input_file: tdata/rk_selection/all.rk_selection.root
-            plot_path: km2_rk/h_m2m_kmu
+            plot_path: km2_rk_full/h_m2m_kmu
 
             min_mass: -0.03
             max_mass:  0.00
@@ -45,7 +45,7 @@ scaling:
         halo:
             strategy: m2
             input_file: tdata/rk_selection/all.rk_selection.root
-            plot_path: km2_rk/h_m2m_kmu
+            plot_path: km2_rk_full/h_m2m_kmu
 
             min_mass: -0.3
             max_mass: -0.075
@@ -53,7 +53,7 @@ scaling:
         km2:
             strategy: m2
             input_file: tdata/rk_selection/all.rk_selection.root
-            plot_path: km2_rk/h_m2m_kmu
+            plot_path: km2_rk_full/h_m2m_kmu
 
             min_mass: -0.03
             max_mass:  0.00
@@ -75,22 +75,96 @@ output:
     input_file: tdata/rk_selection/all.rk_selection.root
     plots:
         - path: k2pi_problem_clusters/h_n_bad
-          name: bad_clusters
+          name: n_bad_clus_k2pi_low
+          rebin: 1
+
         - path: k2pi_problem_clusters/h_E_all
-          name: all_cluster_energy
+          name: all_clus_E_k2pi_low
+          rebin: 1
+
         - path: k2pi_problem_clusters/h_ds_bad
-          name: bad_cluster_ds
+          name: bad_clus_ds_k2pi_low
+          rebin: 1
+
         - path: k2pi_problem_clusters/h_E_bad
-          name: bad_cluster_energy
-        - path: k2pi_region/h_p
-          name: hp_problem
-        - path: km2_rk/h_m2m_kmu
+          name: bad_clus_E_k2pi_low
+          rebin: 1
+
+        - path: k2pi_selection_st_low/h_p
+          name: hp_prob_st
+          rebin: 1
+
+        - path: km2_rk_full_k2pi_low/h_p
+          name: hp_prob_full
+          rebin: 1
+
+        - path: km2_rk_loose_lkr_k2pi_low/h_p
+          name: hp_prob_loose_lkr
+          rebin: 1
+
+        - path: km2_rk_full/h_m2m_kmu
           name:  rk_m2m
+          rebin: 5
+
         - path: km2_rk_single_track/h_m2m_kmu
           name:  rk_m2m_st
+          rebin: 5
+
         - path: km2_rk_loose_lkr/h_m2m_kmu
           name:  rk_m2m_loose
-    rebin: 1
+          rebin: 5
+
+        - path: k2pi_selection_st_low_clusters/h_gt_bad
+          name: low_k2pi_bad_clusters_gt_bad
+          rebin: 1
+
+        - path: k2pi_selection_st_low_clusters/h_gt_ass
+          name: low_k2pi_bad_clusters_gt_ass
+          rebin: 1
+
+        - path: k2pi_selection_st_high_clusters/h_ds_not_ass
+          name: high_k2pi_bad_clusters_ds_not_ass
+          rebin: 1
+
+        - path: k2pi_selection_st_high_clusters/h_E_not_ass
+          name: high_k2pi_bad_clusters_E_not_ass
+          rebin: 1
+
+        - path: k2pi_selection_st_high_clusters/h_ds_all
+          name: high_k2pi_bad_clusters_ds_all
+          rebin: 1
+
+        - path: k2pi_selection_st_high_clusters/h_E_all
+          name: high_k2pi_bad_clusters_E_all
+          rebin: 1
+
+        - path: k2pi_selection_st_high_clusters/h_ds_bad
+          name: high_k2pi_bad_clusters_ds_bad
+          rebin: 1
+
+        - path: k2pi_selection_st_high_clusters/h_E_bad
+          name: high_k2pi_bad_clusters_E_bad
+          rebin: 1
+
+        - path: k2pi_selection_st_high_clusters/h_n_bad
+          name: high_k2pi_bad_clusters_n_bad
+          rebin: 1
+
+        - path: k2pi_selection_st_low_clusters/h_gt_all
+          name: low_k2pi_st_gt_bad
+          rebin: 1
+
+        - path: k2pi_problem_clusters/h_ds_bad
+          name: k2pi_problem_ds_bad
+          rebin: 1
+
+        - path: k2pi_problem_clusters/h_E_bad
+          name: k2pi_problem_E_bad
+          rebin: 1
+
+        - path: k2pi_selection_st_high/h_p
+          name: k2pi_high_p
+          rebin: 1
 
     data_plot:
         channels:
@@ -181,7 +255,6 @@ output:
             fid_weight: p5.k2pig.v2.neg
             channels:
                 - p5.k2pig.v2.neg
-
 
         - item:
             name: halo_pos
