@@ -91,7 +91,7 @@ namespace fn
         km2_br_ = brs_.at( "km2" );
 
 
-        std::cerr << "Estimated kaon flux: " << km2_scale_ * km2_fid_weight_ / km2_br_ << std::endl;
+        //std::cerr << "Estimated kaon flux: " << km2_scale_ * km2_fid_weight_ / km2_br_ << std::endl;
     }
 
     void Km2Scaling::region_scaling()
@@ -262,6 +262,7 @@ namespace fn
             double br = brs_.at( type );
             scale_factor = km2_scale_ *  km2_fid_weight_  / fid_weight * br / km2_br_;
 
+#if 0
             std::cerr << "Scaling " << type << "\n"
                 << std::setw(15) <<  "km2fid: " <<  km2_fid_weight_ 
                 << std::setw(15)  << " km2_scale: " <<  km2_scale_  
@@ -269,6 +270,7 @@ namespace fn
                 << std::setw(15) << " br: " <<  br 
                 << std::setw(15) << " km2br: " <<  km2_br_ 
                 << std::setw(15) << "  scale_factor: " << scale_factor << std::endl;
+#endif
         }
         h.Scale( scale_factor );
     }

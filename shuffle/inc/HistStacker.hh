@@ -66,6 +66,8 @@ namespace fn
             void write( std::string name );
             void write_total( std::string name );
 
+            std::unique_ptr<TH1> get_total_copy();
+
             iterator begin() { return stack_.begin() ; }
             iterator end() { return stack_.end() ; }
             size_type size() { return stack_.size() ;}

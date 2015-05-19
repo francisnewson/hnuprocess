@@ -40,7 +40,15 @@ namespace fn
     std::unique_ptr<TH1> ChannelHistExtractor::get_hist ( boost::filesystem::path p )
     {
         auto result =  fntf_.get_hist( pre_/ p / post_ );
-        result->Rebin(rebin_);
+        TH1 * test_ptr = result.get();
+        if ( TH1D * ptr_1d = dynamic_cast<TH1D*> ( test_ptr ) )
+        {
+            ptr_1d->Rebin(rebin_);
+        }
+        else if ( TH2D * ptr_2d = dynamic_cast<TH2D*>( test_ptr ) )
+        {
+            ptr_2d->Rebin2D(rebin_, rebin_);
+        }
         return result;
     }
 

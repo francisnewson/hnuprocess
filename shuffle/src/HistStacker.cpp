@@ -51,7 +51,7 @@ namespace fn
     void HistFormatter::format( TH1& h , std::string type ) const
     { 
         Color_t color = type_colors_.at( type );
-        std::cerr << std::setw(15) << "Coloring " << std::setw(10) << type << " " << color << std::endl;
+        //std::cerr << std::setw(15) << "Coloring " << std::setw(10) << type << " " << color << std::endl;
         h.SetFillColor( color );
         h.SetLineColor( color );
     }
@@ -70,8 +70,8 @@ namespace fn
             int min_blind_bin = h.GetXaxis()->FindBin( min_blind);
             int max_blind_bin = h.GetXaxis()->FindBin( max_blind );
 
-            std::cerr << "Blind range: " << min_blind << " - " <<  max_blind << "\n";
-            std::cerr << "Blind bin range: " << min_blind_bin << " - " <<  max_blind_bin << "\n";
+            //std::cerr << "Blind range: " << min_blind << " - " <<  max_blind << "\n";
+            //std::cerr << "Blind bin range: " << min_blind_bin << " - " <<  max_blind_bin << "\n";
 
             for ( int bin = min_blind_bin ; bin != max_blind_bin + 1 ; ++bin )
             {
@@ -139,5 +139,12 @@ namespace fn
     {
         auto htotal = stack_.GetTotal();
         htotal->Write( name.c_str() );
+    }
+
+    std::unique_ptr<TH1> HistStacker::get_total_copy()
+    {
+        std::unique_ptr<TH1> result{ static_cast<TH1*>( stack_.GetTotal()->Clone( "htotal" )) };
+        result->SetDirectory(0);
+        return result;
     }
 }
