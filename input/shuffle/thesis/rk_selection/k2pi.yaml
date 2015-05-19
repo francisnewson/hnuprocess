@@ -106,9 +106,37 @@ output:
           name:  rk_m2m
           rebin: 5
 
+        - path: km2_rk_full/h_z
+          name:  rk_z
+          rebin: 1
+
+        - path: km2_rk_full/h_p_z
+          name:  rk_pz
+          rebin: 1
+
+        - path: k2pi_selection_st_high/h_p_z
+          name:  st_high_pz
+          rebin: 2
+
+        - path: k2pi_selection_rk_high/h_z
+          name:  rk_high_z
+          rebin: 1
+
+        - path: k2pi_selection_st_high/h_z
+          name:  st_high_z
+          rebin: 1
+
+        - path: k2pi_selection_st_high/h_p
+          name:  st_high_p
+          rebin: 1
+
         - path: km2_rk_single_track/h_m2m_kmu
           name:  rk_m2m_st
           rebin: 5
+
+        - path: km2_rk_single_track/h_m2_z
+          name:  rk_st_m2_z
+          rebin: 2
 
         - path: km2_rk_loose_lkr/h_m2m_kmu
           name:  rk_m2m_loose
@@ -173,6 +201,22 @@ output:
         - path: k2pi_selection_rk_loose_lkr_high/h_p
           name: k2pi_high_loose_lkr_rk_p
           rebin: 1
+
+        - path: km2_rk_lkr/E_10_r20/h_mini_m2m_kmu
+          name: rk_r20
+          rebin: 5
+
+        - path: km2_rk_lkr/E_10_r30/h_mini_m2m_kmu
+          name: rk_r30
+          rebin: 5
+
+        - path: km2_rk_lkr/E_10_r40/h_mini_m2m_kmu
+          name: rk_r40
+          rebin: 5
+
+        - path: km2_rk_lkr/E_10_r50/h_mini_m2m_kmu
+          name: rk_r50
+          rebin: 5
 
 
     data_plot:

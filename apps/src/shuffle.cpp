@@ -7,6 +7,7 @@
 #include "OwningStack.hh"
 #include "Km2Scaling.hh"
 #include "yaml-cpp/exceptions.h"
+#include "RatioCanvas.hh"
 
 int main( int argc, char * argv[] )
 {
@@ -162,6 +163,8 @@ int main( int argc, char * argv[] )
         std::string name = get_yaml<std::string>( plot_node, "name");
         std::string path = get_yaml<std::string>( plot_node, "path");
 
+        std::cout << "Plotting: " <<  std::setw(40) << name << "   from    " << path <<  std::endl;
+
         if ( const auto& rebin_node = plot_node["rebin"] )
         {
             ce_stack.set_rebin( rebin_node.as<int>() );
@@ -176,7 +179,6 @@ int main( int argc, char * argv[] )
         HistStacker hs( config_node["output"] , ce_stack, scaling_info, formatter );
         hs.create_stack();
 
-        std::cout << "Stack size: " << hs.size() <<  std::endl;
         TH1 * start = (*hs.begin());
 
         //Write stack
@@ -188,18 +190,26 @@ int main( int argc, char * argv[] )
         cd_p( &tfout, name );
         hs.write_total("hbg") ;
 
-        auto hdata =  get_summed_histogram( ce_stack,
+        std::unique_ptr<TH1> hdata =  get_summed_histogram( ce_stack,
                 begin( data_channels), end( data_channels ) );
 
         format_data_hist( *hdata, config_node["output"]["data_plot"] );
 
         cd_p( &tfout, name );
         hdata->Write( "hdata" );
+
+        auto hdenom = hs.get_total_copy();
+        std::unique_ptr<TH1> hratio{ static_cast<TH1*>( hdata->Clone("hratio") ) };
+        hratio->SetDirectory(0);
+        hratio->Sumw2();
+        hratio->Divide( hdenom.get() );
+        hratio->Write("hratio");
+
+        RatioCanvas rc( *hdenom, *hdata, *hratio);
+        rc.Write( "c_comp");
     }
 
     exit(0);
-
-
 
 
     //**************************************************

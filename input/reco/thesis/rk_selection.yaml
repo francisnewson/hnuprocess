@@ -207,6 +207,24 @@
     inputs:
         ogt: auto_bf_st
 
+- selection:
+    name: auto_rk_tgt_pz
+    type: TrackPZ
+    shape: rectangles
+    points:
+        - [ 13, 20, -1000, 6000 ]
+        - [ 20, 25, -1000, 6000 ]
+        - [ 25, 30,     0, 6000 ]
+        - [ 30, 35,   500, 6000 ]
+        - [ 35, 40,   500, 6000 ] 
+        - [ 40, 45,   500, 6000 ]
+        - [ 45, 50,  1000, 6000 ]
+        - [ 50, 55,  1000, 6000 ]
+        - [ 55, 60,  1500, 6000 ]
+        - [ 60, 65,  2500, 6000 ]
+    inputs:
+        ogt: auto_bf_st
+
 
 #-------- 8.] CDA
 - selection: { name: auto_cda_35mm, type: TrackCda,
@@ -351,7 +369,7 @@
         - auto_good_trk
         - auto_pos_trk
         - auto_quality_7
-        - auto_rk_pz
+        - auto_rk_tgt_pz
         - auto_cda_35mm
         - auto_dch1_acc
         - auto_dch4_acc
