@@ -47,6 +47,7 @@ namespace fn
             FourMomComp mc_dch_cmp_;
             TH1D * hpt_;
             TH1D * hcda_;
+            TH1D * hz_;
             TH2D * hm2_tx_;
             TH2D * hm2_ty_;
     };
@@ -78,7 +79,26 @@ namespace fn
     };
     
     //--------------------------------------------------
+    
+    class DchSelection  : public Subscriber
+    {
+        public:
+            template <class F >
+                DchSelection( F f )
+                :checker_( f ){}
 
+        bool check_data( K2piDchData * dch_data, K2piLkrData * lkr_data );
+
+        private:
+        std::function<bool(K2piDchData*, K2piLkrData*)> checker_;
+    };
+
+    bool check_dch_selections( std::vector<DchSelection*> selections, 
+            K2piDchData * dch_data, K2piLkrData * lkr_data );
+
+
+    //--------------------------------------------------
+    
     class DchAnalysis: public Analysis
     {
         public:
@@ -87,6 +107,8 @@ namespace fn
                 std::string lkr_data_source,
                 bool is_mc );
         void end_processing();
+
+        void add_dch_selection( DchSelection* dch_selection );
 
         private:
         void process_event();
@@ -98,6 +120,7 @@ namespace fn
 
         std::vector<DchPlotter> scatter_plots_;
         std::vector<TrackPowerScatterer> scatterers_;
+        std::vector<DchSelection*> dch_selections_;
     };
 }
 #endif

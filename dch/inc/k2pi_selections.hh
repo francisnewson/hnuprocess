@@ -29,6 +29,7 @@ namespace fn
             K2piRecoBag( K2piEventData& event, bool mc, TFile& tfile);
             void add_selection( Selection * sel);
             void add_analysis( Analysis * an );
+            void add_dch_selection( DchSelection * sel );
             void new_event();
             void end_processing();
 
@@ -43,6 +44,7 @@ namespace fn
         private:
             std::vector<std::unique_ptr<Selection>> sel_;
             std::vector<std::unique_ptr<Analysis>>  an_;
+            std::vector<std::unique_ptr<DchSelection>>  dch_slections_;
             int next_id_;
     };
 

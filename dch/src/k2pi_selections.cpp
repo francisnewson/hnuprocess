@@ -26,6 +26,12 @@ namespace fn
         an_.emplace_back( std::unique_ptr<Analysis>( an ) );
     }
 
+    void K2piRecoBag::add_dch_selection( DchSelection * dch_sel )
+    {
+        dch_sel->set_id( next_id_++ );
+        dch_slections_.emplace_back( std::unique_ptr<DchSelection>( dch_sel ) );
+    }
+
     void K2piRecoBag::new_event()
     {
         for( auto& sel: sel_ ) { sel->new_event(); }
@@ -153,7 +159,7 @@ namespace fn
         //--------------------
 
         //MIN PHOTON RADIUS
-         auto min_photon_radius_cut = get_min_photon_radius_cut( k2pirb, 15 );
+        auto min_photon_radius_cut = get_min_photon_radius_cut( k2pirb, 15 );
         k2pirb.add_selection( min_photon_radius_cut );
 
         //CHI2 CUT
@@ -185,8 +191,19 @@ namespace fn
         //(in addition to anything in the selections above)
         //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
+        DchSelection * cda_cut_35 =  new DchSelection( []( K2piDchData* dch_data, K2piLkrData* lkr_data)
+                {
+                Vertex vertex = extract_vertex( *dch_data,  *lkr_data );
+                double cda = vertex.cda;
+                return cda < 3.5;
+                } );
+
+        k2pirb.add_dch_selection( cda_cut_35 );
+
         DchAnalysis * select_fit_dch_plotter  = new DchAnalysis(
                 *fit_selection, k2pirb.tfout, "select_fit_k2pi_plots", k2pirb.event, "fit", k2pirb.is_mc );
+
+        select_fit_dch_plotter->add_dch_selection( cda_cut_35 );
 
         k2pirb.add_analysis( select_fit_dch_plotter );
     }
@@ -210,7 +227,7 @@ namespace fn
         //--------------------
 
         //MIN PHOTON RADIUS
-         auto min_photon_radius_cut = get_min_photon_radius_cut( k2pirb, 15 );
+        auto min_photon_radius_cut = get_min_photon_radius_cut( k2pirb, 15 );
         k2pirb.add_selection( min_photon_radius_cut );
 
         //CHI2 CUT
@@ -226,7 +243,7 @@ namespace fn
         //**************************************************
         //Analysis
         //**************************************************
-        
+
         PionAnalysis * pion_plotter =  new PionAnalysis(
                 *full_selection, k2pirb.tfout, "pion_plotter", k2pirb.event, k2pirb.is_mc );
 

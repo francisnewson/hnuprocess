@@ -2,6 +2,7 @@
 #define K2PI_RECO_FUNCTIONS_HH
 #include "TVector3.h"
 #include "logging.hh"
+#include "Track.hh"
 #if 0
 /*
  *  _    ____        _                       
@@ -43,7 +44,7 @@ namespace fn
 
     double extract_min_photon_radius( K2piLkrData& raw_lkr );
 
-    double extract_cda( const K2piDchData& dch, const K2piLkrData& lkr );
+    Vertex extract_vertex( const K2piDchData& dch, const K2piLkrData& lkr );
 
 
 

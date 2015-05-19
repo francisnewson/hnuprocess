@@ -24,6 +24,9 @@ namespace fn
         hcda_ = dths_.MakeTH1D( "hcda", "DCH CDA",
                 1000, 0.0, 10.0, "Cda( cm )", "#events" );
 
+        hz_ = dths_.MakeTH1D( "hz", "DCH z",
+                1200, -3000, 9000, "z( cm )", "#events" );
+
         hm2_tx_ = dths_.MakeTH2D( "hm2_tx_", "Mass angle correlation" ,
                 100, -0.3, 0.2, "m^{2}_{miss}",
                 100, -0.01, 0.01, "dtx" );
@@ -71,9 +74,11 @@ namespace fn
             //Other kinematics ( pt, cda )
             TVector3 kaon_mom( lkr_interface.pK_X(), lkr_interface.pK_Y(), lkr_interface.pK_Z() );
             TVector3 dch_pip_3mom = dch_pip_4mom.Vect();
+            Vertex vertex = extract_vertex( dch_data, lkr_data );
 
             hpt_->Fill( dch_pip_3mom.Perp( kaon_mom ), weight );
-            hcda_->Fill( extract_cda( dch_data, lkr_data ), weight );
+            hcda_->Fill( vertex.cda , weight );
+            hz_->Fill( vertex.point.Z() , weight );
 
             //m2m
             TVector3 lkr3mom = lkr_pip_4mom.Vect();
@@ -181,6 +186,12 @@ namespace fn
         dths_.Write();
     }
 
+    //--------------------------------------------------
+
+    bool DchSelection::check_data( K2piDchData * dch_data, K2piLkrData * lkr_data )
+    {
+        return checker_( dch_data, lkr_data );
+    }
 
     //--------------------------------------------------
 
@@ -237,14 +248,34 @@ namespace fn
         }
     }
 
+    void DchAnalysis::add_dch_selection( DchSelection* dch_selection )
+    {
+        dch_selections_.push_back( dch_selection );
+    }
+
+    bool check_dch_selections( std::vector<DchSelection*> selections, 
+            K2piDchData * dch_data, K2piLkrData * lkr_data )
+    {
+        for ( auto dch_selection : selections)
+        {
+            if ( ! dch_selection->check_data( dch_data, lkr_data ) )
+            {
+                return false;
+            }
+        }
+        return true;
+    }
+
     void DchAnalysis::process_event()
     {
-        double cda = extract_cda( k2pi_data_.raw_dch, *lkr_data_ );
+        Vertex vertex = extract_vertex( k2pi_data_.raw_dch, *lkr_data_ );
+        double cda = vertex.cda;
+
+        bool passed_dch = check_dch_selections( dch_selections_, &k2pi_data_.raw_dch, lkr_data_ );
 
         if( is_mc_ )
         {
-            //if ( cda < 2.5 )
-            if ( cda < 10.0 )
+            if ( passed_dch )
             {
                 plots_.plot_data( k2pi_data_, *lkr_data_, k2pi_data_.raw_dch, 
                         k2pi_data_.weight, true, &k2pi_data_.mc  );
@@ -259,23 +290,25 @@ namespace fn
                 scatterers_[i].scatter_track( k2pi_data_.compact_number, 
                         mod_dch.dxdz, mod_dch.dydz, mod_dch.p );
 
-                double cda = extract_cda( mod_dch, *lkr_data_ );
+                Vertex vertex = extract_vertex( mod_dch, *lkr_data_ );
+                double cda = vertex.cda;
 
-                //if ( cda < 2.5 )
+                bool passed_mod_dch = check_dch_selections( dch_selections_, &mod_dch, lkr_data_ );
+
                 if ( cda < 10.0 )
-                {
-                    scatter_plots_[i].plot_data( k2pi_data_, *lkr_data_, mod_dch, 
-                            k2pi_data_.weight, true, &k2pi_data_.mc );
-                }
+                    if ( passed_mod_dch )
+                    {
+                        scatter_plots_[i].plot_data( k2pi_data_, *lkr_data_, mod_dch, 
+                                k2pi_data_.weight, true, &k2pi_data_.mc );
+                    }
             }
         }
         else
         {
-
             //2015-03-18 I think in raw_dch here, raw means no extra kick, 
             //rather than no kinematic fitting.
 
-            if ( cda < 2.5 )
+            if ( passed_dch )
             {
                 plots_.plot_data( k2pi_data_, *lkr_data_, k2pi_data_.raw_dch, 
                         k2pi_data_.weight, false, 0 );
