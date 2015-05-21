@@ -80,6 +80,40 @@ namespace fn
 
     //--------------------------------------------------
 
+    REG_DEF_SUB( K2piM2Miss);
+
+    K2piM2Miss::K2piM2Miss( const Km2Event& km2_event,
+            double min_m2, double max_m2)
+        :km2_event_( km2_event ), 
+        min_m2_( min_m2), max_m2_( max_m2)
+    { }
+
+    bool K2piM2Miss::do_check() const
+    {
+        const Km2RecoEvent & km2re = km2_event_.get_reco_event();
+        double m2miss = km2re.get_m2m_kpi();
+
+        return (m2miss > min_m2_) && (m2miss < max_m2_) ;
+    }
+
+    template<>
+        Subscriber * create_subscriber<K2piM2Miss>
+        (YAML::Node& instruct, RecoFactory& rf )
+        {
+            double min_m2 = 
+                get_yaml<double>( instruct, "min_m2" );
+
+            double max_m2 = 
+                get_yaml<double>( instruct, "max_m2" );
+
+            const auto * km2_event = get_km2_event( instruct, rf );
+
+            return new K2piM2Miss( *km2_event, min_m2, max_m2 );
+        }
+
+    //--------------------------------------------------
+
+
     REG_DEF_SUB( Km2PM2Miss);
 
     Km2PM2Miss::Km2PM2Miss(  const Km2Event& km2_event,

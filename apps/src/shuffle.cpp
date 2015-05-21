@@ -198,6 +198,7 @@ int main( int argc, char * argv[] )
         cd_p( &tfout, name );
         hdata->Write( "hdata" );
 
+
         auto hdenom = hs.get_total_copy();
         std::unique_ptr<TH1> hratio{ static_cast<TH1*>( hdata->Clone("hratio") ) };
         hratio->SetDirectory(0);
@@ -207,6 +208,9 @@ int main( int argc, char * argv[] )
 
         RatioCanvas rc( *hdenom, *hdata, *hratio);
         rc.Write( "c_comp");
+
+        std::cout << std::string(  50, ' ' ) 
+            << "bg: " << hdenom->Integral() << " dt:" << hdata->Integral() << std::endl;
     }
 
     exit(0);

@@ -87,6 +87,9 @@ namespace fn
     const SingleRecoTrack * Km2RecoEvent::get_reco_track() const
     { return srt_; }
 
+    TVector3 Km2RecoEvent::get_vertex() const
+    { return srt_->get_vertex(); }
+
     double Km2RecoEvent::get_pt()  const
     {
         return pt_;

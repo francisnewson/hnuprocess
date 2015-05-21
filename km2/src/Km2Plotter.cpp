@@ -141,6 +141,9 @@ namespace fn
                 100, -200, 200, "X (cm)",
                 100, -200, 200, "Y (cm)" );
 
+        h_r_DCH1_ = hs_.MakeTH1D( "h_r_DCH1", "r at DCH1",
+                500, 0, 250, "r (cm)");
+
         h_xy_DCH4_ = hs_.MakeTH2D( "h_xy_DCH4", "XY at DCH4",
                 100, -200, 200, "X (cm)",
                 100, -200, 200, "Y (cm)" );
@@ -198,6 +201,7 @@ namespace fn
 
         TVector3 v_DCH1 = srt->extrapolate_us( na62const::zDch1 );
         h_xy_DCH1_->Fill( v_DCH1.X(), v_DCH1.Y(), wgt );
+        h_r_DCH1_->Fill( std::hypot( v_DCH1.X(), v_DCH1.Y() ), wgt );
 
         TVector3 v_DCH4 = srt->extrapolate_ds( na62const::zDch4 );
         h_xy_DCH4_->Fill( v_DCH4.X(), v_DCH4.Y(), wgt );

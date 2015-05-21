@@ -130,7 +130,7 @@
 
 - input: { name: loose_km2_clusters, type: Km2Clusters,
     noise_energy: 10, noise_time: 12, brehm_radius: 6 ,
-    track_cluster_radius: 25, extra_lkr_check: true,
+    track_cluster_radius: 40, extra_lkr_check: true,
     inputs: { ogt: auto_bf_st, ClusterCorrector: cluster_corrector } }
 
 - input: { name: km2_clusters_E_10_r20, type: Km2Clusters,
@@ -291,6 +291,14 @@
 
 #------ k2pi region
 - selection:
+    name: k2pi_m2m
+    type: K2piM2Miss
+    min_m2: 0.012
+    max_m2: 0.024
+    inputs:
+        km2event: auto_km2_event
+
+- selection:
     name: k2pi_m2m_low
     type: Km2M2Miss
     min_m2: 0.017
@@ -320,6 +328,30 @@
     type: TrackMomentum
     min: 30 #GeV
     max: 52 #GeV
+    inputs:
+        ogt: auto_bf_st
+
+- selection:
+    name: k2pi_low_mom
+    type: TrackMomentum
+    min: 0
+    max: 30
+    inputs:
+        ogt: auto_bf_st
+
+- selection:
+    name: k2pi_mid_mom
+    type: TrackMomentum
+    min: 30
+    max: 50
+    inputs:
+        ogt: auto_bf_st
+
+- selection:
+    name: k2pi_high_mom
+    type: TrackMomentum
+    min: 50
+    max: 100
     inputs:
         ogt: auto_bf_st
 
@@ -361,6 +393,8 @@
 ###################################################
 
 
+#RK SINGLE TRACK
+
 - selection:
     name: weighted_rk_track_selection
     type: CompositeSelection
@@ -375,7 +409,8 @@
         - auto_dch4_acc
         - auto_rk_lkr_accep
         - auto_ddead_cell
-
+         
+#RK FULL
 - selection:
     name : weighted_rk_selection
     type: CompositeSelection
@@ -384,13 +419,17 @@
         - auto_rk_hot_lkr
         - auto_rk_lkr_veto
 
+#K2pi MASS REGION
 - selection:
-    name : weighted_rk_selection_k2pi_low
+    name : weighted_rk_selection_k2pi
     type: CompositeSelection
     children:
         - weighted_rk_selection
-        - k2pi_m2m_low
+        - k2pi_m2m
 
+#---------------
+
+#RK LKr variations
 - selection:
     name : weighted_loose_lkr_rk_selection
     type: CompositeSelection
@@ -431,40 +470,45 @@
         - hot_lkr_E10_r50
         - lkr_veto_E_10_r50
 
-- selection:
-    name : weighted_loose_lkr_rk_selection_k2pi_low
-    type: CompositeSelection
-    children:
-        - weighted_loose_lkr_rk_selection
-        - k2pi_m2m_low
+#---------------
+
+#K2pi VARIATIONS
 
 - selection:
-    name: k2pi_selection_st_low
+    name: k2pi_selection_st
     type: CompositeSelection
     children :
         - weighted_rk_track_selection
-        - k2pi_m2m_low
+        - k2pi_m2m
 
 - selection:
-    name: k2pi_selection_st_high
+    name: k2pi_selection_st_low_mom
     type: CompositeSelection
     children :
-        - weighted_rk_track_selection
-        - k2pi_m2m_high
+        - k2pi_selection_st
+        - k2pi_low_mom
 
 - selection:
-    name: k2pi_selection_rk_high
+    name: k2pi_selection_st_high_mom
     type: CompositeSelection
     children :
-        - weighted_rk_selection
-        - k2pi_m2m_high
+        - k2pi_selection_st
+        - k2pi_high_mom
 
 - selection:
-    name: k2pi_selection_rk_loose_lkr_high
+    name: k2pi_selection_st_mid_mom
     type: CompositeSelection
     children :
-        - weighted_loose_lkr_rk_selection
-        - k2pi_m2m_high
+        - k2pi_selection_st
+        - k2pi_mid_mom
+
+- selection:
+    name: k2pi_selection_rk_loose_lkr
+    type: CompositeSelection
+    children :
+        - k2pi_selection_st
+        - loose_rk_hot_lkr
+        - loose_rk_lkr_veto
 
 - selection:
     name: k2pi_problem_selection_low
@@ -502,6 +546,7 @@
     folder: km2_rk_full
     tfile: tfout
     selection: weighted_rk_selection
+    mini: true
     inputs:
         km2event: auto_km2_event
 
@@ -511,28 +556,32 @@
     folder: km2_rk_loose_lkr
     tfile: tfout
     selection: weighted_loose_lkr_rk_selection
+    mini: true
+    inputs:
+        km2event: auto_km2_event
+
+- analysis:
+    type: Km2Plotter
+    name: plot_km2_single_track
+    folder: km2_rk_single_track
+    tfile: tfout
+    selection: weighted_rk_track_selection
     inputs:
         km2event: auto_km2_event
 
 #--------
 
-- analysis:
-    type: Km2Plotter
-    name: plot_km2_rk_full_k2pi_low
-    folder: km2_rk_full_k2pi_low
-    tfile: tfout
-    selection: weighted_rk_selection_k2pi_low
-    inputs:
-        km2event: auto_km2_event
+- analysis: { type: Km2Plotter, name: k2pi_st_low_mom, folder: k2pi_st_low_mom, mini: true,
+     tfile: tfout, selection: k2pi_selection_st_low_mom,  inputs: { km2event: auto_km2_event } }
 
-- analysis:
-    type: Km2Plotter
-    name: plot_km2_rk_loose_lkr_k2pi_low
-    folder: km2_rk_loose_lkr_k2pi_low
-    tfile: tfout
-    selection: weighted_loose_lkr_rk_selection_k2pi_low
-    inputs:
-        km2event: auto_km2_event
+- analysis: { type: Km2Plotter, name: k2pi_st_mid_mom, folder: k2pi_st_mid_mom, mini: true,
+     tfile: tfout, selection: k2pi_selection_st_mid_mom,  inputs: { km2event: auto_km2_event } }
+
+- analysis: { type: Km2Plotter, name: k2pi_st_high_mom, folder: k2pi_st_high_mom, mini: true,
+     tfile: tfout, selection: k2pi_selection_st_high_mom,  inputs: { km2event: auto_km2_event } }
+
+- analysis: { type: Km2Plotter, name: k2pi_loose_lkr, folder: k2pi_loose_lkr, mini: true,
+     tfile: tfout, selection: k2pi_selection_rk_loose_lkr,  inputs: { km2event: auto_km2_event } }
 
 #--------
 
@@ -548,112 +597,35 @@
 - analysis: { type: Km2Plotter, name: plot_km2_E_10_r50, folder: km2_rk_lkr/E_10_r50, mini: true,
     tfile: tfout, selection: weighted_rk_lkr_E_10_r50, inputs: { km2event: auto_km2_event } }
 
-#--------
+#-------- 
 
-- analysis:
-    type: Km2Plotter
-    name: plot_km2_single_track
-    folder: km2_rk_single_track
-    tfile: tfout
-    selection: weighted_rk_track_selection
-    inputs:
-        km2event: auto_km2_event
+- analysis: { type: Km2ClusterPlotter, name: k2pi_st_low_mom_clusters, folder: k2pi_st_low_mom_clusters,
+    tfile: tfout, selection: k2pi_selection_st_low_mom,
+    inputs: { km2event: auto_km2_event, km2clusters: loose_km2_clusters, ClusterCorrector: cluster_corrector} }
 
+- analysis: { type: Km2ClusterPlotter, name: k2pi_st_mid_mom_clusters, folder: k2pi_st_mid_mom_clusters,
+    tfile: tfout, selection: k2pi_selection_st_mid_mom,
+    inputs: { km2event: auto_km2_event, km2clusters: loose_km2_clusters, ClusterCorrector: cluster_corrector} }
 
-- analysis:
-    type: Km2ClusterPlotter
-    name: plot_km2_single_track_clusters
-    folder: km2_rk_single_track_clusters
-    tfile: tfout
-    selection: weighted_rk_track_selection
-    inputs:
-        km2event: auto_km2_event
-        km2clusters: auto_km2_clusters
-        ClusterCorrector: cluster_corrector
+- analysis: { type: Km2ClusterPlotter, name: k2pi_st_high_mom_clusters, folder: k2pi_st_high_mom_clusters,
+    tfile: tfout, selection: k2pi_selection_st_high_mom,
+    inputs: { km2event: auto_km2_event, km2clusters: loose_km2_clusters, ClusterCorrector: cluster_corrector} }
 
-#--------
+#-------- 
 
-- analysis:
-    type: Km2Plotter
-    name: plot_k2pi_selection_st_low
-    folder: k2pi_selection_st_low
-    tfile: tfout
-    selection: k2pi_selection_st_low
-    inputs:
-        km2event: auto_km2_event
+- analysis: { type: Km2K2pi, name: k2pi_st_low_mom_k2pi, folder: k2pi_st_low_mom_k2pi,
+    tfile: tfout, selection: k2pi_selection_st_low_mom,
+    inputs: { km2event: auto_km2_event, km2clusters: loose_km2_clusters, ClusterCorrector: cluster_corrector} }
 
-- analysis:
-    type: Km2ClusterPlotter
-    name: plot_k2pi_selection_st_low_clusters
-    folder: k2pi_selection_st_low_clusters
-    tfile: tfout
-    selection: k2pi_selection_st_low
-    inputs:
-        km2event: auto_km2_event
-        km2clusters: auto_km2_clusters
-        ClusterCorrector: cluster_corrector
+- analysis: { type: Km2K2pi, name: k2pi_st_mid_mom_k2pi, folder: k2pi_st_mid_mom_k2pi,
+    tfile: tfout, selection: k2pi_selection_st_mid_mom,
+    inputs: { km2event: auto_km2_event, km2clusters: loose_km2_clusters, ClusterCorrector: cluster_corrector} }
 
-#--------
+- analysis: { type: Km2K2pi, name: k2pi_st_high_mom_k2pi, folder: k2pi_st_high_mom_k2pi,
+    tfile: tfout, selection: k2pi_selection_st_high_mom,
+    inputs: { km2event: auto_km2_event, km2clusters: loose_km2_clusters, ClusterCorrector: cluster_corrector} }
 
-- analysis:
-    type: Km2Plotter
-    name: plot_k2pi_selection_st_high
-    folder: k2pi_selection_st_high
-    tfile: tfout
-    selection: k2pi_selection_st_high
-    inputs:
-        km2event: auto_km2_event
-
-- analysis:
-    type: Km2Plotter
-    name: plot_k2pi_selection_rk_high
-    folder: k2pi_selection_rk_high
-    tfile: tfout
-    selection: k2pi_selection_rk_high
-    inputs:
-        km2event: auto_km2_event
-
-- analysis:
-    type: Km2Plotter
-    name: plot_k2pi_selection_rk_loose_lkr_high
-    folder: k2pi_selection_rk_loose_lkr_high
-    tfile: tfout
-    selection: k2pi_selection_rk_loose_lkr_high
-    inputs:
-        km2event: auto_km2_event
-
-- analysis:
-    type: Km2ClusterPlotter
-    name: plot_k2pi_selection_st_high_clusters
-    folder: k2pi_selection_st_high_clusters
-    tfile: tfout
-    selection: k2pi_selection_st_high
-    inputs:
-        km2event: auto_km2_event
-        km2clusters: auto_km2_clusters
-        ClusterCorrector: cluster_corrector
-
-#--------
-
-- analysis:
-    type: Km2Plotter
-    name: plot_k2pi_problem_plots
-    folder: k2pi_problem_plots
-    tfile: tfout
-    selection: k2pi_problem_selection_low
-    inputs:
-        km2event: auto_km2_event
-
-- analysis:
-    type: Km2ClusterPlotter
-    name: plot_k2pi_problem_clusters
-    folder: k2pi_problem_clusters
-    tfile: tfout
-    selection: k2pi_problem_selection_low
-    inputs:
-        km2event: auto_km2_event
-        km2clusters: auto_km2_clusters
-        ClusterCorrector: cluster_corrector
+#-------- 
 
 - analysis:
     type: M2MChopPlot

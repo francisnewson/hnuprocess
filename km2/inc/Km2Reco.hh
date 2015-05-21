@@ -38,6 +38,8 @@ namespace fn
             double get_kaon_mom() const;
             const SingleRecoTrack * get_reco_track() const;
 
+            TVector3 get_vertex() const;
+
         private:
             const SingleRecoTrack * srt_;
             const fne::Event * e_;

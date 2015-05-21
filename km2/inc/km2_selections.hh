@@ -58,11 +58,35 @@ namespace fn
             REG_DEC_SUB( Km2M2Miss );
     };
 
-    //--------------------------------------------------
 
     template<>
         Subscriber * create_subscriber<Km2M2Miss>
         (YAML::Node& instruct, RecoFactory& rf );
+
+    //--------------------------------------------------
+    
+    class K2piM2Miss : public CachedSelection
+    {
+        public:
+            K2piM2Miss( const Km2Event& km2_event,
+                    double min_m2, double max_m2);
+
+        private:
+            bool do_check() const;
+            const Km2Event& km2_event_;
+
+            double min_m2_;
+            double max_m2_;
+
+            REG_DEC_SUB( K2piM2Miss );
+    };
+
+    template<>
+        Subscriber * create_subscriber<K2piM2Miss>
+        (YAML::Node& instruct, RecoFactory& rf );
+
+    //--------------------------------------------------
+
 
     class Km2PM2Miss : public CachedSelection
     {
@@ -78,7 +102,6 @@ namespace fn
 
             REG_DEC_SUB( Km2PM2Miss );
     };
-
 
     template<>
         Subscriber * create_subscriber<Km2PM2Miss>

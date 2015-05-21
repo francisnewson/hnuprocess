@@ -29,6 +29,8 @@ namespace fn
             TVector3 get_point() const;
             TVector3 get_direction() const;
             TVector3 extrapolate( double z) const;
+            double get_dxdz() const;
+            double get_dydz() const;
 
         private:
             TVector3 point_;
@@ -36,7 +38,7 @@ namespace fn
     };
 
     //--------------------------------------------------
-    
+
 
     struct Vertex
     {

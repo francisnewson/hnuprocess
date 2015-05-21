@@ -77,7 +77,7 @@ namespace fn
             h_gt->Fill( photon_angle, weight );
 
             h_E->Fill( track_cluster.get_energy(), weight );
-            h_ds->Fill( (track_cluster.get_pos() - track_lkr).Mag() );
+            h_ds->Fill( (track_cluster.get_pos() - track_lkr).Mag(), weight );
             h_t->Fill( (*itclus)->time - track_time );
             h_xy->Fill( x, y, weight );
             h_Ep->Fill( track_momentum, track_cluster.get_energy(), weight );

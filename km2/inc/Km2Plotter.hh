@@ -88,6 +88,7 @@ namespace fn
 
             TH2D * h_xy_coll_;
             TH2D * h_xy_DCH1_;
+            TH1D * h_r_DCH1_;
             TH2D * h_xy_DCH4_;
             TH2D * h_xy_LKr_;
             TH2D * h_xy_MUV1_;

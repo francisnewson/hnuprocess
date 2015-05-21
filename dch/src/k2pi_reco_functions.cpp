@@ -293,7 +293,7 @@ namespace fn
         const TClonesArray& tca =  e->mc.particles;
         int nparticles = e->mc.npart;
 
-        k2pi_mc_parts result;
+        k2pi_mc_parts result { 0, 0, 0, std::vector<const fne::McParticle*>{} };
 
         for ( int ip = 0; ip != nparticles ; ++ip )
         {

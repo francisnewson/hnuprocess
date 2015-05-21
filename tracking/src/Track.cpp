@@ -22,6 +22,16 @@ namespace fn
     TVector3 Track::get_direction() const
     { return direction_; }
 
+    double Track::get_dxdz() const
+    {
+        return get_direction().X()  / get_direction().Z() ;
+    }
+
+    double Track::get_dydz() const
+    {
+        return get_direction().Y()  / get_direction().Z() ;
+    }
+
     TVector3 Track::extrapolate( double z) const
     {
         double lambda = (z - point_.Z()) / direction_.Z();

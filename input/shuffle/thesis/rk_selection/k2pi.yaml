@@ -16,7 +16,7 @@ scaling:
         halo:
             strategy: m2
             input_file: tdata/rk_selection/all.rk_selection.root
-            plot_path: km2_rk_full/h_m2m_kmu
+            plot_path: km2_rk_full/h_mini_m2m_kmu
 
             min_mass: -0.3
             max_mass: -0.075
@@ -24,7 +24,7 @@ scaling:
         km2:
             strategy: m2
             input_file: tdata/rk_selection/all.rk_selection.root
-            plot_path: km2_rk_full/h_m2m_kmu
+            plot_path: km2_rk_full/h_mini_m2m_kmu
 
             min_mass: -0.03
             max_mass:  0.00
@@ -45,7 +45,7 @@ scaling:
         halo:
             strategy: m2
             input_file: tdata/rk_selection/all.rk_selection.root
-            plot_path: km2_rk_full/h_m2m_kmu
+            plot_path: km2_rk_full/h_mini_m2m_kmu
 
             min_mass: -0.3
             max_mass: -0.075
@@ -53,7 +53,7 @@ scaling:
         km2:
             strategy: m2
             input_file: tdata/rk_selection/all.rk_selection.root
-            plot_path: km2_rk_full/h_m2m_kmu
+            plot_path: km2_rk_full/h_mini_m2m_kmu
 
             min_mass: -0.03
             max_mass:  0.00
@@ -74,149 +74,54 @@ mass_windows:
 output:
     input_file: tdata/rk_selection/all.rk_selection.root
     plots:
-        - path: k2pi_problem_clusters/h_n_bad
-          name: n_bad_clus_k2pi_low
-          rebin: 1
-
-        - path: k2pi_problem_clusters/h_E_all
-          name: all_clus_E_k2pi_low
-          rebin: 1
-
-        - path: k2pi_problem_clusters/h_ds_bad
-          name: bad_clus_ds_k2pi_low
-          rebin: 1
-
-        - path: k2pi_problem_clusters/h_E_bad
-          name: bad_clus_E_k2pi_low
-          rebin: 1
-
-        - path: k2pi_selection_st_low/h_p
-          name: hp_prob_st
-          rebin: 1
-
-        - path: km2_rk_full_k2pi_low/h_p
-          name: hp_prob_full
-          rebin: 1
-
-        - path: km2_rk_loose_lkr_k2pi_low/h_p
-          name: hp_prob_loose_lkr
-          rebin: 1
-
-        - path: km2_rk_full/h_m2m_kmu
-          name:  rk_m2m
+        - path: k2pi_st_mid_mom_k2pi/h_bad_cluster_E
+          name: mid_mom_bad_cluster_E
           rebin: 5
 
-        - path: km2_rk_full/h_z
-          name:  rk_z
-          rebin: 1
+        - path: k2pi_st_mid_mom_k2pi/h_bad_cluster_r
+          name: mid_mom_bad_cluster_r
+          rebin: 5
 
-        - path: km2_rk_full/h_p_z
-          name:  rk_pz
-          rebin: 1
-
-        - path: k2pi_selection_st_high/h_p_z
-          name:  st_high_pz
+        - path: k2pi_st_mid_mom_k2pi/h_bad_cluster_ds_E
+          name: mid_mom_bad_cluster_ds_E
           rebin: 2
 
-        - path: k2pi_selection_rk_high/h_z
-          name:  rk_high_z
-          rebin: 1
+        - path: k2pi_st_mid_mom_clusters/h_xy_bad
+          name: mid_mom_bad_cluster_xy
+          rebin: 10
 
-        - path: k2pi_selection_st_high/h_z
-          name:  st_high_z
-          rebin: 1
-
-        - path: k2pi_selection_st_high/h_p
-          name:  st_high_p
-          rebin: 1
-
-        - path: km2_rk_single_track/h_m2m_kmu
-          name:  rk_m2m_st
+        - path: k2pi_st_mid_mom_clusters/h_ds_bad
+          name: mid_mom_bad_cluster_ds
           rebin: 5
 
-        - path: km2_rk_single_track/h_m2_z
-          name:  rk_st_m2_z
+        - path: k2pi_st_mid_mom_clusters/h_gt_bad
+          name: mid_mom_bad_cluster_gt
+          rebin: 1
+
+
+        - path: k2pi_st_low_mom_k2pi/h_bad_cluster_E
+          name: low_mom_bad_cluster_E
+          rebin: 5
+
+        - path: k2pi_st_low_mom_k2pi/h_bad_cluster_r
+          name: low_mom_bad_cluster_r
+          rebin: 5
+
+        - path: k2pi_st_low_mom_k2pi/h_bad_cluster_ds_E
+          name: low_mom_bad_cluster_ds_E
           rebin: 2
 
-        - path: km2_rk_loose_lkr/h_m2m_kmu
-          name:  rk_m2m_loose
+        - path: k2pi_st_low_mom_clusters/h_xy_bad
+          name: low_mom_bad_cluster_xy
+          rebin: 10
+
+        - path: k2pi_st_low_mom_clusters/h_ds_bad
+          name: low_mom_bad_cluster_ds
           rebin: 5
 
-        - path: k2pi_selection_st_low_clusters/h_gt_bad
-          name: low_k2pi_bad_clusters_gt_bad
+        - path: k2pi_st_low_mom_clusters/h_gt_bad
+          name: low_mom_bad_cluster_gt
           rebin: 1
-
-        - path: k2pi_selection_st_low_clusters/h_gt_ass
-          name: low_k2pi_bad_clusters_gt_ass
-          rebin: 1
-
-        - path: k2pi_selection_st_high_clusters/h_ds_not_ass
-          name: high_k2pi_bad_clusters_ds_not_ass
-          rebin: 1
-
-        - path: k2pi_selection_st_high_clusters/h_E_not_ass
-          name: high_k2pi_bad_clusters_E_not_ass
-          rebin: 1
-
-        - path: k2pi_selection_st_high_clusters/h_ds_all
-          name: high_k2pi_bad_clusters_ds_all
-          rebin: 1
-
-        - path: k2pi_selection_st_high_clusters/h_E_all
-          name: high_k2pi_bad_clusters_E_all
-          rebin: 1
-
-        - path: k2pi_selection_st_high_clusters/h_ds_bad
-          name: high_k2pi_bad_clusters_ds_bad
-          rebin: 1
-
-        - path: k2pi_selection_st_high_clusters/h_E_bad
-          name: high_k2pi_bad_clusters_E_bad
-          rebin: 1
-
-        - path: k2pi_selection_st_high_clusters/h_n_bad
-          name: high_k2pi_bad_clusters_n_bad
-          rebin: 1
-
-        - path: k2pi_selection_st_low_clusters/h_gt_all
-          name: low_k2pi_st_gt_bad
-          rebin: 1
-
-        - path: k2pi_problem_clusters/h_ds_bad
-          name: k2pi_problem_ds_bad
-          rebin: 1
-
-        - path: k2pi_problem_clusters/h_E_bad
-          name: k2pi_problem_E_bad
-          rebin: 1
-
-        - path: k2pi_selection_st_high/h_p
-          name: k2pi_high_st_p
-          rebin: 1
-
-        - path: k2pi_selection_rk_high/h_p
-          name: k2pi_high_rk_p
-          rebin: 1
-
-        - path: k2pi_selection_rk_loose_lkr_high/h_p
-          name: k2pi_high_loose_lkr_rk_p
-          rebin: 1
-
-        - path: km2_rk_lkr/E_10_r20/h_mini_m2m_kmu
-          name: rk_r20
-          rebin: 5
-
-        - path: km2_rk_lkr/E_10_r30/h_mini_m2m_kmu
-          name: rk_r30
-          rebin: 5
-
-        - path: km2_rk_lkr/E_10_r40/h_mini_m2m_kmu
-          name: rk_r40
-          rebin: 5
-
-        - path: km2_rk_lkr/E_10_r50/h_mini_m2m_kmu
-          name: rk_r50
-          rebin: 5
 
 
     data_plot:
