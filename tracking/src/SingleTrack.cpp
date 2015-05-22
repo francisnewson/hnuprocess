@@ -61,13 +61,20 @@ namespace fn
             const fne::Event * event = rf.get_event_ptr();
             KaonTrack * kt = get_kaon_track( instruct, rf );
 
+            bool do_bf = true;
+
+            if ( const YAML::Node do_bf_node = instruct["do_bf"] )
+            {
+                do_bf = do_bf_node.as<bool>() ;
+            }
+
             if ( method == "BF" )
             {
-                return new BFSingleTrack{ event, instruct, *kt } ;
+                return new BFSingleTrack{ event, instruct, *kt, do_bf } ;
             }
             else if ( method == "BFScatter" )
             {
-                return new BFScatterSingleTrack{ event, instruct, *kt };
+                return new BFScatterSingleTrack{ event, instruct, *kt, do_bf };
             }
             else
             {
@@ -83,11 +90,19 @@ namespace fn
 
     void BFSingleRecoTrack::update(  
             const processing_track * proc_track, 
-            const fne::Event * event )
+            const fne::Event * event, bool do_bf )
     {
         proc_track_ = proc_track;
-        bf_track_ = bfc_.compute_bf_track
-            ( proc_track_->corr_mom, proc_track_->rt, proc_track_->vert );
+        if ( do_bf )
+        {
+            bf_track_ = bfc_.compute_bf_track
+                ( proc_track_->corr_mom, proc_track_->rt, proc_track_->vert );
+        }
+        else
+        {
+            const fne::RecoTrack& rt = *proc_track_->rt;
+            bf_track_ = Track{ proc_track_->vert.point, TVector3 { rt.bdxdz, rt.bdydz, 1} };
+        }
     }
 
     int BFSingleRecoTrack::get_charge() const
@@ -209,8 +224,8 @@ namespace fn
     }
 
     BFSingleTrack::BFSingleTrack( const fne::Event * event, 
-            YAML::Node& instruct, KaonTrack& kt)
-        :event_( event ), kt_( kt )
+            YAML::Node& instruct, KaonTrack& kt, bool do_bf)
+        :event_( event ), kt_( kt ), do_bf_( do_bf )
     {
         //Load BF single track parameters
         try
@@ -426,15 +441,15 @@ namespace fn
             << "BFST: Passed! computing BF " << ntracks;
 
         //Compute details for selected track
-        single_reco_track_.update( &proc_tracks_[0], event_ );
+        single_reco_track_.update( &proc_tracks_[0], event_, do_bf_ );
         return true;
     }
 
     //--------------------------------------------------
 
     BFScatterSingleTrack::BFScatterSingleTrack( const fne::Event * event,
-            YAML::Node& instruct, KaonTrack& kt )
-        :BFSingleTrack( event, instruct, kt), event_( event)
+            YAML::Node& instruct, KaonTrack& kt, bool do_bf)
+        :BFSingleTrack( event, instruct, kt, do_bf), event_( event)
     {
         double angle_sigma = get_yaml<double>( instruct, "angle_sigma" );
         double angle_frequency = get_yaml<double>( instruct, "angle_frequency" );

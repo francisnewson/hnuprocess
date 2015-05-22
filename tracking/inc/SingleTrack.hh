@@ -118,7 +118,7 @@ namespace fn
             BFSingleRecoTrack();
             void update(  
                     const processing_track * proc_track, 
-                    const fne::Event * event );
+                    const fne::Event * event, bool do_bf = true );
 
             int get_charge() const;
 
@@ -161,7 +161,8 @@ namespace fn
     {
         public:
             BFSingleTrack( const fne::Event * event, 
-                    YAML::Node& instruct, KaonTrack& kt );
+                    YAML::Node& instruct, KaonTrack& kt,
+                    bool do_bf = true);
 
 
         private:
@@ -193,6 +194,8 @@ namespace fn
             double dch_1_merge_sep_;
 
             KaonTrack& kt_;
+
+            bool do_bf_;
     };
 
     //--------------------------------------------------
@@ -250,7 +253,7 @@ namespace fn
     {
         public:
             BFScatterSingleTrack( const fne::Event * event,
-                    YAML::Node& instruct, KaonTrack& kt );
+                    YAML::Node& instruct, KaonTrack& kt, bool do_bf = true );
 
         private:
             void modify_processing_track( processing_track& pt ) const;

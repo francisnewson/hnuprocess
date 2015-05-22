@@ -43,6 +43,7 @@ namespace fn
         double r;
         double z;
         double t;
+        double phi;
     };
 
     class Km2K2piClusters
@@ -94,6 +95,9 @@ namespace fn
             TH2D * h_mc_photon_ds_E_;
             TH2D * h_mc_photon_E_vs_E_;
             TH2D * h_mc_photon_r_vs_r_;
+            TH2D * h_mc_photon_phi_vs_phi_;
+            TH1D * h_mc_photon_dphi_;
+            TH2D * h_mc_photon_dphi_p_;
             TH2D * h_mc_photon_ds_vs_ds_;
             TH1D * h_mc_photon_n_;
 

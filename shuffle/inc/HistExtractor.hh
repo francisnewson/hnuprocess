@@ -41,6 +41,9 @@ namespace fn
             void set_pre_path( boost::filesystem::path p );
             void set_post_path( boost::filesystem::path p );
             void set_rebin( int rebin );
+            void reset_collapse();
+            void set_collapse_x( bool col_x);
+            void set_collapse_y( bool col_y);
             virtual std::unique_ptr<TH1> get_hist ( boost::filesystem::path p );
 
         private:
@@ -48,6 +51,8 @@ namespace fn
             boost::filesystem::path post_;
             FNTFile& fntf_;
             int rebin_;
+            bool col_x_;
+            bool col_y_;
     };
 
     template <class IT>
@@ -66,6 +71,7 @@ namespace fn
                 result->Add( current_hist.get() );
                 ++current;
             }
+
             return result;
         }
 

@@ -39,7 +39,7 @@ namespace fn
         h_gt = hs.MakeTH1D( 
                 Form( "h_gt_%s", prefix.c_str() ), 
                 Form( "Photon angle for %s", name.c_str() ),
-                100, 0, 0.05, "angle (rad)" );
+                250, 0, 0.05, "angle (rad)" );
 
         h_Ep = hs.MakeTH2D( 
                 Form( "h_Ep_%s", prefix.c_str() ), 

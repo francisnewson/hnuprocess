@@ -55,7 +55,7 @@ namespace fn
 
         h_cluster_zpipe_t_ = hs_.MakeTH2D( Form( "h_%s_cluster_zpipe_t", prefix.c_str() ),  
                 Form( "Pipe interaction ( %s )", name.c_str() ),
-                120, 0, 12000, "zpipe (cm)", 100, 0, 0.05, "t)" );
+                150, 0, 15000, "zpipe (cm)", 100, 0, 0.05, "t)" );
 
         h_cluster_ds_ds_ = hs_.MakeTH2D( Form( "h_%s_cluster_ds_ds", prefix.c_str() ),  
                 Form( "dS for 2 clusters ( %s )", name.c_str() ),
@@ -108,7 +108,7 @@ namespace fn
             h_cluster_ds_E_->Fill( ds, energy, wgt );
             h_cluster_E_->Fill( energy, wgt );
 
-            h_cluster_zpipe_t_->Fill( z_pipe, photon_angle );
+            h_cluster_zpipe_t_->Fill( z_pipe, photon_angle, wgt );
 
             props.r = r;
             props.ds = ds;
@@ -168,12 +168,25 @@ namespace fn
                 "mc track cluster radius correlation",
                 150, 0, 300, "r (cm)", 150, 0, 300, "r (cm)" );
 
+        h_mc_photon_phi_vs_phi_ = hs_.MakeTH2D( "h_mc_photon_phi_vs_phi", 
+                "Photon azimuthal positions",
+                100, 0, 2 * 3.141592, "phi (rad)",
+                100, 0, 2 * 3.141592, "phi (rad)" );
+
+        h_mc_photon_dphi_p_ = hs_.MakeTH2D( "h_mc_photon_dphi_p_", 
+                "Photon azimuthal positions vs pion momentum",
+                100, 0, 100 , "p (GeV)",
+                100, 0, 6, "phi (rad)" );
+
         h_mc_photon_E_vs_E_ = hs_.MakeTH2D( "h_mc_photon_E_vs_E", 
                 "mc track cluster energy correlation",
                 100, 0, 100, "energy (GeV)", 100, 0, 100, "energy (GeV)" );
 
         h_mc_photon_n_ = hs_.MakeTH1D( "h_mc_photon_n", "MC Photon count",
                 5, -0.5, 4.5, "n photons" );
+
+        h_mc_photon_dphi_ = hs_.MakeTH1D( "h_mc_photon_dphi", "MC Photon delta azimuth",
+                100, 0,  4, "dphi" );
 
     }
 
@@ -223,6 +236,7 @@ namespace fn
             props.r = photon_impact.Perp();
             props.z = vertex.Z();
             props.t =  momentum.Theta();
+            props.phi = photon_impact.Phi();
 
             h_mc_photon_t_z_->Fill( props.t , props.z, wgt );
             h_mc_photon_r_->Fill( props.r , wgt );
@@ -238,6 +252,17 @@ namespace fn
             h_mc_photon_E_vs_E_->Fill( photon_props[0].E, photon_props[1].E, wgt );
             h_mc_photon_r_vs_r_->Fill( photon_props[0].r, photon_props[1].r, wgt );
             h_mc_photon_ds_vs_ds_->Fill( photon_props[0].ds, photon_props[1].ds, wgt );
+            h_mc_photon_phi_vs_phi_->Fill( photon_props[0].phi, photon_props[1].phi, wgt );
+
+            double dphi = fabs(photon_props[0].phi- photon_props[1].phi );
+            if (dphi > na62const::pi )
+            {
+                dphi = 2 * na62const::pi - dphi;
+            }
+
+            h_mc_photon_dphi_->Fill( dphi, wgt );
+            h_mc_photon_dphi_p_->Fill( pion->momentum.P(), dphi, wgt );
+            h_mc_photon_dphi_->Fill( dphi, wgt );
         }
     }
 

@@ -26,8 +26,8 @@ scaling:
             input_file: tdata/rk_selection/all.rk_selection.root
             plot_path: km2_rk_full/h_mini_m2m_kmu
 
-            min_mass: -0.03
-            max_mass:  0.00
+            min_mass: -0.01
+            max_mass:  0.01
 
     - scaling_method:
         strategy: m2
@@ -55,8 +55,8 @@ scaling:
             input_file: tdata/rk_selection/all.rk_selection.root
             plot_path: km2_rk_full/h_mini_m2m_kmu
 
-            min_mass: -0.03
-            max_mass:  0.00
+            min_mass: -0.01
+            max_mass:  0.01
 
 weights:
     fid_file: use_root
@@ -74,6 +74,18 @@ mass_windows:
 output:
     input_file: tdata/rk_selection/all.rk_selection.root
     plots:
+        - path: km2_rk_single_track/h_m2m_kmu
+          name: rk_st_m2m
+          rebin: 10
+
+        - path: km2_rk_full/h_mini_m2m_kmu
+          name: rk_m2m
+          rebin: 10
+
+        - path: k2pi_loose_lkr/h_mini_p
+          name: rk_loose_p_k2pi
+          rebin: 1
+
         - path: k2pi_st_mid_mom_k2pi/h_bad_cluster_E
           name: mid_mom_bad_cluster_E
           rebin: 5
@@ -97,6 +109,27 @@ output:
         - path: k2pi_st_mid_mom_clusters/h_gt_bad
           name: mid_mom_bad_cluster_gt
           rebin: 1
+
+        - path: k2pi_st_mid_mom_k2pi/h_bad_cluster_zpipe_t
+          name: mid_mom_bad_cluster_zpipe_t
+          rebin: 1
+
+        - path: k2pi_st_mid_mom_k2pi/h_bad_cluster_zpipe_t
+          name: mid_mom_bad_cluster_zpipe
+          collapse_x: true
+          rebin: 2
+
+        - path: k2pi_st_mid_mom_k2pi/h_all_cluster_zpipe_t
+          name: mid_mom_all_cluster_zpipe_t
+          rebin: 1
+
+        - path: k2pi_st_low_mom_k2pi/h_all_cluster_zpipe_t
+          name: low_mom_all_cluster_zpipe_t
+          rebin: 1
+
+        - path: k2pi_st_low_mom_k2pi/h_bad_cluster_zpipe_t
+          name: low_mom_bad_cluster_zpipe_t
+          rebin: 2
 
 
         - path: k2pi_st_low_mom_k2pi/h_bad_cluster_E

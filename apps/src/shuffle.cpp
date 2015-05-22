@@ -165,14 +165,10 @@ int main( int argc, char * argv[] )
 
         std::cout << "Plotting: " <<  std::setw(40) << name << "   from    " << path <<  std::endl;
 
-        if ( const auto& rebin_node = plot_node["rebin"] )
-        {
-            ce_stack.set_rebin( rebin_node.as<int>() );
-        }
-        else
-        {
-            ce_stack.set_rebin( 1 );
-        }
+        ce_stack.set_rebin( plot_node["rebin"].as<int>( 1 ) );
+        ce_stack.reset_collapse();
+        ce_stack.set_collapse_x( plot_node["collapse_x"].as<bool>( false ) );
+        ce_stack.set_collapse_y( plot_node["collapse_y"].as<bool>( false ) );
 
         ce_stack.set_post_path( path );
 

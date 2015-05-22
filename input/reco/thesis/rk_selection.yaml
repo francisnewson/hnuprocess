@@ -571,6 +571,9 @@
 
 #--------
 
+- analysis: { type: Km2Plotter, name: k2pi_st, folder: k2pi_st, mini: true,
+     tfile: tfout, selection: k2pi_selection_st,  inputs: { km2event: auto_km2_event } }
+
 - analysis: { type: Km2Plotter, name: k2pi_st_low_mom, folder: k2pi_st_low_mom, mini: true,
      tfile: tfout, selection: k2pi_selection_st_low_mom,  inputs: { km2event: auto_km2_event } }
 
@@ -599,6 +602,10 @@
 
 #-------- 
 
+- analysis: { type: Km2ClusterPlotter, name: k2pi_st_clusters, folder: k2pi_st_clusters,
+    tfile: tfout, selection: k2pi_selection_st,
+    inputs: { km2event: auto_km2_event, km2clusters: loose_km2_clusters, ClusterCorrector: cluster_corrector} }
+
 - analysis: { type: Km2ClusterPlotter, name: k2pi_st_low_mom_clusters, folder: k2pi_st_low_mom_clusters,
     tfile: tfout, selection: k2pi_selection_st_low_mom,
     inputs: { km2event: auto_km2_event, km2clusters: loose_km2_clusters, ClusterCorrector: cluster_corrector} }
@@ -612,6 +619,9 @@
     inputs: { km2event: auto_km2_event, km2clusters: loose_km2_clusters, ClusterCorrector: cluster_corrector} }
 
 #-------- 
+- analysis: { type: Km2K2pi, name: k2pi_st_k2pi, folder: k2pi_st_k2pi,
+    tfile: tfout, selection: k2pi_selection_st,
+    inputs: { km2event: auto_km2_event, km2clusters: loose_km2_clusters, ClusterCorrector: cluster_corrector} }
 
 - analysis: { type: Km2K2pi, name: k2pi_st_low_mom_k2pi, folder: k2pi_st_low_mom_k2pi,
     tfile: tfout, selection: k2pi_selection_st_low_mom,
