@@ -36,6 +36,10 @@ namespace fn
                 {
                     return new MCScatterSingleMuon( event, *st );
                 }
+                else if ( rf.is_halo() )
+                {
+                    return new HaloScatterSingleMuon( event, *st );
+                }
                 else
                 {
                     return new RawSingleMuon( event, *st );
@@ -133,10 +137,132 @@ namespace fn
 
     //--------------------------------------------------
 
-    MCScatterSingleMuon::MCScatterSingleMuon( const fne::Event * e, const SingleTrack& st)
+    ScatterSingleMuon::ScatterSingleMuon( const fne::Event * e, const SingleTrack& st)
         :e_( e ), st_( st ), pf_( "input/reco/conditions/run_polarity.dat" )
     {}
 
+    void ScatterSingleMuon::new_event()      { dirty_ = true; }
+    bool ScatterSingleMuon::found()    const { update(); return found_muon_; }
+    double ScatterSingleMuon::weight() const { update(); return 1.0; }
+    double ScatterSingleMuon::x()      const { update(); return x_; }
+    double ScatterSingleMuon::y()      const { update(); return y_; }
+
+    void ScatterSingleMuon::new_run()
+    {
+        BOOST_LOG_SEV( get_log(), always_print)
+            << "New run " << e_->header.run
+            << ". Setting magnet polarity to " << pf_.get_polarity( e_->header.run);
+
+        mss_.set_magnet_polarity( pf_.get_polarity( e_->header.run ) );
+    }
+
+    void ScatterSingleMuon::update() const
+    {
+        if (!dirty_ ){ return ; }
+
+        boost::optional<toymc::track_params> muon_track = get_muon_track( e_, st_ );
+
+        if ( !muon_track )
+        { 
+            found_muon_ = false;
+            dirty_ = false;
+            return;
+        }
+
+        std::pair<double,double> muon_hit = get_muon_position( *muon_track );
+        x_ = muon_hit.first;
+        y_ = muon_hit.second;
+
+        found_muon_ = true;
+        dirty_ = false;
+    }
+
+    std::pair<double,double> ScatterSingleMuon::get_muon_position( toymc::track_params tp) const
+    {
+        //Propagate MC muon
+        std::pair<double, double> muv_hit_xy = mss_.transfer( tp );
+
+        x_ = muv_hit_xy.first  - fmod( muv_hit_xy.first  , na62const::muv_half_width);
+        y_ = muv_hit_xy.second - fmod( muv_hit_xy.second , na62const::muv_half_width);
+        return std::make_pair( x_, y_ );
+    }
+
+    //--------------------------------------------------
+
+    MCScatterSingleMuon::MCScatterSingleMuon( const fne::Event * e, const SingleTrack& st)
+        :ScatterSingleMuon(  e, st  ) {}
+
+    boost::optional<toymc::track_params> 
+        MCScatterSingleMuon::get_muon_track( const fne::Event * e, const SingleTrack& st ) const
+        {
+            //set_log_level( always_print );
+
+            boost::optional<toymc::track_params> result = boost::none;
+
+            //Extract MC muon
+            auto muon_id = find_muon( e->mc );
+
+            BOOST_LOG_SEV( get_log(), log_level() ) << "Muon id: " << muon_id ;
+
+            //no muon found
+            if ( muon_id == e->mc.npart ) { return result; }
+
+            fne::McParticle * rm = 
+                static_cast<fne::McParticle*>( e->mc.particles.At( muon_id ) );
+
+            //check production and decay points
+            const TVector3& prod = rm->production_vertex;
+            const TLorentzVector& four_mom = rm->momentum;
+            double prod_z = prod.Z();
+            double decay_z = rm->decay_vertex.Z();
+
+            //No decay is indicated by COmPact as some negative value
+            if ( decay_z < prod_z )
+            {
+                decay_z = 100000;
+            }
+
+            BOOST_LOG_SEV( get_log(), log_level() )
+                << "Track: " << prod_z << " - " << decay_z ;
+
+
+            if ( prod_z <  (na62const::zLkr - na62const::len_lkr) &&  decay_z > na62const::zMuv2 )
+            {
+                result = toymc::track_params{ four_mom.P(), +1, 
+                    prod.X(), four_mom.X() / four_mom.Z(),
+                    prod.Y(), four_mom.Y() / four_mom.Z(),
+                    prod.Z() } ;
+            }
+
+            return result;
+        }
+
+    //--------------------------------------------------
+
+    HaloScatterSingleMuon::HaloScatterSingleMuon
+        ( const fne::Event * e, const SingleTrack& st)
+        :ScatterSingleMuon( e, st ){}
+
+    boost::optional<toymc::track_params> 
+        HaloScatterSingleMuon::get_muon_track( const fne::Event * e, const SingleTrack& st ) const
+        {
+            boost::optional<toymc::track_params> result = boost::none;
+            const SingleRecoTrack& srt = st.get_single_track();
+            double momentum = srt.get_mom();
+            TVector3 point = srt.extrapolate_ds( na62const::zDch3 );
+            TVector3 dir = srt.get_ds_mom();
+
+            result = toymc::track_params{ momentum, +1, 
+                point.X(), dir.X() / dir.Z(),
+                point.Y(), dir.Y() / dir.Z(),
+                point.Z() } ;
+
+            return result;
+        }
+
+    //--------------------------------------------------
+
+#if 0
     void MCScatterSingleMuon::new_event()
     {
         dirty_ = true;
@@ -214,4 +340,11 @@ namespace fn
     double MCScatterSingleMuon::weight() const{ update(); return 1.0; }
     double MCScatterSingleMuon::x()      const{ update(); return x_; }
     double MCScatterSingleMuon::y()      const{ update(); return y_; }
+
+    //--------------------------------------------------
+
+    MCScatterSingleMuon::MCScatterSingleMuon( const fne::Event * e, const SingleTrack& st)
+        :e_( e ), st_( st ), pf_( "input/reco/conditions/run_polarity.dat" )
+
+#endif
 }

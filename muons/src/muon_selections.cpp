@@ -53,11 +53,41 @@ namespace fn
     REG_DEF_SUB( NoAssMuon );
 
     NoAssMuon::NoAssMuon( const SingleMuon& sm, 
-            const SingleTrack& st, double multiplier )
-        :sm_(sm), st_(st), multiplier_( multiplier)
+            const SingleTrack& st, double multiplier, const Selection& weighter, bool mc )
+        :sm_(sm), st_(st), multiplier_( multiplier), weighter_( weighter ), mc_( mc )
     {}
 
     bool NoAssMuon::do_check() const
+    {
+        if ( mc_ )
+        {
+            return true;
+        }
+        else
+        {
+            return raw_pass();
+        }
+    }
+
+    double NoAssMuon::do_weight() const
+    {
+        if ( !mc_) { return 1.0; }
+
+        if (raw_pass() )
+        {
+            BOOST_LOG_SEV( get_log(), log_level() ) 
+                << "raw_pass" ;
+            return 1.0;
+        }
+        else
+        {
+            BOOST_LOG_SEV( get_log(), log_level() ) 
+                << "weight: " << 1 - weighter_.get_weight()  ;
+            return (1 - weighter_.get_weight() );
+        }
+    }
+
+    bool NoAssMuon::raw_pass() const
     {
         //check if we have a muon
         if ( ! sm_.found() )
@@ -66,10 +96,12 @@ namespace fn
         }
 
         const auto& srt = st_.get_single_track();
-        return ( !check_muon_track_distance( sm_, srt, multiplier_ ) );
+        if ( !check_muon_track_distance( sm_, srt, multiplier_ ) )
+        {
+            return true;
+        }
+        return false;
     }
-
-    double NoAssMuon::do_weight() const { return 1.0; }
 
     template<>
         Subscriber * create_subscriber<NoAssMuon>
@@ -79,7 +111,12 @@ namespace fn
             const SingleMuon * sm = get_single_muon( instruct, rf );
             double multiplier = get_yaml<double>( instruct, "multiplier" );
 
-            return new NoAssMuon(*sm, *st, multiplier );
+            const Selection * weighter = rf.get_selection(
+                    get_yaml<std::string>( instruct, "weighter" ) );
+
+            bool mc = rf.is_mc() || rf.is_halo();
+
+            return new NoAssMuon(*sm, *st, multiplier, *weighter, mc );
         }
 
 
@@ -197,7 +234,7 @@ namespace fn
         Subscriber * create_subscriber<MuonTHXYWeight>
         (YAML::Node& instruct, RecoFactory& rf )
         {
-            if( !rf.is_mc() ){ return new FunctionCut<auto_pass>{{0}} ; }
+            if( ! (rf.is_mc() || rf.is_halo() ) ){ return new FunctionCut<auto_pass>{{0}} ; }
 
             const SingleTrack * st = get_single_track( instruct, rf );
 
@@ -237,7 +274,7 @@ namespace fn
         Subscriber * create_subscriber<MuonTHPWeight>
         (YAML::Node& instruct, RecoFactory& rf )
         {
-            if( !rf.is_mc() ){ return new FunctionCut<auto_pass>{{0}} ; }
+            if( ! (rf.is_mc() || rf.is_halo() ) ){ return new FunctionCut<auto_pass>{{0}} ; }
 
             const SingleTrack * st = get_single_track( instruct, rf );
 
@@ -249,6 +286,12 @@ namespace fn
 
 
             TFile teffs( effs_file.c_str() );
+            if ( teffs.IsZombie() ){ throw std::runtime_error(
+                    "Couldn't open " + effs_file ); }
+
+            teffs.Print();
+            teffs.ls();
+
             auto eff_hist = extract_hist<TH1D>( teffs, effs_hist_path );
 
             return new MuonTHPWeight( *st, *eff_hist );

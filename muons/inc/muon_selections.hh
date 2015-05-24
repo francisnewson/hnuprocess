@@ -23,8 +23,9 @@ namespace fn
 
     //Require a muon associated with the track
     //Always needs MUV1 and MUV2
-    //Efficiency is handled by SingleMuon class
+    //Scattering and track handling is handled by SingleMuon class
     //Additional cut on track-muon separation is handled here.
+    //Efficiency weighting is applied later
     class MuonReq : public CachedSelection
     {
         public:
@@ -48,28 +49,34 @@ namespace fn
 
     //--------------------------------------------------
 
+    //Require NO muon associated with track
+    //Efficiency weighting is handled here
+    //(not by separate cuts)
     class NoAssMuon : public CachedSelection
     {
         public:
             NoAssMuon( const SingleMuon& sm, 
-                    const SingleTrack& st, double multiplier );
+                    const SingleTrack& st, double multiplier,
+                    const Selection& weighter, bool mc);
 
         private:
             bool do_check() const;
             double do_weight() const;
 
+            bool raw_pass() const;
+
             const SingleMuon& sm_;
             const SingleTrack& st_;
             double multiplier_;
 
+            const Selection& weighter_;
+            bool mc_;
             REG_DEC_SUB( NoAssMuon );
     };
 
     template<>
         Subscriber * create_subscriber<NoAssMuon>
         (YAML::Node& instruct, RecoFactory& rf );
-
-
 
     //--------------------------------------------------
 

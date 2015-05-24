@@ -4,36 +4,36 @@
 namespace fn
 {
 
-    FourMomComp::FourMomComp()
+    FourMomComp::FourMomComp( double scale, double m2_scale )
     {
         hdp_ = hs_.MakeTH1D( "hdp", ( name_ + " #Delta p").c_str() ,
-                1000, -50, 50, "#Delta p", "#events" );
+                1000, scale * -50, scale * 50, "#Delta p", "#events" );
 
         hdpop_ = hs_.MakeTH1D( "hdpop_", ( name_ + " #Delta p  / p").c_str() ,
-                1000, -2, 2, "#Delta p", "#events" );
+                1000, scale * -2, scale * 2, "#Delta p", "#events" );
 
         hdpop2_ = hs_.MakeTH1D( "hdpop2_", ( name_ + " #Delta p  / p^2").c_str() ,
-                1000, -0.2, 0.2, "#Delta p", "#events" );
+                1000, scale * -0.2, scale * 0.2, "#Delta p", "#events" );
 
         hdpvsp_ = hs_.MakeTH2D( "hdpvsp_", ( name_ + " #Delta p vs p").c_str(),
                 100, 0, 100, "p",
-                1000, -50, 50, "#Delta p" );
+                1000, scale * -50, scale * 50, "#Delta p" );
 
         hdpopvsp_ = hs_.MakeTH2D( "hdpopvsp_", ( name_ + " #Delta p/p vs p").c_str(),
                 100, 0, 100, "p",
-                1000, -5, 5, "#Delta p / p" );
+                1000, scale * -5, scale * 5, "#Delta p / p" );
 
         hdtx_ = hs_.MakeTH1D( "hdtx",
                 ( name_ + " #Delta #theta_x").c_str() ,
-                1000, -0.05, 0.05, "#Delta #theta_x", "#events" );
+                1000, scale * -0.05, scale * 0.05, "#Delta #theta_x", "#events" );
 
         hdty_ = hs_.MakeTH1D( "hdty",
                 ( name_ + " #Delta #theta_y").c_str() ,
-                1000, -0.05, 0.05, "#Delta #theta_y", "#events" );
+                1000, scale * -0.05, scale * 0.05, "#Delta #theta_y", "#events" );
 
         hdm2_ = hs_.MakeTH1D( "hdm2",
                 ( name_ + " #Delta m^{2}_{miss}").c_str(),
-                2000, -0.2, 0.2, " #Delta m^{2}_{miss}" );
+                2000,  m2_scale * -0.2, m2_scale * 0.2, " #Delta m^{2}_{miss}" );
     }
 
     void FourMomComp::FillM2( const TLorentzVector& a, 

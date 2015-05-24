@@ -90,18 +90,45 @@ namespace fn
 
     void BFSingleRecoTrack::update(  
             const processing_track * proc_track, 
-            const fne::Event * event, bool do_bf )
+            const fne::Event * event, const Track& kaon_track,
+            logger& fnlog, bool do_bf )
     {
         proc_track_ = proc_track;
         if ( do_bf )
         {
-            bf_track_ = bfc_.compute_bf_track
+            //bf track routine returns track with the corrected direction
+            Track effective_track_params = bfc_.compute_bf_track
                 ( proc_track_->corr_mom, proc_track_->rt, proc_track_->vert );
+
+            //new track should start at midpoint with corrected direction
+            Track pt_track = get_bz_track( *proc_track_->rt );
+            double mid_z = 0.5 * ( proc_track_->vert.point.Z() + na62const::bz_tracking );
+            TVector3 mid_point = pt_track.extrapolate( mid_z );
+
+            bf_track_ = Track{ mid_point, effective_track_params.get_direction() };
         }
         else
         {
             const fne::RecoTrack& rt = *proc_track_->rt;
-            bf_track_ = Track{ proc_track_->vert.point, TVector3 { rt.bdxdz, rt.bdydz, 1} };
+            bf_track_ = Track{ TVector3{ rt.bx, rt.by, na62const::bz_tracking}, TVector3 { rt.bdxdz, rt.bdydz, 1} };
+        }
+
+        try
+        {
+            bf_vertex_ = compute_cda( bf_track_, kaon_track );
+        }
+        catch ( std::domain_error& e )
+        {
+            //Handle parallel tracks
+            BOOST_LOG_SEV( fnlog, always_print )
+                << "Event : "
+                << event->header.run << " "
+                << event->header.burst_time << " " 
+                << event->header.compact_number 
+                << " " << e.what() ;
+
+            bf_vertex_.point = TVector3( 0, 0, - 1000000.0 );
+            bf_vertex_.cda = ( extrapolate_z( *proc_track->rt, 0) - kaon_track.extrapolate(0) ).Mag() ;
         }
     }
 
@@ -122,12 +149,14 @@ namespace fn
 
     TVector3 BFSingleRecoTrack::get_vertex() const
     {
-        return proc_track_->vert.point;
+        //return proc_track_->vert.point;
+        return bf_vertex_.point;
     }
 
     double BFSingleRecoTrack::get_cda() const
     {
-        return proc_track_->vert.cda;
+    //    return proc_track_->vert.cda;
+    return bf_vertex_.cda;
     }
 
     double BFSingleRecoTrack::get_time() const
@@ -441,7 +470,7 @@ namespace fn
             << "BFST: Passed! computing BF " << ntracks;
 
         //Compute details for selected track
-        single_reco_track_.update( &proc_tracks_[0], event_, do_bf_ );
+        single_reco_track_.update( &proc_tracks_[0], event_, kt_.get_kaon_track() , get_log(), do_bf_);
         return true;
     }
 

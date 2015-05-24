@@ -26,8 +26,8 @@ scaling:
             input_file: tdata/beam_corrections/all.beam_corrections.root
             plot_path: weighted_km2_auto_full/h_m2m_kmu
 
-            min_mass: -0.02
-            max_mass:  0.02
+            min_mass: -0.01
+            max_mass:  0.01
 
     - scaling_method:
         strategy: m2
@@ -55,8 +55,8 @@ scaling:
             input_file: tdata/beam_corrections/all.beam_corrections.root
             plot_path: weighted_km2_auto_full/h_m2m_kmu
 
-            min_mass: -0.04
-            max_mass:  0.00
+            min_mass: -0.01
+            max_mass:  0.01
 
 weights:
     fid_file: use_root
@@ -73,8 +73,11 @@ mass_windows:
 
 output:
     input_file: tdata/beam_corrections/all.beam_corrections.root
-    plot_path: weighted_km2_auto_full/h_m2m_kmu
-    rebin: 10
+
+    plots:
+        - path: km2_st_wgt/h_m2m_kmu
+          name: st_m2m
+          rebin: 10
 
     data_plot:
         channels:
@@ -101,6 +104,22 @@ output:
             channels:
                 - p5.km3.v2.neg
 
+        - item:
+            name: ke3_pos
+            scaling: mc_pos
+            type: ke3
+            fid_weight: p5.ke3.v2.pos
+            channels:
+                - p5.ke3.v2.pos
+
+        - item:
+            name: ke3_neg
+            scaling: mc_neg
+            type: ke3
+            fid_weight: p5.ke3.v2.neg
+            channels:
+                - p5.ke3.v2.neg
+
 
         - item:
             name: k3pi_pos
@@ -117,6 +136,22 @@ output:
             type: k3pi
             channels:
                 - p5.k3pi.v2.neg
+
+        - item:
+            name: k3pi0_pos
+            scaling: mc_pos
+            fid_weight: p5.k3pi0.v2.pos
+            type: k3pi0
+            channels:
+                - p5.k3pi0.v2.pos
+
+        - item:
+            name: k3pi0_neg
+            scaling: mc_neg
+            fid_weight: p5.k3pi0.v2.neg
+            type: k3pi0
+            channels:
+                - p5.k3pi0.v2.neg
 
         - item:
             name: k2pig_pos

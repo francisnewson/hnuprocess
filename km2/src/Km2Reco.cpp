@@ -25,11 +25,15 @@ namespace fn
         double muon_energy = std::hypot( muon_mom, muon_mass );
         TLorentzVector daughter_muon_4mom { muon_3mom, muon_energy };
 
+        p4_mu_ = daughter_muon_4mom;
+
         //parent kaon 4 mom
         TVector3  kaon_3mom = kt_->get_kaon_3mom();
         double kaon_mom = kt_->get_kaon_mom();
         double kaon_energy = std::hypot( kaon_mom, kaon_mass );
         TLorentzVector parent_kaon_4mom { kaon_3mom, kaon_energy };
+
+        p4_k_ = parent_kaon_4mom;
 
         //parent pion 4 mom
         double parent_pion_energy = std::hypot( kaon_mom, pion_mass );
@@ -87,6 +91,15 @@ namespace fn
     const SingleRecoTrack * Km2RecoEvent::get_reco_track() const
     { return srt_; }
 
+    TLorentzVector Km2RecoEvent::get_p4_miss_kmu() const
+    { return p4miss_kmu_; }
+
+    TLorentzVector Km2RecoEvent::get_p4_mu() const
+    { return p4_mu_; }
+
+    TLorentzVector Km2RecoEvent::get_p4_k() const
+    { return p4_k_; }
+
     TVector3 Km2RecoEvent::get_vertex() const
     { return srt_->get_vertex(); }
 
@@ -143,12 +156,12 @@ namespace fn
     //--------------------------------------------------
 
     Km2Event * get_km2_event
-        ( YAML::Node& instruct, RecoFactory& rf )
+        ( YAML::Node& instruct, RecoFactory& rf, std::string label )
         {
-            YAML::Node yogt = instruct["inputs"]["km2event"];
+            YAML::Node yogt = instruct["inputs"][label];
 
             if ( !yogt )
-            {throw Xcept<MissingNode>( "km2event" );}
+            {throw Xcept<MissingNode>( label );}
 
             Km2Event * ogt = dynamic_cast<Km2Event*>
                 ( rf.get_subscriber( yogt.as<std::string>() ));

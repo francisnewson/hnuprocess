@@ -118,7 +118,8 @@ namespace fn
             BFSingleRecoTrack();
             void update(  
                     const processing_track * proc_track, 
-                    const fne::Event * event, bool do_bf = true );
+                    const fne::Event * event, const Track& kaon_track,
+                    logger& fnlog, bool do_bf = true );
 
             int get_charge() const;
 
@@ -152,6 +153,7 @@ namespace fn
             BFCorrection& bfc_;
             const processing_track * proc_track_;
             Track bf_track_;
+            Vertex bf_vertex_;
     };
 
     //--------------------------------------------------

@@ -3,6 +3,7 @@
 #include "Subscriber.hh"
 #include "MuonScatterSim.hh"
 #include "PolarityFinder.hh"
+#include  <boost/optional.hpp>
 #if 0
 /*
  *  ____  _             _      __  __
@@ -70,6 +71,67 @@ namespace fn
 
     //--------------------------------------------------
 
+    class ScatterSingleMuon  : public SingleMuon
+    {
+        public:
+            ScatterSingleMuon
+                ( const fne::Event * e, const SingleTrack& st);
+
+            virtual void new_event();
+            virtual void new_run();
+
+            bool found() const;
+            double weight() const;
+            double x() const;
+            double y() const;
+
+        private:
+            const fne::Event * e_;
+            const SingleTrack& st_;
+
+            void update() const;
+
+            virtual boost::optional<toymc::track_params> 
+                get_muon_track( const fne::Event * e, const SingleTrack& st ) const = 0;
+
+            virtual std::pair<double,double> get_muon_position( toymc::track_params tp) const;
+
+            mutable bool dirty_;
+            mutable bool found_muon_;
+            mutable double x_;
+            mutable double y_;
+
+            MuonScatterSim mss_;
+            PolarityFinder pf_;
+    };
+
+    //--------------------------------------------------
+
+    //Uses MC muon particle and simulates scattering
+    class MCScatterSingleMuon : public ScatterSingleMuon
+    {
+        public:
+            MCScatterSingleMuon
+                ( const fne::Event * e, const SingleTrack& st);
+
+            boost::optional<toymc::track_params> 
+                get_muon_track( const fne::Event * e, const SingleTrack& st ) const;
+    };
+
+    //--------------------------------------------------
+
+    //Uses halo muon track and simulates scattering
+    class HaloScatterSingleMuon : public ScatterSingleMuon
+    {
+        public:
+            HaloScatterSingleMuon
+                ( const fne::Event * e, const SingleTrack& st);
+
+            boost::optional<toymc::track_params> 
+                get_muon_track( const fne::Event * e, const SingleTrack& st ) const;
+    };
+
+#if 0 
     //Uses MC muon particle and simulates scattering
     class MCScatterSingleMuon : public SingleMuon
     {
@@ -99,6 +161,36 @@ namespace fn
             MuonScatterSim mss_;
             PolarityFinder pf_;
     };
+
+    class HaloScatterSingleMuon : public SingleMuon
+    {
+        public:
+            HaloScatterSingleMuon
+                ( const fne::Event * e, const SingleTrack& st);
+
+            virtual void new_event();
+            virtual void new_run();
+
+            bool found() const;
+            double weight() const;
+            double x() const;
+            double y() const;
+
+        private:
+            const fne::Event * e_;
+            const SingleTrack& st_;
+
+            void update() const;
+            mutable bool dirty_;
+            mutable bool found_muon_;
+            mutable double x_;
+            mutable double y_;
+
+            MuonScatterSim mss_;
+            PolarityFinder pf_;
+    };
+
+#endif
 }
 #endif
 

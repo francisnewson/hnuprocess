@@ -10,7 +10,7 @@ namespace fn
     class FourMomComp
     {
         public:
-            FourMomComp();
+            FourMomComp( double scale = 1, double m2_scale = 1);
             void Fill( const TLorentzVector& a,
                     const TLorentzVector& b , double wgt );
 

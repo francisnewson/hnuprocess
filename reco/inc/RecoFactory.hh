@@ -43,7 +43,7 @@ namespace fn
 
             //logger
             void set_log( logger& log );
-            logger& get_log();
+            logger& get_log() const;
 
             //reco interaction
             Long64_t get_max_events();
@@ -80,6 +80,8 @@ namespace fn
             const GlobalStatus * get_global_status();
 
             bool is_mc() const;
+
+            bool is_halo() const;
 
             //stoppage
             bool* get_remote_stop() const;

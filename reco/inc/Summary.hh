@@ -53,7 +53,7 @@ namespace fn
         public:
             SummaryWeightVisitor();
             bool visit( Selection& ) ;
-            bool visit_enter( Selection& ){ return true;} 
+            bool visit_enter( Selection& );
             bool visit_leave( Selection& );
 
             void set_event_weight( double weight );
@@ -70,6 +70,7 @@ namespace fn
         private:
             container weights_;
             double event_weight_;
+            std::vector<double> weight_stack_;
     };
 
     /* **************************************************

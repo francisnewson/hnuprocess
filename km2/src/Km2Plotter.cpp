@@ -224,16 +224,20 @@ namespace fn
     {
         std::cout << "Km2MiniPlots constructor" << std::endl;
 
-        h_m2m_kmu_ = hs_.MakeTH1D( "h_mini_m2m_kmu", "K_{#mu2} missing mass",
+        h_m2m_kmu_ = hs_.MakeTH1D( "h_m2m_kmu", "K_{#mu2} missing mass",
                 10000, -0.7, 0.3, "m^{2}_{miss} ( GeV^{2}/ c^{4} )", "#events" ); 
 
-        h_p_ = hs_.MakeTH1D( "h_mini_p", "Momentum (GeV)",
+        h_m2m_kpi_ = hs_.MakeTH1D( "h_m2m_kpi", "K_{2#pi} missing mass",
+                10000, -0.7, 0.3, "m^{2}_{miss} ( GeV^{2}/ c^{4} )", "#events" ); 
+
+        h_p_ = hs_.MakeTH1D( "h_p", "Momentum (GeV)",
                 100, 0, 100, "p (GeV)" );
     }
 
     void Km2MiniPlots::Fill( const Km2RecoEvent& km2re, double wgt )
     {
         h_m2m_kmu_->Fill( km2re.get_m2m_kmu(), wgt );
+        h_m2m_kpi_->Fill( km2re.get_m2m_kpi(), wgt );
         h_p_->Fill( km2re.get_muon_mom(), wgt );
     }
 

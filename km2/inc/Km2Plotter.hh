@@ -109,6 +109,7 @@ namespace fn
         private:
             TH1D * h_p_;
             TH1D * h_m2m_kmu_;
+            TH1D * h_m2m_kpi_;
             HistStore hs_;
     };
 

@@ -13,7 +13,7 @@ namespace fn
     void RecoFactory::set_log( logger& log )
     { log_ = &log; }
 
-    logger& RecoFactory::get_log()
+    logger& RecoFactory::get_log() const
     { 
         if ( ! log_ )
         { 
@@ -229,6 +229,34 @@ namespace fn
     bool RecoFactory::is_mc() const
     {
         return reco_.is_mc();
+    }
+
+    bool RecoFactory::is_halo() const
+    {
+
+        boost::filesystem::path channel_classes_file
+            = "input/reco/channel_classes.yaml";
+
+        const auto& channel_classes_ = YAML::LoadFile( channel_classes_file.string() ).as
+            <std::map<std::string, std::vector<std::string>>>();
+
+        const auto& halo_channels = channel_classes_.at("p6");
+
+        bool result = false;
+
+        for (auto chan : halo_channels )
+        {
+            if ( chan == channel_ )
+            {
+                result =  true;
+            }
+        }
+
+        BOOST_LOG_SEV( get_log(), always_print )
+            << "Checking if " << channel_ << " is halo: "
+            << std::boolalpha << result;
+
+        return result;
     }
 
     //--------------------------------------------------

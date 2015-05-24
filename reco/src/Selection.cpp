@@ -93,7 +93,10 @@ namespace fn
         double weight = 1;
 
         for ( auto& selection : children_ )
-        { weight *= selection->get_weight(); }
+        { 
+            if ( ! selection->check() ) { break; }
+            weight *= selection->get_weight();
+        }
 
         return weight;
     }

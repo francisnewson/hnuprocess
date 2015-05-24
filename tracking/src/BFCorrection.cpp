@@ -19,6 +19,8 @@ namespace fn
         float tmom =  corr_mom;
 
         //Rawy track geometry
+        //blue_tack requires point at DCH1 but here DCH1 beams bz_tracking:
+        //ie. 9700.6 not 9708, so it's fine to take values straight from Compact.
         float Vpnt[2];
         Vpnt[0] = rt->bx;
         Vpnt[1] = rt->by;

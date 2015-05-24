@@ -99,7 +99,6 @@ namespace fn
         using std::vector;
         using std::string;
 
-
         //Channel definitions
         auto halo_channels = get_yaml<vector<string>>( scaling_config_, "halo_channels" );
         auto data_channels = get_yaml<vector<string>>( scaling_config_, "data_channels" );

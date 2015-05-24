@@ -144,7 +144,7 @@
 - input: { name : auto_bf_st, type : SingleTrack,  method : BF,
     init_min_mom: 3.0 , init_max_mom: 75.0,
     init_max_cda: 15.0, init_min_z: -2000.0, init_max_z:  9000.0,
-    dch_merge_sep: 0.5,
+    dch_merge_sep: 0.5, do_bf : true,
     inputs: { kt: auto_kaon_track } }
 
 - input: { name : no_bf_st, type : SingleTrack,  method : BF,
@@ -358,6 +358,16 @@
     selection: auto_full_selection
     inputs:
         km2event: auto_km2_event
+
+- analysis :
+    type: Km2MCPlots
+    name: km2_auto_full_mc
+    folder: km2_auto_full_mc
+    tfile: tfout
+    selection: auto_full_selection
+    inputs:
+        raw_km2event: no_bf_km2_event
+        corr_km2event: auto_km2_event
 
 - analysis :
     type: Km2Plotter

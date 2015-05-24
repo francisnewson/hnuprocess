@@ -363,13 +363,6 @@
     inputs:
         ogt: auto_bf_st
 
-- selection:
-    name: no_muon
-    type: NoAssMuon
-    multiplier: 4
-    inputs:
-        ogt: auto_bf_st
-        sm: single_muon
 
 - selection:
     name: muv_acc
@@ -387,6 +380,37 @@
     inputs:
         ogt: auto_bf_st
 
+- selection:
+    name: muon_xy_wgt
+    type: MuonTHXYWeight
+    effs_file: input/reco/conditions/muv_xy.root
+    effs_hist: rat_xy
+    inputs:
+        ogt: auto_bf_st
+
+- selection:
+    name: muon_p_wgt
+    type: MuonTHPWeight
+    effs_file: input/reco/conditions/muv_p.root
+    effs_hist: rat_p
+    inputs:
+        ogt: auto_bf_st
+
+- selection:
+    name: muon_wgt
+    type: CompositeSelection
+    children:
+        - muon_p_wgt
+        - muon_xy_wgt
+
+- selection:
+    name: no_muon
+    type: NoAssMuon
+    multiplier: 4
+    weighter: muon_wgt
+    inputs:
+        ogt: auto_bf_st
+        sm: single_muon
 
 ###################################################
 # SELECTIONS
@@ -475,10 +499,20 @@
 #K2pi VARIATIONS
 
 - selection:
+    name: muv_st
+    type: CompositeSelection
+    children :
+        - weighted_rk_track_selection
+        - muv_acc
+        - no_muon
+
+- selection:
     name: k2pi_selection_st
     type: CompositeSelection
     children :
         - weighted_rk_track_selection
+        - muv_acc
+        - no_muon
         - k2pi_m2m
 
 - selection:
@@ -533,11 +567,18 @@
     source: weighted_rk_selection
     ostream: os_stats
 
-- analysis:
+- analysis: 
     type: Summary
     name: print_stats
     base: passer
     source: weighted_rk_selection
+    ostream: os_cerr
+
+- analysis: 
+    type: Summary
+    name: print_stats_muv
+    base: passer
+    source: muv_st
     ostream: os_cerr
 
 - analysis:
@@ -571,7 +612,10 @@
 
 #--------
 
-- analysis: { type: Km2Plotter, name: k2pi_st, folder: k2pi_st, mini: true,
+- analysis: { type: Km2Plotter, name: plot_muv_st, folder: muv_st, mini: false,
+     tfile: tfout, selection: muv_st,  inputs: { km2event: auto_km2_event } }
+
+- analysis: { type: Km2Plotter, name: k2pi_st, folder: k2pi_st, mini: false,
      tfile: tfout, selection: k2pi_selection_st,  inputs: { km2event: auto_km2_event } }
 
 - analysis: { type: Km2Plotter, name: k2pi_st_low_mom, folder: k2pi_st_low_mom, mini: true,

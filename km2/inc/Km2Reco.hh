@@ -38,6 +38,10 @@ namespace fn
             double get_kaon_mom() const;
             const SingleRecoTrack * get_reco_track() const;
 
+            TLorentzVector get_p4_miss_kmu() const;
+            TLorentzVector get_p4_mu() const;
+            TLorentzVector get_p4_k() const;
+
             TVector3 get_vertex() const;
 
         private:
@@ -46,6 +50,8 @@ namespace fn
             const KaonTrack * kt_;
 
             TLorentzVector p4miss_kmu_;
+            TLorentzVector p4_mu_;
+            TLorentzVector p4_k_;
             double m2m_kmu_;
             double m2m_pimu_;
             double m2m_kpi_;
@@ -86,7 +92,7 @@ namespace fn
     //--------------------------------------------------
 
     Km2Event * get_km2_event
-        ( YAML::Node& instruct, RecoFactory& rf );
+        ( YAML::Node& instruct, RecoFactory& rf, std::string label = "km2event" );
 
 }
 #endif

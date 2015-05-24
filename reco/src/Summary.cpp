@@ -4,6 +4,7 @@
 #include "yaml-cpp/yaml.h"
 #include "yaml_help.hh"
 #include <iomanip>
+#include <cassert>
 #include "RecoFactory.hh"
 
 namespace fn
@@ -94,11 +95,16 @@ namespace fn
     //Initialize vector with space for maximum id
     //( should remove hardcoded max at some point)
     SummaryWeightVisitor::SummaryWeightVisitor()
-        :weights_( 200, 0 ){
+        :weights_( 200, 0 ), weight_stack_(1, 1){
             std::cerr << " Summary weight visitor container size: " 
                 << weights_.size() << std::endl;
         }
 
+    bool SummaryWeightVisitor::visit_enter( Selection& )
+    {
+        weight_stack_.push_back( weight_stack_.back() );
+        return true;
+    } 
 
     bool SummaryWeightVisitor::visit( Selection& s) 
     {
@@ -108,9 +114,10 @@ namespace fn
         if ( s.check() )
         {
             //std::cerr <<"passed" << std::endl;
-            weights_.at( s.get_id() ) += event_weight_;
-                //std::cerr <<"incremented" << std::endl;
-                return true;
+            weight_stack_.back() *= s.get_weight();
+            weights_.at( s.get_id() ) += weight_stack_.back();
+            //std::cerr <<"incremented" << std::endl;
+            return true;
         }
         //std::cerr <<"failed" << std::endl;
         return false;
@@ -120,11 +127,17 @@ namespace fn
     {
         //Do the composite count on the way out
         //std::cerr <<"About to visit" << std::endl;
+        assert( weight_stack_.size() > 0 );
+        weight_stack_.pop_back();
         return visit( s );
     } 
 
     void SummaryWeightVisitor::set_event_weight( double weight )
-    { event_weight_ = weight; }
+    { 
+        event_weight_ = weight; 
+        assert( weight_stack_.size() == 1 );
+        weight_stack_[0] =  event_weight_;
+    }
 
     //expose vector of counts
     SummaryWeightVisitor::const_iterator SummaryWeightVisitor::begin() const
@@ -150,7 +163,7 @@ namespace fn
     {
         source_.accept( sv_ );
 
-        swv_.set_event_weight( source_.get_weight() );
+        swv_.set_event_weight( get_weight() );
         source_.accept( swv_ );
         //std::cerr << "Done processing" << std::endl;
     }
@@ -168,7 +181,7 @@ namespace fn
             os_ << std::setw(20 + ns.gen * 10) << ns.name ;
             os_
                 << std::setw(20)  << sv_.at( ns.id ) 
-                << std::setw(20)  << swv_.at( ns.id ) 
+                << std::setw(20)  << std::fixed << std::setprecision(2) << swv_.at( ns.id ) 
                 << std::endl;
         }
         os_ << "#END " << get_name() << std::endl;
@@ -184,7 +197,7 @@ namespace fn
 
             Selection * source = rf.get_selection( 
                     get_yaml<std::string>(instruct, "source"));
-            
+
             std::ostream& os = rf.get_ostream( 
                     get_yaml<std::string>( instruct, "ostream" ));
 
