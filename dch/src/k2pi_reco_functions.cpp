@@ -288,10 +288,12 @@ namespace fn
     }
 
 
-    k2pi_mc_parts extract_k2pi_particles( const fne::Event * e )
+    boost::optional<k2pi_mc_parts> extract_k2pi_particles( const fne::Event * e )
     {
         const TClonesArray& tca =  e->mc.particles;
         int nparticles = e->mc.npart;
+
+        boost::optional<k2pi_mc_parts> opt_result = boost::none;
 
         k2pi_mc_parts result { 0, 0, 0, std::vector<const fne::McParticle*>{} };
 
@@ -321,7 +323,12 @@ namespace fn
                 return (p->momentum.E() < q->momentum.E() );
                 } );
 
-        return result;
+        if ( result.k && result.pip && result.pi0 && result.photons.size() > 1 )
+        {
+            opt_result = result;
+        }
+
+        return opt_result;
     }
 
 }

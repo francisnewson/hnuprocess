@@ -8,6 +8,7 @@
 
 #include "KaonTrack.hh"
 #include "SingleTrack.hh"
+#include "SingleMuon.hh"
 
 #include "tracking_selections.hh"
 #include "cluster_selections.hh"
@@ -33,9 +34,11 @@ namespace fn
             const fne::Event * event, const SingleTrack & st , 
             const K2piClusters& k2pi_clusters, 
             const ClusterCorrector& cluster_corrector, const KaonTrack& kt,
+            const SingleMuon& sm, const Selection& muon_eff,
             bool mc )
         :weighter_( weighter ),e_( event ), st_( st ), k2pi_clusters_( k2pi_clusters),
-        cluster_corrector_( cluster_corrector),  kt_( kt ), mc_( mc )
+        cluster_corrector_( cluster_corrector),  kt_( kt ), 
+        sm_(sm), muon_eff_(muon_eff),  mc_( mc )
     {}
 
     const K2piEventData * FNK2piExtractor::get_k2pi_event_ptr()
@@ -65,6 +68,7 @@ namespace fn
         //Extract raw info
         extract_raw_lkr(k2pirc, cluster_corrector_, kt_, k2pi_event_data_.raw_lkr );
         extract_raw_dch( srt, k2pi_event_data_.raw_dch );
+        extract_muons( sm_, muon_eff_, k2pi_event_data_.muv );
 
         if ( mc_ )
         {
@@ -118,13 +122,17 @@ namespace fn
             const SingleTrack* st = get_single_track( instruct, rf );
             const K2piClusters* k2pic = get_k2pi_clusters( instruct, rf );
             const KaonTrack* kt = get_kaon_track( instruct, rf );
+            const Selection * muon_eff = rf.get_selection(
+                    get_yaml<std::string>( instruct, "muon_eff" ) );
+            const SingleMuon * sm = get_single_muon( instruct, rf );
 
             const ClusterCorrector * cluster_corrector = 
                 get_cluster_corrector( instruct, rf );
 
             bool mc = rf.is_mc();
 
-            return new FNK2piExtractor( *sel, event, *st, *k2pic, *cluster_corrector,  *kt, mc );
+            return new FNK2piExtractor( *sel, event, *st,
+                    *k2pic, *cluster_corrector,  *kt, *sm, *muon_eff,  mc );
         }
 
     //--------------------------------------------------
@@ -175,12 +183,34 @@ namespace fn
     void extract_k2pi_mc( const fne::Event& e, K2piMcData& dest  )
     {
         K2piMcInterface mc( dest );
-        k2pi_mc_parts particles = extract_k2pi_particles( &e );
-        mc.p4k() = particles.k->momentum;;
-        mc.p4pip() = particles.pip->momentum;
-        mc.p4pi0() = particles.pi0->momentum;
-        mc.p4g1() = particles.photons[0]->momentum;
-        mc.p4g2() = particles.photons[1]->momentum;
+        boost::optional<k2pi_mc_parts> particles = extract_k2pi_particles( &e );
+        if ( particles )
+        {
+        mc.p4k() = particles->k->momentum;;
+        mc.p4pip() = particles->pip->momentum;
+        mc.p4pi0() = particles->pi0->momentum;
+        mc.p4g1() = particles->photons[0]->momentum;
+        mc.p4g2() = particles->photons[1]->momentum;
+        }
+    }
+
+    void extract_muons( const SingleMuon& sm, 
+            const Selection & muon_eff, K2piMuvData& k2pi_muv )
+    {
+        if (!sm.found() )
+        {
+            k2pi_muv.found_muon = false;
+            k2pi_muv.x = 0;
+            k2pi_muv.y = 0;
+            k2pi_muv.eff = 0;
+        }
+        else
+        {
+            k2pi_muv.found_muon = true;
+            k2pi_muv.x = sm.x();
+            k2pi_muv.y = sm.y();
+            k2pi_muv.eff = muon_eff.get_weight();
+        }
     }
 
     double fit_lkr( const K2piLkrData& raw,

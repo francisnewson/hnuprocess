@@ -31,7 +31,7 @@ namespace fn
     class K2piRecoClusters;
     class ClusterCorrector;
     class SingleRecoTrack;
-
+    class SingleMuon;
 
 
     class FNK2piExtractor : public Subscriber
@@ -44,6 +44,8 @@ namespace fn
                     const K2piClusters& k2pi_clusters,
                     const ClusterCorrector& cluster_corrector,
                     const KaonTrack& kt,
+                    const SingleMuon& sm,
+                    const Selection& muon_eff,
                     bool mc );
 
             const K2piEventData * get_k2pi_event_ptr();
@@ -58,6 +60,8 @@ namespace fn
             const K2piClusters& k2pi_clusters_;
             const ClusterCorrector& cluster_corrector_;
             const KaonTrack& kt_;
+            const SingleMuon& sm_;
+            const Selection& muon_eff_;
 
             K2piEventData k2pi_event_data_;
             bool mc_;
@@ -84,6 +88,9 @@ namespace fn
             K2piDchData& dest );
 
     void extract_k2pi_mc( const fne::Event& e, K2piMcData& mc );
+
+    void extract_muons( const SingleMuon& sm, 
+            const Selection & muon_eff, K2piMuvData& k2pi_muv ); 
 
     double fit_lkr( const K2piLkrData& raw,
             const ClusterCorrector& cluster_corrector, 

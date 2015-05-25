@@ -8,6 +8,7 @@
 #include "Km2Scaling.hh"
 #include "yaml-cpp/exceptions.h"
 #include "RatioCanvas.hh"
+#include "fiducial_functions.hh"
 
 int main( int argc, char * argv[] )
 {
@@ -109,7 +110,7 @@ int main( int argc, char * argv[] )
     auto branching_ratios = YAML::LoadFile(br_filename).as<std::map<std::string, double>>();
 
     const YAML::Node& scaling_node = config_node["scaling"];
-    std::map<std::string, Km2Scaling> scaling_info;
+    std::map<std::string, MultiScaling> scaling_info;
 
     for ( const auto& scaling_method : scaling_node )
     {
@@ -119,7 +120,7 @@ int main( int argc, char * argv[] )
         //Create Km2Scaling object in map
         auto insertion  =
             scaling_info.emplace( std::make_pair(
-                        method_name, Km2Scaling(method_node, fiducial_weights, branching_ratios) ) );
+                        method_name, MultiScaling(method_node, fiducial_weights, branching_ratios) ) );
         auto& this_method = insertion.first->second;
 
         //COmpute scaling and print

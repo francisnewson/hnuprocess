@@ -3,60 +3,71 @@ scaling:
         strategy: m2
         name: mc_pos
 
-        halo_channels:
-            - p6.data.kless.q11t.v2.pos
-            - p6.data.km.q11t.v2.pos
+        channels:
+            halo_channels:
+                - p6.data.kless.q11t.v2.pos
+                - p6.data.km.q11t.v2.pos
 
-        data_channels:
-            - p5.data.q1.v2.pos
+            data_channels:
+                - p5.data.q1.v2.pos
 
-        km2_channels:
-            - p5.km2.v2.pos
+            km2_channels:
+                - p5.km2.v2.pos
 
         halo:
             strategy: m2
             input_file: tdata/beam_corrections/all.beam_corrections.root
-            plot_path: weighted_km2_auto_full/h_m2m_kmu
+            plot_path: km2_wgt_st/h_m2m_kmu
 
-            min_mass: -0.3
-            max_mass: -0.1
+            min_mass_halo: -0.3
+            max_mass_halo: -0.075
+            min_mass_peak: -0.01
+            max_mass_peak:  0.01
 
-        km2:
+        mc:
             strategy: m2
             input_file: tdata/beam_corrections/all.beam_corrections.root
-            plot_path: weighted_km2_auto_full/h_m2m_kmu
+            plot_path: km2_wgt_st/h_m2m_kmu
 
-            min_mass: -0.01
-            max_mass:  0.01
+            min_mass_halo: -0.3
+            max_mass_halo: -0.075
+            min_mass_peak: -0.01
+            max_mass_peak:  0.01
 
     - scaling_method:
         strategy: m2
         name: mc_neg
 
-        halo_channels:
-            - p6.data.km.q11t.v2.neg
+        channels:
+            halo_channels:
+                - p6.data.km.q11t.v2.neg
 
-        data_channels:
-            - p5.data.q1.v2.neg
+            data_channels:
+                - p5.data.q1.v2.neg
 
-        km2_channels:
-            - p5.km2.v2.neg
+            km2_channels:
+                - p5.km2.v2.neg
 
         halo:
             strategy: m2
             input_file: tdata/beam_corrections/all.beam_corrections.root
-            plot_path: weighted_km2_auto_full/h_m2m_kmu
+            plot_path: km2_wgt_st/h_m2m_kmu
 
-            min_mass: -0.3
-            max_mass: -0.075
+            min_mass_halo: -0.3
+            max_mass_halo: -0.075
+            min_mass_peak: -0.01
+            max_mass_peak:  0.01
 
-        km2:
+        mc:
             strategy: m2
             input_file: tdata/beam_corrections/all.beam_corrections.root
-            plot_path: weighted_km2_auto_full/h_m2m_kmu
+            plot_path: km2_wgt_st/h_m2m_kmu
 
-            min_mass: -0.01
-            max_mass:  0.01
+            min_mass_halo: -0.3
+            max_mass_halo: -0.075
+            min_mass_peak: -0.01
+            max_mass_peak:  0.01
+
 
 weights:
     fid_file: use_root
@@ -75,9 +86,29 @@ output:
     input_file: tdata/beam_corrections/all.beam_corrections.root
 
     plots:
-        - path: km2_st_wgt/h_m2m_kmu
+        - path: km2_wgt_st/h_m2m_kmu
           name: st_m2m
-          rebin: 10
+          rebin: 5
+
+        - path: km2_wgt_full/h_m2m_kmu
+          name: full_m2m
+          rebin: 5
+
+        - path: km2_wgt_loose_lkr/h_m2m_kmu
+          name: loose_lkr_m2m
+          rebin: 5
+
+        - path: km2_wgt_st/h_p_z
+          name: st_pz
+          rebin: 1
+
+        - path: km2_wgt_st/h_p_m2m_kmu
+          name: st_p_m2m
+          rebin: 1
+
+        - path: km2_wgt_st/h_m2_z
+          name: st_m2_z
+          rebin: 1
 
     data_plot:
         channels:

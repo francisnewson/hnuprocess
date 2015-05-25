@@ -206,7 +206,11 @@ namespace fn
     void Km2K2pi::plot_mc( const fne::Event& e, double wgt )
     {
 
-        k2pi_mc_parts mc_parts = extract_k2pi_particles( &e );
+        boost::optional<k2pi_mc_parts> opt_mc_parts = extract_k2pi_particles( &e );
+
+        if ( !opt_mc_parts ){ return; }
+
+        k2pi_mc_parts& mc_parts = *opt_mc_parts;
 
         if ( ! ( mc_parts.pip ) ){ return; }
 

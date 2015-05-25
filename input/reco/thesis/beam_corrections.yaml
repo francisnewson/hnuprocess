@@ -167,6 +167,11 @@
     track_cluster_radius: 20,
     inputs: { ogt: auto_bf_st, ClusterCorrector: cluster_corrector } }
 
+- input: { name: auto_km2_clusters_loose_10_40, type: Km2Clusters,
+    noise_energy: 10, noise_time: 12, brehm_radius: 0 ,
+    track_cluster_radius: 40,
+    inputs: { ogt: auto_bf_st, ClusterCorrector: cluster_corrector } }
+
 ###################################################
 # CUTS
 ###################################################
@@ -196,8 +201,18 @@
     inner: 15.0, outer: 115.0,
     inputs: { ogt: auto_bf_st}  }
 
+- selection: { name: auto_dch1_acc_tgt, type: TrackRadialAcceptance,
+    track_section: upstream, z: 9708.42,
+    inner: 20.0, outer: 115.0,
+    inputs: { ogt: auto_bf_st}  }
+
 #--------Track DHC4 ACC
 - selection: { name: auto_dch4_acc, type: TrackRadialAcceptance,
+    track_section: upstream, z: 11888.0,
+    inner: 15.0, outer: 115.0,
+    inputs: { ogt: auto_bf_st} }
+
+- selection: { name: auto_dch4_acc_tgt, type: TrackRadialAcceptance,
     track_section: upstream, z: 11888.0,
     inner: 15.0, outer: 115.0,
     inputs: { ogt: auto_bf_st} }
@@ -210,6 +225,9 @@
 - selection: {name: auto_rk_lkr_veto, type: Km2NoBadCluster,
     inputs: {km2clusters: auto_km2_clusters} }
 
+- selection: {name: auto_rk_lkr_veto_loose_10_40, type: Km2NoBadCluster,
+    inputs: {km2clusters: auto_km2_clusters_loose_10_40} }
+
 #--------LKr acceptance
 - selection: {name: auto_rk_lkr_accep, type: TrackLkrAcceptance,
     margin_parameter: 8, inputs: { ogt: auto_bf_st } }
@@ -219,6 +237,10 @@
     hot_cells: [ [ 134, 56 ], [ 134, 57 ] ],
     inputs: { km2event: auto_km2_event, km2clusters: auto_km2_clusters } }
 
+- selection: {name: auto_rk_hot_lkr_loose_10_40, type: Km2HotLkr,
+    hot_cells: [ [ 134, 56 ], [ 134, 57 ] ],
+    inputs: { km2event: auto_km2_event, km2clusters: auto_km2_clusters_loose_10_40 } }
+
 #--------Dead Cells
 - selection: { name: auto_ddead_cell, type: TrackDDeadCell, 
     min_ddead_cell: 2.0,  inputs: {ogt: auto_bf_st } }
@@ -226,6 +248,24 @@
 #--------PZ
 - selection:
     name: auto_rk_pz
+    type: TrackPZ
+    shape: rectangles
+    points:
+        - [ 13, 20, -1000, 9000 ]
+        - [ 20, 25, -1000, 9000 ]
+        - [ 25, 30,     0, 9000 ]
+        - [ 30, 35,   500, 9000 ]
+        - [ 35, 40,   500, 9000 ] 
+        - [ 40, 45,   500, 9000 ]
+        - [ 45, 50,  1000, 9000 ]
+        - [ 50, 55,  1000, 9000 ]
+        - [ 55, 60,  1500, 9000 ]
+        - [ 60, 65,  1500, 9000 ]
+    inputs:
+        ogt: auto_bf_st
+
+- selection:
+    name: auto_rk_pz_extra_z
     type: TrackPZ
     shape: rectangles
     points:
@@ -247,6 +287,10 @@
     min_eop: 0.0, max_eop: 0.95,
     inputs: { km2clusters: auto_km2_clusters, ogt: auto_bf_st } }
 
+- selection: { name: auto_km2_eop_loose_10_40, type: Km2TrackClusterEP,
+    min_eop: 0.0, max_eop: 0.95,
+    inputs: { km2clusters: auto_km2_clusters_loose_10_40, ogt: auto_bf_st } }
+
 ###################################################
 # SELECTIONS
 ###################################################
@@ -255,75 +299,65 @@
     name: single_track
     type: CompositeSelection
     children:
-        - data_sample
-        - auto_good_trk
-        - auto_pos_trk
-        - auto_quality_7
-        - auto_cda_30mm
-        - auto_dch1_acc
-        - auto_dch4_acc
-
-- selection:
-    name: weighted_single_track
-    type: CompositeSelection
-    children:
-        - weighted_data_sample
-        - data_sample
-        - auto_good_trk
-        - auto_pos_trk
-        - auto_quality_7
-        - auto_cda_30mm
-        - auto_dch1_acc
-        - auto_dch4_acc
-
-- selection:
-    name : auto_full_selection
-    type: CompositeSelection
-    children:
-        - data_sample
-        - auto_good_trk
-        - auto_pos_trk
-        - auto_quality_7
-        - auto_cda_30mm
-        - auto_dch1_acc
-        - auto_dch4_acc
-        - auto_rk_lkr_accep
-        - auto_rk_lkr_veto
-        - auto_rk_hot_lkr
-        - auto_ddead_cell
-        - auto_rk_pz
-        - auto_km2_eop
-
-- selection:
-    name : weighted_auto_full_selection
-    type: CompositeSelection
-    children:
-        - weighted_data_sample
-        - auto_good_trk
-        - auto_pos_trk
-        - auto_quality_7
-        - auto_cda_30mm
-        - auto_dch1_acc
-        - auto_dch4_acc
-        - auto_rk_lkr_accep
-        - auto_rk_lkr_veto
-        - auto_rk_hot_lkr
-        - auto_ddead_cell
-        - auto_rk_pz
-        - auto_km2_eop
-
-- selection:
-    name : weighted_loose_selection
-    type: CompositeSelection
-    children:
-        - weighted_data_sample
         - auto_good_trk
         - auto_pos_trk
         - auto_quality_7
         - auto_cda_35mm
-        - auto_dch1_acc
-        - auto_dch4_acc
-        - auto_rk_pz
+        - auto_dch1_acc_tgt
+        - auto_dch4_acc_tgt
+        - auto_rk_pz_extra_z
+        - auto_rk_lkr_accep
+        - auto_ddead_cell
+
+- selection:
+    name: wgt_single_track
+    type: CompositeSelection
+    children:
+        - weighted_data_sample
+        - single_track
+
+- selection:
+    name: uw_single_track
+    type: CompositeSelection
+    children:
+        - data_sample
+        - single_track
+
+- selection:
+    name : wgt_full_selection
+    type: CompositeSelection
+    children:
+        - wgt_single_track
+        - auto_rk_lkr_veto
+        - auto_rk_hot_lkr
+        - auto_km2_eop
+
+- selection:
+    name : uw_full_selection
+    type: CompositeSelection
+    children:
+        - uw_single_track
+        - auto_rk_lkr_veto
+        - auto_rk_hot_lkr
+        - auto_km2_eop
+
+- selection:
+    name : wgt_loose_lkr_10_40_selection
+    type: CompositeSelection
+    children:
+        - wgt_single_track
+        - auto_rk_lkr_veto_loose_10_40
+        - auto_rk_hot_lkr_loose_10_40
+        - auto_km2_eop_loose_10_40
+
+- selection:
+    name : uw_loose_lkr_10_40_selection
+    type: CompositeSelection
+    children:
+        - uw_single_track
+        - auto_rk_lkr_veto_loose_10_40
+        - auto_rk_hot_lkr_loose_10_40
+        - auto_km2_eop_loose_10_40
 
 ###################################################
 # ANALYSES
@@ -333,83 +367,84 @@
     type: Summary
     name: auto_summary
     base: passer
-    source: auto_full_selection
+    source: wgt_full_selection
     ostream: debug_out
 
 - analysis:
     type: Summary
     name: weighted_auto_summary
     base: passer
-    source: weighted_auto_full_selection
+    source: wgt_full_selection
     ostream: debug_out
 
-- analysis:
-    type: Summary
-    name: cerr_weighted_auto_summary
-    base: passer
-    source: weighted_auto_full_selection
-    ostream: os_cerr
+#--
 
 - analysis :
     type: Km2Plotter
-    name: km2_auto_full
-    folder: km2_auto_full
+    name: km2_wgt_st
+    folder: km2_wgt_st
     tfile: tfout
-    selection: auto_full_selection
+    selection: wgt_single_track
     inputs:
         km2event: auto_km2_event
+
+- analysis :
+    type: Km2Plotter
+    name: km2_uw_st
+    folder: km2_uw_st
+    tfile: tfout
+    selection: uw_single_track
+    inputs:
+        km2event: auto_km2_event
+
+#--
+
+- analysis :
+    type: Km2Plotter
+    name: km2_wgt_full
+    folder: km2_wgt_full
+    tfile: tfout
+    selection: wgt_full_selection
+    inputs:
+        km2event: auto_km2_event
+
+- analysis :
+    type: Km2Plotter
+    name: km2_uw_full
+    folder: km2_uw_full
+    tfile: tfout
+    selection: uw_full_selection
+    inputs:
+        km2event: auto_km2_event
+
+#--
+
+- analysis :
+    type: Km2Plotter
+    name: km2_wgt_loose_lkr
+    folder: km2_wgt_loose_lkr
+    tfile: tfout
+    selection: wgt_loose_lkr_10_40_selection
+    inputs:
+        km2event: auto_km2_event
+
+- analysis :
+    type: Km2Plotter
+    name: km2_uw_loose_lkr
+    folder: km2_uw_loose_lkr
+    tfile: tfout
+    selection: uw_loose_lkr_10_40_selection
+    inputs:
+        km2event: auto_km2_event
+
+#--
 
 - analysis :
     type: Km2MCPlots
     name: km2_auto_full_mc
     folder: km2_auto_full_mc
     tfile: tfout
-    selection: auto_full_selection
+    selection: wgt_full_selection
     inputs:
         raw_km2event: no_bf_km2_event
         corr_km2event: auto_km2_event
-
-- analysis :
-    type: Km2Plotter
-    name: km2_st
-    folder: km2_st
-    tfile: tfout
-    selection: single_track
-    inputs:
-        km2event: auto_km2_event
-
-- analysis :
-    type: Km2Plotter
-    name: km2_st_wgt
-    folder: km2_st_wgt
-    tfile: tfout
-    selection: weighted_single_track
-    inputs:
-        km2event: auto_km2_event
-
-- analysis :
-    type: Km2Plotter
-    name: km2_st_wgt_no_bf
-    folder: km2_st_wgt_no_bf
-    tfile: tfout
-    selection: weighted_single_track
-    inputs:
-        km2event: no_bf_km2_event
-
-- analysis :
-    type: Km2Plotter
-    name: weighted_km2_auto_full
-    folder: weighted_km2_auto_full
-    tfile: tfout
-    selection: weighted_auto_full_selection
-    inputs:
-        km2event: auto_km2_event
-
-- analysis :
-    type: Km2Plotter
-    name: weighted_km2_loose
-    folder: weighted_km2_loose
-    tfile: tfout
-    selection: weighted_loose_selection
-    inputs:
-        km2event: auto_km2_event

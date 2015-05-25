@@ -239,27 +239,27 @@ namespace fn
 
                 if ( instruct["skipmcruns"] )
                 {
-                BOOST_LOG_SEV( log_, startup )
-                    << "EXECPARSER: Found skipmcruns";
+                    BOOST_LOG_SEV( log_, startup )
+                        << "EXECPARSER: Found skipmcruns";
                     mc_skip_ = instruct["skipmcruns"].as<std::vector<int>>();
                 }
 
                 if ( instruct["skipdatafiles"] )
                 {
-                BOOST_LOG_SEV( log_, startup )
-                    << "EXECPARSER: Found skipdatafiles";
+                    BOOST_LOG_SEV( log_, startup )
+                        << "EXECPARSER: Found skipdatafiles";
                     data_skip_ = instruct["skipdatafiles"].as<std::vector<std::string>>();
                 }
                 if ( instruct["skipdatalist"] )
                 {
-                BOOST_LOG_SEV( log_, startup )
-                    << "EXECPARSER: Found skipdatalist";
-                std::string data_list = instruct["skipdatalist"].as<std::string>();
+                    BOOST_LOG_SEV( log_, startup )
+                        << "EXECPARSER: Found skipdatalist";
+                    std::string data_list = instruct["skipdatalist"].as<std::string>();
 
-                std::ifstream ifdl( data_list );
-                std::copy( std::istream_iterator<std::string>( ifdl ),
-                        std::istream_iterator<std::string>(),
-                        std::back_inserter( data_skip_ ) );
+                    std::ifstream ifdl( data_list );
+                    std::copy( std::istream_iterator<std::string>( ifdl ),
+                            std::istream_iterator<std::string>(),
+                            std::back_inserter( data_skip_ ) );
                 }
             }
         }
@@ -275,9 +275,18 @@ namespace fn
 
     void ExecParser::prune_filelist( std::vector<boost::filesystem::path>& filenames )
     {
-        filenames.erase( std::remove_if( filenames.begin(), filenames.end(),
-                    [this]( boost::filesystem::path p ){ return reject(p);} ), 
-            filenames.end() ) ;
+        try
+        {
+            auto remove_p = std::remove_if( filenames.begin(), filenames.end(),
+                    [this]( boost::filesystem::path p ){ return reject(p);} );
+
+            filenames.erase( remove_p, filenames.end() ) ;
+        }
+        catch ( std::invalid_argument& e )
+        {
+            std::cerr << "Problem pruning filelist" << e.what() 
+                << ". Returning whole list (possibly jumbled). " << std::endl;
+        }
     }
 
     bool ExecParser::reject( boost::filesystem::path filename )

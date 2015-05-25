@@ -3,6 +3,7 @@
 #include "TVector3.h"
 #include "logging.hh"
 #include "Track.hh"
+#include <boost/optional.hpp>
 #if 0
 /*
  *  _    ____        _                       
@@ -79,7 +80,7 @@ namespace fn
         std::vector<const fne::McParticle*>  photons;
     };
 
-     k2pi_mc_parts extract_k2pi_particles( const fne::Event * e );
+    boost::optional<k2pi_mc_parts> extract_k2pi_particles( const fne::Event * e );
     
 }
 #endif

@@ -58,6 +58,18 @@ namespace fn
             ClassDef ( K2piDchData, 2 );
     };
 
+    class K2piMuvData : public TObject
+    {
+        public:
+            Bool_t found_muon;
+            Double_t x;
+            Double_t y;
+            Double_t eff;
+
+            virtual ~K2piMuvData(){}
+            ClassDef ( K2piMuvData, 2 );
+    };
+
     class K2piMcData : public TObject
     {
         public:
@@ -97,11 +109,14 @@ namespace fn
             //DCH
             K2piDchData raw_dch;
 
+            //MUV
+            K2piMuvData muv;
+
             //MC
             K2piMcData mc;
 
             virtual ~K2piEventData(){}
-            ClassDef ( K2piEventData, 2 );
+            ClassDef ( K2piEventData, 3 );
     };
 
     class k2pi_user_info : public TObject

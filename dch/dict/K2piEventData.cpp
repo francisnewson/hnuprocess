@@ -3,4 +3,5 @@
 ClassImp ( fn::K2piLkrData );
 ClassImp ( fn::K2piDchData );
 ClassImp ( fn::K2piMcData );
+ClassImp ( fn::K2piMuvData );
 ClassImp ( fn::K2piEventData );

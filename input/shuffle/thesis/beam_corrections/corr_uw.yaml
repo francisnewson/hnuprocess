@@ -16,18 +16,18 @@ scaling:
 
         halo:
             strategy: m2
-            input_file: tdata/rk_selection/all.rk_selection.root
-            plot_path: km2_rk_full/h_mini_m2m_kmu
+            input_file: tdata/beam_corrections/all.beam_corrections.root
+            plot_path: km2_uw_st/h_m2m_kmu
 
             min_mass_halo: -0.3
             max_mass_halo: -0.075
             min_mass_peak: -0.01
             max_mass_peak:  0.01
 
-        km2:
+        mc:
             strategy: m2
-            input_file: tdata/rk_selection/all.rk_selection.root
-            plot_path: km2_rk_full/h_mini_m2m_kmu
+            input_file: tdata/beam_corrections/all.beam_corrections.root
+            plot_path: km2_uw_st/h_m2m_kmu
 
             min_mass_halo: -0.3
             max_mass_halo: -0.075
@@ -38,41 +38,43 @@ scaling:
         strategy: m2
         name: mc_neg
 
-        halo_channels:
-            - p6.data.km.q11t.v2.neg
+        channels:
+            halo_channels:
+                - p6.data.km.q11t.v2.neg
 
-        data_channels:
-            - p5.data.q1.v2.neg
+            data_channels:
+                - p5.data.q1.v2.neg
 
-        km2_channels:
-            - p5.km2.v2.neg
+            km2_channels:
+                - p5.km2.v2.neg
 
         halo:
             strategy: m2
-            input_file: tdata/rk_selection/all.rk_selection.root
-            plot_path: km2_rk_full/h_mini_m2m_kmu
+            input_file: tdata/beam_corrections/all.beam_corrections.root
+            plot_path: km2_uw_st/h_m2m_kmu
 
             min_mass_halo: -0.3
             max_mass_halo: -0.075
             min_mass_peak: -0.01
             max_mass_peak:  0.01
 
-        km2:
+        mc:
             strategy: m2
-            input_file: tdata/rk_selection/all.rk_selection.root
-            plot_path: km2_rk_full/h_mini_m2m_kmu
+            input_file: tdata/beam_corrections/all.beam_corrections.root
+            plot_path: km2_uw_st/h_m2m_kmu
 
             min_mass_halo: -0.3
             max_mass_halo: -0.075
             min_mass_peak: -0.01
             max_mass_peak:  0.01
+
 
 weights:
     fid_file: use_root
-    root_file: "tdata/rk_selection/all.rk_selection.root"
+    root_file: "tdata/beam_corrections/all.beam_corrections.root"
     pre : ""
     post: "sample_burst_count/bursts"
-    branch:  "weight"
+    branch:  "events"
 
 mass_windows:
     method: params
@@ -81,90 +83,32 @@ mass_windows:
     offset: 0
 
 output:
-    input_file: tdata/rk_selection/all.rk_selection.root
+    input_file: tdata/beam_corrections/all.beam_corrections.root
+
     plots:
-        - path: km2_rk_single_track/h_m2m_kmu
-          name: rk_st_m2m
-          rebin: 10
-
-        - path: km2_rk_full/h_mini_m2m_kmu
-          name: rk_m2m
-          rebin: 10
-
-        - path: k2pi_loose_lkr/h_mini_p
-          name: rk_loose_p_k2pi
-          rebin: 1
-
-        - path: k2pi_st_mid_mom_k2pi/h_bad_cluster_E
-          name: mid_mom_bad_cluster_E
+        - path: km2_uw_st/h_m2m_kmu
+          name: st_m2m
           rebin: 5
 
-        - path: k2pi_st_mid_mom_k2pi/h_bad_cluster_r
-          name: mid_mom_bad_cluster_r
+        - path: km2_uw_full/h_m2m_kmu
+          name: full_m2m
           rebin: 5
 
-        - path: k2pi_st_mid_mom_k2pi/h_bad_cluster_ds_E
-          name: mid_mom_bad_cluster_ds_E
-          rebin: 2
-
-        - path: k2pi_st_mid_mom_clusters/h_xy_bad
-          name: mid_mom_bad_cluster_xy
-          rebin: 10
-
-        - path: k2pi_st_mid_mom_clusters/h_ds_bad
-          name: mid_mom_bad_cluster_ds
+        - path: km2_uw_loose_lkr/h_m2m_kmu
+          name: loose_lkr_m2m
           rebin: 5
 
-        - path: k2pi_st_mid_mom_clusters/h_gt_bad
-          name: mid_mom_bad_cluster_gt
+        - path: km2_uw_st/h_p_z
+          name: st_pz
           rebin: 1
 
-        - path: k2pi_st_mid_mom_k2pi/h_bad_cluster_zpipe_t
-          name: mid_mom_bad_cluster_zpipe_t
+        - path: km2_uw_st/h_p_m2m_kmu
+          name: st_p_m2m
           rebin: 1
 
-        - path: k2pi_st_mid_mom_k2pi/h_bad_cluster_zpipe_t
-          name: mid_mom_bad_cluster_zpipe
-          collapse_x: true
-          rebin: 2
-
-        - path: k2pi_st_mid_mom_k2pi/h_all_cluster_zpipe_t
-          name: mid_mom_all_cluster_zpipe_t
+        - path: km2_uw_st/h_m2_z
+          name: st_m2_z
           rebin: 1
-
-        - path: k2pi_st_low_mom_k2pi/h_all_cluster_zpipe_t
-          name: low_mom_all_cluster_zpipe_t
-          rebin: 1
-
-        - path: k2pi_st_low_mom_k2pi/h_bad_cluster_zpipe_t
-          name: low_mom_bad_cluster_zpipe_t
-          rebin: 2
-
-
-        - path: k2pi_st_low_mom_k2pi/h_bad_cluster_E
-          name: low_mom_bad_cluster_E
-          rebin: 5
-
-        - path: k2pi_st_low_mom_k2pi/h_bad_cluster_r
-          name: low_mom_bad_cluster_r
-          rebin: 5
-
-        - path: k2pi_st_low_mom_k2pi/h_bad_cluster_ds_E
-          name: low_mom_bad_cluster_ds_E
-          rebin: 2
-
-        - path: k2pi_st_low_mom_clusters/h_xy_bad
-          name: low_mom_bad_cluster_xy
-          rebin: 10
-
-        - path: k2pi_st_low_mom_clusters/h_ds_bad
-          name: low_mom_bad_cluster_ds
-          rebin: 5
-
-        - path: k2pi_st_low_mom_clusters/h_gt_bad
-          name: low_mom_bad_cluster_gt
-          rebin: 1
-
 
     data_plot:
         channels:
@@ -255,6 +199,7 @@ output:
             fid_weight: p5.k2pig.v2.neg
             channels:
                 - p5.k2pig.v2.neg
+
 
         - item:
             name: halo_pos

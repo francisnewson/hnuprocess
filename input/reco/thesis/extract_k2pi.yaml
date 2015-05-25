@@ -17,6 +17,11 @@
     filename: k2pi_tree.root
 
 - output:
+    name: tfstats
+    type: tfile
+    filename: k2pi_stats.root
+
+- output:
     name: sumout
     type: ostream
     filename: k2pi.dat
@@ -72,7 +77,12 @@
 - selection:
     name: good_muv_burst
     type: BadBurst
-    burst_list: "input/reco/conditions/bad_muv_burst.dat"
+    burst_list: "input/reco/conditions/bad_muv_burst.90.dat"
+
+- selection:
+    name: good_muv_burst_range
+    type: BadBurstRange
+    burst_range_list: "input/reco/conditions/bad_muv_burst_ranges.dat"
 
 - selection:
     name: weighted_data_sample
@@ -82,14 +92,27 @@
         - good_phys_burst
         - good_dch_burst
         - good_muv_burst
-
-
+        - good_muv_burst_range
 
 - selection:
     name: mcz
     type: MCZCut
     min_z: -1800
     max_z:  8000
+
+- selection:
+    name: weighted_mc_sample
+    type: CompositeSelection
+    children:
+        - weighted_data_sample
+        - mcz
+
+- analysis:
+    name: sample_burst_count
+    type: BurstCount
+    tfile: tfstats
+    folder: sample_burst_count
+    selection: weighted_mc_sample
         
 #-------------------------------------------------- 
 
@@ -120,8 +143,8 @@
     method: LooseTrack
 
     max_track_cluster_time: 12
-    min_cluster_energy: 5
-    max_track_cluster_distance: 5
+    min_cluster_energy: 10
+    max_track_cluster_distance: 40
 
     inputs:
         ogt: bf_st
@@ -218,6 +241,36 @@
     inputs:
         ogt: bf_st
 
+- input:
+    name: single_muon
+    type: SingleMuon
+    method: auto
+    inputs:
+        ogt: bf_st
+
+- selection:
+    name: muon_xy_wgt
+    type: MuonTHXYWeight
+    effs_file: input/reco/conditions/muv_xy.root
+    effs_hist: rat_xy
+    inputs:
+        ogt: bf_st
+
+- selection:
+    name: muon_p_wgt
+    type: MuonTHPWeight
+    effs_file: input/reco/conditions/muv_p.root
+    effs_hist: rat_p
+    inputs:
+        ogt: bf_st
+
+- selection:
+    name: muon_wgt
+    type: CompositeSelection
+    children:
+        - muon_p_wgt
+        - muon_xy_wgt
+
         #--------------------------------------------------
         
 ###################################################
@@ -229,7 +282,6 @@
     type: CompositeSelection
     children:
         - weighted_data_sample
-#       - muon_veto
         - good_trk
         - pos_trk
         - quality_7
@@ -263,11 +315,13 @@
     name: k2pi_extract
     type: FNK2piExtractor
     weighter: kaon_mom_weights
+    muon_eff: muon_wgt
     inputs:
         k2pic: k2pi_clusters
         kt: kaon_track
         ogt: bf_st
         ClusterCorrector: cluster_corrector
+        sm: single_muon
 
 - analysis:
     name: k2pi_filter
