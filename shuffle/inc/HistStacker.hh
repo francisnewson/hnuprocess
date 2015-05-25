@@ -7,7 +7,7 @@
 #include <boost/filesystem/path.hpp>
 #include "OwningStack.hh"
 #include "HistExtractor.hh"
-#include "Km2Scaling.hh"
+#include "MultiScaling.hh"
 #include "HistStore.hh"
 #if 0
 /*
@@ -55,7 +55,7 @@ namespace fn
             typedef OwningStack::size_type size_type;
 
             HistStacker( const YAML::Node& stack_instructions, FNTFile& tfin, 
-                    std::map<std::string, Km2Scaling>& scaling_info,
+                    std::map<std::string, MultiScaling>& scaling_info,
                     const HistFormatter& formatter );
 
             std::unique_ptr<TH1> load_hist( const YAML::Node& instruct );
@@ -79,7 +79,7 @@ namespace fn
             const YAML::Node stack_instructions_;
             FNTFile& tfin_;
             OwningStack stack_;
-            std::map<std::string, Km2Scaling>& scaling_info_;
+            std::map<std::string, MultiScaling>& scaling_info_;
             const HistFormatter& formatter_;
     };
 

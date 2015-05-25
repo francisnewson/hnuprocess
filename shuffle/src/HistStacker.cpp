@@ -83,7 +83,7 @@ namespace fn
     //--------------------------------------------------
 
     HistStacker::HistStacker( const YAML::Node& stack_instructions, FNTFile& tfin,
-            std::map<std::string, Km2Scaling>& scaling_info, const HistFormatter& formatter)
+            std::map<std::string, MultiScaling>& scaling_info, const HistFormatter& formatter)
         :stack_instructions_( stack_instructions), tfin_( tfin ),
         scaling_info_( scaling_info ), formatter_( formatter )
     { }
