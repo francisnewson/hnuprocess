@@ -191,23 +191,35 @@ namespace fn
                     BOOST_LOG_SEV( log_, fn::severity_level::always_print)
                         << "Setting cache";
                     tch_->SetCacheSize( 100000000 );
+                    BOOST_LOG_SEV( log_, fn::severity_level::always_print)
+                        << "cache set";
                     tch_->AddBranchToCache( "*", kTRUE );
 
                     //Extract event version
+                    BOOST_LOG_SEV( log_, fn::severity_level::always_print)
+                        << "Loading event version";
                     event_version_ = 0;
 
+                    BOOST_LOG_SEV( log_, fn::severity_level::always_print)
+                        << "Extracting streamer_infos";
                     const TList * streamer_infos = tch_->GetFile()->GetStreamerInfoList();
                     TIter next( streamer_infos );
+
+                    BOOST_LOG_SEV( log_, fn::severity_level::always_print)
+                        << "Entering object loop";
                     for (  TObject * obj = next() ; obj ; obj = next() ) 
                     {
                         auto streamer_info = static_cast<TStreamerInfo*>( obj );
-                        //obj->Print();
-                        //std::cerr << streamer_info->GetName() << std::endl;
+                        obj->Print();
+                        std::cerr << streamer_info->GetName() << std::endl;
                         if ( strcmp( streamer_info->GetName(), branch_name_.c_str() ) == 0 )
                         {
                             event_version_ =  streamer_info->GetClassVersion(); 
                         }
                     }
+
+                    BOOST_LOG_SEV( log_, fn::severity_level::always_print)
+                        << "Checking event version";
 
                     if ( event_version_ == 0 )
                     { 
@@ -222,6 +234,8 @@ namespace fn
                     BOOST_LOG_SEV( log_, fn::severity_level::always_print)
                         << "Using event version " << event_version_ ;
 
+                    BOOST_LOG_SEV( log_, fn::severity_level::always_print)
+                        << "Calling new_tree() for the first time";
                     new_tree();
                 }
 

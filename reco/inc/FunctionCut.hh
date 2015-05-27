@@ -81,5 +81,22 @@ namespace fn
             }
     };
 
+    class LambdaWgtCut: public CachedSelection
+    {
+        private:
+            bool do_check() const;
+            double do_weight() const;
+            std::function<bool()> cut_function_;
+            std::function<double()> wgt_function_;
+
+        public:
+            template <class F, class G>
+            LambdaWgtCut( F cut_function, G wgt_function )
+            {
+                cut_function_ = cut_function;
+                wgt_function_ = wgt_function;
+            }
+    };
+
 }
 #endif

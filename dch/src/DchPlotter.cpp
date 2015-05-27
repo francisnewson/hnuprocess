@@ -27,6 +27,9 @@ namespace fn
         hz_ = dths_.MakeTH1D( "hz", "DCH z",
                 1200, -3000, 9000, "z( cm )", "#events" );
 
+        hdm2_pi0_ = dths_.MakeTH1D( "hdm2_pi0", "DCH pi0 mass difference",
+                1000, -0.2, 0.2, "dm^{2}", "#events" );
+
         hm2_tx_ = dths_.MakeTH2D( "hm2_tx_", "Mass angle correlation" ,
                 100, -0.3, 0.2, "m^{2}_{miss}",
                 100, -0.01, 0.01, "dtx" );
@@ -87,6 +90,9 @@ namespace fn
             double dty = lkr3mom.Y()/lkr3mom.Mag()  - dch3mom.Y()/dch3mom.Mag();
             double dm2 = (kaon_4mom - lkr_pip_4mom).M2() - (kaon_4mom - dch_pip_4mom).M2();
 
+            double dm2_pi0 = (kaon_4mom - dch_pip_4mom ).M2() - na62const::mPi0 *na62const::mPi0;
+            hdm2_pi0_->Fill( dm2_pi0, weight);
+
             hm2_tx_->Fill( dm2, dtx, weight );
             hm2_ty_->Fill( dm2, dty, weight );
 
@@ -113,6 +119,7 @@ namespace fn
 
     void DchPlotter::write()
     {
+        //std::cout << "Switching to folder " << folder_ << std::endl;
         cd_p( &tf_, folder_ );
         dths_.Write();
 
@@ -158,8 +165,27 @@ namespace fn
         htrack_cluster_sep_ = dths_.MakeTH1D( "htrack_cluster_sep", "Track Cluster - Photon Cluster Separation",
                 1000, 0.0 , 200,  "Sep ( cm )", "#events" );
 
+        htrack_track_cluster_sep_ = dths_.MakeTH1D( "htrack_track_cluster_sep", "Track - Track Cluster",
+                1000, 0.0 , 200,  "Sep ( cm )", "#events" );
+
+        htrack_cluster_E_sep_ = dths_.MakeTH2D( "htrack_cluster_E_sep", "Track Cluster E and sep",
+                100, 0.0 , 200,  "sep (cm)",
+                100, 0.0 , 100,  "E (GeV)" );
+
         hmin_photon_radius_ = dths_.MakeTH1D( "hmin_photon_radius", "Min photon radius at DCH1",
                 1000, 0.0 , 200,  "Sep ( cm )", "#events" );
+
+        hevent_pt_ = dths_.MakeTH1D( "hevent_pt_", "Event pt",
+                1000, 0.0 , 1,  "p_T", "#events" );
+
+        hphoton_energy_ = dths_.MakeTH2D( "hphoton_energy", "Photon energies",
+                100, 0.0 , 100,  "E1", 100, 0.0 , 100,  "E2" );
+
+        hhigh_photon_energy_ = dths_.MakeTH1D( "hhigh_photon_energy", "High Photon energy",
+                1000, 0.0 , 100,  "Energy(GeV)", "#events" );
+
+        hlow_photon_energy_ = dths_.MakeTH1D( "hlow_photon_energy", "High Photon energy",
+                1000, 0.0 , 100,  "Energy(GeV)", "#events" );
 
     }
 
@@ -172,12 +198,28 @@ namespace fn
             heop_->Fill( extract_eop( event_data, dch_data, mc) , weight );
             heop_p_->Fill( dch_data.p, extract_eop( event_data, dch_data, mc)
                     , weight );
+
+        double track_track_cluster_sep = extract_track_track_cluster_sep( event_data, dch_data, mc);
+            htrack_track_cluster_sep_->Fill( track_track_cluster_sep , weight );
+        htrack_cluster_E_sep_->Fill( track_track_cluster_sep, event_data.TCE, weight );
         }
 
-        hphoton_sep_->Fill( extract_photon_sep( lkr_data), weight );
-        htrack_cluster_sep_->Fill( extract_min_track_cluster_sep( lkr_data, dch_data), weight );
-        hmin_photon_radius_->Fill( extract_min_photon_radius( lkr_data), weight );
+        double photon_sep =  extract_photon_sep( lkr_data);
+        double min_track_cluster_sep = extract_min_track_cluster_sep( lkr_data, dch_data);
+        double min_photon_radius = extract_min_photon_radius( lkr_data);
+        double event_pt = extract_event_pt(  dch_data, lkr_data, mc );
+
+        hphoton_sep_->Fill( photon_sep, weight );
+        htrack_cluster_sep_->Fill( min_track_cluster_sep, weight );
+        hmin_photon_radius_->Fill(  min_photon_radius, weight );
+
+        hevent_pt_->Fill( event_pt, weight );
+
         hchi2_->Fill( event_data.lkr_fit_chi2, weight );
+        hhigh_photon_energy_->Fill( lkr_data.E1, weight );
+        hlow_photon_energy_->Fill( lkr_data.E2, weight );
+
+        hphoton_energy_->Fill( lkr_data.E1, lkr_data.E2, weight );
     }
 
     void K2piEventPlotter::write()
@@ -217,8 +259,10 @@ namespace fn
                 ( "DchAnalysis: Unknown lkr source " + lkr_data_source );
         }
 
+        n_scatterers_ = 0;
 
-        for ( int i = 0 ; i != 5 ; ++ i )
+
+        for ( int i = 0 ; i != n_scatterers_ ; ++ i )
         {
             double angle_cutoff = 0.00085;
             double angle_frequency = (i == 0) ? 0 : 2 * i * 0.001;
@@ -273,18 +317,20 @@ namespace fn
 
         bool passed_dch = check_dch_selections( dch_selections_, &k2pi_data_.raw_dch, lkr_data_ );
 
+        double wgt = k2pi_data_.weight * get_weight();
+
         if( is_mc_ )
         {
             if ( passed_dch )
             {
                 plots_.plot_data( k2pi_data_, *lkr_data_, k2pi_data_.raw_dch, 
-                        k2pi_data_.weight, true, &k2pi_data_.mc  );
+                        wgt, true, &k2pi_data_.mc  );
 
                 event_plots_.plot_data( k2pi_data_, *lkr_data_ , k2pi_data_.raw_dch, 
-                        k2pi_data_.weight, true, &k2pi_data_.mc  );
+                        wgt, true, &k2pi_data_.mc  );
             }
 
-            for ( int i  = 0 ; i != 5 ; ++i )
+            for ( int i  = 0 ; i != n_scatterers_ ; ++i )
             {
                 K2piDchData mod_dch = k2pi_data_.raw_dch;
                 scatterers_[i].scatter_track( k2pi_data_.compact_number, 
@@ -299,7 +345,7 @@ namespace fn
                     if ( passed_mod_dch )
                     {
                         scatter_plots_[i].plot_data( k2pi_data_, *lkr_data_, mod_dch, 
-                                k2pi_data_.weight, true, &k2pi_data_.mc );
+                                wgt, true, &k2pi_data_.mc );
                     }
             }
         }
@@ -311,10 +357,10 @@ namespace fn
             if ( passed_dch )
             {
                 plots_.plot_data( k2pi_data_, *lkr_data_, k2pi_data_.raw_dch, 
-                        k2pi_data_.weight, false, 0 );
+                        wgt, false, 0 );
 
                 event_plots_.plot_data( k2pi_data_, *lkr_data_, k2pi_data_.raw_dch, 
-                        k2pi_data_.weight, false, 0  );
+                        wgt, false, 0  );
             }
         }
     }

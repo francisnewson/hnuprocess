@@ -43,10 +43,14 @@ namespace fn
     double extract_photon_sep ( K2piLkrData &raw_lkr );
     double extract_min_track_cluster_sep ( K2piLkrData &raw_lkr, K2piDchData& dch );
 
+    double extract_track_track_cluster_sep
+        ( K2piEventData& event, K2piDchData& raw_dch, bool mc );
+
     double extract_min_photon_radius( K2piLkrData& raw_lkr );
 
     Vertex extract_vertex( const K2piDchData& dch, const K2piLkrData& lkr );
 
+    double extract_event_pt( const K2piDchData& dch, const K2piLkrData& lkr, bool mc );
 
 
     TVector3 compute_neutral_vertex( const fne::Event * e,

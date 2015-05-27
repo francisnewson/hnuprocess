@@ -12,6 +12,7 @@ lenv.AddLibs( [
 'tracking',
 'clusters',
 'muons',
+'conditions',
 #'k2pi',
 ] )
 lenv.AddEvent( event_dir, 'event' )

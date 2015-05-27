@@ -11,9 +11,10 @@ getyaml () {
 app=$( getyaml run.app )
 channel=$( getyaml run.channel )
 runlist=$( getyaml run.runlist )
+mission=$( getyaml run.mission )
 output=$( cat $instruct | shyaml get-value save.local | shyaml keys )
 
 mkdir -p output
 
 #run the command!
-$app -c $channel -l $runlist  -o $output 
+$app -s $mission -c $channel -l $runlist  -o $output 

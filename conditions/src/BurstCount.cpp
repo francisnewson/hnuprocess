@@ -6,6 +6,7 @@
 #include "TROOT.h"
 #include <TApplication.h>
 #include "TClass.h"
+#include "K2piEventData.hh"
 
 namespace fn
 {
@@ -21,7 +22,7 @@ namespace fn
         burst_tree_.Branch( "burst_time", &burst_info_.burst_time, "burst_time/L" );
         burst_tree_.Branch( "events", &burst_info_.events, "events/L" );
         burst_tree_.Branch( "weight", &burst_info_.weight, "weight/D" );
-        }
+    }
 
     void BurstCount::new_burst()
     {
@@ -77,4 +78,47 @@ namespace fn
 
             return new BurstCount( *sel, tfile, folder, e );
         }
+
+    //--------------------------------------------------
+
+    K2piBurstCount::K2piBurstCount( const Selection& sel,
+            TFile& tfile, std::string folder,
+            const K2piEventData& e )
+        :Analysis( sel ), tfile_( tfile), folder_( folder ), e_( e ),
+        burst_tree_( "bursts", "Burst info")
+    {
+        TTree::SetMaxTreeSize(10000000000LL);
+        burst_tree_.Branch( "run", &burst_info_.run, "run/L" );
+        burst_tree_.Branch( "burst_time", &burst_info_.burst_time, "burst_time/L" );
+        burst_tree_.Branch( "events", &burst_info_.events, "events/L" );
+        burst_tree_.Branch( "weight", &burst_info_.weight, "weight/D" );
+        new_burst();
+    }
+
+    void K2piBurstCount::new_burst()
+    {
+        burst_info_.run = e_.run;
+        burst_info_.burst_time = e_.burst_time;
+        burst_info_.events = 0;
+        burst_info_.weight = 0;
+    }
+
+    void K2piBurstCount::process_event()
+    {
+        burst_info_.events++;
+        burst_info_.weight +=  e_.weight * get_weight();
+    }
+
+    void K2piBurstCount::end_burst()
+    {
+        burst_tree_.Fill();
+    }
+
+    void K2piBurstCount::end_processing()
+    {
+        end_burst();
+        cd_p( &tfile_, folder_ );
+        burst_tree_.Write();
+        burst_tree_.SetDirectory(0);
+    }
 }

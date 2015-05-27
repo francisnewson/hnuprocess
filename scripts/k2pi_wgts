@@ -1,0 +1,65 @@
+#!/usr/bin/env python
+import os
+import os.path as osp
+import re
+import sys
+
+def read_file( f ):
+    for line in f:
+        if 'weighted_data_sample' in line:
+            sim_weight = line.strip().split()[-1]
+        if 'k2pi_cuts' in line:
+            pass_weight = line.strip().split()[-1]
+
+    try:
+        return float(sim_weight), float(pass_weight)
+    except ZeroDivisionError:
+        return 0.0,0.0
+
+def sum_file( f ):
+    for line in f:
+        if 'kaon_mom_weights' in line:
+            dcount, dwgt = line.strip().split()[-2:]
+
+        if '#' in line:
+            continue
+
+        name, count, wgt = line.strip().split()
+        print('{0:30} {1:10.4} {2:10.4}'.format( name, float(count) / float(dcount), float(wgt) / float(dcount) ) )
+
+sum_file( open( '/afs/cern.ch/work/f/fnewson/hnu/gopher/data/thesis/extractfit/channels/p5.data.nhod.v2.neg/batch007.k2pi.dat' ) )
+sum_file( open( '/afs/cern.ch/work/f/fnewson/hnu/gopher/data/thesis/extractfit/channels/p5.data.nhod.v2.neg/batch016.k2pi.dat' ) )
+sys.exit();
+
+
+top_folder = '/afs/cern.ch/work/f/fnewson/hnu/gopher/data/thesis/extractfit/channels/'
+channels = os.listdir( top_folder )
+
+all_data = {}
+
+for channel in channels:
+    channel_files =  [ x for x in os.listdir( osp.join( top_folder, channel ) ) if 'dat' in x ]
+    channel_data = []
+    for cf in channel_files:
+        sim_wgt, pass_wgt =  read_file( open( osp.join( top_folder, channel, cf ) ) )
+        batch_match = re.search( r'batch([0-9]+).*', cf)
+        batch = int(batch_match.group(1))
+        channel_data.append( 
+                {'channel'  : channel,
+                    'batch_name' : cf, 'batch_number' : batch,
+                    'sim_wgt' : sim_wgt, 'pass_wgt' : pass_wgt
+                    } )
+
+        all_data[channel] = sorted( channel_data, key = lambda k: k['batch_number'] )
+
+for chan, data in all_data.iteritems():
+    print ( chan )
+    for datum in data:
+        batch =  datum["batch_number"]
+        sim_wgt = datum['sim_wgt']
+        pass_wgt = datum['pass_wgt']
+        try:
+            acc = pass_wgt / sim_wgt
+        except ZeroDivisionError:
+            acc = 0
+        print( "{0:3} {1:12} {2:12} {3:10.4g}".format( batch, sim_wgt, pass_wgt, acc   ) )

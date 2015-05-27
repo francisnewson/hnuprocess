@@ -26,7 +26,11 @@ save = config['save']
 for source, dest in save['local'].items():
     sys.stderr.write ( "Copying {0} to {1}\n".format( source, dest ))
     os.makedirs( os.path.dirname( dest ), exist_ok = True )
-    shutil.copy( source, dest )
+    try:
+        shutil.copy( source, dest )
+    except IOError:
+        print( 'Could not copy {0} to {1}\n'.format( source, dest ) )
+
 
 #do castor
 for source, dest in save['castor'].items():

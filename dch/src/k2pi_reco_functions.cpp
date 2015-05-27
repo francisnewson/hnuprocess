@@ -15,6 +15,7 @@
 #include "RecoCluster.hh"
 #include "KaonTrack.hh"
 #include "Track.hh"
+#include "Xcept.hh"
 
 #include "root_help.hh"
 #include <boost/math/tools/roots.hpp>
@@ -70,6 +71,27 @@ namespace fn
         return std::min( sep1.Mag(), sep2.Mag() );
     }
 
+    double extract_track_track_cluster_sep ( K2piEventData& event, K2piDchData& raw_dch, bool mc )
+    {
+        K2piDchInterface dch( raw_dch);
+
+        fne::RecoCluster rc;
+        rc.energy = event.TCE;
+        rc.x = event.TCX;
+        rc.y = event.TCY;
+
+        CorrCluster cc{ calibrated_cluster_data
+            { event.TCE, { event.TCX, event.TCY, na62const::zLkr } }, mc };
+
+        Track dch_track( dch.x0(), dch.y0(), na62const::bz_tracking,
+                dch.dxdz(), dch.dydz(), 1 );
+
+        TVector3 track_pos = dch_track.extrapolate( cc.get_pos().Z() );
+
+        double sep = ( track_pos - cc.get_pos() ).Mag();
+        return sep;
+    }
+
     double extract_min_photon_radius( K2piLkrData& raw_lkr )
     {
         //Copy data into parameter array
@@ -95,6 +117,30 @@ namespace fn
         Track kaon{ lkr.kx0, lkr.ky0, 0, lkr.pkx, lkr.pky, lkr.pkz };
         Track pion{ dch.x0, dch.y0, na62const::bz_tracking, dch.dxdz, dch.dydz, 1 };
         return compute_cda( kaon, pion );
+    }
+
+    double extract_event_pt( const K2piDchData& dch, const K2piLkrData& lkr, bool mc )
+    {
+        CorrCluster cc1{ calibrated_cluster_data
+            { lkr.E1, { lkr.X1, lkr.Y1, na62const::zLkr } }, mc };
+
+        CorrCluster cc2{ calibrated_cluster_data
+            { lkr.E2, { lkr.X2, lkr.Y2, na62const::zLkr } }, mc };
+
+        Vertex vertex = extract_vertex( dch, lkr );
+
+        TVector3 v1 = cc1.get_pos() - vertex.point;
+        TVector3 p1 = cc1.get_energy() * v1.Unit();
+
+        TVector3 v2 = cc2.get_pos() - vertex.point;
+        TVector3 p2 = cc2.get_energy() * v2.Unit();
+
+        TVector3 p_pion = TVector3{ dch.dxdz, dch.dydz, 1 }.Unit() * dch.p;
+        TVector3 p_kaon = TVector3{ lkr.pkx, lkr.pky, lkr.pkz };
+
+        TVector3 p_miss = p_kaon - p_pion - p1 - p2;
+
+        return p_miss.Perp( p_kaon);
     }
 
 
@@ -151,6 +197,7 @@ namespace fn
 
         return kt.extrapolate_z( best_z );
     }
+
 
     //--------------------------------------------------
 

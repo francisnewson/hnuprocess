@@ -105,6 +105,13 @@ int main( int argc, char * argv[] )
         extract_root_fiducial_weights( config_node["weights"]  )
         :  YAML::LoadFile(fid_filename).as<std::map<std::string, double>>();
 
+    std::cout << "Fiducial weights" << std::endl;
+    for ( auto chan : fiducial_weights )
+    {
+        std::cout << chan.first << " " << chan.second << std::endl;
+
+    }
+
     //Load branching ratios
     std::string br_filename = "input/shuffle/branching_ratios.yaml" ;
     auto branching_ratios = YAML::LoadFile(br_filename).as<std::map<std::string, double>>();
@@ -129,8 +136,8 @@ int main( int argc, char * argv[] )
         std::cout << "Halo scale: " << this_method.get_halo_scale() 
             << " ± " << this_method.get_halo_scale_error() << "\n";
 
-        std::cout << "Km2 scale: " << this_method.get_km2_scale() 
-            << " ± " << this_method.get_km2_scale_error() << "\n";
+        std::cout << "Peak scale: " << this_method.get_peak_scale() 
+            << " ± " << this_method.get_peak_scale_error() << "\n";
     }
 
     for ( const auto& scaling : scaling_info  )

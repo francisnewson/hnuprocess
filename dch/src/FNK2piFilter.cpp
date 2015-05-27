@@ -279,6 +279,7 @@ namespace fn
     {
         k2pi_event_ = extractor_.get_k2pi_event_ptr();
 
+        tfile_.cd();
         ttree_ = new TTree( tree_name.c_str(), tree_name.c_str() );
         TTree::SetMaxTreeSize( 10000000000LL );
         ttree_->Branch( "K2piEventData", "fn::K2piEventData",

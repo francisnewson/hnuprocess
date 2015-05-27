@@ -1,0 +1,204 @@
+scaling:
+    - scaling_method:
+        strategy: m2
+        name: mc_pos
+        peakname: k2pi
+
+        channels:
+            halo_channels:
+                - p6.data.km.q11t.v2.pos
+
+            data_channels:
+                - p5.data.nhod.v2.pos
+
+            peak_channels:
+                - p5.k2pig.v2.pos
+
+        halo:
+            strategy: dummy
+
+        mc:
+            strategy: m2
+            input_file: tdata/k2pi/all.k2pi.root
+            plot_path: select_fit_k2pi_plots/lkr_dch_cmp/hdm2
+
+            min_mass_halo: -0.03
+            max_mass_halo: -0.025
+            min_mass_peak: -0.01
+            max_mass_peak:  0.01
+
+    - scaling_method:
+        strategy: m2
+        name: mc_neg
+        peakname: k2pi
+
+        channels:
+            halo_channels:
+                - p6.data.km.q11t.v2.neg
+
+            data_channels:
+                - p5.data.nhod.v2.neg
+
+            peak_channels:
+                - p5.k2pig.v2.neg
+
+        halo:
+            strategy: dummy
+
+        mc:
+            strategy: m2
+            input_file: tdata/k2pi/all.k2pi.root
+            plot_path: select_fit_k2pi_plots/lkr_dch_cmp/hdm2
+
+            min_mass_halo: -0.03
+            max_mass_halo: -0.025
+            min_mass_peak: -0.01
+            max_mass_peak:  0.01
+
+weights:
+    fid_file: use_root
+    root_file: "tdata/extractfit/all.extractfit.root"
+    pre : ""
+    post: "sample_burst_count/bursts"
+    branch:  "weight"
+
+output:
+    input_file: tdata/k2pi/all.k2pi.root
+
+    plots:
+        - path: select_fit_k2pi_plots/lkr_dch_cmp/hdm2
+          name: fit_dm2
+          rebin: 5
+
+        - path: select_fit_k2pi_plots/lkr_dch_cmp/hdtx
+          name: fit_dtx
+          rebin: 5
+
+        - path: select_fit_k2pi_plots/lkr_dch_cmp/hdty
+          name: fit_dty
+          rebin: 5
+
+        - path: select_fit_k2pi_plots/lkr_dch_cmp/hdpop_
+          name: fit_dpop
+          rebin: 2
+
+        - path: select_fit_k2pi_plots/hchi2
+          name: fit_chi2
+          rebin: 2
+
+        - path: select_fit_k2pi_plots/hz
+          name: fit_z
+          rebin: 5
+
+        - path: select_fit_k2pi_plots/hcda
+          name: fit_cda
+          rebin: 2
+
+        - path: select_fit_k2pi_plots/hpt_
+          name: fit_pt
+          rebin: 20
+
+    data_plot:
+        channels:
+            - p5.data.nhod.v2.pos
+            - p5.data.nhod.v2.neg
+        do_blind: false
+
+    stack:
+        - item:
+            name: km3_pos
+            scaling: mc_pos
+            type: km3
+            fid_weight: p5.km3.v2.pos
+            channels:
+                - p5.km3.v2.pos
+
+        - item:
+            name: km3_neg
+            scaling: mc_neg
+            type: km3
+            fid_weight: p5.km3.v2.neg
+            channels:
+                - p5.km3.v2.neg
+
+        - item:
+            name: ke3_pos
+            scaling: mc_pos
+            type: ke3
+            fid_weight: p5.ke3.v2.pos
+            channels:
+                - p5.ke3.v2.pos
+
+        - item:
+            name: ke3_neg
+            scaling: mc_neg
+            type: ke3
+            fid_weight: p5.ke3.v2.neg
+            channels:
+                - p5.ke3.v2.neg
+
+
+        - item:
+            name: k3pi_pos
+            scaling: mc_pos
+            fid_weight: p5.k3pi.v2.pos
+            type: k3pi
+            channels:
+                - p5.k3pi.v2.pos
+
+        - item:
+            name: k3pi_neg
+            scaling: mc_neg
+            fid_weight: p5.k3pi.v2.neg
+            type: k3pi
+            channels:
+                - p5.k3pi.v2.neg
+
+        - item:
+            name: k3pi0_pos
+            scaling: mc_pos
+            fid_weight: p5.k3pi0.v2.pos
+            type: k3pi0
+            channels:
+                - p5.k3pi0.v2.pos
+
+        - item:
+            name: k3pi0_neg
+            scaling: mc_neg
+            fid_weight: p5.k3pi0.v2.neg
+            type: k3pi0
+            channels:
+                - p5.k3pi0.v2.neg
+
+        - item:
+            name: km2_pos
+            scaling: mc_pos
+            fid_weight: p5.km2.v2.pos
+            type: km2
+            channels:
+                - p5.km2.v2.pos
+
+        - item:
+            name: km2_neg
+            scaling: mc_neg
+            fid_weight: p5.km2.v2.neg
+            type: km2
+            channels:
+                - p5.km2.v2.neg
+
+        - item:
+            name: k2pig_pos
+            scaling: mc_pos
+            type: k2pi
+            fid_weight: p5.k2pig.v2.pos
+            channels:
+                - p5.k2pig.v2.pos
+
+        - item:
+            name: k2pig_neg
+            scaling: mc_neg
+            type: k2pi
+            fid_weight: p5.k2pig.v2.neg
+            channels:
+                - p5.k2pig.v2.neg
+

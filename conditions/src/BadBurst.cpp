@@ -2,6 +2,7 @@
 #include <iostream>
 #include <fstream>
 #include "RecoFactory.hh"
+#include "FunctionCut.hh"
 #include "Xcept.hh"
 #include "yaml_help.hh"
 
@@ -73,6 +74,13 @@ namespace fn
         Subscriber * create_subscriber<BadBurstRange>
         (YAML::Node& instruct, RecoFactory& rf )
         {
+
+            bool is_mc = rf.is_mc();
+
+            if ( is_mc )
+            {
+                return new FunctionCut<auto_pass>{{0}} ; 
+            }
 
             //Extract burst list filename
             auto burst_list = get_yaml<std::string>(instruct,"burst_range_list");

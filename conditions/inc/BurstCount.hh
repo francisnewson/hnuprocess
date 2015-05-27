@@ -19,6 +19,8 @@ class TFile;
 
 namespace fn
 {
+    class K2piEventData;
+
     struct burst_info
     {
         Long64_t run;
@@ -53,5 +55,28 @@ namespace fn
     template<>
         Subscriber * create_subscriber<BurstCount>
         (YAML::Node& instruct, RecoFactory& rf );
+
+    //--------------------------------------------------
+
+    class K2piBurstCount : public Analysis
+    {
+        public:
+            K2piBurstCount( const Selection& sel,
+                    TFile& tfile, std::string folder,
+                    const K2piEventData& e );
+
+            void new_burst();
+            void end_burst();
+            void end_processing();
+
+        private:
+            void process_event();
+
+            TFile& tfile_;
+            std::string folder_;
+            const K2piEventData& e_;
+            burst_info burst_info_;
+            TTree burst_tree_;
+    };
 }
 #endif

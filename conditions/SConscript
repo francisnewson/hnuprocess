@@ -9,9 +9,11 @@ lenv.SetBoost( boost_dir, boost_name )
 lenv.AddLibs( [
 'tools', 
 'reco', 
+'dch',
 ] )
 lenv.AddEvent( event_dir, 'event' )
 lenv.SetYaml( yaml_dir )
+lenv.Append( CPPPATH = '../dch/dict' )
 
 
 lenv.Append( CPPPATH = 'inc' )

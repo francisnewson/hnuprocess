@@ -189,10 +189,10 @@ int main( int argc, char * argv[] )
 
     TFile tfout( output_file.string().c_str() , "RECREATE");
 
-    std::string folder = "";
+    std::string channel = "";
     if ( vm.count( "channel" ) )
     {
-        folder = vm["channel"].as<std::string>() ;
+        channel = vm["channel"].as<std::string>() ;
     }
 
     Long64_t event_count = echain->get_max_event();
@@ -209,7 +209,7 @@ int main( int argc, char * argv[] )
     K2PIGStatus k2pigs{ echain->get_event_pointer(), is_mc };
     raw_global_status() = &k2pigs;
 
-    K2piRecoBag k2pirb( *event_data, is_mc, tfout );
+    K2piRecoBag k2pirb( *event_data, is_mc, tfout, channel );
 
     //add studies
     for( auto study: studies )

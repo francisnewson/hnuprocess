@@ -2,6 +2,7 @@ scaling:
     - scaling_method:
         strategy: m2
         name: mc_pos
+        peakname: km2
 
         channels:
             halo_channels:
@@ -11,7 +12,7 @@ scaling:
             data_channels:
                 - p5.data.q1.v2.pos
 
-            km2_channels:
+            peak_channels:
                 - p5.km2.v2.pos
 
         halo:
@@ -37,6 +38,7 @@ scaling:
     - scaling_method:
         strategy: m2
         name: mc_neg
+        peakname: km2
 
         channels:
             halo_channels:
@@ -45,7 +47,7 @@ scaling:
             data_channels:
                 - p5.data.q1.v2.neg
 
-            km2_channels:
+            peak_channels:
                 - p5.km2.v2.neg
 
         halo:

@@ -50,6 +50,7 @@ namespace fn
             TH1D * hz_;
             TH2D * hm2_tx_;
             TH2D * hm2_ty_;
+            TH1D * hdm2_pi0_;
     };
 
     //--------------------------------------------------
@@ -75,7 +76,15 @@ namespace fn
             TH2D * heop_p_ ;
             TH1D * hphoton_sep_ ;
             TH1D * htrack_cluster_sep_ ;
+            TH1D * htrack_track_cluster_sep_ ;
+            TH2D * htrack_cluster_E_sep_ ;
             TH1D * hmin_photon_radius_;
+
+            TH1D * hevent_pt_;
+
+            TH2D * hphoton_energy_;
+            TH1D * hhigh_photon_energy_;
+            TH1D * hlow_photon_energy_;
     };
     
     //--------------------------------------------------
@@ -118,6 +127,7 @@ namespace fn
         K2piLkrData * lkr_data_;
         bool is_mc_;
 
+        int n_scatterers_;
         std::vector<DchPlotter> scatter_plots_;
         std::vector<TrackPowerScatterer> scatterers_;
         std::vector<DchSelection*> dch_selections_;

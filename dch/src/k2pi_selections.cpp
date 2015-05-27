@@ -2,17 +2,21 @@
 #include "NA62Constants.hh"
 #include "FunctionCut.hh"
 #include "PionPlotter.hh"
+#include "BurstCount.hh"
+#include "Summary.hh"
 
 namespace fn
 {
-    K2piRecoBag::K2piRecoBag(K2piEventData& k2pi_event, bool mc, TFile& tfile)
+    K2piRecoBag::K2piRecoBag(K2piEventData& k2pi_event, bool mc, TFile& tfile, std::string channel)
         : is_mc( mc ),
         event( k2pi_event),
         raw_lkr( event.raw_lkr ),
         fit_lkr( event.fit_lkr ),
         raw_dch( event.raw_dch ),
         tfout( tfile ),
-        next_id_(0){}
+        next_id_(0),
+        channel_( channel )
+    {}
 
     void K2piRecoBag::add_selection( Selection * sel)
     { 
@@ -43,6 +47,11 @@ namespace fn
         for( auto& an: an_){an->end_processing(); }
     }
 
+    std::string K2piRecoBag::get_folder( std::string folder )
+    {
+        return (boost::filesystem::path( channel_ ) / folder ).string();
+    }
+
     //--------------------------------------------------
 
     Selection * get_photon_sep_cut( K2piRecoBag& k2pirb, double sep )
@@ -67,6 +76,25 @@ namespace fn
         LambdaCut * track_cluster_sep_cut  = new LambdaCut{ track_cluster_sep};
         track_cluster_sep_cut->set_name( "track_cluster_sep_cut" );
         return track_cluster_sep_cut;
+    }
+
+    Selection * get_track_track_cluster_sep_cut( K2piRecoBag& k2pirb, double sep, bool mc )
+    {
+        auto track_track_cluster_sep = [&k2pirb, sep, mc]()
+        {
+            if ( k2pirb.event.found_track_cluster )
+            {
+                return extract_track_track_cluster_sep( k2pirb.event, k2pirb.raw_dch, mc ) < sep ;
+            }
+            else
+            {
+                return true;
+            }
+        };
+
+        LambdaCut * track_track_cluster_sep_cut  = new LambdaCut{ track_track_cluster_sep};
+        track_track_cluster_sep_cut->set_name( "track_track_cluster_sep_cut" );
+        return track_track_cluster_sep_cut;
     }
 
     Selection * get_min_photon_radius_cut( K2piRecoBag& k2pirb, double rad )
@@ -94,12 +122,49 @@ namespace fn
         return chi2_cut;
     }
 
+    Selection * get_muv_cut( K2piRecoBag& k2pirb, bool mc )
+    {
+        if (mc)
+        {
+            auto accept_event = [] { return true; };
+            auto weight = [&k2pirb]
+            {
+                if ( k2pirb.event.muv.found_muon )
+                {
+                    return 1 - k2pirb.event.muv.eff;
+                }
+                else
+                {
+                    return 1.0;
+                }
+            };
+
+            LambdaWgtCut * muv_cut = new LambdaWgtCut{ accept_event, weight };
+            muv_cut->set_name( "mc_muv_cut" );
+            return muv_cut;
+        }
+        else
+        {
+            auto accept_event = [&k2pirb]
+            {
+                return !k2pirb.event.muv.found_muon;
+            };
+
+            LambdaCut * muv_cut = new LambdaCut{ accept_event};
+            muv_cut->set_name( "dt_muv_cut");
+            return muv_cut;
+        }
+
+    }
+
     void add_dch_study( K2piRecoBag & k2pirb)
     {
-
         //**************************************************
         //Selections
         //**************************************************
+
+        Selection * passer = new FunctionCut<auto_pass>( 0 );
+        k2pirb.add_selection( passer );
 
         //M2M CUT
         auto m2m_pip = [&k2pirb]()
@@ -132,7 +197,7 @@ namespace fn
             if ( k2pirb.event.found_track_cluster )
             {
                 double eop = extract_eop( k2pirb.event, k2pirb.raw_dch, k2pirb.is_mc );
-                return ( 0.2 < eop && eop < 0.8 );
+                return ( 0.0 < eop && eop < 0.95 );
             }
             else
             {
@@ -153,18 +218,32 @@ namespace fn
         //--------------------
 
         //TRACK CLUSTER SEPARATION
-        auto track_cluster_sep_cut =  get_track_cluster_sep_cut(k2pirb, 30 ) ;
+        auto track_cluster_sep_cut =  get_track_cluster_sep_cut(k2pirb, 40 ) ;
         k2pirb.add_selection  (track_cluster_sep_cut);
+
+        //--------------------
+
+        //TRACK TRACK CLUSTER SEPARATION
+        auto track_track_cluster_sep_cut =  get_track_track_cluster_sep_cut(k2pirb, 30, k2pirb.is_mc ) ;
+        k2pirb.add_selection  (track_track_cluster_sep_cut);
 
         //--------------------
 
         //MIN PHOTON RADIUS
         auto min_photon_radius_cut = get_min_photon_radius_cut( k2pirb, 15 );
         k2pirb.add_selection( min_photon_radius_cut );
+       
+        //--------------------
 
         //CHI2 CUT
         auto chi2_cut = get_chi2_cut( k2pirb, 0.016 );
         k2pirb.add_selection( chi2_cut );
+
+        //--------------------
+
+        //MUV CUT
+        auto muv_cut = get_muv_cut( k2pirb, k2pirb.is_mc);
+        k2pirb.add_selection( muv_cut );
 
         CompositeSelection * full_selection = new CompositeSelection( 
                 { m2m_cut, eop_cut, track_cluster_sep_cut, min_photon_radius_cut } );
@@ -172,7 +251,7 @@ namespace fn
         k2pirb.add_selection( full_selection );
 
         CompositeSelection * fit_selection = new CompositeSelection( 
-                {  chi2_cut, eop_cut, track_cluster_sep_cut, min_photon_radius_cut} );
+                {  chi2_cut, eop_cut, track_cluster_sep_cut, track_track_cluster_sep_cut,  min_photon_radius_cut, muv_cut} );
         fit_selection->set_name( "fit_selection" );
         k2pirb.add_selection( fit_selection );
 
@@ -181,13 +260,18 @@ namespace fn
         fit_no_eop_selection->set_name( "fit_no_eop_selection" );
         k2pirb.add_selection( fit_no_eop_selection );
 
+        CompositeSelection * fit_no_chi2_selection = new CompositeSelection( 
+                { track_cluster_sep_cut, min_photon_radius_cut} );
+        fit_no_eop_selection->set_name( "fit_no_eop_selection" );
+        k2pirb.add_selection( fit_no_chi2_selection );
+
         //**************************************************
-        //Analysis
+        //Analyses
         //**************************************************
 
         //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         //IMPORTANT
-        //DchAnalysis implements a cut on CDA!
+        //DchAnalyses implement dch_cuts
         //(in addition to anything in the selections above)
         //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
@@ -198,14 +282,43 @@ namespace fn
                 return cda < 3.5;
                 } );
 
+
         k2pirb.add_dch_selection( cda_cut_35 );
 
+        DchSelection * z_cut_m1000_6500 =  new DchSelection( []( K2piDchData* dch_data, K2piLkrData* lkr_data)
+                {
+                Vertex vertex = extract_vertex( *dch_data,  *lkr_data );
+                double z = vertex.point.Z();
+                return z > - 2000 && z < 6500;
+                } );
+
+        k2pirb.add_dch_selection( z_cut_m1000_6500 );
+
+        auto select_fit_folder =  k2pirb.get_folder("select_fit_k2pi_plots");
+        std::cout << "Select fit folder: " << select_fit_folder << std::endl;
+
         DchAnalysis * select_fit_dch_plotter  = new DchAnalysis(
-                *fit_selection, k2pirb.tfout, "select_fit_k2pi_plots", k2pirb.event, "fit", k2pirb.is_mc );
+                *fit_selection, k2pirb.tfout, select_fit_folder,k2pirb.event, "fit", k2pirb.is_mc );
+
+        DchAnalysis * select_fit_no_chi2_dch_plotter  = new DchAnalysis(
+                *fit_no_chi2_selection, k2pirb.tfout, k2pirb.get_folder("select_fit_no_chi2_k2pi_plots"),
+                k2pirb.event, "fit", k2pirb.is_mc );
+
+        auto * burst_count = new K2piBurstCount( *passer, k2pirb.tfout,
+                k2pirb.get_folder("burst_count"), k2pirb.event );
 
         select_fit_dch_plotter->add_dch_selection( cda_cut_35 );
+        select_fit_no_chi2_dch_plotter->add_dch_selection( cda_cut_35 );
+
+        select_fit_dch_plotter->add_dch_selection( z_cut_m1000_6500 );
+        select_fit_no_chi2_dch_plotter->add_dch_selection( z_cut_m1000_6500 );
 
         k2pirb.add_analysis( select_fit_dch_plotter );
+        k2pirb.add_analysis( select_fit_no_chi2_dch_plotter );
+        k2pirb.add_analysis( burst_count );
+
+        Summary  * full_summary = new Summary( *passer, *fit_selection, std::cout );
+        k2pirb.add_analysis( full_summary );
     }
 
     void add_pion_study( K2piRecoBag & k2pirb)
@@ -215,7 +328,7 @@ namespace fn
         //**************************************************
 
         //PHOTON SEPARATION
-        auto photon_sep_cut =  get_photon_sep_cut(k2pirb, 20  ) ;
+        auto photon_sep_cut =  get_photon_sep_cut(k2pirb, 25  ) ;
         k2pirb.add_selection( photon_sep_cut);
 
         //--------------------
@@ -225,6 +338,7 @@ namespace fn
         k2pirb.add_selection  (track_cluster_sep_cut);
 
         //--------------------
+
 
         //MIN PHOTON RADIUS
         auto min_photon_radius_cut = get_min_photon_radius_cut( k2pirb, 15 );

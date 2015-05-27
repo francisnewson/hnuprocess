@@ -23,8 +23,8 @@ namespace fn
     {
         double halo_scale;
         double halo_scale_error;
-        double km2_scale;
-        double km2_scale_error;
+        double peak_scale;
+        double peak_scale_error;
     };
 
     std::ostream& operator<<( std::ostream& os , const scale_result& sr );
@@ -38,11 +38,11 @@ namespace fn
             double get_halo_scale_error() const
             { return sr.halo_scale_error; }
 
-            double get_km2_scale() const
-            { return sr.km2_scale; }
+            double get_peak_scale() const
+            { return sr.peak_scale; }
 
-            double get_km2_scale_error() const
-            { return sr.km2_scale_error; }
+            double get_peak_scale_error() const
+            { return sr.peak_scale_error; }
 
             void update_scaling();
 
@@ -67,14 +67,24 @@ namespace fn
 
             std::vector<std::string> halo_channels;
             std::vector<std::string> data_channels;
-            std::vector<std::string> km2_channels;
+            std::vector<std::string> peak_channels;
 
             boost::filesystem::path input_file;
             std::string post_path;
             double m2_min_halo;
             double m2_max_halo;
-            double m2_min_km2;
-            double m2_max_km2;
+            double m2_min_peak;
+            double m2_max_peak;
+    };
+
+    class DummyScaleStrategy : public ScaleStrategy
+    {
+        public:
+            DummyScaleStrategy(){}
+
+        private:
+            scale_result compute_scaling()
+            { return scale_result{ 1,0, 1,0 }; }
     };
 
     //--------------------------------------------------
@@ -92,8 +102,8 @@ namespace fn
 
             double get_halo_scale() const;
             double get_halo_scale_error() const;
-            double get_km2_scale() const;
-            double get_km2_scale_error() const;
+            double get_peak_scale() const;
+            double get_peak_scale_error() const;
 
         private:
             std::unique_ptr<ScaleStrategy> mc_strat_;
@@ -103,11 +113,12 @@ namespace fn
 
             const std::map<std::string, double>& fiducial_weights_;
             const std::map<std::string, double>& brs_;
-            std::vector<std::string> km2_channels_;
+            std::vector<std::string> peak_channels_;
 
 
-            double km2_fid_weight_;
-            double km2_br_;
+            double peak_fid_weight_;
+            double peak_br_;
+            std::string peak_name_;
     };
 }
 #endif

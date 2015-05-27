@@ -15,4 +15,16 @@ namespace fn
     {
         return cut_function_();
     }
+
+    //--------------------------------------------------
+
+    bool LambdaWgtCut::do_check() const
+    {
+        return cut_function_();
+    }
+
+    double LambdaWgtCut::do_weight() const
+    {
+        return wgt_function_();
+    }
 }
