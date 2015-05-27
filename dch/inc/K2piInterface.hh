@@ -60,6 +60,11 @@ namespace fn
             double& x0();
             double& y0();
 
+            double& ds_dxdz();
+            double& ds_dydz();
+            double& ds_x0();
+            double& ds_y0();
+
             TLorentzVector get_pip_4mom();
 
         private:

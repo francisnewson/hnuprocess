@@ -150,8 +150,8 @@ namespace fn
                 return !k2pirb.event.muv.found_muon;
             };
 
-            LambdaCut * muv_cut = new LambdaCut{ accept_event};
-            muv_cut->set_name( "dt_muv_cut");
+            LambdaCut * muv_cut = new LambdaCut{ accept_event };
+            muv_cut->set_name( "dt_muv_cut" );
             return muv_cut;
         }
 
@@ -209,6 +209,24 @@ namespace fn
         eop_cut->set_name( "eop_cut" );
         k2pirb.add_selection( eop_cut );
 
+        //EXTRA EOP CUT
+        auto raw_extra_eop = [&k2pirb]()
+        {
+            if ( k2pirb.event.found_track_cluster )
+            {
+                double eop = extract_eop( k2pirb.event, k2pirb.raw_dch, k2pirb.is_mc );
+                return ( 0.2 < eop && eop < 0.95 );
+            }
+            else
+            {
+                return false;
+            }
+        };
+
+        LambdaCut * extra_eop_cut = new LambdaCut{ raw_extra_eop};
+        extra_eop_cut->set_name( "extra_eop_cut" );
+        k2pirb.add_selection( extra_eop_cut );
+
         //--------------------
 
         //PHOTON SEPARATION
@@ -255,6 +273,11 @@ namespace fn
         fit_selection->set_name( "fit_selection" );
         k2pirb.add_selection( fit_selection );
 
+        CompositeSelection * fit_extra_eop_selection = new CompositeSelection( 
+                {  chi2_cut, eop_cut, extra_eop_cut, track_cluster_sep_cut, track_track_cluster_sep_cut,  min_photon_radius_cut} );
+        fit_extra_eop_selection->set_name( "fit_extra_eop_selection" );
+        k2pirb.add_selection( fit_extra_eop_selection );
+
         CompositeSelection * fit_no_eop_selection = new CompositeSelection( 
                 {  chi2_cut, track_cluster_sep_cut, min_photon_radius_cut} );
         fit_no_eop_selection->set_name( "fit_no_eop_selection" );
@@ -262,7 +285,7 @@ namespace fn
 
         CompositeSelection * fit_no_chi2_selection = new CompositeSelection( 
                 { track_cluster_sep_cut, min_photon_radius_cut} );
-        fit_no_eop_selection->set_name( "fit_no_eop_selection" );
+        fit_no_chi2_selection->set_name( "fit_no_chi2_selection" );
         k2pirb.add_selection( fit_no_chi2_selection );
 
         //**************************************************
@@ -289,7 +312,7 @@ namespace fn
                 {
                 Vertex vertex = extract_vertex( *dch_data,  *lkr_data );
                 double z = vertex.point.Z();
-                return z > - 2000 && z < 6500;
+                return z > -2000 && z < 6500;
                 } );
 
         k2pirb.add_dch_selection( z_cut_m1000_6500 );
@@ -297,8 +320,14 @@ namespace fn
         auto select_fit_folder =  k2pirb.get_folder("select_fit_k2pi_plots");
         std::cout << "Select fit folder: " << select_fit_folder << std::endl;
 
+        auto select_fit_extra_eop_folder =  k2pirb.get_folder("select_fit_extra_eop_k2pi_plots");
+        std::cout << "Select fit folder: " << select_fit_extra_eop_folder << std::endl;
+
         DchAnalysis * select_fit_dch_plotter  = new DchAnalysis(
                 *fit_selection, k2pirb.tfout, select_fit_folder,k2pirb.event, "fit", k2pirb.is_mc );
+
+        DchAnalysis * select_fit_extra_eop_dch_plotter  = new DchAnalysis(
+                *fit_extra_eop_selection, k2pirb.tfout, select_fit_extra_eop_folder,k2pirb.event, "fit", k2pirb.is_mc );
 
         DchAnalysis * select_fit_no_chi2_dch_plotter  = new DchAnalysis(
                 *fit_no_chi2_selection, k2pirb.tfout, k2pirb.get_folder("select_fit_no_chi2_k2pi_plots"),
@@ -314,11 +343,15 @@ namespace fn
         select_fit_no_chi2_dch_plotter->add_dch_selection( z_cut_m1000_6500 );
 
         k2pirb.add_analysis( select_fit_dch_plotter );
+        k2pirb.add_analysis( select_fit_extra_eop_dch_plotter );
         k2pirb.add_analysis( select_fit_no_chi2_dch_plotter );
         k2pirb.add_analysis( burst_count );
 
         Summary  * full_summary = new Summary( *passer, *fit_selection, std::cout );
         k2pirb.add_analysis( full_summary );
+
+        Summary  * full_extra_summary = new Summary( *passer, *fit_extra_eop_selection, std::cout );
+        k2pirb.add_analysis( full_extra_summary );
     }
 
     void add_pion_study( K2piRecoBag & k2pirb)

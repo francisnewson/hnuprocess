@@ -113,6 +113,7 @@
     tfile: tfstats
     folder: sample_burst_count
     selection: weighted_mc_sample
+    codename: bursts
         
 #-------------------------------------------------- 
 
@@ -290,7 +291,22 @@
         - rk_lkr_accep
         - rk_dcht
         - good_clust
-          
+
+- selection:
+    name: weighted_mc_final_sample
+    type: CompositeSelection
+    children:
+        - weighted_data_sample
+        - mcz
+        - good_trk
+        - pos_trk
+        - quality_7
+        - dch1_acc
+        - dch4_acc
+        - rk_lkr_accep
+        - rk_dcht
+        - good_clust
+
 ###################################################
 # ANALYSES
 ###################################################
@@ -330,3 +346,11 @@
     selection: k2pi_cuts
     inputs:
         k2pix: k2pi_extract
+
+#- analysis:
+#    name: final_sample_burst_count
+#    type: BurstCount
+#    tfile: tfstats
+#    folder: final_sample_burst_count
+#    selection: weighted_mc_final_sample
+#    codename: final

@@ -12,10 +12,10 @@ namespace fn
 {
 
     BurstCount::BurstCount( const Selection& sel,
-            TFile& tfile, std::string folder,
+            TFile& tfile, std::string folder, std::string codename,
             const fne::Event * e )
         :Analysis( sel ), tfile_( tfile), folder_( folder ), e_( e),
-        burst_tree_( "bursts", "Burst info")
+        burst_tree_( codename.c_str() , "Burst info")
     {
         TTree::SetMaxTreeSize(10000000000LL);
         burst_tree_.Branch( "run", &burst_info_.run, "run/L" );
@@ -74,9 +74,11 @@ namespace fn
 
             std::string folder = get_folder( instruct, rf );
 
+            std::string codename = get_yaml<std::string>( instruct, "codename" );
+
             const fne::Event * e = rf.get_event_ptr();
 
-            return new BurstCount( *sel, tfile, folder, e );
+            return new BurstCount( *sel, tfile, folder, codename, e );
         }
 
     //--------------------------------------------------

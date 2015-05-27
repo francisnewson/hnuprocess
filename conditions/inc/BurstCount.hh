@@ -34,6 +34,7 @@ namespace fn
         public:
             BurstCount( const Selection& sel,
                     TFile& tfile, std::string folder,
+                    std::string codename,
                     const fne::Event * e );
 
             void new_burst();

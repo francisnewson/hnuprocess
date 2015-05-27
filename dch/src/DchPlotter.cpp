@@ -37,6 +37,13 @@ namespace fn
         hm2_ty_ = dths_.MakeTH2D( "hm2_ty_", "Mass angle correlation" ,
                 100, -0.3, 0.2, "m^{2}_{miss}",
                 100, -0.01, 0.01, "dty" );
+
+        hxy_muv_ = dths_.MakeTH2D( "hxy_muv", "track xy at MUV" ,
+                150, -150, 150, "x",
+                150, -150, 150, "y" );
+
+        hmuv_eff_ = dths_.MakeTH1D( "hmuv_eff", "Muon veto efficiency",
+                1000, -0.5, 1.5, "efficiency", "#events" );
     }
 
     void DchPlotter::plot_data

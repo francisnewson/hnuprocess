@@ -34,6 +34,11 @@ namespace fn
     double& K2piDchInterface::x0(){ return data_.x0 ; }
     double& K2piDchInterface::y0(){ return data_.y0 ; }
 
+    double& K2piDchInterface::ds_dxdz(){ return data_.ds_dxdz ; }
+    double& K2piDchInterface::ds_dydz(){ return data_.ds_dydz; }
+    double& K2piDchInterface::ds_x0(){   return data_.ds_x0 ; }
+    double& K2piDchInterface::ds_y0(){   return data_.ds_y0 ; }
+
     TLorentzVector K2piDchInterface::get_pip_4mom()
     {
         TVector3 mom = TVector3( dxdz(), dydz(), 1 ).Unit() * p();

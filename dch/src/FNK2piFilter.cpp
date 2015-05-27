@@ -12,6 +12,7 @@
 
 #include "tracking_selections.hh"
 #include "cluster_selections.hh"
+#include "muon_selections.hh"
 
 #include "NA62Constants.hh"
 #include "RecoFactory.hh"
@@ -68,7 +69,7 @@ namespace fn
         //Extract raw info
         extract_raw_lkr(k2pirc, cluster_corrector_, kt_, k2pi_event_data_.raw_lkr );
         extract_raw_dch( srt, k2pi_event_data_.raw_dch );
-        extract_muons( sm_, muon_eff_, k2pi_event_data_.muv );
+        extract_muons( sm_, srt, muon_eff_, k2pi_event_data_.muv);
 
         if ( mc_ )
         {
@@ -178,6 +179,14 @@ namespace fn
         TVector3 point = srt.extrapolate_bf( na62const::bz_tracking );
         dch.x0() = point.X();
         dch.y0() = point.Y();
+
+        TVector3 ds_mom = srt.get_ds_mom();
+        dch.ds_dxdz()  = ds_mom.X() / ds_mom.Z();
+        dch.ds_dydz()  = ds_mom.Y() / ds_mom.Z();
+
+        TVector3 ds_point = srt.extrapolate_ds( na62const::z_tracking );
+        dch.ds_x0() = ds_point.X();
+        dch.ds_y0() = ds_point.Y();
     }
 
     void extract_k2pi_mc( const fne::Event& e, K2piMcData& dest  )
@@ -194,21 +203,30 @@ namespace fn
         }
     }
 
-    void extract_muons( const SingleMuon& sm, 
+    void extract_muons( const SingleMuon& sm, const SingleRecoTrack& srt,
             const Selection & muon_eff, K2piMuvData& k2pi_muv )
     {
         if (!sm.found() )
         {
             k2pi_muv.found_muon = false;
-            k2pi_muv.x = 0;
-            k2pi_muv.y = 0;
-            k2pi_muv.eff = 0;
+            k2pi_muv.x = -1000;
+            k2pi_muv.y = -1000;
+            k2pi_muv.dx = -1000;
+            k2pi_muv.dy = -1000;
+            k2pi_muv.eff = -10;
         }
         else
         {
+            std::pair<double,double> muon_track_separation
+                = get_muon_track_separation( sm, srt );
+
             k2pi_muv.found_muon = true;
             k2pi_muv.x = sm.x();
             k2pi_muv.y = sm.y();
+
+            k2pi_muv.dx = muon_track_separation.first;
+            k2pi_muv.dy = muon_track_separation.second;
+
             k2pi_muv.eff = muon_eff.get_weight();
         }
     }

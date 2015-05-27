@@ -51,6 +51,9 @@ namespace fn
             TH2D * hm2_tx_;
             TH2D * hm2_ty_;
             TH1D * hdm2_pi0_;
+
+            TH2D * hxy_muv_;
+            TH1D * hmuv_eff_;
     };
 
     //--------------------------------------------------

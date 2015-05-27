@@ -89,7 +89,7 @@ namespace fn
 
     void extract_k2pi_mc( const fne::Event& e, K2piMcData& mc );
 
-    void extract_muons( const SingleMuon& sm, 
+    void extract_muons( const SingleMuon& sm, const SingleRecoTrack& srt,
             const Selection & muon_eff, K2piMuvData& k2pi_muv ); 
 
     double fit_lkr( const K2piLkrData& raw,

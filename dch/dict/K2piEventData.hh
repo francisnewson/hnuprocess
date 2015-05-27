@@ -54,8 +54,16 @@ namespace fn
             Double_t x0;
             Double_t y0;
 
+            //Downstream Momentum
+            Double_t ds_dxdz;
+            Double_t ds_dydz;
+
+            //Downstream position
+            Double_t ds_x0;
+            Double_t ds_y0;
+
             virtual ~K2piDchData(){}
-            ClassDef ( K2piDchData, 2 );
+            ClassDef ( K2piDchData, 3 );
     };
 
     class K2piMuvData : public TObject
@@ -64,10 +72,12 @@ namespace fn
             Bool_t found_muon;
             Double_t x;
             Double_t y;
+            Double_t dx;
+            Double_t dy;
             Double_t eff;
 
             virtual ~K2piMuvData(){}
-            ClassDef ( K2piMuvData, 2 );
+            ClassDef ( K2piMuvData, 3 );
     };
 
     class K2piMcData : public TObject
@@ -116,7 +126,7 @@ namespace fn
             K2piMcData mc;
 
             virtual ~K2piEventData(){}
-            ClassDef ( K2piEventData, 3 );
+            ClassDef ( K2piEventData, 4 );
     };
 
     class k2pi_user_info : public TObject
