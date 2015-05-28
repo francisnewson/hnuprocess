@@ -57,7 +57,7 @@ scaling:
 
 weights:
     fid_file: use_root
-    root_file: "tdata/extractfit/all.extractfit.root"
+    root_file: "tdata/extractfit/all.extract.root"
     pre : ""
     post: "sample_burst_count/bursts"
     branch:  "weight"
@@ -69,6 +69,14 @@ output:
         - path: select_fit_k2pi_plots/lkr_dch_cmp/hdm2
           name: fit_dm2
           rebin: 5
+
+        - path: select_fit_extra_eop_k2pi_plots/lkr_dch_cmp/hdm2
+          name: fit_eop_dm2
+          rebin: 10
+
+        - path: select_fit_extra_eop_k2pi_plots/lkr_dch_cmp/hdtx
+          name: fit_eop_dtx
+          rebin: 2 
 
         - path: select_fit_k2pi_plots/lkr_dch_cmp/hdtx
           name: fit_dtx
@@ -84,6 +92,10 @@ output:
 
         - path: select_fit_k2pi_plots/hchi2
           name: fit_chi2
+          rebin: 2
+
+        - path: select_fit_no_chi2_k2pi_plots/hchi2
+          name: fit_no_chi2_chi2
           rebin: 2
 
         - path: select_fit_k2pi_plots/hz

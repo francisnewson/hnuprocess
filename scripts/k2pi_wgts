@@ -27,9 +27,9 @@ def sum_file( f ):
         name, count, wgt = line.strip().split()
         print('{0:30} {1:10.4} {2:10.4}'.format( name, float(count) / float(dcount), float(wgt) / float(dcount) ) )
 
-sum_file( open( '/afs/cern.ch/work/f/fnewson/hnu/gopher/data/thesis/extractfit/channels/p5.data.nhod.v2.neg/batch007.k2pi.dat' ) )
-sum_file( open( '/afs/cern.ch/work/f/fnewson/hnu/gopher/data/thesis/extractfit/channels/p5.data.nhod.v2.neg/batch016.k2pi.dat' ) )
-sys.exit();
+#sum_file( open( '/afs/cern.ch/work/f/fnewson/hnu/gopher/data/thesis/extractfit/channels/p5.data.nhod.v2.neg/batch007.k2pi.dat' ) )
+#sum_file( open( '/afs/cern.ch/work/f/fnewson/hnu/gopher/data/thesis/extractfit/channels/p5.data.nhod.v2.neg/batch016.k2pi.dat' ) )
+#sys.exit();
 
 
 top_folder = '/afs/cern.ch/work/f/fnewson/hnu/gopher/data/thesis/extractfit/channels/'

@@ -59,8 +59,9 @@ namespace fn
     void format_data_hist( TH1 &h, const YAML::Node& instruct )
     {
         h.SetMarkerSize( 2 );
-        h.SetMarkerColor( kRed);
-        h.SetLineColor( kRed );
+        h.SetMarkerColor( kGray + 2);
+        h.SetLineColor( kGray +2 );
+        //h.Sumw2();
 
         if ( get_yaml<bool>( instruct, "do_blind" ) )
         {

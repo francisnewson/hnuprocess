@@ -254,7 +254,7 @@ namespace fn
         //--------------------
 
         //CHI2 CUT
-        auto chi2_cut = get_chi2_cut( k2pirb, 0.016 );
+        auto chi2_cut = get_chi2_cut( k2pirb, 0.1 );
         k2pirb.add_selection( chi2_cut );
 
         //--------------------
