@@ -141,7 +141,7 @@ namespace fn
     void extract_raw_lkr( const K2piRecoClusters& k2pirc, 
             const ClusterCorrector& cc, const KaonTrack& kt , K2piLkrData& dest )
     {
-        K2piLkrInterface lkr( dest );
+        WK2piLkrInterface lkr( dest );
 
         //Clusters ( no projection correction at this stage )
         CorrCluster c1 {k2pirc.cluster1(), cc, k2pirc.is_mc() };
@@ -169,7 +169,7 @@ namespace fn
     void extract_raw_dch( const SingleRecoTrack& srt, 
             K2piDchData& dest )
     {
-        K2piDchInterface dch ( dest );
+        WK2piDchInterface dch ( dest );
         dch.p() = srt.get_mom();
 
         TVector3 mom = srt.get_3mom();
@@ -252,9 +252,9 @@ namespace fn
         minimizer->Minimize();
         double chi2 = fit_object( minimizer->X() );
 
-        K2piLkrInterface out_fit ( fit );
+        WK2piLkrInterface out_fit ( fit );
         copy( fit_object.fit_, out_fit );
-        K2piLkrInterface out_err ( err );
+        WK2piLkrInterface out_err ( err );
         copy( fit_object.errors_, out_err );
         return chi2;
     }

@@ -23,35 +23,85 @@ namespace fn
     struct K2piLkrInterface
     {
         public:
-            K2piLkrInterface( K2piLkrData& data )
+            K2piLkrInterface( const K2piLkrData& data )
                 :data_( data ){}
 
-            double&  E1();
-            double&  E2();
+            const double&  E1();
+            const double&  E2();
 
-            double&  posC1_X();
-            double&  posC2_X();
+            const double&  posC1_X();
+            const double&  posC2_X();
 
-            double&  posC1_Y();
-            double&  posC2_Y();
+            const double&  posC1_Y();
+            const double&  posC2_Y();
 
-            double&  pK_X();
-            double&  pK_Y();
-            double&  pK_Z();
+            const double&  pK_X();
+            const double&  pK_Y();
+            const double&  pK_Z();
 
-            double&  pos0K_X();
-            double&  pos0K_Y();
+            const double&  pos0K_X();
+            const double&  pos0K_Y();
 
         private:
-            K2piLkrData& data_;
+            const K2piLkrData& data_;
     };
+
+    struct WK2piLkrInterface
+    {
+        public:
+            WK2piLkrInterface(  K2piLkrData& data )
+                :data_( data ){}
+
+             double&  E1();
+             double&  E2();
+
+             double&  posC1_X();
+             double&  posC2_X();
+
+             double&  posC1_Y();
+             double&  posC2_Y();
+
+             double&  pK_X();
+             double&  pK_Y();
+             double&  pK_Z();
+
+             double&  pos0K_X();
+             double&  pos0K_Y();
+
+        private:
+             K2piLkrData& data_;
+    };
+
 
     class K2piDchData;
 
     struct K2piDchInterface
     {
         public:
-            K2piDchInterface( K2piDchData& data )
+            K2piDchInterface( const K2piDchData& data )
+                :data_( data ){}
+
+            const double& p();
+            const double& dxdz();
+            const double& dydz();
+            const double& x0();
+            const double& y0();
+
+            const double& ds_dxdz();
+            const double& ds_dydz();
+            const double& ds_x0();
+            const double& ds_y0();
+
+            TLorentzVector get_pip_4mom();
+
+        private:
+            const K2piDchData& data_;
+    };
+
+    struct WK2piDchInterface
+    {
+        public:
+            WK2piDchInterface( K2piDchData& data )
                 :data_( data ){}
 
             double& p();
