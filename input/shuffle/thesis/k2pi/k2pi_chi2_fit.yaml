@@ -66,12 +66,36 @@ output:
     input_file: tdata/k2pi/all.k2pi.root
 
     plots:
-        - path: select_fit_k2pi_plots/lkr_dch_cmp/hdm2
-          name: fit_dm2
-          rebin: 5
+        - path: select_fit_k2pi_plots/hdm2_pi0
+          name: fit_dm2_pi0
+          rebin: 10
+
+        - path: raw_k2pi_plots/hm2pip_lkr
+          name: raw_m2pip
+          rebin: 1
+
+        - path: raw_k2pi_plots/hdm2_pi0
+          name: raw_dm2_pi0
+          rebin: 10
 
         - path: select_fit_extra_eop_k2pi_plots/lkr_dch_cmp/hdm2
           name: fit_eop_dm2
+          rebin: 10
+
+        - path: select_fit_tgt_eop_k2pi_plots/lkr_dch_cmp/hdm2
+          name: fit_tgt_eop_dm2
+          rebin: 10
+
+        - path: select_fit_tgt_eop_k2pi_plots/lkr_dch_cmp/hdm2
+          name: rough_fit_tgt_eop_dm2
+          rebin: 50
+
+        - path: select_fit_tgt_eop_k2pi_plots/hevent_pt_
+          name: fit_tgt_eop_event_pt_
+          rebin: 1
+
+        - path: select_fit_tgt_eop_k2pi_plots/heop
+          name: fit_tgt_eop_heop
           rebin: 10
 
         - path: select_fit_extra_eop_k2pi_plots/lkr_dch_cmp/hdtx
@@ -88,7 +112,7 @@ output:
 
         - path: select_fit_k2pi_plots/lkr_dch_cmp/hdpop_
           name: fit_dpop
-          rebin: 2
+          rebin: 5
 
         - path: select_fit_k2pi_plots/hchi2
           name: fit_chi2
@@ -97,6 +121,10 @@ output:
         - path: select_fit_no_chi2_k2pi_plots/hchi2
           name: fit_no_chi2_chi2
           rebin: 2
+
+        - path: select_fit_no_chi2_k2pi_plots/hchi2_zoom
+          name: fit_no_chi2_chi2_zoom
+          rebin: 1
 
         - path: select_fit_k2pi_plots/hz
           name: fit_z

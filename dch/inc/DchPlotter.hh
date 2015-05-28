@@ -48,6 +48,7 @@ namespace fn
             TH1D * hpt_;
             TH1D * hcda_;
             TH1D * hz_;
+            TH1D * hp_;
             TH2D * hm2_tx_;
             TH2D * hm2_ty_;
             TH1D * hdm2_pi0_;
@@ -75,6 +76,7 @@ namespace fn
 
             HistStore dths_;
             TH1D * hchi2_ ;
+            TH1D * hchi2_zoom_ ;
             TH1D * heop_ ;
             TH2D * heop_p_ ;
             TH1D * hphoton_sep_ ;

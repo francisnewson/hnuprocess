@@ -27,6 +27,9 @@ namespace fn
         hz_ = dths_.MakeTH1D( "hz", "DCH z",
                 1200, -3000, 9000, "z( cm )", "#events" );
 
+        hp_ = dths_.MakeTH1D( "hp", "DCH p",
+                100, 0, 100, "p( GeV )", "#events" );
+
         hdm2_pi0_ = dths_.MakeTH1D( "hdm2_pi0", "DCH pi0 mass difference",
                 1000, -0.2, 0.2, "dm^{2}", "#events" );
 
@@ -89,6 +92,7 @@ namespace fn
             hpt_->Fill( dch_pip_3mom.Perp( kaon_mom ), weight );
             hcda_->Fill( vertex.cda , weight );
             hz_->Fill( vertex.point.Z() , weight );
+            hp_->Fill( dch_pip_3mom.Mag() );
 
             //m2m
             TVector3 lkr3mom = lkr_pip_4mom.Vect();
@@ -102,6 +106,17 @@ namespace fn
 
             hm2_tx_->Fill( dm2, dtx, weight );
             hm2_ty_->Fill( dm2, dty, weight );
+
+
+            //Downstream track
+            Track ds_track{
+                TVector3{ dch_interface.ds_x0(), dch_interface.ds_y0(), na62const::z_tracking },
+                    TVector3{ dch_interface.ds_dxdz(), dch_interface.ds_dydz(), 1.0 } };
+
+            double track_muv_x = ds_track.extrapolate( na62const::zMuv2).X();
+            double track_muv_y = ds_track.extrapolate( na62const::zMuv1).Y();
+
+            hxy_muv_->Fill( track_muv_x, track_muv_y, weight );
 
 
             if ( !mc )
@@ -166,6 +181,9 @@ namespace fn
         hchi2_ = dths_.MakeTH1D( "hchi2", "Fit Chi2",
                 10000, 0.0 , 10,  "Chi2", "#events" );
 
+        hchi2_zoom_ = dths_.MakeTH1D( "hchi2_zoom", "Fit Chi2",
+                10000, 0.0 , 100,  "Chi2", "#events" );
+
         hphoton_sep_ = dths_.MakeTH1D( "hphoton_sep", "Photon Cluster Separation",
                 1000, 0.0 , 200,  "Sep ( cm )", "#events" );
 
@@ -206,9 +224,9 @@ namespace fn
             heop_p_->Fill( dch_data.p, extract_eop( event_data, dch_data, mc)
                     , weight );
 
-        double track_track_cluster_sep = extract_track_track_cluster_sep( event_data, dch_data, mc);
+            double track_track_cluster_sep = extract_track_track_cluster_sep( event_data, dch_data, mc);
             htrack_track_cluster_sep_->Fill( track_track_cluster_sep , weight );
-        htrack_cluster_E_sep_->Fill( track_track_cluster_sep, event_data.TCE, weight );
+            htrack_cluster_E_sep_->Fill( track_track_cluster_sep, event_data.TCE, weight );
         }
 
         double photon_sep =  extract_photon_sep( lkr_data);
@@ -223,6 +241,7 @@ namespace fn
         hevent_pt_->Fill( event_pt, weight );
 
         hchi2_->Fill( event_data.lkr_fit_chi2, weight );
+        hchi2_zoom_->Fill( event_data.lkr_fit_chi2, weight );
         hhigh_photon_energy_->Fill( lkr_data.E1, weight );
         hlow_photon_energy_->Fill( lkr_data.E2, weight );
 

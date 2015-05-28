@@ -209,7 +209,7 @@ int main( int argc, char * argv[] )
     K2PIGStatus k2pigs{ echain->get_event_pointer(), is_mc };
     raw_global_status() = &k2pigs;
 
-    K2piRecoBag k2pirb( *event_data, is_mc, tfout, channel );
+    K2piRecoBag k2pirb( *event_data, is_mc, tfout, channel, slg );
 
     //add studies
     for( auto study: studies )

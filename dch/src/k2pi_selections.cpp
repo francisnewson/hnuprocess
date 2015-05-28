@@ -4,10 +4,11 @@
 #include "PionPlotter.hh"
 #include "BurstCount.hh"
 #include "Summary.hh"
+#include "tracking_selections.hh"
 
 namespace fn
 {
-    K2piRecoBag::K2piRecoBag(K2piEventData& k2pi_event, bool mc, TFile& tfile, std::string channel)
+    K2piRecoBag::K2piRecoBag(K2piEventData& k2pi_event, bool mc, TFile& tfile, std::string channel, logger& slg)
         : is_mc( mc ),
         event( k2pi_event),
         raw_lkr( event.raw_lkr ),
@@ -15,8 +16,9 @@ namespace fn
         raw_dch( event.raw_dch ),
         tfout( tfile ),
         next_id_(0),
-        channel_( channel )
-    {}
+        channel_( channel ),
+        slg_( slg )
+    { }
 
     void K2piRecoBag::add_selection( Selection * sel)
     { 
@@ -36,8 +38,16 @@ namespace fn
         dch_slections_.emplace_back( std::unique_ptr<DchSelection>( dch_sel ) );
     }
 
+    void K2piRecoBag::add_subscriber( Subscriber * sub )
+    {
+        sub->set_id( next_id_++ );
+        sub->set_log( slg_ );
+        sub_.emplace_back( std::unique_ptr<Subscriber>( sub ) );
+    }
+
     void K2piRecoBag::new_event()
     {
+        for( auto& sub: sub_ ) { sub->new_event(); }
         for( auto& sel: sel_ ) { sel->new_event(); }
         for( auto& an: an_ ) { an->new_event(); }
     }
@@ -154,7 +164,13 @@ namespace fn
             muv_cut->set_name( "dt_muv_cut" );
             return muv_cut;
         }
+    }
 
+    K2piSingleTrack * get_k2pi_single_track( K2piRecoBag& k2pirb )
+    {
+        K2piSingleTrack * result = new K2piSingleTrack( k2pirb.raw_dch, k2pirb.fit_lkr );
+        result->set_name( "k2pi_single_track" );
+        return result;
     }
 
     void add_dch_study( K2piRecoBag & k2pirb)
@@ -209,6 +225,24 @@ namespace fn
         eop_cut->set_name( "eop_cut" );
         k2pirb.add_selection( eop_cut );
 
+        //TGT EOP CUT
+        auto tgt_raw_eop = [&k2pirb]()
+        {
+            if ( k2pirb.event.found_track_cluster )
+            {
+                double eop = extract_eop( k2pirb.event, k2pirb.raw_dch, k2pirb.is_mc );
+                return ( 0.0 < eop && eop < 0.80 );
+            }
+            else
+            {
+                return true;
+            }
+        };
+
+        LambdaCut * tgt_eop_cut = new LambdaCut{ tgt_raw_eop};
+        tgt_eop_cut->set_name( "tgt_eop_cut" );
+        k2pirb.add_selection( tgt_eop_cut );
+
         //EXTRA EOP CUT
         auto raw_extra_eop = [&k2pirb]()
         {
@@ -257,32 +291,83 @@ namespace fn
         auto chi2_cut = get_chi2_cut( k2pirb, 0.1 );
         k2pirb.add_selection( chi2_cut );
 
+        auto loose_chi2_cut = get_chi2_cut( k2pirb, 0.5 );
+        loose_chi2_cut->set_name( "loose_chi2_cut" );
+        k2pirb.add_selection( loose_chi2_cut );
+
         //--------------------
 
         //MUV CUT
         auto muv_cut = get_muv_cut( k2pirb, k2pirb.is_mc);
         k2pirb.add_selection( muv_cut );
 
+        //--------------------
+        
+        //TRACKING
+        SingleTrack * st = get_k2pi_single_track( k2pirb );
+        k2pirb.add_subscriber( st );
+
+        //MUV ACC
+        Selection * muv_acc = new TrackXYUVAcceptance( *st, 
+                TrackXYUVAcceptance::track_section::ds , na62const::zMuv1, 
+                -100, 100, /* x */ -100, 100, /* y */
+                -100, 100, /* u */ -100, 100 /* v */ );
+        muv_acc->set_name( "muv_acc" );
+        k2pirb.add_selection( muv_acc );
+
+
+        //NO FIT
         CompositeSelection * full_selection = new CompositeSelection( 
-                { m2m_cut, eop_cut, track_cluster_sep_cut, min_photon_radius_cut } );
+                { m2m_cut, eop_cut, track_cluster_sep_cut, min_photon_radius_cut, muv_acc, muv_cut } );
         full_selection->set_name( "full_selection" );
         k2pirb.add_selection( full_selection );
 
+        CompositeSelection * full_selection_tgt_eop = new CompositeSelection( 
+                { m2m_cut, tgt_eop_cut, track_cluster_sep_cut, min_photon_radius_cut, muv_acc, muv_cut } );
+        full_selection_tgt_eop->set_name( "full_selection_tgt_eop" );
+        k2pirb.add_selection( full_selection_tgt_eop );
+
+       //FIT 
         CompositeSelection * fit_selection = new CompositeSelection( 
-                {  chi2_cut, eop_cut, track_cluster_sep_cut, track_track_cluster_sep_cut,  min_photon_radius_cut, muv_cut} );
+                {  chi2_cut, eop_cut,
+                track_cluster_sep_cut, track_track_cluster_sep_cut,  min_photon_radius_cut, 
+                muv_acc, muv_cut} );
+
         fit_selection->set_name( "fit_selection" );
         k2pirb.add_selection( fit_selection );
 
+       //FIT  TGT EOP
+        CompositeSelection * fit_tgt_eop_selection = new CompositeSelection( 
+                {  chi2_cut, tgt_eop_cut,
+                track_cluster_sep_cut, track_track_cluster_sep_cut,  min_photon_radius_cut, 
+                muv_acc, muv_cut} );
+
+        fit_tgt_eop_selection->set_name( "fit_tgt_eop_selection" );
+        k2pirb.add_selection( fit_tgt_eop_selection );
+
+       //FIT LOOSE CHI2
+        CompositeSelection * fit_loose_chi2_selection = new CompositeSelection( 
+                {  loose_chi2_cut, tgt_eop_cut,
+                track_cluster_sep_cut, track_track_cluster_sep_cut,  min_photon_radius_cut, 
+                muv_acc, muv_cut} );
+
+        fit_loose_chi2_selection->set_name( "fit_loose_chi2_selection" );
+        k2pirb.add_selection( fit_loose_chi2_selection );
+
+        //FIT EXTRA EOP
         CompositeSelection * fit_extra_eop_selection = new CompositeSelection( 
-                {  chi2_cut, eop_cut, extra_eop_cut, track_cluster_sep_cut, track_track_cluster_sep_cut,  min_photon_radius_cut} );
+                {  chi2_cut, eop_cut, extra_eop_cut, track_cluster_sep_cut, track_track_cluster_sep_cut,
+                min_photon_radius_cut} );
         fit_extra_eop_selection->set_name( "fit_extra_eop_selection" );
         k2pirb.add_selection( fit_extra_eop_selection );
 
+        //FIT NO EOP
         CompositeSelection * fit_no_eop_selection = new CompositeSelection( 
                 {  chi2_cut, track_cluster_sep_cut, min_photon_radius_cut} );
         fit_no_eop_selection->set_name( "fit_no_eop_selection" );
         k2pirb.add_selection( fit_no_eop_selection );
 
+        //FIT NO CHI2
         CompositeSelection * fit_no_chi2_selection = new CompositeSelection( 
                 { track_cluster_sep_cut, min_photon_radius_cut} );
         fit_no_chi2_selection->set_name( "fit_no_chi2_selection" );
@@ -323,28 +408,61 @@ namespace fn
         auto select_fit_extra_eop_folder =  k2pirb.get_folder("select_fit_extra_eop_k2pi_plots");
         std::cout << "Select fit folder: " << select_fit_extra_eop_folder << std::endl;
 
+        auto select_fit_tgt_eop_folder =  k2pirb.get_folder("select_fit_tgt_eop_k2pi_plots");
+        std::cout << "Select fit folder: " << select_fit_tgt_eop_folder << std::endl;
+
+        auto select_fit_loose_chi2_folder =  k2pirb.get_folder("select_fit_loose_chi2_k2pi_plots");
+        std::cout << "Select fit folder: " << select_fit_loose_chi2_folder << std::endl;
+
+        auto select_raw_folder =  k2pirb.get_folder("raw_k2pi_plots");
+        std::cout << "Select raw folder: " << select_raw_folder << std::endl;
+
+        auto select_raw_tgt_eop_folder =  k2pirb.get_folder("raw_tgt_eop_k2pi_plots");
+        std::cout << "Select raw folder: " << select_raw_tgt_eop_folder << std::endl;
+
         DchAnalysis * select_fit_dch_plotter  = new DchAnalysis(
                 *fit_selection, k2pirb.tfout, select_fit_folder,k2pirb.event, "fit", k2pirb.is_mc );
 
         DchAnalysis * select_fit_extra_eop_dch_plotter  = new DchAnalysis(
                 *fit_extra_eop_selection, k2pirb.tfout, select_fit_extra_eop_folder,k2pirb.event, "fit", k2pirb.is_mc );
 
+        DchAnalysis * select_fit_tgt_eop_dch_plotter  = new DchAnalysis(
+                *fit_tgt_eop_selection, k2pirb.tfout, select_fit_tgt_eop_folder,k2pirb.event, "fit", k2pirb.is_mc );
+
+        DchAnalysis * select_fit_loose_chi2_dch_plotter  = new DchAnalysis(
+                *fit_loose_chi2_selection, k2pirb.tfout, select_fit_loose_chi2_folder, k2pirb.event, "fit", k2pirb.is_mc );
+
         DchAnalysis * select_fit_no_chi2_dch_plotter  = new DchAnalysis(
                 *fit_no_chi2_selection, k2pirb.tfout, k2pirb.get_folder("select_fit_no_chi2_k2pi_plots"),
                 k2pirb.event, "fit", k2pirb.is_mc );
 
+        DchAnalysis * select_raw  = new DchAnalysis(
+                *full_selection, k2pirb.tfout, select_raw_folder,k2pirb.event, "raw", k2pirb.is_mc );
+
+        DchAnalysis * select_raw_tgt_eop  = new DchAnalysis(
+                *full_selection_tgt_eop, k2pirb.tfout, select_raw_tgt_eop_folder,k2pirb.event, "raw", k2pirb.is_mc );
+
+
         auto * burst_count = new K2piBurstCount( *passer, k2pirb.tfout,
                 k2pirb.get_folder("burst_count"), k2pirb.event );
 
-        select_fit_dch_plotter->add_dch_selection( cda_cut_35 );
-        select_fit_no_chi2_dch_plotter->add_dch_selection( cda_cut_35 );
-
-        select_fit_dch_plotter->add_dch_selection( z_cut_m1000_6500 );
-        select_fit_no_chi2_dch_plotter->add_dch_selection( z_cut_m1000_6500 );
 
         k2pirb.add_analysis( select_fit_dch_plotter );
         k2pirb.add_analysis( select_fit_extra_eop_dch_plotter );
+        k2pirb.add_analysis( select_fit_tgt_eop_dch_plotter );
+        k2pirb.add_analysis( select_fit_loose_chi2_dch_plotter );
         k2pirb.add_analysis( select_fit_no_chi2_dch_plotter );
+        k2pirb.add_analysis( select_raw );
+        k2pirb.add_analysis( select_raw_tgt_eop );
+
+        //add dch selections
+        for ( auto an = k2pirb.an_begin() ; an != k2pirb.an_end() ; ++an )
+        {
+            auto dch_an = static_cast<DchAnalysis*>( an->get() );
+            dch_an->add_dch_selection( cda_cut_35 );
+            dch_an->add_dch_selection( z_cut_m1000_6500 );
+        }
+
         k2pirb.add_analysis( burst_count );
 
         Summary  * full_summary = new Summary( *passer, *fit_selection, std::cout );
