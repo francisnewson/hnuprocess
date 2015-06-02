@@ -109,7 +109,7 @@ namespace fn
         c2 = high_E_clusters[1].rc;
 
         //Can look for track cluster in left over clusters
-        if ( tc == 0 && false )
+        if ( tc == 0 )
         {
             auto it_track_cluster = find_track_cluster( low_E_clusters, srt,
                     max_track_cluster_distance_, mc, cluster_corrector_ );
@@ -138,7 +138,7 @@ namespace fn
                 TVector3 track_pos = srt.extrapolate_ds( pos.Z() );
                 double dist = fabs ( ( track_pos - pos).Mag() );
 
-                BOOST_LOG_SEV( get_log(), always_print )
+                BOOST_LOG_SEV( get_log(), debug )
                     << "--Unusually high E/p\n"
                     << "E/p: " << eop <<"\n"
                     << "E: " << tc->energy << "\n"

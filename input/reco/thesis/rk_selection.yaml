@@ -99,6 +99,7 @@
     tfile: tfout
     folder: sample_burst_count
     selection: weighted_mc_sample
+    codename: bursts
 
 - analysis:
     type: Summary

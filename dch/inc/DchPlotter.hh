@@ -54,6 +54,7 @@ namespace fn
             TH1D * hdm2_pi0_;
 
             TH2D * hxy_muv_;
+            TH2D * hxy_lkr_;
             TH1D * hmuv_eff_;
     };
 
@@ -119,12 +120,21 @@ namespace fn
         DchAnalysis( Selection& sel, TFile& tf_, 
                 std::string folder_, K2piEventData& k2pi_data,
                 std::string lkr_data_source,
-                bool is_mc );
+                bool is_mc, bool do_scatter );
         void end_processing();
 
         void add_dch_selection( DchSelection* dch_selection );
 
         private:
+        struct scatter_params
+        {
+            std::string name;
+            double angle_cutoff;
+            double angle_frequency;
+            double mom_cutoff;
+            double mom_frequency;
+        };
+
         void process_event();
         DchPlotter plots_;
         K2piEventPlotter event_plots_;

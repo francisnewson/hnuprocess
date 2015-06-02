@@ -139,6 +139,7 @@ namespace fn
     void HistStacker::write_total( std::string name)
     {
         auto htotal = stack_.GetTotal();
+        htotal->SetFillStyle(0);
         htotal->Write( name.c_str() );
     }
 

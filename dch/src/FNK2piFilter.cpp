@@ -110,6 +110,9 @@ namespace fn
         else
         {
             k2pi_event_data_.found_track_cluster = false;
+            k2pi_event_data_.TCE = -1.0;
+            k2pi_event_data_.TCX = -200;
+            k2pi_event_data_.TCY = -200;
         }
     }
 

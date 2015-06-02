@@ -69,6 +69,7 @@ namespace fn
     Selection * get_min_photon_radius_cut( K2piRecoBag& k2pirb, double rad );
     Selection * get_chi2_cut( K2piRecoBag& k2pirb, double chi2 );
     Selection * get_muv_cut( K2piRecoBag& k2pirb, bool mc );
+    Selection * get_eop_cut( K2piRecoBag& k2pirb, bool mc, double E_thresh, double min, double max );
 
     K2piSingleTrack * get_k2pi_single_track( K2piRecoBag& k2pirb );
 

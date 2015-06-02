@@ -173,6 +173,26 @@ namespace fn
         return result;
     }
 
+    Selection * get_eop_cut( K2piRecoBag& k2pirb, bool mc, double E_thresh, double min, double max )
+    {
+        auto raw_eop_cut = [&k2pirb, mc, E_thresh, min, max]()
+        {
+            if ( k2pirb.event.found_track_cluster && k2pirb.event.TCE > E_thresh )
+            {
+                double eop = extract_eop( k2pirb.event, k2pirb.raw_dch, k2pirb.is_mc );
+                return ( min < eop && eop < max );
+            }
+            else
+            {
+                return true;
+            }
+        };
+
+        LambdaCut * eop_cut = new LambdaCut{ raw_eop_cut };
+        eop_cut->set_name( "eop_cut" );
+        return eop_cut;
+    }
+
     void add_dch_study( K2piRecoBag & k2pirb)
     {
         //**************************************************
@@ -208,58 +228,13 @@ namespace fn
         //--------------------
 
         //EOP CUT
-        auto raw_eop = [&k2pirb]()
-        {
-            if ( k2pirb.event.found_track_cluster )
-            {
-                double eop = extract_eop( k2pirb.event, k2pirb.raw_dch, k2pirb.is_mc );
-                return ( 0.0 < eop && eop < 0.95 );
-            }
-            else
-            {
-                return true;
-            }
-        };
+        auto eop_cut_90 = get_eop_cut  (k2pirb, k2pirb.is_mc, 9, 0.0, 0.90 );
+        eop_cut_90->set_name( "eop_cut_90" );
+        k2pirb.add_selection( eop_cut_90 );
 
-        LambdaCut * eop_cut = new LambdaCut{ raw_eop};
-        eop_cut->set_name( "eop_cut" );
-        k2pirb.add_selection( eop_cut );
-
-        //TGT EOP CUT
-        auto tgt_raw_eop = [&k2pirb]()
-        {
-            if ( k2pirb.event.found_track_cluster )
-            {
-                double eop = extract_eop( k2pirb.event, k2pirb.raw_dch, k2pirb.is_mc );
-                return ( 0.0 < eop && eop < 0.80 );
-            }
-            else
-            {
-                return true;
-            }
-        };
-
-        LambdaCut * tgt_eop_cut = new LambdaCut{ tgt_raw_eop};
-        tgt_eop_cut->set_name( "tgt_eop_cut" );
-        k2pirb.add_selection( tgt_eop_cut );
-
-        //EXTRA EOP CUT
-        auto raw_extra_eop = [&k2pirb]()
-        {
-            if ( k2pirb.event.found_track_cluster )
-            {
-                double eop = extract_eop( k2pirb.event, k2pirb.raw_dch, k2pirb.is_mc );
-                return ( 0.2 < eop && eop < 0.95 );
-            }
-            else
-            {
-                return false;
-            }
-        };
-
-        LambdaCut * extra_eop_cut = new LambdaCut{ raw_extra_eop};
-        extra_eop_cut->set_name( "extra_eop_cut" );
-        k2pirb.add_selection( extra_eop_cut );
+        auto eop_cut_80 = get_eop_cut  (k2pirb, k2pirb.is_mc, 9, 0.0, 0.80 );
+        eop_cut_80->set_name( "eop_cut_80" );
+        k2pirb.add_selection( eop_cut_80 );
 
         //--------------------
 
@@ -284,16 +259,16 @@ namespace fn
         //MIN PHOTON RADIUS
         auto min_photon_radius_cut = get_min_photon_radius_cut( k2pirb, 15 );
         k2pirb.add_selection( min_photon_radius_cut );
-       
+
         //--------------------
 
         //CHI2 CUT
-        auto chi2_cut = get_chi2_cut( k2pirb, 0.1 );
-        k2pirb.add_selection( chi2_cut );
+        auto chi2_cut_010 = get_chi2_cut( k2pirb, 0.1 );
+        k2pirb.add_selection( chi2_cut_010 );
 
-        auto loose_chi2_cut = get_chi2_cut( k2pirb, 0.5 );
-        loose_chi2_cut->set_name( "loose_chi2_cut" );
-        k2pirb.add_selection( loose_chi2_cut );
+        auto chi2_cut_050 = get_chi2_cut( k2pirb, 0.5 );
+        chi2_cut_050->set_name( "chi2_cut_050" );
+        k2pirb.add_selection( chi2_cut_050 );
 
         //--------------------
 
@@ -302,7 +277,7 @@ namespace fn
         k2pirb.add_selection( muv_cut );
 
         //--------------------
-        
+
         //TRACKING
         SingleTrack * st = get_k2pi_single_track( k2pirb );
         k2pirb.add_subscriber( st );
@@ -315,73 +290,30 @@ namespace fn
         muv_acc->set_name( "muv_acc" );
         k2pirb.add_selection( muv_acc );
 
+        //--------------------
 
-        //NO FIT
-        CompositeSelection * full_selection = new CompositeSelection( 
-                { m2m_cut, eop_cut, track_cluster_sep_cut, min_photon_radius_cut, muv_acc, muv_cut } );
-        full_selection->set_name( "full_selection" );
-        k2pirb.add_selection( full_selection );
+        //NO FIT 
+        CompositeSelection * no_fit_raw = new CompositeSelection( 
+                { track_track_cluster_sep_cut,  track_cluster_sep_cut, min_photon_radius_cut, muv_acc, muv_cut } );
+        no_fit_raw->set_name( "no_fit_raw" );
+        k2pirb.add_selection( no_fit_raw );
 
-        CompositeSelection * full_selection_tgt_eop = new CompositeSelection( 
-                { m2m_cut, tgt_eop_cut, track_cluster_sep_cut, min_photon_radius_cut, muv_acc, muv_cut } );
-        full_selection_tgt_eop->set_name( "full_selection_tgt_eop" );
-        k2pirb.add_selection( full_selection_tgt_eop );
+        CompositeSelection * no_fit_full = new CompositeSelection( { no_fit_raw, m2m_cut, eop_cut_90} );
+        no_fit_full->set_name( "no_fit_full" );
+        k2pirb.add_selection( no_fit_full );
 
-       //FIT 
-        CompositeSelection * fit_selection = new CompositeSelection( 
-                {  chi2_cut, eop_cut,
-                track_cluster_sep_cut, track_track_cluster_sep_cut,  min_photon_radius_cut, 
-                muv_acc, muv_cut} );
+        //FIT 
+        CompositeSelection * fit_selection_eop_90 = new CompositeSelection( { no_fit_raw, eop_cut_90, chi2_cut_050 } );
+        fit_selection_eop_90->set_name( "fit_selection_eop_90" );
+        k2pirb.add_selection( fit_selection_eop_90 );
 
-        fit_selection->set_name( "fit_selection" );
-        k2pirb.add_selection( fit_selection );
-
-       //FIT  TGT EOP
-        CompositeSelection * fit_tgt_eop_selection = new CompositeSelection( 
-                {  chi2_cut, tgt_eop_cut,
-                track_cluster_sep_cut, track_track_cluster_sep_cut,  min_photon_radius_cut, 
-                muv_acc, muv_cut} );
-
-        fit_tgt_eop_selection->set_name( "fit_tgt_eop_selection" );
-        k2pirb.add_selection( fit_tgt_eop_selection );
-
-       //FIT LOOSE CHI2
-        CompositeSelection * fit_loose_chi2_selection = new CompositeSelection( 
-                {  loose_chi2_cut, tgt_eop_cut,
-                track_cluster_sep_cut, track_track_cluster_sep_cut,  min_photon_radius_cut, 
-                muv_acc, muv_cut} );
-
-        fit_loose_chi2_selection->set_name( "fit_loose_chi2_selection" );
-        k2pirb.add_selection( fit_loose_chi2_selection );
-
-        //FIT EXTRA EOP
-        CompositeSelection * fit_extra_eop_selection = new CompositeSelection( 
-                {  chi2_cut, eop_cut, extra_eop_cut, track_cluster_sep_cut, track_track_cluster_sep_cut,
-                min_photon_radius_cut} );
-        fit_extra_eop_selection->set_name( "fit_extra_eop_selection" );
-        k2pirb.add_selection( fit_extra_eop_selection );
-
-        //FIT NO EOP
-        CompositeSelection * fit_no_eop_selection = new CompositeSelection( 
-                {  chi2_cut, track_cluster_sep_cut, min_photon_radius_cut} );
-        fit_no_eop_selection->set_name( "fit_no_eop_selection" );
-        k2pirb.add_selection( fit_no_eop_selection );
-
-        //FIT NO CHI2
-        CompositeSelection * fit_no_chi2_selection = new CompositeSelection( 
-                { track_cluster_sep_cut, min_photon_radius_cut} );
-        fit_no_chi2_selection->set_name( "fit_no_chi2_selection" );
-        k2pirb.add_selection( fit_no_chi2_selection );
+        CompositeSelection * fit_selection_eop_80 = new CompositeSelection( { no_fit_raw, eop_cut_80, chi2_cut_050 } );
+        fit_selection_eop_80->set_name( "fit_selection_eop_80" );
+        k2pirb.add_selection( fit_selection_eop_80 );
 
         //**************************************************
-        //Analyses
+        //DCH Cuts
         //**************************************************
-
-        //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-        //IMPORTANT
-        //DchAnalyses implement dch_cuts
-        //(in addition to anything in the selections above)
-        //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
         DchSelection * cda_cut_35 =  new DchSelection( []( K2piDchData* dch_data, K2piLkrData* lkr_data)
                 {
@@ -390,86 +322,85 @@ namespace fn
                 return cda < 3.5;
                 } );
 
-
         k2pirb.add_dch_selection( cda_cut_35 );
 
-        DchSelection * z_cut_m1000_6500 =  new DchSelection( []( K2piDchData* dch_data, K2piLkrData* lkr_data)
+        DchSelection * z_cut_m1500_6500 =  new DchSelection( []( K2piDchData* dch_data, K2piLkrData* lkr_data)
                 {
                 Vertex vertex = extract_vertex( *dch_data,  *lkr_data );
                 double z = vertex.point.Z();
-                return z > -2000 && z < 6500;
+                return z > -1500 && z < 6500;
                 } );
 
-        k2pirb.add_dch_selection( z_cut_m1000_6500 );
+        k2pirb.add_dch_selection( z_cut_m1500_6500 );
+
+        DchSelection *track_mom_cut_10_60 = new DchSelection(  []( K2piDchData* dch_data, K2piLkrData* lkr_data)
+                {
+                K2piDchInterface dch( *dch_data );
+                return ( dch.p() > 10 ) && (dch.p() < 60 );
+                } );
+
+        //**************************************************
+        //Analyses
+        //**************************************************
 
         auto select_fit_folder =  k2pirb.get_folder("select_fit_k2pi_plots");
         std::cout << "Select fit folder: " << select_fit_folder << std::endl;
 
-        auto select_fit_extra_eop_folder =  k2pirb.get_folder("select_fit_extra_eop_k2pi_plots");
-        std::cout << "Select fit folder: " << select_fit_extra_eop_folder << std::endl;
+        DchAnalysis * no_fit_raw_plots  = new DchAnalysis(
+                *no_fit_raw, k2pirb.tfout, k2pirb.get_folder( "no_fit_raw_plots" ), k2pirb.event, "raw", k2pirb.is_mc, false );
 
-        auto select_fit_tgt_eop_folder =  k2pirb.get_folder("select_fit_tgt_eop_k2pi_plots");
-        std::cout << "Select fit folder: " << select_fit_tgt_eop_folder << std::endl;
+        DchAnalysis * no_fit_fit_plots  = new DchAnalysis(
+                *no_fit_raw, k2pirb.tfout, k2pirb.get_folder( "no_fit_fit_plots" ), k2pirb.event, "fit", k2pirb.is_mc, false );
 
-        auto select_fit_loose_chi2_folder =  k2pirb.get_folder("select_fit_loose_chi2_k2pi_plots");
-        std::cout << "Select fit folder: " << select_fit_loose_chi2_folder << std::endl;
+        DchAnalysis * no_fit_full_plots  = new DchAnalysis(
+                *no_fit_full, k2pirb.tfout, k2pirb.get_folder( "no_fit_full_plots"), k2pirb.event, "raw", k2pirb.is_mc, false );
 
-        auto select_raw_folder =  k2pirb.get_folder("raw_k2pi_plots");
-        std::cout << "Select raw folder: " << select_raw_folder << std::endl;
+        DchAnalysis * fit_eop_90_plots  = new DchAnalysis(
+                *fit_selection_eop_90, k2pirb.tfout, k2pirb.get_folder( "fit_eop_90") ,k2pirb.event, "fit", k2pirb.is_mc, true );
 
-        auto select_raw_tgt_eop_folder =  k2pirb.get_folder("raw_tgt_eop_k2pi_plots");
-        std::cout << "Select raw folder: " << select_raw_tgt_eop_folder << std::endl;
+        DchAnalysis * fit_eop_90_plots_no_cda  = new DchAnalysis(
+                *fit_selection_eop_90, k2pirb.tfout, k2pirb.get_folder( "fit_eop_90_no_cda") ,k2pirb.event, "fit", k2pirb.is_mc, true );
 
-        DchAnalysis * select_fit_dch_plotter  = new DchAnalysis(
-                *fit_selection, k2pirb.tfout, select_fit_folder,k2pirb.event, "fit", k2pirb.is_mc );
+        DchAnalysis * fit_eop_80_plots  = new DchAnalysis(
+                *fit_selection_eop_80, k2pirb.tfout, k2pirb.get_folder( "fit_eop_80") ,k2pirb.event, "fit", k2pirb.is_mc, false );
 
-        DchAnalysis * select_fit_extra_eop_dch_plotter  = new DchAnalysis(
-                *fit_extra_eop_selection, k2pirb.tfout, select_fit_extra_eop_folder,k2pirb.event, "fit", k2pirb.is_mc );
-
-        DchAnalysis * select_fit_tgt_eop_dch_plotter  = new DchAnalysis(
-                *fit_tgt_eop_selection, k2pirb.tfout, select_fit_tgt_eop_folder,k2pirb.event, "fit", k2pirb.is_mc );
-
-        DchAnalysis * select_fit_loose_chi2_dch_plotter  = new DchAnalysis(
-                *fit_loose_chi2_selection, k2pirb.tfout, select_fit_loose_chi2_folder, k2pirb.event, "fit", k2pirb.is_mc );
-
-        DchAnalysis * select_fit_no_chi2_dch_plotter  = new DchAnalysis(
-                *fit_no_chi2_selection, k2pirb.tfout, k2pirb.get_folder("select_fit_no_chi2_k2pi_plots"),
-                k2pirb.event, "fit", k2pirb.is_mc );
-
-        DchAnalysis * select_raw  = new DchAnalysis(
-                *full_selection, k2pirb.tfout, select_raw_folder,k2pirb.event, "raw", k2pirb.is_mc );
-
-        DchAnalysis * select_raw_tgt_eop  = new DchAnalysis(
-                *full_selection_tgt_eop, k2pirb.tfout, select_raw_tgt_eop_folder,k2pirb.event, "raw", k2pirb.is_mc );
+        DchAnalysis * fit_eop_90_raw_plots  = new DchAnalysis(
+                *fit_selection_eop_90, k2pirb.tfout, k2pirb.get_folder( "fit_eop_90_raw") ,k2pirb.event, "raw", k2pirb.is_mc, true );
 
 
         auto * burst_count = new K2piBurstCount( *passer, k2pirb.tfout,
                 k2pirb.get_folder("burst_count"), k2pirb.event );
 
 
-        k2pirb.add_analysis( select_fit_dch_plotter );
-        k2pirb.add_analysis( select_fit_extra_eop_dch_plotter );
-        k2pirb.add_analysis( select_fit_tgt_eop_dch_plotter );
-        k2pirb.add_analysis( select_fit_loose_chi2_dch_plotter );
-        k2pirb.add_analysis( select_fit_no_chi2_dch_plotter );
-        k2pirb.add_analysis( select_raw );
-        k2pirb.add_analysis( select_raw_tgt_eop );
+        k2pirb.add_analysis( no_fit_raw_plots );
+        k2pirb.add_analysis( no_fit_fit_plots );
+        k2pirb.add_analysis( no_fit_full_plots );
+        k2pirb.add_analysis( fit_eop_80_plots );
+        k2pirb.add_analysis( fit_eop_90_plots );
+        k2pirb.add_analysis( fit_eop_90_raw_plots );
 
         //add dch selections
         for ( auto an = k2pirb.an_begin() ; an != k2pirb.an_end() ; ++an )
         {
             auto dch_an = static_cast<DchAnalysis*>( an->get() );
             dch_an->add_dch_selection( cda_cut_35 );
-            dch_an->add_dch_selection( z_cut_m1000_6500 );
+            dch_an->add_dch_selection( z_cut_m1500_6500 );
+            dch_an->add_dch_selection( track_mom_cut_10_60 );
         }
+
+        k2pirb.add_analysis( fit_eop_90_plots_no_cda );
+        fit_eop_90_plots_no_cda->add_dch_selection( z_cut_m1500_6500 );
+        fit_eop_90_plots_no_cda->add_dch_selection( track_mom_cut_10_60 );
 
         k2pirb.add_analysis( burst_count );
 
-        Summary  * full_summary = new Summary( *passer, *fit_selection, std::cout );
-        k2pirb.add_analysis( full_summary );
+        Summary  * full_no_fit_summary = new Summary( *passer, *no_fit_full, std::cout );
+        full_no_fit_summary->set_name("full_no_fit_summary");
+        k2pirb.add_analysis( full_no_fit_summary );
 
-        Summary  * full_extra_summary = new Summary( *passer, *fit_extra_eop_selection, std::cout );
-        k2pirb.add_analysis( full_extra_summary );
+        Summary  * full_fit_eop_90_summary = new Summary( *passer, *fit_selection_eop_90, std::cout );
+        full_fit_eop_90_summary->set_name( "full_fit_eop_90_summary" );
+        k2pirb.add_analysis( full_fit_eop_90_summary );
     }
 
     void add_pion_study( K2piRecoBag & k2pirb)

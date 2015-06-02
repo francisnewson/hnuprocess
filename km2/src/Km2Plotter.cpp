@@ -232,6 +232,9 @@ namespace fn
 
         h_p_ = hs_.MakeTH1D( "h_p", "Momentum (GeV)",
                 100, 0, 100, "p (GeV)" );
+
+        h_pnu_ = hs_.MakeTH1D( "h_pnu", "Neutrino Momentum (GeV)",
+                100, 0, 100, "p (GeV)" );
     }
 
     void Km2MiniPlots::Fill( const Km2RecoEvent& km2re, double wgt )
@@ -239,6 +242,9 @@ namespace fn
         h_m2m_kmu_->Fill( km2re.get_m2m_kmu(), wgt );
         h_m2m_kpi_->Fill( km2re.get_m2m_kpi(), wgt );
         h_p_->Fill( km2re.get_muon_mom(), wgt );
+
+        TLorentzVector p4_nu = km2re.get_p4_miss_kmu();
+        h_pnu_->Fill( p4_nu.P() );
     }
 
     void Km2MiniPlots::Write()

@@ -5,27 +5,24 @@ scaling:
         peakname: k2pi
 
         channels:
-            halo_channels:
-                - p6.data.km.q11t.v2.pos
+            halo_channels: [ p6.data.km.q11t.v2.pos  ]
+            data_channels: [ p5.data.nhod.v2.pos ]
+            peak_channels: [ p5.k2pig.v2.pos ]
 
-            data_channels:
-                - p5.data.nhod.v2.pos
-
-            peak_channels:
-                - p5.k2pig.v2.pos
-
-        halo:
-            strategy: dummy
+        halo: { strategy: dummy }
 
         mc:
             strategy: m2
             input_file: tdata/k2pi/all.k2pi.root
-            plot_path: select_fit_k2pi_plots/lkr_dch_cmp/hdm2
+            plot_path: fit_eop_90/lkr_dch_cmp/hdm2
+            #plot_path: no_fit_raw_plots/hm2pip_lkr
 
             min_mass_halo: -0.03
             max_mass_halo: -0.025
             min_mass_peak: -0.01
             max_mass_peak:  0.01
+            #min_mass_peak:  0.015
+            #max_mass_peak:  0.024
 
     - scaling_method:
         strategy: m2
@@ -33,27 +30,24 @@ scaling:
         peakname: k2pi
 
         channels:
-            halo_channels:
-                - p6.data.km.q11t.v2.neg
+            halo_channels: [ p6.data.km.q11t.v2.neg ]
+            data_channels: [ p5.data.nhod.v2.neg ]
+            peak_channels: [ p5.k2pig.v2.neg ]
 
-            data_channels:
-                - p5.data.nhod.v2.neg
-
-            peak_channels:
-                - p5.k2pig.v2.neg
-
-        halo:
-            strategy: dummy
+        halo: { strategy: dummy }
 
         mc:
             strategy: m2
             input_file: tdata/k2pi/all.k2pi.root
-            plot_path: select_fit_k2pi_plots/lkr_dch_cmp/hdm2
+            plot_path: fit_eop_90/lkr_dch_cmp/hdm2
+            #plot_path: no_fit_raw_plots/hm2pip_lkr
 
             min_mass_halo: -0.03
             max_mass_halo: -0.025
             min_mass_peak: -0.01
             max_mass_peak:  0.01
+            #min_mass_peak:  0.015
+            #max_mass_peak:  0.024
 
 weights:
     fid_file: use_root
@@ -66,77 +60,110 @@ output:
     input_file: tdata/k2pi/all.k2pi.root
 
     plots:
-        - path: select_fit_k2pi_plots/hdm2_pi0
-          name: fit_dm2_pi0
-          rebin: 10
+        - path: fit_eop_90/hdm2_pi0
+          name: fit_eop_90_dm2_pi0_rebin
+          rebin: 40
 
-        - path: raw_k2pi_plots/hm2pip_lkr
-          name: raw_m2pip
-          rebin: 1
+        - path: fit_eop_90/scatter_a/hdm2_pi0
+          name: fit_eop_90_dm2_pi0_rebin_a
+          rebin: 40
 
-        - path: raw_k2pi_plots/hdm2_pi0
-          name: raw_dm2_pi0
-          rebin: 10
+        - path: fit_eop_90/scatter_b/hdm2_pi0
+          name: fit_eop_90_dm2_pi0_rebin_b
+          rebin: 40
 
-        - path: select_fit_extra_eop_k2pi_plots/lkr_dch_cmp/hdm2
-          name: fit_eop_dm2
-          rebin: 10
+        - path: fit_eop_90/scatter_c/hdm2_pi0
+          name: fit_eop_90_dm2_pi0_rebin_c
+          rebin: 40
 
-        - path: select_fit_tgt_eop_k2pi_plots/lkr_dch_cmp/hdm2
-          name: fit_tgt_eop_dm2
-          rebin: 10
-
-        - path: select_fit_tgt_eop_k2pi_plots/lkr_dch_cmp/hdm2
-          name: rough_fit_tgt_eop_dm2
-          rebin: 50
-
-        - path: select_fit_tgt_eop_k2pi_plots/hevent_pt_
-          name: fit_tgt_eop_event_pt_
-          rebin: 1
-
-        - path: select_fit_tgt_eop_k2pi_plots/heop
-          name: fit_tgt_eop_heop
-          rebin: 10
-
-        - path: select_fit_extra_eop_k2pi_plots/lkr_dch_cmp/hdtx
-          name: fit_eop_dtx
-          rebin: 2 
-
-        - path: select_fit_k2pi_plots/lkr_dch_cmp/hdtx
-          name: fit_dtx
-          rebin: 5
-
-        - path: select_fit_k2pi_plots/lkr_dch_cmp/hdty
-          name: fit_dty
-          rebin: 5
-
-        - path: select_fit_k2pi_plots/lkr_dch_cmp/hdpop_
-          name: fit_dpop
-          rebin: 5
-
-        - path: select_fit_k2pi_plots/hchi2
-          name: fit_chi2
+        - path: fit_eop_90/hdm2_pi0
+          name: fit_eop_90_dm2_pi0
           rebin: 2
 
-        - path: select_fit_no_chi2_k2pi_plots/hchi2
-          name: fit_no_chi2_chi2
-          rebin: 2
-
-        - path: select_fit_no_chi2_k2pi_plots/hchi2_zoom
-          name: fit_no_chi2_chi2_zoom
-          rebin: 1
-
-        - path: select_fit_k2pi_plots/hz
-          name: fit_z
+        - path: fit_eop_90/hcda
+          name: fit_eop_90_cda
           rebin: 5
 
-        - path: select_fit_k2pi_plots/hcda
-          name: fit_cda
-          rebin: 2
+        - path: fit_eop_90/scatter_a/hcda
+          name: fit_eop_90_cda_a
+          rebin: 5
 
-        - path: select_fit_k2pi_plots/hpt_
-          name: fit_pt
-          rebin: 20
+        - path: fit_eop_90/scatter_b/hcda
+          name: fit_eop_90_cda_b
+          rebin: 5
+
+        - path: fit_eop_90/scatter_c/hcda
+          name: fit_eop_90_cda_c
+          rebin: 5
+
+
+        - path: fit_eop_90/lkr_dch_cmp/hdm2
+          name: fit_eop_90_dm2_lkr_pip
+          rebin: 10
+
+        - path: fit_eop_90/lkr_dch_cmp/hdpop_
+          name: fit_eop_90_dm2_lkr_dpop
+          rebin: 5
+
+        - path: fit_eop_90/lkr_dch_cmp/hdtx
+          name: fit_eop_90_dm2_lkr_dtx
+          rebin: 1
+
+        - path: fit_eop_90/lkr_dch_cmp/hdtx
+          name: fit_eop_90_dm2_lkr_dtx_rebin
+          rebin: 5
+
+        - path: fit_eop_90/scatter_a/lkr_dch_cmp/hdtx
+          name: fit_eop_90_dm2_lkr_dtx_scatter_a
+          rebin: 1
+
+        - path: fit_eop_90/scatter_b/lkr_dch_cmp/hdtx
+          name: fit_eop_90_dm2_lkr_dtx_scatter_b
+          rebin: 1
+
+        - path: fit_eop_90/scatter_c/lkr_dch_cmp/hdtx
+          name: fit_eop_90_dm2_lkr_dtx_scatter_c
+          rebin: 1
+
+        - path: fit_eop_90/lkr_dch_cmp/hdty
+          name: fit_eop_90_dm2_lkr_dty
+          rebin: 1
+
+        - path: fit_eop_90/lkr_dch_cmp/hdty
+          name: fit_eop_90_dm2_lkr_dty_rebin
+          rebin: 5
+
+        - path: fit_eop_90/hpt_
+          name: fit_eop_90_pt_rebin
+          rebin: 40
+
+        - path: fit_eop_90/hpt_
+          name: fit_eop_90_pt
+          rebin: 10 
+
+        - path: fit_eop_90/scatter_a/hpt_
+          name: fit_eop_90_pt_a
+          rebin: 10 
+
+        - path: fit_eop_90/scatter_b/hpt_
+          name: fit_eop_90_pt_b
+          rebin: 10 
+
+        - path: fit_eop_90/scatter_c/hpt_
+          name: fit_eop_90_pt_c
+          rebin: 10 
+
+        - path: no_fit_fit_plots/hchi2
+          name: no_fit_chi2
+          rebin: 40
+
+        - path: no_fit_raw_plots/hm2pip_lkr
+          name: raw_m2pip_lkr
+          rebin: 1
+
+        - path: no_fit_fit_plots/heop
+          name: no_fit_eop
+          rebin: 2
 
     data_plot:
         channels:
@@ -160,6 +187,22 @@ output:
             fid_weight: p5.km3.v2.neg
             channels:
                 - p5.km3.v2.neg
+
+        - item:
+            name: k3pi0_pos
+            scaling: mc_pos
+            fid_weight: p5.k3pi0.v2.pos
+            type: k3pi0
+            channels:
+                - p5.k3pi0.v2.pos
+
+        - item:
+            name: k3pi0_neg
+            scaling: mc_neg
+            fid_weight: p5.k3pi0.v2.neg
+            type: k3pi0
+            channels:
+                - p5.k3pi0.v2.neg
 
         - item:
             name: ke3_pos
@@ -194,21 +237,6 @@ output:
             channels:
                 - p5.k3pi.v2.neg
 
-        - item:
-            name: k3pi0_pos
-            scaling: mc_pos
-            fid_weight: p5.k3pi0.v2.pos
-            type: k3pi0
-            channels:
-                - p5.k3pi0.v2.pos
-
-        - item:
-            name: k3pi0_neg
-            scaling: mc_neg
-            fid_weight: p5.k3pi0.v2.neg
-            type: k3pi0
-            channels:
-                - p5.k3pi0.v2.neg
 
         - item:
             name: km2_pos

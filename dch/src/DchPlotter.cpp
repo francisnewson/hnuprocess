@@ -45,6 +45,10 @@ namespace fn
                 150, -150, 150, "x",
                 150, -150, 150, "y" );
 
+        hxy_lkr_ = dths_.MakeTH2D( "hxy_lkr", "track xy at lkr" ,
+                150, -150, 150, "x",
+                150, -150, 150, "y" );
+
         hmuv_eff_ = dths_.MakeTH1D( "hmuv_eff", "Muon veto efficiency",
                 1000, -0.5, 1.5, "efficiency", "#events" );
     }
@@ -116,8 +120,10 @@ namespace fn
             double track_muv_x = ds_track.extrapolate( na62const::zMuv2).X();
             double track_muv_y = ds_track.extrapolate( na62const::zMuv1).Y();
 
-            hxy_muv_->Fill( track_muv_x, track_muv_y, weight );
+            TVector3 track_lkr = ds_track.extrapolate( na62const::zLkr );
 
+            hxy_muv_->Fill( track_muv_x, track_muv_y, weight );
+            hxy_lkr_->Fill( track_lkr.X(), track_lkr.Y(), weight );
 
             if ( !mc )
             { return ; }
@@ -265,7 +271,7 @@ namespace fn
 
     DchAnalysis::DchAnalysis( Selection& sel,  TFile& tf_,
             std::string folder_, K2piEventData& k2pi_data, 
-            std::string lkr_data_source, bool is_mc)
+            std::string lkr_data_source, bool is_mc, bool do_scatter)
         :Analysis( sel ),
         plots_( tf_, folder_ ),event_plots_( tf_, folder_ ),
         k2pi_data_( k2pi_data), is_mc_( is_mc )
@@ -285,34 +291,37 @@ namespace fn
                 ( "DchAnalysis: Unknown lkr source " + lkr_data_source );
         }
 
-        n_scatterers_ = 0;
 
+        std::vector<scatter_params> scatterings = {};
 
-        for ( int i = 0 ; i != n_scatterers_ ; ++ i )
+        if( do_scatter )
         {
-            double angle_cutoff = 0.00085;
-            double angle_frequency = (i == 0) ? 0 : 2 * i * 0.001;
-            //double angle_frequency = (i == 0) ? 0 : 1 * 1 * 0.01;
+            scatterings = { 
+                { "b",         0.00085, 0.001 , 0.08, 0.001}, 
+                { "b_nop" ,    0.00085, 0.001 , 0.00, 0.000}, 
+                { "b_noxy",    0.00000, 0.000 , 0.08, 0.001}, 
+                { "b_morexy" , 0.00085, 0.002 , 0.08, 0.001}, 
+                { "b_earlyxy", 0.00085, 0.001 , 0.08, 0.001}, 
+            };
+        }
 
-            double mom_cutoff = 0.08;
-            //double mom_frequency = 1 * i * 0.001;
-            //double mom_frequency = 1 * i * 0.001;
-            double mom_frequency = (i == 0) ? 0 : 1 * 4 * 0.001;
+        n_scatterers_ = scatterings.size();
 
-            std::cout << "SCATTER " << i << std::endl;
+        for ( auto scat :  scatterings )
+        {
+            std::cout << "SCATTERING: " << scat.name << "\n";
+            std::cout << "angle_cutoff: " << scat.angle_cutoff << "\n";
+            std::cout << "angle_frequency: " << scat.angle_frequency << "\n";
 
-            std::cout << "angle_cutoff: " << angle_cutoff << "\n";
-            std::cout << "angle_frequency: " << angle_frequency << "\n";
-
-            std::cout << "mom_cutoff: " << mom_cutoff << "\n";
-            std::cout << "mom_frequency: " << mom_frequency << "\n";
+            std::cout << "mom_cutoff: " << scat.mom_cutoff << "\n";
+            std::cout << "mom_frequency: " << scat.mom_frequency << "\n";
 
             scatterers_.push_back( TrackPowerScatterer( 
-                        angle_cutoff, angle_frequency,
-                        mom_cutoff, mom_frequency ) );
+                        scat.angle_cutoff, scat.angle_frequency,
+                        scat.mom_cutoff, scat.mom_frequency ) );
 
             path folder{ folder_};
-            folder /= ("scatter" + std::to_string( i ) );
+            folder /= ("scatter_" + scat.name );
 
             scatter_plots_.push_back( DchPlotter( tf_, folder.string() ) );
         }
@@ -338,11 +347,7 @@ namespace fn
 
     void DchAnalysis::process_event()
     {
-        Vertex vertex = extract_vertex( k2pi_data_.raw_dch, *lkr_data_ );
-        double cda = vertex.cda;
-
         bool passed_dch = check_dch_selections( dch_selections_, &k2pi_data_.raw_dch, lkr_data_ );
-
         double wgt = k2pi_data_.weight * get_weight();
 
         if( is_mc_ )
@@ -359,34 +364,29 @@ namespace fn
             for ( int i  = 0 ; i != n_scatterers_ ; ++i )
             {
                 K2piDchData mod_dch = k2pi_data_.raw_dch;
-                scatterers_[i].scatter_track( k2pi_data_.compact_number, 
-                        mod_dch.dxdz, mod_dch.dydz, mod_dch.p );
-
-                Vertex vertex = extract_vertex( mod_dch, *lkr_data_ );
-                double cda = vertex.cda;
+                scatterers_[i].scatter_track( k2pi_data_.compact_number, mod_dch.dxdz, mod_dch.dydz, mod_dch.p );
 
                 bool passed_mod_dch = check_dch_selections( dch_selections_, &mod_dch, lkr_data_ );
 
-                if ( cda < 10.0 )
-                    if ( passed_mod_dch )
-                    {
-                        scatter_plots_[i].plot_data( k2pi_data_, *lkr_data_, mod_dch, 
-                                wgt, true, &k2pi_data_.mc );
-                    }
+                if ( passed_mod_dch )
+                {
+                    scatter_plots_[i].plot_data( k2pi_data_, *lkr_data_, mod_dch, wgt, true, &k2pi_data_.mc );
+                }
             }
         }
         else
         {
             //2015-03-18 I think in raw_dch here, raw means no extra kick, 
             //rather than no kinematic fitting.
-
             if ( passed_dch )
             {
-                plots_.plot_data( k2pi_data_, *lkr_data_, k2pi_data_.raw_dch, 
-                        wgt, false, 0 );
+                plots_.plot_data( k2pi_data_, *lkr_data_, k2pi_data_.raw_dch, wgt, false, 0 );
+                event_plots_.plot_data( k2pi_data_, *lkr_data_, k2pi_data_.raw_dch, wgt, false, 0  );
 
-                event_plots_.plot_data( k2pi_data_, *lkr_data_, k2pi_data_.raw_dch, 
-                        wgt, false, 0  );
+                for ( int i  = 0 ; i != n_scatterers_ ; ++i )
+                {
+                    scatter_plots_[i].plot_data( k2pi_data_, *lkr_data_, k2pi_data_.raw_dch, wgt, false, 0);
+                }
             }
         }
     }
