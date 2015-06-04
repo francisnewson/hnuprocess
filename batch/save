@@ -38,3 +38,9 @@ for source, dest in save['castor'].items():
     subprocess.check_call( ['rfmkdir', '-p',
             os.path.dirname(dest)] )
     subprocess.check_call(['rfcp', source, dest] )
+
+for source, dest in save['eos'].items():
+    sys.stderr.write ( "Copying {0} to {1}\n".format( source, dest ))
+    subprocess.check_call( ['/afs/cern.ch/project/eos/installation/0.3.15/bin/eos.select', 'mkdir', '-p',
+            os.path.dirname(dest)] )
+    subprocess.check_call(['xrdcp', source, 'root://eosna62//' + dest] )
