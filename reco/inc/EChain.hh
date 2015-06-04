@@ -156,6 +156,9 @@ namespace fn
                         std::string file_string  = filename.string();
                         add_file_protocol( file_string);
 
+                    BOOST_LOG_SEV( log_, fn::severity_level::debug)
+                        << "Adding " << file_string;
+
                         //add file: NB we don't count entries
                         int added = tch_->AddFile( root_file_string( file_string ) );
                         if ( added != 1 )
@@ -179,6 +182,10 @@ namespace fn
                         << "Going to read " << max_event_ << " entries";
 
                     //Prepare chain
+                    BOOST_LOG_SEV( log_, fn::severity_level::always_print)
+                        << "TChain::LoadTree() ... ";
+                    Long64_t load_entry  = tch_->LoadTree(0);
+
                     BOOST_LOG_SEV( log_, fn::severity_level::always_print)
                         << "TChain::GetFile() ... ";
 

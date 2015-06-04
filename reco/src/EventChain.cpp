@@ -45,11 +45,17 @@ namespace fn
         { throw std::runtime_error(
                 "Attempt to load chain with 0 files" ); }
 
+            BOOST_LOG_SEV( log_, fn::severity_level::always_print)
+                << "Adding " << filenames.size() << " files.";
+
         for ( auto& filename : filenames )
         {
             //prepare filename
             std::string file_string  = filename.string();
             add_file_protocol( file_string);
+
+            BOOST_LOG_SEV( log_, fn::severity_level::always_print)
+                << "Adding " << file_string;
 
             if ( !have_max_event_ )
             {

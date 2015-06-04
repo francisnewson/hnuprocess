@@ -31,6 +31,14 @@ namespace fn
                 ( name_ + " #Delta #theta_y").c_str() ,
                 1000, scale * -0.05, scale * 0.05, "#Delta #theta_y", "#events" );
 
+        hdpx_ = hs_.MakeTH1D( "hdpx",
+                ( name_ + " #Delta p_x").c_str() ,
+                1000, scale * 5, scale * 5, "#Delta p_x (GeV)", "#events" );
+
+        hdpy_ = hs_.MakeTH1D( "hdpy",
+                ( name_ + " #Delta p_y").c_str() ,
+                1000, scale * -5, scale * 5, "#Delta p_y (GeV)", "#events" );
+
         hdm2_ = hs_.MakeTH1D( "hdm2",
                 ( name_ + " #Delta m^{2}_{miss}").c_str(),
                 2000,  m2_scale * -0.2, m2_scale * 0.2, " #Delta m^{2}_{miss}" );
@@ -57,6 +65,9 @@ namespace fn
         hdp_->Fill( amag - bmag, wgt );
         hdtx_->Fill( amom.X()/amag -  bmom.X()/bmag, wgt );
         hdty_->Fill( amom.Y()/amag -  bmom.Y()/bmag, wgt );
+
+        hdpx_->Fill( amom.X() -  bmom.X(), wgt );
+        hdpy_->Fill( amom.Y() -  bmom.Y(), wgt );
 
         auto reference_mag = amag; //(previously (amag + bmag) / 2  )
 

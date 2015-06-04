@@ -612,7 +612,7 @@ namespace fn
         if( uniform_roll < angle_frequency_ )
         {
             //xkick
-            double xanglekick = angle_function_.GetRandom();
+            double xanglekick = angle_function_.GetRandom() / mom;
             int dir = dir_dist( gen );
             if ( dir == 1)
             {dxdz += xanglekick;}
@@ -625,7 +625,7 @@ namespace fn
         if( uniform_roll < angle_frequency_ )
         {
             //ykick
-            double yanglekick = angle_function_.GetRandom();
+            double yanglekick = angle_function_.GetRandom() / mom; 
             int dir = dir_dist( gen );
             if ( dir == 1)
             {dydz += yanglekick;}

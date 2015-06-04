@@ -28,6 +28,8 @@ namespace fn
             TH1D * hdpop2_;
             TH1D * hdtx_;
             TH1D * hdty_;
+            TH1D * hdpx_;
+            TH1D * hdpy_;
             TH2D * hdpvsp_;
             TH2D * hdpopvsp_;
             TH1D * hdm2_;

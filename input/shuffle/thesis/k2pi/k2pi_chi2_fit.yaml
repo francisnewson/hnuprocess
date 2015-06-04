@@ -64,38 +64,53 @@ output:
           name: fit_eop_90_dm2_pi0_rebin
           rebin: 40
 
-        - path: fit_eop_90/scatter_a/hdm2_pi0
-          name: fit_eop_90_dm2_pi0_rebin_a
-          rebin: 40
-
         - path: fit_eop_90/scatter_b/hdm2_pi0
           name: fit_eop_90_dm2_pi0_rebin_b
           rebin: 40
 
-        - path: fit_eop_90/scatter_c/hdm2_pi0
-          name: fit_eop_90_dm2_pi0_rebin_c
-          rebin: 40
-
         - path: fit_eop_90/hdm2_pi0
           name: fit_eop_90_dm2_pi0
-          rebin: 2
+          rebin: 40
 
-        - path: fit_eop_90/hcda
+        - path: fit_eop_90/scatter_b/hdm2_pi0
+          name: fit_eop_90_pi0_b
+          rebin: 40 
+
+        - path: fit_eop_90/scatter_b_nop/hdm2_pi0
+          name: fit_eop_90_pi0_b_nop
+          rebin: 40 
+
+        - path: fit_eop_90/scatter_b_noxy/hdm2_pi0
+          name: fit_eop_90_pi0_b_noxy
+          rebin: 40 
+
+        - path: fit_eop_90/scatter_b_morexy/hdm2_pi0
+          name: fit_eop_90_pi0_b_morexy
+          rebin: 40 
+
+        - path: fit_eop_90/scatter_b_earlyxy/hdm2_pi0
+          name: fit_eop_90_pi0_b_earlyxy
+          rebin: 40 
+
+        - path: fit_eop_90_no_cda/hcda
           name: fit_eop_90_cda
-          rebin: 5
+          rebin: 10
 
-        - path: fit_eop_90/scatter_a/hcda
-          name: fit_eop_90_cda_a
-          rebin: 5
-
-        - path: fit_eop_90/scatter_b/hcda
+        - path: fit_eop_90_no_cda/scatter_b/hcda
           name: fit_eop_90_cda_b
-          rebin: 5
+          rebin: 10
 
-        - path: fit_eop_90/scatter_c/hcda
-          name: fit_eop_90_cda_c
-          rebin: 5
+        - path: fit_eop_90_no_cda/scatter_b_nop/hcda
+          name: fit_eop_90_cda_b_nop
+          rebin: 10
 
+        - path: fit_eop_90_no_cda/scatter_b_morexy/hcda
+          name: fit_eop_90_cda_morexy
+          rebin: 10
+
+        - path: fit_eop_90_no_cda/scatter_b_earlyxy/hcda
+          name: fit_eop_90_cda_earlyxy
+          rebin: 10
 
         - path: fit_eop_90/lkr_dch_cmp/hdm2
           name: fit_eop_90_dm2_lkr_pip
@@ -103,6 +118,10 @@ output:
 
         - path: fit_eop_90/lkr_dch_cmp/hdpop_
           name: fit_eop_90_dm2_lkr_dpop
+          rebin: 5
+
+        - path: fit_eop_90/scatter_b/lkr_dch_cmp/hdpop_
+          name: fit_eop_90_dm2_lkr_dpop_scatter_b
           rebin: 5
 
         - path: fit_eop_90/lkr_dch_cmp/hdtx
@@ -113,16 +132,8 @@ output:
           name: fit_eop_90_dm2_lkr_dtx_rebin
           rebin: 5
 
-        - path: fit_eop_90/scatter_a/lkr_dch_cmp/hdtx
-          name: fit_eop_90_dm2_lkr_dtx_scatter_a
-          rebin: 1
-
         - path: fit_eop_90/scatter_b/lkr_dch_cmp/hdtx
           name: fit_eop_90_dm2_lkr_dtx_scatter_b
-          rebin: 1
-
-        - path: fit_eop_90/scatter_c/lkr_dch_cmp/hdtx
-          name: fit_eop_90_dm2_lkr_dtx_scatter_c
           rebin: 1
 
         - path: fit_eop_90/lkr_dch_cmp/hdty
@@ -141,16 +152,24 @@ output:
           name: fit_eop_90_pt
           rebin: 10 
 
-        - path: fit_eop_90/scatter_a/hpt_
-          name: fit_eop_90_pt_a
-          rebin: 10 
-
         - path: fit_eop_90/scatter_b/hpt_
           name: fit_eop_90_pt_b
           rebin: 10 
 
-        - path: fit_eop_90/scatter_c/hpt_
-          name: fit_eop_90_pt_c
+        - path: fit_eop_90/scatter_b_nop/hpt_
+          name: fit_eop_90_pt_b_nop
+          rebin: 10 
+
+        - path: fit_eop_90/scatter_b_noxy/hpt_
+          name: fit_eop_90_pt_b_noxy
+          rebin: 10 
+
+        - path: fit_eop_90/scatter_b_morexy/hpt_
+          name: fit_eop_90_pt_b_morexy
+          rebin: 10 
+
+        - path: fit_eop_90/scatter_b_earlyxy/hpt_
+          name: fit_eop_90_pt_b_earlyxy
           rebin: 10 
 
         - path: no_fit_fit_plots/hchi2

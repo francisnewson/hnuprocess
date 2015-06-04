@@ -297,11 +297,10 @@ namespace fn
         if( do_scatter )
         {
             scatterings = { 
-                { "b",         0.00085, 0.001 , 0.08, 0.001}, 
-                { "b_nop" ,    0.00085, 0.001 , 0.00, 0.000}, 
-                { "b_noxy",    0.00000, 0.000 , 0.08, 0.001}, 
-                { "b_morexy" , 0.00085, 0.002 , 0.08, 0.001}, 
-                { "b_earlyxy", 0.00085, 0.001 , 0.08, 0.001}, 
+                { "b",       0.00085, 0.0100  , 0.08, 0.0010}, 
+                { "r" ,      0.00085, 0.0050  , 0.08, 0.0020}, 
+                { "r15" ,    0.00085, 0.0075  , 0.08, 0.0030}, 
+                { "r08" ,    0.00085, 0.0040  , 0.08, 0.0016}, 
             };
         }
 
@@ -309,11 +308,11 @@ namespace fn
 
         for ( auto scat :  scatterings )
         {
-            std::cout << "SCATTERING: " << scat.name << "\n";
-            std::cout << "angle_cutoff: " << scat.angle_cutoff << "\n";
-            std::cout << "angle_frequency: " << scat.angle_frequency << "\n";
+            std::cout << "SCATTERING: " << std::setw(6) << scat.name;
+            std::cout << "angle_cutoff: " << scat.angle_cutoff;
+            std::cout << "angle_frequency: " << scat.angle_frequency;
 
-            std::cout << "mom_cutoff: " << scat.mom_cutoff << "\n";
+            std::cout << "mom_cutoff: " << scat.mom_cutoff;
             std::cout << "mom_frequency: " << scat.mom_frequency << "\n";
 
             scatterers_.push_back( TrackPowerScatterer( 
