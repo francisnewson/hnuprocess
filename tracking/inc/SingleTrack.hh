@@ -35,6 +35,8 @@ namespace fn
 
             virtual double get_time() const = 0;
 
+            virtual double get_adjusted_time() const = 0;
+
             virtual double get_quality() const = 0;
 
             virtual double get_ddead_cell() const = 0;
@@ -103,6 +105,7 @@ namespace fn
         double corr_mom;
         double unscattered_mom;
         Vertex vert;
+        double adjusted_time;
         bool good;
 
         fne::RecoTrack rt_;
@@ -133,6 +136,7 @@ namespace fn
             double momentum();
 
             double get_time() const;
+            double get_adjusted_time() const;
 
             double get_quality() const;
 

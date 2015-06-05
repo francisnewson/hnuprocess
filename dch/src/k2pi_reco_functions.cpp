@@ -330,7 +330,7 @@ namespace fn
         const double& ce = energy;
         return std::sqrt(
                 std::pow( 0.42 / std::sqrt(ce),  2 )
-                + std::pow( 0.06 * ce, 2 )
+                + std::pow( 0.06, 2 )
                 );
     }
 

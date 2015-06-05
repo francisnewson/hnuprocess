@@ -54,7 +54,7 @@ namespace fn
             std::string file_string  = filename.string();
             add_file_protocol( file_string);
 
-            BOOST_LOG_SEV( log_, fn::severity_level::always_print)
+            BOOST_LOG_SEV( log_, fn::severity_level::debug)
                 << "Adding " << file_string;
 
             if ( !have_max_event_ )
@@ -69,7 +69,7 @@ namespace fn
                     std::unique_ptr<TFile> tf{ TFile::Open( root_file_string( file_string ) ) };
                     if ( tf )
                     { 
-                        BOOST_LOG_SEV( log_, always_print) << "Checked: " << tf->GetName() ; 
+                        BOOST_LOG_SEV( log_, debug) << "Checked: " << tf->GetName() ; 
                         found_file = true;
                     }
                     else if ( nb_attempts == max_attempts ){

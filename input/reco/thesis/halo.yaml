@@ -1,0 +1,370 @@
+---
+#Study halo using P6
+#Autopass
+- selection:
+    name: passer
+    type : auto_pass
+
+###################################################
+# FILE MANAGEMENT
+###################################################
+
+- output:
+    name: tfout
+    type: tfile
+    filename: halo_plots.root
+
+###################################################
+# STANDARD CORRECTIONS
+###################################################
+
+#automatically load the correct kind of kaon track
+#(including 1 + beta corrections)
+- input:
+    name: kaon_track
+    type: KaonTrack
+    kaon_type: auto
+    beam_mapping: input/reco/beam/beam_mapping.yaml
+
+#kaon weights
+- selection:
+    name: kaon_mom_weights
+    type: KaonMomWeight
+    crude_weights: "input/reco/mod/kaon_crude_weights.dat"
+    fine_weights: "input/reco/mod/kaon_fine_weights.dat"
+
+#standard cluster corretions
+- input:
+    name: cluster_corrector
+    type: ClusterCorrector
+    filename: "/afs/cern.ch/user/f/fnewson/work/hnu/gopher/data/detector/eopCorrfile.dat"
+    enabled: true
+
+- output:
+    name: os_cerr
+    type: ostream
+    filename: cerr
+
+- output:
+    name: os_stats
+    type: ostream
+    filename: halo_stats.dat
+
+- output:
+    name: tfout
+    type: tfile
+    filename: halo_plots.root
+
+###################################################
+# DATA SAMPLE DEFINITION
+###################################################
+
+# 1]Bad bursts
+- selection:
+    name: good_phys_burst
+    type: BadBurst
+    burst_list: "input/reco/conditions/bad_phys_burst.dat"
+
+- selection:
+    name: good_dch_burst
+    type: BadBurst
+    burst_list: "input/reco/conditions/bad_dch_burst.dat"
+
+- selection:
+    name: good_muv_burst
+    type: BadBurst
+    burst_list: "input/reco/conditions/bad_muv_burst.90.dat"
+
+- selection:
+    name: weighted_data_sample
+    type: CompositeSelection
+    children:
+        - kaon_mom_weights
+        - good_phys_burst
+        - good_dch_burst
+        - good_muv_burst
+
+- selection:
+    name: mcz
+    type: MCZCut
+    min_z: -1800
+    max_z:  8000
+
+- selection:
+    name: weighted_mc_sample
+    type: CompositeSelection
+    children:
+        - weighted_data_sample
+        - mcz
+
+- analysis:
+    name: sample_burst_count
+    type: BurstCount
+    tfile: tfout
+    folder: sample_burst_count
+    selection: weighted_mc_sample
+    codename: bursts
+
+###################################################
+# INPUTS
+###################################################
+
+#----------Single Track
+- input: { name : bf_st, type : SingleTrack,  method : BF,
+    init_min_mom: 3.0 , init_max_mom: 80,
+    init_max_cda: 15.0, init_min_z: -5000.0, init_max_z:  10000.0,
+    dch_merge_sep: 0.5,
+    inputs: { kt: kaon_track } }
+
+#----------km2 event
+- input: { name: km2_event, type: Km2Event,
+    inputs: { ogt: bf_st, kt: kaon_track } }
+
+#---------km2 clusters
+- input: { name: km2_clusters, type: Km2Clusters,
+    noise_energy: 3, noise_time: 12, brehm_radius: 0 ,
+    track_cluster_radius: 5, extra_lkr_check: false,
+    inputs: { ogt: bf_st, ClusterCorrector: cluster_corrector } }
+
+
+###################################################
+# CUTS
+###################################################
+
+#-------- 2.] Found ogt ( DCH VETO )
+- selection: {name: good_trk, type : FoundGoodTrack,
+  inputs : {ogt: bf_st} }
+
+#-------- 3.] Track charge
+- selection: { name: pos_trk, type : TrackCharge,
+    charge: +1, inputs : {ogt: bf_st} }
+
+#------- 4.] Track quality
+- selection: { name: quality_7, type: TrackQuality,
+    quality: 0.7, inputs: { ogt: bf_st} }
+
+#-------- 9.] LKr acceptance
+- selection: {name: rk_lkr_accep, type: TrackLkrAcceptance,
+    margin_parameter: 8, inputs: { ogt: bf_st } }
+
+#--------10.] Hot Cells
+- selection: {name: rk_hot_lkr, type: Km2HotLkr,
+    hot_cells: [ [ 134, 56 ], [ 134, 57 ] ],
+    inputs: { km2event: km2_event, km2clusters: km2_clusters } }
+
+#------- 6.] NoBadClusters ( LKr VETO )
+- selection: {name: rk_lkr_veto, type: Km2NoBadCluster,
+    inputs: {km2clusters: km2_clusters} }
+
+#-------- 7.] PZ (FIDUCIAL VOLUME)
+- selection: {name: fiducial_pz, type: TrackPZ,
+    shape: rectangles, points: [ [  5, 70, -2000, 9000 ] ],
+    inputs: {ogt: bf_st} }
+
+#--------13.] Track DHC1 ACC
+- selection: { name: dch1_acc, type: TrackRadialAcceptance,
+    track_section: upstream, z: 9708.42,
+    inner: 12.0, outer: 115.0,
+    inputs: { ogt: bf_st} }
+
+#--------14.] Track DHC4 ACC
+- selection: { name: dch4_acc, type: TrackRadialAcceptance,
+    track_section: downstream, z: 11888.0,
+    inner: 14.0, outer: 115.0,
+    inputs: { ogt: bf_st} }
+
+#--------16.] Track time
+- selection: { name: rk_dcht, type : TrackTime,
+    max_dt: 20,  inputs: { ogt: bf_st } } 
+
+#--------Dead Cells
+- selection: { name: ddead_cell, type: TrackDDeadCell, 
+    min_ddead_cell: 2.0,  inputs: {ogt: bf_st } }
+
+###################################################
+# PZ REGIONS
+###################################################
+
+#UPPER
+- selection: {
+    name: upper_pz, type: TrackPZ,
+    shape: rectangles,
+    points: [ [  11, 40, 2000, 7200 ] ],
+    inputs: { ogt: bf_st } }
+
+- selection: {
+    name: upper_cda, type: TrackCda,
+    min_cda: 2.5, max_cda: 6.5, #cm
+    inputs: {ogt: bf_st } }
+
+- selection: {
+    name: upper_t, type: Km2Angle,
+    min_t: 0, max_t: 0.013,
+    inputs: { km2event: km2_event } }
+
+- selection: {
+     name: upper_specific, type: CompositeSelection,
+     children: [ upper_pz, upper_cda, upper_t ] }
+
+#LOWER
+- selection: {
+    name: lower_pz, type: TrackPZ,
+    shape: rectangles,
+    points: [ [  10, 40, -1800, 500 ] ],
+    inputs: { ogt: bf_st } }
+
+- selection: { 
+    name: lower_cda, type: TrackCda,
+    min_cda: 1.0, max_cda: 4.0,
+    inputs: { ogt: bf_st } }
+
+- selection: {
+    name: lower_t, type: Km2Angle,
+    min_t: 0.003, max_t: 0.013,
+    inputs: { km2event: km2_event } }
+
+- selection: {
+     name: lower_specific, type: CompositeSelection,
+     children: [ lower_pz, lower_cda, lower_t ] }
+
+###################################################
+# RK
+###################################################
+
+- selection:
+    name: rk_pz
+    type: TrackPZ
+    shape: rectangles
+    points:
+        - [ 13, 20, -1000, 9000 ]
+        - [ 20, 25, -1000, 9000 ]
+        - [ 25, 30,     0, 9000 ]
+        - [ 30, 35,   500, 9000 ]
+        - [ 35, 40,   500, 9000 ] 
+        - [ 40, 45,   500, 9000 ]
+        - [ 45, 50,  1000, 9000 ]
+        - [ 50, 55,  1000, 9000 ]
+        - [ 55, 60,  1500, 9000 ]
+        - [ 60, 65,  1500, 9000 ]
+    inputs:
+        ogt: bf_st
+
+- selection: { 
+    name: rk_cda, type: TrackCda,
+    min_cda: 0.0, max_cda: 3.5,
+    inputs: { ogt: bf_st } }
+
+- selection: {
+     name: rk_specific, type: CompositeSelection,
+     children: [ rk_pz, rk_cda ] }
+
+###################################################
+# SELECTIONS
+###################################################
+
+- selection:
+    name: pre_selection
+    type: CompositeSelection
+    children:
+        - weighted_data_sample
+        - good_trk
+        - pos_trk
+        - quality_7
+        - fiducial_pz
+        - dch1_acc
+        - dch4_acc
+        - rk_hot_lkr
+        - rk_lkr_veto
+        - rk_dcht
+        - ddead_cell
+
+- selection:
+    name: full_upper
+    type : CompositeSelection
+    children:
+        - pre_selection
+        - upper_specific
+
+- selection:
+    name: full_lower
+    type : CompositeSelection
+    children:
+        - pre_selection
+        - lower_specific
+
+- selection:
+    name: rk_like_selection
+    type: CompositeSelection
+    children:
+        - pre_selection
+        - rk_specific
+
+##################################################
+#
+# ANALYSES
+#
+##################################################
+
+- analysis :
+    type: Km2Plotter
+    name: pre_halo_plots
+    folder: pre_halo
+    tfile: tfout
+    selection: pre_selection
+    inputs:
+        km2event: km2_event
+
+- analysis :
+    type: Km2Plotter
+    name: full_upper_halo_plots
+    folder: full_upper_halo
+    tfile: tfout
+    selection: full_upper
+    inputs:
+        km2event: km2_event
+
+- analysis :
+    type: Km2Plotter
+    name: full_rk_like_plots
+    folder: full_rk_like_plots
+    tfile: tfout
+    selection: rk_like_selection
+    inputs:
+        km2event: km2_event
+
+- analysis :
+    type: Km2Plotter
+    name: full_lower_halo_plots
+    folder: full_lower_halo
+    tfile: tfout
+    selection: full_lower
+    inputs:
+        km2event: km2_event
+
+- analysis : 
+    name : full_summary
+    type: Summary
+    base : passer
+    source : pre_selection 
+    ostream: os_stats
+
+- analysis : 
+    name : rk_like_summary
+    type: Summary
+    base : passer
+    source : pre_selection 
+    ostream: os_stats
+
+- analysis : 
+    name : upper_summary
+    type: Summary
+    base : passer
+    source : full_upper 
+    ostream: os_stats
+
+- analysis : 
+    name : lower_summary
+    type: Summary
+    base : passer
+    source : full_lower 
+    ostream: os_stats

@@ -164,6 +164,11 @@ namespace fn
         return proc_track_->rt->time;
     }
 
+    double BFSingleRecoTrack::get_adjusted_time() const
+    {
+        return proc_track_->adjusted_time;
+    }
+
     double BFSingleRecoTrack::get_quality() const
     {
         return proc_track_->rt->quality;
@@ -394,6 +399,7 @@ namespace fn
             { continue; }
 
             //out of time tracks are bad
+            pt.adjusted_time = pt.rt->time - dch_toffst;
             if ( fabs( pt.rt->time - dch_toffst ) > 62.5 )
             {
                 BOOST_LOG_SEV( get_log() , log_level() )

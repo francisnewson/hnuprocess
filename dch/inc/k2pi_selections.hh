@@ -45,6 +45,7 @@ namespace fn
             K2piEventData& event;
             K2piLkrData& raw_lkr;
             K2piLkrData& fit_lkr;
+            K2piLkrData& fit_lkr_err;
             K2piDchData& raw_dch;
             TFile& tfout;
 
@@ -68,6 +69,8 @@ namespace fn
     Selection * get_track_cluster_sep_cut( K2piRecoBag& k2pirb, double sep );
     Selection * get_min_photon_radius_cut( K2piRecoBag& k2pirb, double rad );
     Selection * get_chi2_cut( K2piRecoBag& k2pirb, double chi2 );
+    Selection * get_min_chi2_cut( K2piRecoBag& k2pirb, double chi2 );
+    Selection * get_bad_prob_cut( K2piRecoBag& k2pirb, double prob );
     Selection * get_muv_cut( K2piRecoBag& k2pirb, bool mc );
     Selection * get_eop_cut( K2piRecoBag& k2pirb, bool mc, double E_thresh, double min, double max );
 
@@ -76,6 +79,8 @@ namespace fn
     void add_dch_study( K2piRecoBag & k2pirb);
 
     void add_pion_study( K2piRecoBag & k2pirb);
+
+    void add_pull_study( K2piRecoBag & k2pirb );
 
 
 }

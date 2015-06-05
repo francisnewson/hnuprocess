@@ -116,7 +116,8 @@ int main( int argc, char * argv[] )
     {
         std::cerr <<  "Available studies: \n"
             << "    dch\n" 
-            << "    pion\n" ;
+            << "    pion\n"
+            << "    pull\n" ;
 
         return 0;
     }
@@ -223,6 +224,11 @@ int main( int argc, char * argv[] )
         {
             std::cerr << "Adding dch study" << std::endl;
             add_pion_study( k2pirb );
+        }
+        else if ( study == "pull" )
+        {
+            std::cerr << "Adding dch study" << std::endl;
+            add_pull_study( k2pirb );
         }
         else
         {

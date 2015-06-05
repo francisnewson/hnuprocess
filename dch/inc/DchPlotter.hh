@@ -56,6 +56,9 @@ namespace fn
             TH2D * hxy_muv_;
             TH2D * hxy_lkr_;
             TH1D * hmuv_eff_;
+
+            TH2D * hchi2_vs_z_ ;
+            TH2D * hchi2_vs_p_ ;
     };
 
     //--------------------------------------------------
@@ -91,6 +94,9 @@ namespace fn
             TH2D * hphoton_energy_;
             TH1D * hhigh_photon_energy_;
             TH1D * hlow_photon_energy_;
+
+            TH2D * hchi2_vs_E1_ ;
+            TH2D * hchi2_vs_E2_ ;
     };
     
     //--------------------------------------------------

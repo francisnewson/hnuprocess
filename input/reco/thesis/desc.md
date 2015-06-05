@@ -40,3 +40,7 @@ to check we understand what's going on
 extract_k2pi.yaml
 -----------------
 To be reprocessed with k2pi_reco
+
+halo.yaml
+---------
+Halo enriched selections to study P5/P6 agreement.

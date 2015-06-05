@@ -86,6 +86,9 @@ namespace fn
         h_z_ = hs_.MakeTH1D( "h_z", "Z Decay Vertex (cm)",
                 120, -2000, 10000, "Z (cm)" );
 
+        h_track_time_ = hs_.MakeTH1D( "h_track_time", "Track time",
+                200, -100, 100, "t (ns)" );
+
         //----------
 
         //Kinematic correlations
@@ -180,6 +183,8 @@ namespace fn
         h_z_->Fill( km2re.get_zvertex(), wgt );
 
         h_pt_->Fill( km2re.get_pt(), wgt );
+
+        h_track_time_->Fill( km2re.get_reco_track()->get_adjusted_time() , wgt );
 
         //Kinematic correlations
         h_p_t_->Fill( km2re.get_muon_mom(), km2re.get_opening_angle(), wgt );

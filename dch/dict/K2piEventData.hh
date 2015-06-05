@@ -114,6 +114,7 @@ namespace fn
             K2piLkrData raw_lkr;
             K2piLkrData fit_lkr;
             K2piLkrData fit_lkr_err;
+            K2piLkrData fit_lkr_fit_err;
             Double_t lkr_fit_chi2;
 
             //DCH

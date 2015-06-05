@@ -2,6 +2,7 @@
 #include "NA62Constants.hh"
 #include "FunctionCut.hh"
 #include "PionPlotter.hh"
+#include "PullPlotter.hh"
 #include "BurstCount.hh"
 #include "Summary.hh"
 #include "tracking_selections.hh"
@@ -13,6 +14,7 @@ namespace fn
         event( k2pi_event),
         raw_lkr( event.raw_lkr ),
         fit_lkr( event.fit_lkr ),
+        fit_lkr_err( event.fit_lkr_err ),
         raw_dch( event.raw_dch ),
         tfout( tfile ),
         next_id_(0),
@@ -130,6 +132,29 @@ namespace fn
         LambdaCut * chi2_cut = new LambdaCut{ max_chi2 };
         chi2_cut->set_name( "chi2_cut" );
         return chi2_cut;
+    }
+
+    Selection * get_min_chi2_cut( K2piRecoBag& k2pirb, double chi2 )
+    {
+        auto min_chi2 = [&k2pirb, chi2]
+        {
+            return k2pirb.event.lkr_fit_chi2 > chi2 ;
+        };
+
+        LambdaCut * chi2_cut = new LambdaCut{ min_chi2 };
+        chi2_cut->set_name( "min_chi2_cut" );
+        return chi2_cut;
+    }
+
+    Selection * get_bad_prob_cut( K2piRecoBag& k2pirb, double prob )
+    {
+        auto bad_prob = [&k2pirb, prob]
+        {
+            return TMath::Prob( k2pirb.event.lkr_fit_chi2, 1 ) < 0.01;
+        };
+        LambdaCut * bad_prob_cut  = new LambdaCut{ bad_prob};
+        bad_prob_cut->set_name( "bad_prob_cut");
+        return bad_prob_cut;
     }
 
     Selection * get_muv_cut( K2piRecoBag& k2pirb, bool mc )
@@ -270,6 +295,9 @@ namespace fn
         chi2_cut_050->set_name( "chi2_cut_050" );
         k2pirb.add_selection( chi2_cut_050 );
 
+        auto bad_prob_cut = get_bad_prob_cut( k2pirb, 0.01 );
+        k2pirb.add_selection( bad_prob_cut );
+
         //--------------------
 
         //MUV CUT
@@ -310,6 +338,12 @@ namespace fn
         CompositeSelection * fit_selection_eop_80 = new CompositeSelection( { no_fit_raw, eop_cut_80, chi2_cut_050 } );
         fit_selection_eop_80->set_name( "fit_selection_eop_80" );
         k2pirb.add_selection( fit_selection_eop_80 );
+
+        //DODGY
+        CompositeSelection * dodgy_selection = new CompositeSelection(
+                { track_track_cluster_sep_cut,  track_cluster_sep_cut, min_photon_radius_cut, muv_acc, muv_cut, eop_cut_90, bad_prob_cut } );
+        dodgy_selection->set_name("dodgy_selection");
+        k2pirb.add_selection( dodgy_selection);
 
         //**************************************************
         //DCH Cuts
@@ -367,6 +401,12 @@ namespace fn
         DchAnalysis * fit_eop_90_raw_plots  = new DchAnalysis(
                 *fit_selection_eop_90, k2pirb.tfout, k2pirb.get_folder( "fit_eop_90_raw") ,k2pirb.event, "raw", k2pirb.is_mc, true );
 
+        DchAnalysis * fit_dodgy_plots  = new DchAnalysis(
+                *dodgy_selection, k2pirb.tfout, k2pirb.get_folder( "dodgy_fit") ,k2pirb.event, "fit", k2pirb.is_mc, true );
+
+
+        DchAnalysis * raw_dodgy_plots  = new DchAnalysis(
+                *dodgy_selection, k2pirb.tfout, k2pirb.get_folder( "dodgy_raw") ,k2pirb.event, "raw", k2pirb.is_mc, true );
 
         auto * burst_count = new K2piBurstCount( *passer, k2pirb.tfout,
                 k2pirb.get_folder("burst_count"), k2pirb.event );
@@ -391,6 +431,9 @@ namespace fn
         k2pirb.add_analysis( fit_eop_90_plots_no_cda );
         fit_eop_90_plots_no_cda->add_dch_selection( z_cut_m1500_6500 );
         fit_eop_90_plots_no_cda->add_dch_selection( track_mom_cut_10_60 );
+
+        k2pirb.add_analysis( fit_dodgy_plots );
+        k2pirb.add_analysis( raw_dodgy_plots );
 
         k2pirb.add_analysis( burst_count );
 
@@ -445,4 +488,118 @@ namespace fn
 
         k2pirb.add_analysis( pion_plotter );
     }
+
+    void add_pull_study( K2piRecoBag & k2pirb )
+    {
+
+        //**************************************************
+        //Selections
+        //**************************************************
+
+        //PHOTON SEPARATION
+        auto photon_sep_cut =  get_photon_sep_cut(k2pirb, 20  ) ;
+        k2pirb.add_selection( photon_sep_cut);
+
+        //--------------------
+
+        //TRACK CLUSTER SEPARATION
+        auto track_cluster_sep_cut =  get_track_cluster_sep_cut(k2pirb, 40 ) ;
+        k2pirb.add_selection  (track_cluster_sep_cut);
+
+        //--------------------
+
+        //TRACK TRACK CLUSTER SEPARATION
+        auto track_track_cluster_sep_cut =  get_track_track_cluster_sep_cut(k2pirb, 30, k2pirb.is_mc ) ;
+        k2pirb.add_selection  (track_track_cluster_sep_cut);
+
+        //--------------------
+
+        //MIN PHOTON RADIUS
+        auto min_photon_radius_cut = get_min_photon_radius_cut( k2pirb, 15 );
+        k2pirb.add_selection( min_photon_radius_cut );
+
+
+        //Chi2 selection
+        auto chi2_cut = get_chi2_cut( k2pirb, 10000000000000 );
+        k2pirb.add_selection( chi2_cut );
+
+        auto good_chi2_cut = get_chi2_cut( k2pirb, 0.5 );
+        k2pirb.add_selection( good_chi2_cut );
+
+
+        //BAD PROB CUT
+        auto bad_prob_cut = get_bad_prob_cut( k2pirb, 0.01 );
+        k2pirb.add_selection( bad_prob_cut );
+
+        CompositeSelection * full_selection = new CompositeSelection(
+                {photon_sep_cut, track_cluster_sep_cut, track_track_cluster_sep_cut, min_photon_radius_cut,chi2_cut} );
+
+        full_selection->set_name( "full_selection" );
+        k2pirb.add_selection( full_selection );
+
+        CompositeSelection * good_selection = new CompositeSelection(
+                {photon_sep_cut, track_cluster_sep_cut, track_track_cluster_sep_cut, min_photon_radius_cut,good_chi2_cut} );
+
+        good_selection->set_name( "good_selection" );
+        k2pirb.add_selection( good_selection );
+
+        CompositeSelection * dodgy_selection = new CompositeSelection(
+                {photon_sep_cut, track_cluster_sep_cut, track_track_cluster_sep_cut,
+                min_photon_radius_cut,chi2_cut, bad_prob_cut} );
+
+        dodgy_selection->set_name( "dodgy_selection" );
+        k2pirb.add_selection( dodgy_selection );
+
+
+        //**************************************************
+        //Analysis
+        //**************************************************
+
+        PullPlotterAnalysis * pull_plotter =  new PullPlotterAnalysis(
+                *full_selection, k2pirb.tfout,  "pull_plotter",
+                k2pirb.raw_lkr, k2pirb.fit_lkr, k2pirb.fit_lkr_err, k2pirb.event, PullPlotter::source::mc );
+
+        k2pirb.add_analysis( pull_plotter );
+
+
+        PullPlotterAnalysis * pull_plotter_dt =  new PullPlotterAnalysis(
+                *full_selection, k2pirb.tfout,  "pull_plotter_dt",
+                k2pirb.raw_lkr, k2pirb.fit_lkr, k2pirb.fit_lkr_err, k2pirb.event, PullPlotter::source::data );
+        k2pirb.add_analysis( pull_plotter_dt );
+
+
+        PullPlotterAnalysis * good_pull_plotter =  new PullPlotterAnalysis(
+                *good_selection, k2pirb.tfout,  "good_pull_plotter",
+                k2pirb.raw_lkr, k2pirb.fit_lkr, k2pirb.fit_lkr_err, k2pirb.event, PullPlotter::source::mc );
+
+        k2pirb.add_analysis( good_pull_plotter );
+
+        PullPlotterAnalysis * good_pull_plotter_mcafter =  new PullPlotterAnalysis(
+                *good_selection, k2pirb.tfout,  "good_pull_plotter_mcafter",
+                k2pirb.raw_lkr, k2pirb.fit_lkr, k2pirb.fit_lkr_err, k2pirb.event, PullPlotter::source::mcafter );
+
+        k2pirb.add_analysis( good_pull_plotter_mcafter );
+
+
+        PullPlotterAnalysis * good_pull_plotter_dt =  new PullPlotterAnalysis(
+                *good_selection, k2pirb.tfout,  "good_pull_plotter_dt",
+                k2pirb.raw_lkr, k2pirb.fit_lkr, k2pirb.fit_lkr_err, k2pirb.event, PullPlotter::source::data );
+
+        k2pirb.add_analysis( good_pull_plotter_dt );
+
+
+        PullPlotterAnalysis * dodgy_pull_plotter =  new PullPlotterAnalysis(
+                *dodgy_selection, k2pirb.tfout,  "dodgy_pull_plotter",
+                k2pirb.raw_lkr, k2pirb.fit_lkr, k2pirb.fit_lkr_err, k2pirb.event, PullPlotter::source::mc );
+
+        k2pirb.add_analysis( dodgy_pull_plotter );
+
+
+        PullPlotterAnalysis * dodgy_pull_plotter_dt =  new PullPlotterAnalysis(
+                *dodgy_selection, k2pirb.tfout,  "dodgy_pull_plotter_dt",
+                k2pirb.raw_lkr, k2pirb.fit_lkr, k2pirb.fit_lkr_err, k2pirb.event, PullPlotter::source::data );
+
+        k2pirb.add_analysis( dodgy_pull_plotter_dt );
+    }
 }
+

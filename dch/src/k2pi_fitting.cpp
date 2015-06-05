@@ -140,7 +140,7 @@ namespace fn
             }
 
             //Include pi+ constraint
-            result += std::pow( 10000*( pion_mass - na62const::mPi), 2 );
+            result += std::pow( 500000*( pion_mass - na62const::mPi), 2 );
             return result;
         }
 
@@ -148,8 +148,8 @@ namespace fn
         {
             for ( unsigned int i = 0 ; i != 11 ; ++i )
             {
-                double min_val = measured_.par_[i] - errors_.par_[i];
-                double max_val = measured_.par_[i] + errors_.par_[i];
+                double min_val = measured_.par_[i] - 30 * errors_.par_[i];
+                double max_val = measured_.par_[i] + 30 * errors_.par_[i];
 
                 if ( i == 0 || i == 1 )
                 {

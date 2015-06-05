@@ -51,6 +51,14 @@ namespace fn
 
         hmuv_eff_ = dths_.MakeTH1D( "hmuv_eff", "Muon veto efficiency",
                 1000, -0.5, 1.5, "efficiency", "#events" );
+
+        hchi2_vs_z_ = dths_.MakeTH2D( "hchi2vsz", "Fit Chi2 vs Z vertex",
+                200, -2000 , 10000,  "z", 
+                100, 0.0 , 10,  "Chi2" );
+
+        hchi2_vs_p_ = dths_.MakeTH2D( "hchi2vsp", "Fit Chi2 vs pi+ momentum",
+                100, 0,    100,  "p", 
+                100, 0.0 , 10,  "Chi2" );
     }
 
     void DchPlotter::plot_data
@@ -125,6 +133,9 @@ namespace fn
             hxy_muv_->Fill( track_muv_x, track_muv_y, weight );
             hxy_lkr_->Fill( track_lkr.X(), track_lkr.Y(), weight );
 
+            hchi2_vs_z_->Fill( vertex.point.Z() ,  event_data.lkr_fit_chi2, weight );
+            hchi2_vs_p_->Fill( lkr_pip_4mom.P(), event_data.lkr_fit_chi2, weight );
+
             if ( !mc )
             { return ; }
 
@@ -187,6 +198,7 @@ namespace fn
         hchi2_ = dths_.MakeTH1D( "hchi2", "Fit Chi2",
                 10000, 0.0 , 10,  "Chi2", "#events" );
 
+
         hchi2_zoom_ = dths_.MakeTH1D( "hchi2_zoom", "Fit Chi2",
                 10000, 0.0 , 100,  "Chi2", "#events" );
 
@@ -217,6 +229,14 @@ namespace fn
 
         hlow_photon_energy_ = dths_.MakeTH1D( "hlow_photon_energy", "High Photon energy",
                 1000, 0.0 , 100,  "Energy(GeV)", "#events" );
+
+        hchi2_vs_E1_ = dths_.MakeTH2D( "hchi2vsE1", "Fit Chi2 vs E1",
+                100, 0,    100,  "E1", 
+                100, 0.0 , 10,  "Chi2" );
+
+        hchi2_vs_E2_ = dths_.MakeTH2D( "hchi2vsE2", "Fit Chi2 vs E2",
+                100, 0,    100,  "E2", 
+                100, 0.0 , 10,  "Chi2" );
 
     }
 
@@ -252,6 +272,9 @@ namespace fn
         hlow_photon_energy_->Fill( lkr_data.E2, weight );
 
         hphoton_energy_->Fill( lkr_data.E1, lkr_data.E2, weight );
+
+        hchi2_vs_E1_->Fill( lkr_data.E1, event_data.lkr_fit_chi2, weight );
+        hchi2_vs_E2_->Fill( lkr_data.E2, event_data.lkr_fit_chi2, weight );
     }
 
     void K2piEventPlotter::write()

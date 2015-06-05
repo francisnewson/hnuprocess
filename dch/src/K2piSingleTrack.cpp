@@ -35,6 +35,7 @@ namespace fn
     double K2piSingleRecoTrack::get_cda() const { return vertex_.cda; }
 
     double K2piSingleRecoTrack::get_time() const { return 0 ; }
+    double K2piSingleRecoTrack::get_adjusted_time() const { return 0 ; }
 
     double K2piSingleRecoTrack::get_quality() const { return 0 ; }
 

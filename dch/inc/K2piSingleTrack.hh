@@ -30,6 +30,7 @@ namespace fn
             virtual double get_cda() const ;
 
             virtual double get_time() const ;
+            virtual double get_adjusted_time() const ;
 
             virtual double get_quality() const ;
 

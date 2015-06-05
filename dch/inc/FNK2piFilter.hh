@@ -94,7 +94,9 @@ namespace fn
 
     double fit_lkr( const K2piLkrData& raw,
             const ClusterCorrector& cluster_corrector, 
-            K2piLkrData& fit, K2piLkrData& err, bool mc );
+            K2piLkrData& fit, K2piLkrData& err,
+            K2piLkrData& fit_err,
+            bool mc );
 
 
     //--------------------------------------------------

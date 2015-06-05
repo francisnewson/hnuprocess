@@ -89,7 +89,8 @@ namespace fn
 
         //Do Lkr Fit
         double chi2 = fit_lkr( k2pi_event_data_.raw_lkr, cluster_corrector_,
-                k2pi_event_data_.fit_lkr, k2pi_event_data_.fit_lkr_err, mc_ );
+                k2pi_event_data_.fit_lkr, k2pi_event_data_.fit_lkr_err, 
+                k2pi_event_data_.fit_lkr_fit_err, mc_ );
         k2pi_event_data_.lkr_fit_chi2 = chi2;
 
         //Extract header
@@ -198,11 +199,12 @@ namespace fn
         boost::optional<k2pi_mc_parts> particles = extract_k2pi_particles( &e );
         if ( particles )
         {
-        mc.p4k() = particles->k->momentum;;
+        mc.p4k() = particles->k->momentum;
         mc.p4pip() = particles->pip->momentum;
         mc.p4pi0() = particles->pi0->momentum;
         mc.p4g1() = particles->photons[0]->momentum;
         mc.p4g2() = particles->photons[1]->momentum;
+        mc.vertex() = particles->k->decay_vertex;
         }
     }
 
@@ -235,7 +237,8 @@ namespace fn
     }
 
     double fit_lkr( const K2piLkrData& raw,
-            const ClusterCorrector& cluster_corrector, K2piLkrData& fit, K2piLkrData& err, bool mc )
+            const ClusterCorrector& cluster_corrector, K2piLkrData& fit, K2piLkrData& err,
+            K2piLkrData& fit_err, bool mc )
     {
         //create fit object
         FNK2piFit fit_object( cluster_corrector, mc  );
@@ -257,8 +260,17 @@ namespace fn
 
         WK2piLkrInterface out_fit ( fit );
         copy( fit_object.fit_, out_fit );
+
         WK2piLkrInterface out_err ( err );
         copy( fit_object.errors_, out_err );
+
+        k2pi_params fit_errors;
+        std::copy( minimizer->Errors(), minimizer->Errors() + 11, begin(fit_errors.par_) );
+
+        WK2piLkrInterface out_fit_err ( fit_err );
+        copy( fit_errors, out_fit_err );
+
+
         return chi2;
     }
 

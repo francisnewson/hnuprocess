@@ -12,14 +12,14 @@
 
 
 - output:
-    name: tftree
-    type: tfile
-    filename: k2pi_tree.root
-
-- output:
     name: tfstats
     type: tfile
     filename: k2pi_stats.root
+
+- output:
+    name: tftree
+    type: tfile
+    filename: k2pi_tree.root
 
 - output:
     name: sumout
