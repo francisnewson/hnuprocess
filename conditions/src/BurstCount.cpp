@@ -11,17 +11,33 @@
 namespace fn
 {
 
+    //--------------------------------------------------
+    SaveDirectory::SaveDirectory()
+        :td( gDirectory ), tf( gFile ){
+        }
+
+    SaveDirectory::~SaveDirectory()
+    {
+        gDirectory = td;
+        gFile = tf;
+    }
+
+    //--------------------------------------------------
+
     BurstCount::BurstCount( const Selection& sel,
             TFile& tfile, std::string folder, std::string codename,
             const fne::Event * e )
         :Analysis( sel ), tfile_( tfile), folder_( folder ), e_( e),
-        burst_tree_( codename.c_str() , "Burst info")
+        burst_tree_(0)
     {
+        SaveDirectory sd;
+        cd_p( &tfile_, folder_ );
+        burst_tree_ = new TTree ( codename.c_str() , "Burst info");
         TTree::SetMaxTreeSize(10000000000LL);
-        burst_tree_.Branch( "run", &burst_info_.run, "run/L" );
-        burst_tree_.Branch( "burst_time", &burst_info_.burst_time, "burst_time/L" );
-        burst_tree_.Branch( "events", &burst_info_.events, "events/L" );
-        burst_tree_.Branch( "weight", &burst_info_.weight, "weight/D" );
+        burst_tree_->Branch( "run", &burst_info_.run, "run/L" );
+        burst_tree_->Branch( "burst_time", &burst_info_.burst_time, "burst_time/L" );
+        burst_tree_->Branch( "events", &burst_info_.events, "events/L" );
+        burst_tree_->Branch( "weight", &burst_info_.weight, "weight/D" );
     }
 
     void BurstCount::new_burst()
@@ -40,7 +56,7 @@ namespace fn
 
     void BurstCount::end_burst()
     {
-        burst_tree_.Fill();
+        burst_tree_->Fill();
     }
 
     void BurstCount::end_processing()
@@ -55,9 +71,10 @@ namespace fn
 #endif
 
         cd_p( &tfile_, folder_ );
-        //burst_tree_.Print();
-        burst_tree_.Write();
-        burst_tree_.SetDirectory(0);
+        burst_tree_->Print();
+        burst_tree_->Scan();
+        burst_tree_->Write();
+        //burst_tree_.SetDirectory(0);
     }
 
     REG_DEF_SUB( BurstCount);
@@ -87,13 +104,13 @@ namespace fn
             TFile& tfile, std::string folder,
             const K2piEventData& e )
         :Analysis( sel ), tfile_( tfile), folder_( folder ), e_( e ),
-        burst_tree_( "bursts", "Burst info")
+        burst_tree_(  new TTree( "bursts", "Burst info") )
     {
         TTree::SetMaxTreeSize(10000000000LL);
-        burst_tree_.Branch( "run", &burst_info_.run, "run/L" );
-        burst_tree_.Branch( "burst_time", &burst_info_.burst_time, "burst_time/L" );
-        burst_tree_.Branch( "events", &burst_info_.events, "events/L" );
-        burst_tree_.Branch( "weight", &burst_info_.weight, "weight/D" );
+        burst_tree_->Branch( "run", &burst_info_.run, "run/L" );
+        burst_tree_->Branch( "burst_time", &burst_info_.burst_time, "burst_time/L" );
+        burst_tree_->Branch( "events", &burst_info_.events, "events/L" );
+        burst_tree_->Branch( "weight", &burst_info_.weight, "weight/D" );
         new_burst();
     }
 
@@ -113,14 +130,15 @@ namespace fn
 
     void K2piBurstCount::end_burst()
     {
-        burst_tree_.Fill();
+        burst_tree_->Fill();
     }
 
     void K2piBurstCount::end_processing()
     {
         end_burst();
         cd_p( &tfile_, folder_ );
-        burst_tree_.Write();
-        burst_tree_.SetDirectory(0);
+        std::cout << "Printing burst_tree" << std::endl;
+        burst_tree_->Print();
+        burst_tree_->Write();
     }
 }

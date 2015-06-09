@@ -19,6 +19,18 @@ class TFile;
 
 namespace fn
 {
+    class SaveDirectory
+    {
+        public:
+            SaveDirectory();
+            ~SaveDirectory();
+
+        private:
+            TDirectory * td;
+            TFile * tf;
+    };
+
+    //--------------------------------------------------
     class K2piEventData;
 
     struct burst_info
@@ -28,6 +40,8 @@ namespace fn
         Long64_t events;
         Double_t weight;
     };
+
+
 
     class BurstCount : public Analysis
     {
@@ -48,7 +62,7 @@ namespace fn
             std::string folder_;
             const fne::Event * e_;
             burst_info burst_info_;
-            TTree burst_tree_;
+            TTree * burst_tree_;
 
             REG_DEC_SUB( BurstCount);
     };
@@ -77,7 +91,7 @@ namespace fn
             std::string folder_;
             const K2piEventData& e_;
             burst_info burst_info_;
-            TTree burst_tree_;
+            TTree * burst_tree_;
     };
 }
 #endif
