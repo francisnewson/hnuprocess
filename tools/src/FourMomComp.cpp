@@ -33,11 +33,11 @@ namespace fn
 
         hdpx_ = hs_.MakeTH1D( "hdpx",
                 ( name_ + " #Delta p_x").c_str() ,
-                1000, scale * -5, scale * 5, "#Delta p_x (GeV)", "#events" );
+                1000, scale * -1, scale * 1, "#Delta p_x (GeV)", "#events" );
 
         hdpy_ = hs_.MakeTH1D( "hdpy",
                 ( name_ + " #Delta p_y").c_str() ,
-                1000, scale * -5, scale * 5, "#Delta p_y (GeV)", "#events" );
+                1000, scale * -1, scale * 1, "#Delta p_y (GeV)", "#events" );
 
         hdm2_ = hs_.MakeTH1D( "hdm2",
                 ( name_ + " #Delta m^{2}_{miss}").c_str(),

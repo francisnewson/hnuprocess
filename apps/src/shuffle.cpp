@@ -210,6 +210,12 @@ int main( int argc, char * argv[] )
         hratio->Divide( hdenom.get() );
         hratio->Write("hratio");
 
+        std::unique_ptr<TH1> hresid{ static_cast<TH1*>( hdata->Clone("hresid") ) };
+        hresid->SetDirectory(0);
+        hresid->Sumw2();
+        hresid->Add( hdenom.get(), - 1 );
+        hresid->Write("hresid");
+
         RatioCanvas rc( *hdenom, *hdata, *hratio);
         rc.Write( "c_comp");
 

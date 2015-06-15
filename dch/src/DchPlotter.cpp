@@ -320,10 +320,11 @@ namespace fn
         if( do_scatter )
         {
             scatterings = { 
-                { "b",       0.00085, 0.0100  , 0.08, 0.0010}, 
-                { "r" ,      0.00085, 0.0050  , 0.08, 0.0020}, 
-                { "r15" ,    0.00085, 0.0075  , 0.08, 0.0030}, 
-                { "r08" ,    0.00085, 0.0040  , 0.08, 0.0016}, 
+                { "b",       0.00085, 0.0100  , 2  , 0.08, 0.0010, 2}, 
+                { "r08" ,    0.00085, 0.0040  , 2  , 0.08, 0.0016, 2}, 
+                { "s4"  ,    0.00085, 0.000040, 4  , 0.08, 0.000016, 4}, 
+                { "s4high",  0.00085, 0.000400, 4  , 0.08, 0.000160, 4}, 
+                { "s4low" ,  0.00085, 0.000004, 4  , 0.08, 0.0000016, 4}, 
             };
         }
 
@@ -339,8 +340,8 @@ namespace fn
             std::cout << "mom_frequency: " << scat.mom_frequency << "\n";
 
             scatterers_.push_back( TrackPowerScatterer( 
-                        scat.angle_cutoff, scat.angle_frequency,
-                        scat.mom_cutoff, scat.mom_frequency ) );
+                        scat.angle_cutoff, scat.angle_frequency, scat.angle_power,
+                        scat.mom_cutoff, scat.mom_frequency, scat.mom_power ) );
 
             path folder{ folder_};
             folder /= ("scatter_" + scat.name );

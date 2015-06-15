@@ -54,6 +54,7 @@ namespace fn
         //std::cerr << std::setw(15) << "Coloring " << std::setw(10) << type << " " << color << std::endl;
         h.SetFillColor( color );
         h.SetLineColor( color );
+        h.SetLineWidth( 1 );
     }
 
     void format_data_hist( TH1 &h, const YAML::Node& instruct )
@@ -61,6 +62,7 @@ namespace fn
         h.SetMarkerSize( 2 );
         h.SetMarkerColor( kGray + 2);
         h.SetLineColor( kGray +2 );
+        h.SetLineWidth( 1 );
         //h.Sumw2();
 
         if ( get_yaml<bool>( instruct, "do_blind" ) )

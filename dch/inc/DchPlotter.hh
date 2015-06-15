@@ -46,6 +46,9 @@ namespace fn
             FourMomComp lkr_tk_mc_cmp_;
             FourMomComp mc_dch_cmp_;
             TH1D * hpt_;
+            TH1D * htx_;
+            TH1D * hty_;
+
             TH1D * hcda_;
             TH1D * hz_;
             TH1D * hp_;
@@ -137,8 +140,10 @@ namespace fn
             std::string name;
             double angle_cutoff;
             double angle_frequency;
+            int angle_power;
             double mom_cutoff;
             double mom_frequency;
+            int mom_power;
         };
 
         void process_event();

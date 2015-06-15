@@ -155,8 +155,8 @@ namespace fn
 
     double BFSingleRecoTrack::get_cda() const
     {
-    //    return proc_track_->vert.cda;
-    return bf_vertex_.cda;
+        //    return proc_track_->vert.cda;
+        return bf_vertex_.cda;
     }
 
     double BFSingleRecoTrack::get_time() const
@@ -488,12 +488,14 @@ namespace fn
     {
         double angle_sigma = get_yaml<double>( instruct, "angle_sigma" );
         double angle_frequency = get_yaml<double>( instruct, "angle_frequency" );
+        int angle_power = get_yaml<double>( instruct, "angle_power" );
 
         double mom_sigma = get_yaml<double>( instruct, "mom_sigma" );
         double mom_frequency = get_yaml<double>( instruct, "mom_frequency" );
+        int mom_power = get_yaml<double>( instruct, "mom_power" );
 
-        scatterer_.set_angle_params( angle_sigma, angle_frequency );
-        scatterer_.set_mom_params( mom_sigma, mom_frequency );
+        scatterer_.set_angle_params( angle_sigma, angle_frequency, angle_power );
+        scatterer_.set_mom_params( mom_sigma, mom_frequency, mom_power );
 
         BOOST_LOG_SEV( get_log(), always_print)
             << "K2pi scatter angle_frequency: " << angle_frequency;
@@ -571,34 +573,52 @@ namespace fn
     //--------------------------------------------------
 
     TrackPowerScatterer::TrackPowerScatterer(
-            double angle_cutoff, double angle_frequency, 
-            double mom_cutoff, double mom_frequency)
+            double angle_cutoff, double angle_frequency,  int angle_power,
+            double mom_cutoff, double mom_frequency, int mom_power)
     {
-        set_angle_params( angle_cutoff, angle_frequency);
-        set_mom_params( mom_cutoff, mom_frequency);
+        set_angle_params( angle_cutoff, angle_frequency, angle_power);
+        set_mom_params( mom_cutoff, mom_frequency, mom_power);
     }
 
     void TrackPowerScatterer::set_angle_params
-        ( double cutoff, double frequency)
+        ( double cutoff, double frequency, int power)
         {
-            angle_function_ = TF1( "f_angle", "tanh( pow(x*[0],4) )*pow(x,-2)",
+            angle_function_ = TF1( "f_angle", "tanh( pow(x*[0],[1]+2) )*pow(x,-[1])",
                     -15*cutoff, 15*cutoff );
 
-            double xscale = 1.021;
+            double xscale = 0;
+            if (power==4) { xscale = 0.965; }
+            else if ( power==2 ){ xscale = 1.021 ; }
+            else
+            {
+                throw std::runtime_error{
+                    "TrackPowerScatterer was given power which wasn't 2 or 4"};
+            }
             angle_function_.SetParameter( 0 , xscale/cutoff );
+            mom_function_.SetParameter(1, power);
             angle_function_.SetNpx( 200 );
             angle_frequency_ = frequency;
         }
 
     void TrackPowerScatterer::set_mom_params
-        ( double cutoff, double frequency)
+        ( double cutoff, double frequency, int power)
         {
             //mom_function_ = TF1( "f_mom", "pow(x,-4)", cutoff, 1 );
-            mom_function_ = TF1( "f_mom", "tanh( pow(x*[0],4) )*pow(x,-2)",
+            mom_function_ = TF1( "f_mom", "tanh( pow(x*[0],[1]+2) )*pow(x,-[1])",
                     -1, 1 );
 
-            double xscale = 1.021;
+            double xscale = 0;
+            if (power==4) { xscale = 0.965; }
+            else if ( power==2 ){ xscale = 1.021 ; }
+            else
+            {
+                throw std::runtime_error{
+                    "TrackPowerScatterer was given power which wasn't 2 or 4"};
+            }
+
+
             mom_function_.SetParameter(0, xscale/cutoff );
+            mom_function_.SetParameter(1, power);
             mom_function_.SetNpx( 200 );
             mom_frequency_ = frequency;
         }
