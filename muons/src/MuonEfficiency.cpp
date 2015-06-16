@@ -9,6 +9,7 @@
 #include "SingleMuon.hh"
 #include "TEfficiencyHelper.h"
 #include "TGraphAsymmErrors.h"
+#include "stl_help.hh"
 
 namespace fn
 {
@@ -74,13 +75,6 @@ namespace fn
         cd_p( &tf_, folder_ );
         hs_.Write();
 
-#if 0
-        TGraphAsymmErrors muv_eff_xy( h_xy_passed_, h_xy_total_, "b(0.5,0.5)" );
-        TGraphAsymmErrors muv_eff_p(  h_p_passed_,  h_p_total_, "b(0.5,0.5)" );
-        muv_eff_xy.Write( "muv_eff_xy" );
-        muv_eff_p.Write( "muv_eff_p" );
-#endif
-
         TH2D * h_xy_ratio = static_cast<TH2D*>
             ( h_xy_passed_->Clone( "h_xy_ratio" ) );
         h_xy_ratio->Sumw2();
@@ -123,50 +117,39 @@ namespace fn
 
     MuonMultiplierEfficiency::MuonMultiplierEfficiency(const Selection& sel,
             std::vector<double> cut_values,
-            const SingleMuon& sm, const SingleTrack& st,
+            const fne::Event * e, bool mc, const SingleTrack& st,
             TFile& tf, std::string folder )
         :Analysis( sel ),cut_values_( cut_values ),
-        sm_( sm ), st_(st ), tf_( tf ), folder_( folder )
+        e_( e ), st_(st ), tf_( tf ), folder_( folder ), mc_(mc)
     {
         passed_ = std::vector<double>( cut_values.size(), 0 );
         total_ = 0;
+
+        for (  double cut : cut_values_ )
+        {
+            if ( mc )
+            {
+                muon_recos_.push_back( make_unique<MCScatterSingleMuon>( e_, st ) );
+            }
+            else
+            {
+                muon_recos_.push_back( make_unique<DataMuRec>( e_, st, cut ));
+            }
+        }
     }
 
     void MuonMultiplierEfficiency::process_event()
     {
         double wgt = get_weight();
 
-        if ( sm_.found() )
-        {
-            wgt *= sm_.weight();
-        }
-
         total_ += wgt;
-
-        if ( !sm_.found() )
-        {
-            return;
-        }
-
-        const SingleRecoTrack& srt = st_.get_single_track();
-        double mom  = srt.get_mom();
-
-        std::pair<double,double> sep_pair = get_muon_track_separation( sm_,  srt );
-
-        const double& sep_x = sep_pair.first;
-        const double& sep_y = sep_pair.second;
-
-        double err_x =  mu_error_0902_sc( mom, 2 );
-        double err_y =  mu_error_0902_sc( mom, 1 );
 
         for( unsigned int icut = 0 ; icut != cut_values_.size() ; ++icut )
         {
             double cut = cut_values_[icut];
 
-            bool pass_x = sep_x < na62const::muv_half_width + cut * err_x;
-            bool pass_y = sep_y < na62const::muv_half_width + cut * err_y;
-
-            if ( pass_x && pass_y )
+            muon_recos_[icut]->new_event();
+            if ( muon_recos_[icut]->found() )
             {
                 passed_[icut] += wgt;
             }
@@ -196,23 +179,6 @@ namespace fn
             effs.push_back( eff );
             eff_low.push_back( err );
             eff_up.push_back( err );
-
-#if 0
-            fc.Calculate(pass, total_);
-            double lower = fc.Lower();
-            double upper = fc.Upper();
-            eff_low.push_back( eff - lower );
-            eff_up.push_back( std::min( 1.0, upper ) - eff );
-
-            std::cout 
-                << "pass: " << pass << "\n"
-                << "total: " << total_ << "\n"
-                << "eff: " << eff << "\n"
-                << "lower: " << lower << "\n"
-                << "upper: " << upper << "\n"
-                << "down: " << eff - lower << "\n"
-                << "up: " << std::min( 1.0 , upper ) - eff << "\n";
-#endif
         }
 
         std::vector<double> xerr( effs.size(), 0 );
@@ -235,17 +201,20 @@ namespace fn
             const Selection * sel = rf.get_selection( 
                     get_yaml<std::string>( instruct, "selection" ) );
 
-            const SingleMuon * sm = get_single_muon( instruct, rf );
             const SingleTrack * st = get_single_track( instruct, rf );
+
+            const  fne::Event * e = rf.get_event_ptr();
 
             TFile & tfile = rf.get_tfile( 
                     get_yaml<std::string>( instruct, "tfile" ) );
 
             std::string folder = get_folder( instruct, rf );
-            
+
             std::vector<double> cut_values = get_yaml<std::vector<double>>
                 ( instruct, "multiplier_values" );
 
-            return new MuonMultiplierEfficiency( *sel, cut_values, *sm, *st, tfile, folder );
+            bool mc = rf.is_mc();
+
+            return new MuonMultiplierEfficiency( *sel, cut_values, e, mc, *st, tfile, folder );
         }
 }

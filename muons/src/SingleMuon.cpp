@@ -8,6 +8,7 @@
 #include "muon_functions.hh"
 #include "NA62Constants.hh"
 #include "MuRec.hh"
+#include <sstream>
 
 namespace fn
 {
@@ -48,7 +49,8 @@ namespace fn
                 }
                 else
                 {
-                    return new RawSingleMuon( event, *st );
+                    double multiplier = get_yaml<double>( instruct, "multiplier" );
+                    return new DataMuRec( event, *st, multiplier );
                 }
             }
             else
@@ -168,8 +170,11 @@ namespace fn
 
         boost::optional<toymc::track_params> muon_track = get_muon_track( e_, st_ );
 
+
         if ( !muon_track )
         { 
+            BOOST_LOG_SEV( get_log(), log_level() )
+                << "No Track" ;
             found_muon_ = false;
             dirty_ = false;
             return;
@@ -186,30 +191,41 @@ namespace fn
         //check track impact point is in acceptance
         if ( ( fabs( x_track ) < tube_hole ) &&  ( fabs(y_track ) < tube_hole  ) )
         {
+            BOOST_LOG_SEV( get_log(), log_level() )
+                << "In hole" ;
             found_muon_ = false;
             dirty_ = false;
             return;
         }
 
-        double xmin = muv_geom_.V_centres( 0 ) - na62const::muv_half_width;
-        double xmax = muv_geom_.V_centres( muv_geom_.num_strips() ) + na62const::muv_half_width;
+        double xmin = muv_geom_.V_centres( muv_geom_.num_strips()-1 ) - na62const::muv_half_width;
+        double xmax = muv_geom_.V_centres( 0 ) + na62const::muv_half_width;
 
         double ymin = muv_geom_.H_centres( 0 ) - na62const::muv_half_width;
-        double ymax = muv_geom_.H_centres( muv_geom_.num_strips() ) + na62const::muv_half_width;
+        double ymax = muv_geom_.H_centres( muv_geom_.num_strips()-1 ) + na62const::muv_half_width;
 
-        if ( (x_track < xmin ) || (x_track > xmax ) || (y_track < ymin ) || (y_track > ymin ) )
+        if ( (x_track < xmin ) || (x_track > xmax ) || (y_track < ymin ) || (y_track > ymax ) )
         {
+            BOOST_LOG_SEV( get_log(), log_level() )
+                << xmin << " " << xmax << " " << ymin << " " << ymax;
+            BOOST_LOG_SEV( get_log(), log_level() )
+                << "Outside MUV "  << x_track << " " << y_track ;
             found_muon_ = false;
             dirty_ = false;
             return;
         }
 
         //Determine muon position
-        double x_muon = muv_geom_.muonchan2pos( muv_geom_.muonpos2chan( x_, 2 ) );
-        double y_muon = muv_geom_.muonchan2pos( muv_geom_.muonpos2chan( y_, 1 ) );
+        double x_muon = muv_geom_.muonchan2pos( muv_geom_.muonpos2chan( x_track, 2 ) );
+        double y_muon = muv_geom_.muonchan2pos( muv_geom_.muonpos2chan( y_track, 1 ) );
+
 
         x_ = x_muon;
         y_ = y_muon;
+
+        BOOST_LOG_SEV( get_log(), log_level() )
+            << x_ << " " << y_ ;
+
         found_muon_ = true;
         dirty_ = false;
     }

@@ -31,7 +31,7 @@ namespace fn
             0.00, 23.00, 47.93, 72.73, 97.60, 122.37}},
 
         num_channels_{scint_speed_.size() },
-        num_strips_ {V_centres_.size() },
+        num_strips_ {V_centres_.max_size() },
         time_cut_ { 10.0 }
     {}
 

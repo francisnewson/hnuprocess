@@ -244,8 +244,10 @@ namespace fn
             std::string effs_hist_path = get_yaml<std::string>
                 ( instruct, "effs_hist" );
 
-
             TFile teffs( effs_file.c_str() );
+            if ( teffs.IsZombie() ){ throw std::runtime_error(
+                    "Couldn't open " + effs_file ); }
+
             auto eff_hist = extract_hist<TH2D>( teffs, effs_hist_path );
 
             return new MuonTHXYWeight( *st, *eff_hist );

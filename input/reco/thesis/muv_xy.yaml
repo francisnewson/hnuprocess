@@ -308,6 +308,18 @@
         ogt: bf_st
 
 - selection:
+    name: muv_inner_xy
+    type: TrackMuvXYAcceptance
+    shape: rectangles
+    points:
+        - [ -1000,   -11, -1000, 1000 ]
+        - [    11,  1000, -1000, 1000 ]
+        - [ -1000,  1000, -1000,  -11 ]
+        - [ -1000,  1000,    11, 1000 ]
+    inputs:
+        ogt: bf_st
+
+- selection:
     name: tgt_muv_xy
     type: TrackMuvXYAcceptance
     shape: rectangles
@@ -339,6 +351,7 @@
     inputs:
         ogt: bf_st
 
+# a small region with hopefully constant eff( x, y )
 - selection:
     name: very_tgt_muv_xy
     type: TrackMuvXYAcceptance
@@ -348,18 +361,24 @@
     inputs:
         ogt: bf_st
 
+- selection:
+    name: muv_acc
+    type: TrackXYUVAcceptance
+    track_section: ds
+    z: 13012.0 #MUV3
+    min_x: -135.0
+    max_x:  135.0
+    min_y: -135.0
+    max_y:  135.0
+    min_u: -135.0
+    max_u:  135.0
+    min_v: -135.0
+    max_v:  135.0
+    inputs:
+        ogt: bf_st
 #Momentum cuts
 - selection:
-    { name: mom20, type: TrackMomentum, min: 20,  max: 60, inputs: {ogt: bf_st } }
-
-- selection:
-    { name: mom25, type: TrackMomentum, min: 25,  max: 60, inputs: {ogt: bf_st } }
-
-- selection:
     { name: mom30, type: TrackMomentum, min: 30,  max: 60, inputs: {ogt: bf_st } }
-
-- selection:
-    { name: mom35, type: TrackMomentum, min: 35,  max: 60, inputs: {ogt: bf_st } }
 
 - selection:
     { name: mom_restp, type: TrackMomentum, min: 8,  max: 62, inputs: {ogt: bf_st } }
@@ -393,29 +412,36 @@
         - eop_90
 
 - selection:
+    { name: muon_muv_acc, type: CompositeSelection, children: [muon_selection, muv_inner_xy, muv_acc  ] }
+
+- selection:
     { name: mom_sel_30_eop, type: CompositeSelection, children: [muon_selection, mom30 ] }
 
 - selection:
-    { name: muon_selection_rest_p, type: CompositeSelection, children: [muon_selection, mom_restp ] }
-
-- selection:
-    { name: tgt_muv_rad_eop, type: CompositeSelection, children: [muon_selection, tgt_muv_xy] }
+    { name: muon_xy_cutout, type: CompositeSelection, children: [muon_selection, tgt_muv_xy] }
 
 - selection:
     { name: very_tgt_muv_rad_eop, type: CompositeSelection, children: [muon_selection, very_tgt_muv_xy] }
+
+- selection:
+    { name: muon_high_mom_xy_cutout, type: CompositeSelection, children: [muon_selection, mom30, tgt_muv_xy] }
+
+- selection:
+    { name: muon_rest_mom, type: CompositeSelection, children: [muon_selection, mom_restp] }
 
 - input:
     name: single_muon
     type: SingleMuon
     method: auto
+    multiplier: 4
     inputs:
         ogt: bf_st
 
-- input:
-    name: single_muon_mu_rec
-    type: SingleMuon
-    method: datamurec
-    multiplier: 4
+- selection:
+    name: muon_xy_cutout_wgt
+    type: MuonTHXYWeight
+    effs_file: input/reco/conditions/muv_xy_cutout.root
+    effs_hist: rat_xy
     inputs:
         ogt: bf_st
 
@@ -427,31 +453,6 @@
     inputs:
         ogt: bf_st
 
-
-- selection:
-   { name: raw_req_muon_40, type: MuonReq, multiplier: 4.0, inputs: {ogt: bf_st, sm: single_muon } }
-
-- selection:
-   { name: raw_mu_req_muon_40, type: MuonReq, multiplier: 4.0, inputs: {ogt: bf_st, sm: single_muon_mu_rec } }
-
-- selection:
-    { name: req_muon_40, type: CompositeSelection, children: [raw_req_muon_40, muon_xy_wgt] }
-
-- selection:
-    { name: mu_req_muon_40, type: CompositeSelection, children: [raw_mu_req_muon_40, muon_xy_wgt] }
-
-- selection:
-   { name: raw_req_muon_38, type: MuonReq, multiplier: 3.8, inputs: {ogt: bf_st, sm: single_muon } }
-
-- selection:
-    { name: req_muon_38, type: CompositeSelection, children: [raw_req_muon_38, muon_xy_wgt] }
-
-- selection:
-   { name: raw_req_muon_25, type: MuonReq, multiplier: 2.5, inputs: {ogt: bf_st, sm: single_muon } }
-
-- selection:
-    { name: req_muon_25, type: CompositeSelection, children: [raw_req_muon_25, muon_xy_wgt] }
-
 - selection:
     name: muon_p_wgt
     type: MuonTHPWeight
@@ -461,10 +462,16 @@
         ogt: bf_st
 
 - selection:
-    { name: req_p_muon_40, type: CompositeSelection, children: [raw_req_muon_40, muon_p_wgt] }
+   { name: muon_req_38, type: MuonReq, multiplier: 3.8, inputs: {ogt: bf_st, sm: single_muon } }
 
 - selection:
-    { name: mu_req_p_muon_40, type: CompositeSelection, children: [raw_mu_req_muon_40, muon_p_wgt] }
+    { name: muon_req_38_pw, type: CompositeSelection, children: [muon_req_38, muon_p_wgt] }
+
+- selection:
+    { name: muon_req_38_xy_cutoutw, type: CompositeSelection, children: [muon_req_38, muon_xy_cutout_wgt] }
+
+- selection:
+    { name: muon_req_38_xyw_pw, type: CompositeSelection, children: [muon_req_38, muon_xy_wgt, muon_p_wgt] }
 
 ###################################################
 # ANALYSES
@@ -472,54 +479,89 @@
 
 
 - analysis:
-    { name: muv_eff_r40_p30_eop, type: MuonEfficiency,
-    muv_selection: req_muon_40, 
-    selection: mom_sel_30_eop,
-    folder: muon_eff_r40_p30_eop,
+    { name: muv_eff_uw_r38_p_full, type: MuonEfficiency,
+    muv_selection: muon_req_38, 
+    selection: muon_muv_acc,
+    folder: muv_eff_uw_r38_p_full,
     tfile: tfout, inputs: {ogt: bf_st} }
 
+#measure eff(xy) dependence for a cut-out region,
+#using high momentum muons so we assume eff(p) =1.0 (flat)
 - analysis:
-    { name: muv_eff_r40_p30_eop_raw, type: MuonEfficiency,
-    muv_selection: raw_req_muon_40, 
-    selection: mom_sel_30_eop,
-    folder: muon_eff_r40_p30_eop_raw,
+    { name: muv_eff_uw_r38_high_p_xycutout, type: MuonEfficiency,
+    muv_selection: muon_req_38, 
+    selection: muon_high_mom_xy_cutout,
+    folder: muv_eff_uw_r38_high_p_xycutout,
     tfile: tfout, inputs: {ogt: bf_st} }
 
+#use measured eff(xy) to measure eff(p) for all p,
+#using the cutout region in which eff(xy) was measured
 - analysis:
-    { name: muv_eff_tgt_muv__pfull_eop, type: MuonEfficiency,
-    muv_selection: req_muon_40,
-    selection: tgt_muv_rad_eop,
-    folder: muon_eff_tgt_muv_pfull_eop,
+    { name: muv_eff_r38_all_p_xycutout, type: MuonEfficiency,
+    muv_selection: muon_req_38_xy_cutoutw, 
+    selection: muon_xy_cutout,
+    folder: muv_eff_r38_all_p_xycutout,
     tfile: tfout, inputs: {ogt: bf_st} }
 
+#use measured eff(p)  to measure eff(xy) for whole MUV,
+#using muons of all momenta so we can reach all points
 - analysis:
-    { name: muv_eff_very_tgt_muv__pfull_eop, type: MuonEfficiency,
-    muv_selection: req_muon_40,
-    selection: very_tgt_muv_rad_eop,
-    folder: muon_eff_very_tgt_muv_pfull_eop,
+    { name: muv_eff_r38_rest_p_allxy, type: MuonEfficiency,
+    muv_selection: muon_req_38_pw, 
+    selection: muon_rest_mom,
+    folder: muv_eff_r38_rest_p_allxy,
     tfile: tfout, inputs: {ogt: bf_st} }
 
-
+#test measured eff(p,xy) across whole range
 - analysis:
-    { name: muv_full_p_corr, type: MuonEfficiency,
-    muv_selection: req_p_muon_40,
-    selection: muon_selection,
-    folder: p_corr,
+    { name: muv_eff_test, type: MuonEfficiency,
+    muv_selection: muon_req_38_xyw_pw, 
+    selection: muon_rest_mom,
+    folder: muv_eff_test,
     tfile: tfout, inputs: {ogt: bf_st} }
 
-- analysis:
-    { name: mu_muv_full_p_corr, type: MuonEfficiency,
-    muv_selection: mu_req_p_muon_40,
-    selection: muon_selection,
-    folder: mu_rec_p_corr,
-    tfile: tfout, inputs: {ogt: bf_st} }
-
-- analysis:
-    { name: muv_full_p_corr_restp, type: MuonEfficiency,
-    muv_selection: req_p_muon_40,
-    selection: muon_selection_rest_p,
-    folder: p_corr_restp,
-    tfile: tfout, inputs: {ogt: bf_st} }
+#- analysis:
+#    { name: muv_eff_r40_p30_eop_raw, type: MuonEfficiency,
+#    muv_selection: raw_req_muon_40, 
+#    selection: mom_sel_30_eop,
+#    folder: muon_eff_r40_p30_eop_raw,
+#    tfile: tfout, inputs: {ogt: bf_st} }
+#
+#- analysis:
+#    { name: muv_eff_tgt_muv__pfull_eop, type: MuonEfficiency,
+#    muv_selection: req_muon_40,
+#    selection: tgt_muv_rad_eop,
+#    folder: muon_eff_tgt_muv_pfull_eop,
+#    tfile: tfout, inputs: {ogt: bf_st} }
+#
+#- analysis:
+#    { name: muv_eff_very_tgt_muv__pfull_eop, type: MuonEfficiency,
+#    muv_selection: req_muon_40,
+#    selection: very_tgt_muv_rad_eop,
+#    folder: muon_eff_very_tgt_muv_pfull_eop,
+#    tfile: tfout, inputs: {ogt: bf_st} }
+#
+#
+#- analysis:
+#    { name: muv_full_p_corr, type: MuonEfficiency,
+#    muv_selection: req_p_muon_40,
+#    selection: muon_selection,
+#    folder: p_corr,
+#    tfile: tfout, inputs: {ogt: bf_st} }
+#
+#- analysis:
+#    { name: mu_muv_full_p_corr, type: MuonEfficiency,
+#    muv_selection: mu_req_p_muon_40,
+#    selection: muon_selection,
+#    folder: mu_rec_p_corr,
+#    tfile: tfout, inputs: {ogt: bf_st} }
+#
+#- analysis:
+#    { name: muv_full_p_corr_restp, type: MuonEfficiency,
+#    muv_selection: req_p_muon_40,
+#    selection: muon_selection_rest_p,
+#    folder: p_corr_restp,
+#    tfile: tfout, inputs: {ogt: bf_st} }
 
 - analysis:
     type: Summary
@@ -530,10 +572,10 @@
 
 - analysis:
     type: Summary
-    name: sum_mom_very_tgt
+    name: sum_muon_muv_acc
     ostream: oscout
     base: passer
-    source:  very_tgt_muv_rad_eop
+    source:  muon_muv_acc
 
 - analysis:
     type: Summary

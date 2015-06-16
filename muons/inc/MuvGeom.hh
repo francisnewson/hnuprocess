@@ -47,9 +47,9 @@ namespace fn
 
         private:
 
-            std::array<double,56> scint_speed_;
-            std::array<double,11> V_centres_; 
-            std::array<double,11> H_centres_;
+            const std::array<double,56> scint_speed_;
+            const std::array<double,11> V_centres_; 
+            const std::array<double,11> H_centres_;
 
             std::array<double,56>::size_type num_channels_;
             std::array<double,11>::size_type num_strips_;

@@ -59,7 +59,7 @@ namespace fn
         us_toys_.push_back(scatter_in_dch1);
 
         ToyMC * scatter_dch1_to_dch2 = library_.add_toy( 
-                make_unique<ToyMCThickScatter> ( gen_, nc::X0_helium, drift_dch1_to_dch2, 10 ) );
+                make_unique<ToyMCThickScatter> ( gen_, nc::X0_helium, drift_dch1_to_dch2, 11 ) );
         us_toys_.push_back(scatter_dch1_to_dch2);
 
         ToyMC *  scatter_in_dch2 = library_.add_toy(
@@ -76,7 +76,7 @@ namespace fn
         us_toys_.push_back(bend_in_mag_);
 
         ToyMC * scatter_mag_to_dch3 = library_.add_toy( 
-                make_unique<ToyMCThickScatter> ( gen_, nc::X0_helium, drift_mag_to_dch3, 10 ) );
+                make_unique<ToyMCThickScatter> ( gen_, nc::X0_helium, drift_mag_to_dch3, 1 ) );
         us_toys_.push_back(scatter_mag_to_dch3);
 
         ToyMC *  scatter_in_dch3 = library_.add_toy(
@@ -84,7 +84,7 @@ namespace fn
         us_toys_.push_back(scatter_in_dch3);
 
         ToyMC * scatter_dch3_to_dch4 = library_.add_toy( 
-                make_unique<ToyMCThickScatter> ( gen_, nc::X0_helium, drift_dch3_to_dch4, 10 ) );
+                make_unique<ToyMCThickScatter> ( gen_, nc::X0_helium, drift_dch3_to_dch4, 1 ) );
         us_toys_.push_back(scatter_dch3_to_dch4);
 
         ToyMC *  scatter_in_dch4 = library_.add_toy(
@@ -92,7 +92,7 @@ namespace fn
         us_toys_.push_back(scatter_in_dch4);
 
         ToyMC * scatter_to_al_window = library_.add_toy( 
-                make_unique<ToyMCThickScatter> ( gen_, nc::X0_helium, drift_dch4_to_al, 10 ) );
+                make_unique<ToyMCThickScatter> ( gen_, nc::X0_helium, drift_dch4_to_al, 1 ) );
         us_toys_.push_back(scatter_to_al_window);
 
         ToyMC * scatter_al_window_to_lkr = library_.add_toy(
@@ -102,7 +102,7 @@ namespace fn
         //----------------------Downstream detector (LKr onwards)----------------------------
 
         ToyMC * scatter_in_lkr = library_.add_toy(
-                make_unique<ToyMCThickScatter> ( gen_, nc::X0_lkr, nc::len_lkr , 10) );
+                make_unique<ToyMCThickScatter> ( gen_, nc::X0_lkr, nc::len_lkr , 1) );
         ds_toys_.push_back(scatter_in_lkr);
 
         ToyMC * scatter_lkr_to_hac = library_.add_toy(
@@ -110,7 +110,7 @@ namespace fn
         ds_toys_.push_back(scatter_lkr_to_hac);
 
         ToyMC * scatter_in_hac = library_.add_toy(
-                make_unique<ToyMCThickScatter> ( gen_, nc::X0_iron, nc::len_hac , 10) );
+                make_unique<ToyMCThickScatter> ( gen_, nc::X0_iron, nc::len_hac , 1) );
         ds_toys_.push_back(scatter_in_hac);
 
         ToyMC * scatter_hac_to_muv1 = library_.add_toy(
@@ -118,7 +118,7 @@ namespace fn
         ds_toys_.push_back(scatter_hac_to_muv1);
 
         ToyMC * scatter_in_muv1 = library_.add_toy(
-                make_unique<ToyMCThickScatter> ( gen_, nc::X0_iron, nc::len_muv_iron , 10) );
+                make_unique<ToyMCThickScatter> ( gen_, nc::X0_iron, nc::len_muv_iron , 1) );
         ds_toys_.push_back(scatter_in_muv1);
 
         downstream_sim_ = ToyMCComposite( ds_toys_ );
@@ -126,11 +126,11 @@ namespace fn
         //----------------------Scatter from MUV1 to MUV2----------------------------
 
         ToyMC * scatter_muv1_to_muv2 = library_.add_toy(
-                make_unique<ToyMCThickScatter> ( gen_, nc::X0_air, drift_muv1_to_muv2 , 10) );
+                make_unique<ToyMCThickScatter> ( gen_, nc::X0_air, drift_muv1_to_muv2 , 1) );
         m2_toys_.push_back(scatter_muv1_to_muv2);
 
         ToyMC * scatter_in_muv2 = library_.add_toy(
-                make_unique<ToyMCThickScatter> ( gen_, nc::X0_iron, nc::len_muv_iron , 10) );
+                make_unique<ToyMCThickScatter> ( gen_, nc::X0_iron, nc::len_muv_iron , 1) );
         m2_toys_.push_back(scatter_in_muv2);
 
         muv1_to_muv2_sim_ = ToyMCComposite( m2_toys_ );

@@ -2,6 +2,7 @@
 #define MUONEFFICIENCY_HH
 #include "Analysis.hh"
 #include "HistStore.hh"
+#include "MuRec.hh"
 #if 0
 /*
  *  __  __                   _____  __  __ _      _
@@ -13,6 +14,11 @@
  *
  */
 #endif
+namespace fne
+{
+    class Event;
+}
+
 namespace fn
 {
 
@@ -65,7 +71,8 @@ namespace fn
         public:
             MuonMultiplierEfficiency(const Selection& sel,
                     std::vector<double> cut_values,
-                    const SingleMuon& sm, const SingleTrack& st,
+                    const fne::Event * e, bool mc,
+                     const SingleTrack& st,
                     TFile& tf, std::string folder );
 
             void end_processing();
@@ -77,12 +84,16 @@ namespace fn
             std::vector<double> passed_;
             double total_;
 
-            const SingleMuon& sm_;
+
+            std::vector<std::unique_ptr<SingleMuon>> muon_recos_;
+            const fne::Event * e_;
             const SingleTrack& st_;
 
             TFile& tf_;
             std::string folder_;
 
+
+            bool mc_;
 
             HistStore hs_;
 

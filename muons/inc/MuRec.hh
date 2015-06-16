@@ -27,7 +27,8 @@ namespace fn
     class DataMuRec : public SingleMuon
     {
         public:
-            DataMuRec( const fne::Event * e,  const SingleTrack& st, double multiplier );
+            DataMuRec( const fne::Event * e,  
+                    const SingleTrack& st, double multiplier );
 
             void new_event();
 

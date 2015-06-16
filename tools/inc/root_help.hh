@@ -47,7 +47,7 @@ namespace fn
         std::unique_ptr<T> extract_hist
         (  TFile& tf , boost::filesystem::path p )
         {
-            T * h;
+            T * h = 0;
             tf.GetObject( root_file_string( p ) , h );
             if ( !h )
             { 
