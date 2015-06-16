@@ -1,0 +1,64 @@
+---
+#Some basic muon info
+
+#Autopass
+- selection:
+    name: passer
+    type : auto_pass
+
+#Kaon track
+- input:
+    name: kaon_track
+    type: KaonTrack
+    kaon_type: auto
+    beam_mapping: input/reco/beam/beam_mapping.yaml
+
+- input:
+    name : bf_st
+    type : SingleTrack
+    method : BF
+
+    #log_level: always_print
+
+    init_min_mom: 3.0 
+    init_max_mom: 75.0
+
+    init_max_cda: 10.0
+
+    init_min_z: -2000.0
+    init_max_z:  9000.0
+
+    dch_merge_sep: 0.5
+
+    inputs:
+        kt: kaon_track
+
+- input:
+    name: raw_muon
+    type: SingleMuon
+    method: raw
+    inputs:
+        ogt: bf_st
+
+- input:
+    name: mu_rec_muon
+    type: SingleMuon
+    method: datamurec
+    inputs:
+        ogt: bf_st
+
+- selection:
+    name: dch_veto
+    type : FoundGoodTrack
+
+    inputs :
+        ogt: bf_st
+
+- analysis:
+    type: MuonComp
+    name: muon_comp
+    selection: dch_veto
+    muon1: raw_muon
+    muon2: mu_rec_muon
+    inputs:
+        ogt: bf_st

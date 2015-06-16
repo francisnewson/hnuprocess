@@ -7,6 +7,7 @@
 #include "tracking_selections.hh"
 #include "muon_functions.hh"
 #include "NA62Constants.hh"
+#include "MuRec.hh"
 
 namespace fn
 {
@@ -29,6 +30,10 @@ namespace fn
             else if ( method == "mcscatter" )
             {
                 return new MCScatterSingleMuon( event, *st );
+            }
+            else if ( method == "datamurec" )
+            {
+                return new DataMuRec( event, *st, 4 );
             }
             else if ( method == "auto" )
             {
@@ -184,6 +189,10 @@ namespace fn
 
         x_ = muv_hit_xy.first  - fmod( muv_hit_xy.first  , na62const::muv_half_width);
         y_ = muv_hit_xy.second - fmod( muv_hit_xy.second , na62const::muv_half_width);
+
+        //check muon has actually hit a strip
+
+
         return std::make_pair( x_, y_ );
     }
 

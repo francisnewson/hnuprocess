@@ -30,11 +30,13 @@ namespace fn
 
     TVector3 K2piSingleRecoTrack::get_3mom() const { return us_track_.get_direction().Unit() * mom_ ; }
     double K2piSingleRecoTrack::get_mom() const { return mom_; }
+    double K2piSingleRecoTrack::get_raw_mom() const { return mom_; }
 
     TVector3 K2piSingleRecoTrack::get_vertex() const { return vertex_.point; }
     double K2piSingleRecoTrack::get_cda() const { return vertex_.cda; }
 
     double K2piSingleRecoTrack::get_time() const { return 0 ; }
+    double K2piSingleRecoTrack::get_best_time() const { return 0 ; }
     double K2piSingleRecoTrack::get_adjusted_time() const { return 0 ; }
 
     double K2piSingleRecoTrack::get_quality() const { return 0 ; }

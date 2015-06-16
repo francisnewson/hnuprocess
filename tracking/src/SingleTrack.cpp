@@ -147,6 +147,11 @@ namespace fn
         return proc_track_->corr_mom;
     }
 
+    double BFSingleRecoTrack::get_raw_mom() const
+    {
+        return proc_track_->rt->p;
+    }
+
     TVector3 BFSingleRecoTrack::get_vertex() const
     {
         //return proc_track_->vert.point;
@@ -167,6 +172,16 @@ namespace fn
     double BFSingleRecoTrack::get_adjusted_time() const
     {
         return proc_track_->adjusted_time;
+    }
+
+    double BFSingleRecoTrack::get_best_time() const
+    {
+        auto& rt = *proc_track_->rt;
+
+        if ( rt.hodstatus == 2 ){ return rt.hodTime; }
+        else if ( rt.quality > 0.9 ){ return rt.time; }
+        else if ( rt.hodstatus == 1 ) { return rt.hodTime; }
+        else { return rt.time; }
     }
 
     double BFSingleRecoTrack::get_quality() const

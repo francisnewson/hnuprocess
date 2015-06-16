@@ -64,48 +64,42 @@ output:
         #dm2
         - { path: fit_eop_90/hdm2_pi0,           name: dm2_pi0/fit_eop_90_rebin,   rebin: 40 }
         - { path: fit_eop_90/scatter_b/hdm2_pi0, name: dm2_pi0/fit_eop_90_rebin_b, rebin: 40}
-        - { path: fit_eop_90/scatter_r/hdm2_pi0, name: dm2_pi0/fit_eop_90_rebin_r, rebin: 40}
-        - { path: fit_eop_90/scatter_r15/hdm2_pi0, name: dm2_pi0/fit_eop_90_rebin_r15, rebin: 40}
         - { path: fit_eop_90/scatter_r08/hdm2_pi0, name: dm2_pi0/fit_eop_90_rebin_r08, rebin: 40}
         - { path: fit_eop_90/hdm2_pi0,           name: dm2_pi0/fit_eop_90,         rebin: 2 }
         - { path: fit_eop_90/scatter_b/hdm2_pi0, name: dm2_pi0/fit_eop_90_b,       rebin: 2}
+        - { path: fit_eop_90/scatter_s4/hdm2_pi0, name: dm2_pi0/fit_eop_90_s4,       rebin: 2}
+        - { path: fit_eop_90/scatter_s4high/hdm2_pi0, name: dm2_pi0/fit_eop_90_s4high,       rebin: 2}
 
           #pt
         - { path: fit_eop_90/hpt_,           name: pt/fit_eop_90,         rebin: 10  }
         - { path: fit_eop_90/scatter_b/hpt_, name: pt/fit_eop_90_b,       rebin: 10  }
         - { path: fit_eop_90/hpt_,           name: pt/fit_eop_90_rebin,   rebin: 40 }
         - { path: fit_eop_90/scatter_b/hpt_, name: pt/fit_eop_90_b_rebin, rebin: 40  }
-        - { path: fit_eop_90/scatter_r/hpt_, name: pt/fit_eop_90_r_rebin, rebin: 40  }
-        - { path: fit_eop_90/scatter_r15/hpt_, name: pt/fit_eop_90_r15_rebin, rebin: 40  }
         - { path: fit_eop_90/scatter_r08/hpt_, name: pt/fit_eop_90_r08, rebin: 40  }
+        - { path: fit_eop_90/scatter_s4high/hpt_, name: pt/fit_eop_90_s4high,  rebin: 2}
 
           #cda
         - { path: fit_eop_90_no_cda/hcda,           name: cda/fit_eop_90,   rebin: 10 }
         - { path: fit_eop_90_no_cda/scatter_b/hcda, name: cda/fit_eop_90_b, rebin: 10 }
-        - { path: fit_eop_90_no_cda/scatter_r/hcda, name: cda/fit_eop_90_r, rebin: 10 }
-        - { path: fit_eop_90_no_cda/scatter_r15/hcda, name: cda/fit_eop_90_r15, rebin: 10 }
         - { path: fit_eop_90_no_cda/scatter_r08/hcda, name: cda/fit_eop_90_r08, rebin: 10 }
 
           #dpop
         - { path: fit_eop_90/lkr_dch_cmp/hdpop_,           name: dpop/fit_eop_90,   rebin: 5 }
         - { path: fit_eop_90/scatter_b/lkr_dch_cmp/hdpop_, name: dpop/fit_eop_90_b, rebin: 5 }
-        - { path: fit_eop_90/scatter_r/lkr_dch_cmp/hdpop_, name: dpop/fit_eop_90_r, rebin: 5 }
-        - { path: fit_eop_90/scatter_r15/lkr_dch_cmp/hdpop_, name: dpop/fit_eop_90_r15, rebin: 5 }
         - { path: fit_eop_90/scatter_r08/lkr_dch_cmp/hdpop_, name: dpop/fit_eop_90_r08, rebin: 5 }
+        - { path: fit_eop_90/scatter_s4high/lkr_dch_cmp/hdpop_, name: dpop/fit_eop_90_s4high, rebin: 5 }
 
           #dtx
         - { path: fit_eop_90/lkr_dch_cmp/hdtx,              name: dtx/fit_eop_90,       rebin: 1 }
         - { path: fit_eop_90/scatter_b/lkr_dch_cmp/hdtx,    name: dtx/fit_eop_90_b,     rebin: 1 }
         - { path: fit_eop_90/lkr_dch_cmp/hdtx,              name: dtx/fit_eop_90_rebin, rebin: 5 }
         - { path: fit_eop_90/scatter_b/lkr_dch_cmp/hdtx,    name: dtx/fit_eop_90_b_rebin, rebin: 5 }
-        - { path: fit_eop_90/scatter_r/lkr_dch_cmp/hdtx,    name: dtx/fit_eop_90_r_rebin, rebin: 5 }
-        - { path: fit_eop_90/scatter_r/lkr_dch_cmp/hdtx,    name: dtx/fit_eop_90_r_rebin, rebin: 5 }
+        - { path: fit_eop_90/scatter_r08/lkr_dch_cmp/hdtx,    name: dtx/fit_eop_90_r08_rebin, rebin: 5 }
+        - { path: fit_eop_90/scatter_s4high/lkr_dch_cmp/hdtx,    name: dtx/fit_eop_90_s4high_rebin, rebin: 5 }
 
           #dpy
         - { path: fit_eop_90/lkr_dch_cmp/hdpy,           name: dpy/fit_eop_90,   rebin: 1 }
         - { path: fit_eop_90/scatter_b/lkr_dch_cmp/hdpy, name: dpy/fit_eop_90_b, rebin: 1 }
-        - { path: fit_eop_90/scatter_r/lkr_dch_cmp/hdpy, name: dpy/fit_eop_90_r, rebin: 1 }
-        - { path: fit_eop_90/scatter_r15/lkr_dch_cmp/hdpy, name: dpy/fit_eop_90_r15, rebin: 1 }
         - { path: fit_eop_90/scatter_r08/lkr_dch_cmp/hdpy, name: dpy/fit_eop_90_r08, rebin: 1 }
 
 

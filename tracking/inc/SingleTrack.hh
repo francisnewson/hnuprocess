@@ -29,11 +29,14 @@ namespace fn
 
             virtual TVector3 get_3mom() const = 0;
             virtual double get_mom() const = 0;
+            virtual double get_raw_mom() const = 0;
 
             virtual TVector3 get_vertex() const = 0;
             virtual double get_cda() const = 0;
 
             virtual double get_time() const = 0;
+
+            virtual double get_best_time() const = 0;
 
             virtual double get_adjusted_time() const = 0;
 
@@ -128,6 +131,7 @@ namespace fn
 
             TVector3 get_3mom() const;
             double get_mom() const;
+            double get_raw_mom() const;
 
             TVector3 get_vertex() const;
             double get_cda() const;
@@ -136,6 +140,7 @@ namespace fn
             double momentum();
 
             double get_time() const;
+            double get_best_time() const;
             double get_adjusted_time() const;
 
             double get_quality() const;
@@ -235,11 +240,11 @@ namespace fn
         public:
             TrackPowerScatterer(){}
             TrackPowerScatterer(
-                    double angle_cutoff, double angle_frequency, 
-                    double mom_cutoff, double mom_frequency);
+                    double angle_cutoff, double angle_frequency, int angle_power,
+                    double mom_cutoff, double mom_frequency, int mom_power);
 
-            void set_angle_params( double cutoff, double frequency);
-            void set_mom_params( double cutoff, double frequency);
+            void set_angle_params( double cutoff, double frequency, int power);
+            void set_mom_params( double cutoff, double frequency, int power);
 
             void scatter_track( Long64_t seed, 
                     double& dxdz, double& dydz, double& mom ) const;

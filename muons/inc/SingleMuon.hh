@@ -130,67 +130,6 @@ namespace fn
             boost::optional<toymc::track_params> 
                 get_muon_track( const fne::Event * e, const SingleTrack& st ) const;
     };
-
-#if 0 
-    //Uses MC muon particle and simulates scattering
-    class MCScatterSingleMuon : public SingleMuon
-    {
-        public:
-            MCScatterSingleMuon
-                ( const fne::Event * e, const SingleTrack& st);
-
-            virtual void new_event();
-            virtual void new_run();
-
-            bool found() const;
-            double weight() const;
-            double x() const;
-            double y() const;
-
-        private:
-            const fne::Event * e_;
-            const SingleTrack& st_;
-
-            void update() const;
-
-            mutable bool dirty_;
-            mutable bool found_muon_;
-            mutable double x_;
-            mutable double y_;
-
-            MuonScatterSim mss_;
-            PolarityFinder pf_;
-    };
-
-    class HaloScatterSingleMuon : public SingleMuon
-    {
-        public:
-            HaloScatterSingleMuon
-                ( const fne::Event * e, const SingleTrack& st);
-
-            virtual void new_event();
-            virtual void new_run();
-
-            bool found() const;
-            double weight() const;
-            double x() const;
-            double y() const;
-
-        private:
-            const fne::Event * e_;
-            const SingleTrack& st_;
-
-            void update() const;
-            mutable bool dirty_;
-            mutable bool found_muon_;
-            mutable double x_;
-            mutable double y_;
-
-            MuonScatterSim mss_;
-            PolarityFinder pf_;
-    };
-
-#endif
 }
 #endif
 

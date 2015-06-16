@@ -25,11 +25,13 @@ namespace fn
 
             virtual TVector3 get_3mom() const ;
             virtual double get_mom() const ;
+            virtual double get_raw_mom() const ;
 
             virtual TVector3 get_vertex() const ;
             virtual double get_cda() const ;
 
             virtual double get_time() const ;
+            virtual double get_best_time() const ;
             virtual double get_adjusted_time() const ;
 
             virtual double get_quality() const ;

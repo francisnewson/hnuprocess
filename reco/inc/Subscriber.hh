@@ -41,6 +41,8 @@ namespace fn
 
             virtual void end_processing(){};
 
+            virtual void debug_event(){};
+
             void set_name( std::string s );
             std::string get_name();
 
