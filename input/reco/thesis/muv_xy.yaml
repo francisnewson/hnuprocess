@@ -411,6 +411,14 @@
     inputs:
         ogt: bf_st
 
+- input:
+    name: single_muon_mu_rec
+    type: SingleMuon
+    method: datamurec
+    multiplier: 4
+    inputs:
+        ogt: bf_st
+
 - selection:
     name: muon_xy_wgt
     type: MuonTHXYWeight
@@ -424,7 +432,13 @@
    { name: raw_req_muon_40, type: MuonReq, multiplier: 4.0, inputs: {ogt: bf_st, sm: single_muon } }
 
 - selection:
+   { name: raw_mu_req_muon_40, type: MuonReq, multiplier: 4.0, inputs: {ogt: bf_st, sm: single_muon_mu_rec } }
+
+- selection:
     { name: req_muon_40, type: CompositeSelection, children: [raw_req_muon_40, muon_xy_wgt] }
+
+- selection:
+    { name: mu_req_muon_40, type: CompositeSelection, children: [raw_mu_req_muon_40, muon_xy_wgt] }
 
 - selection:
    { name: raw_req_muon_38, type: MuonReq, multiplier: 3.8, inputs: {ogt: bf_st, sm: single_muon } }
@@ -448,6 +462,9 @@
 
 - selection:
     { name: req_p_muon_40, type: CompositeSelection, children: [raw_req_muon_40, muon_p_wgt] }
+
+- selection:
+    { name: mu_req_p_muon_40, type: CompositeSelection, children: [raw_mu_req_muon_40, muon_p_wgt] }
 
 ###################################################
 # ANALYSES
@@ -488,6 +505,13 @@
     muv_selection: req_p_muon_40,
     selection: muon_selection,
     folder: p_corr,
+    tfile: tfout, inputs: {ogt: bf_st} }
+
+- analysis:
+    { name: mu_muv_full_p_corr, type: MuonEfficiency,
+    muv_selection: mu_req_p_muon_40,
+    selection: muon_selection,
+    folder: mu_rec_p_corr,
     tfile: tfout, inputs: {ogt: bf_st} }
 
 - analysis:
