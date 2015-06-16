@@ -176,9 +176,40 @@ namespace fn
         }
 
         std::pair<double,double> muon_hit = get_muon_position( *muon_track );
-        x_ = muon_hit.first;
-        y_ = muon_hit.second;
 
+        double x_track = muon_hit.first;
+        double y_track = muon_hit.second;
+
+
+        double tube_hole = 10.6;
+
+        //check track impact point is in acceptance
+        if ( ( fabs( x_track ) < tube_hole ) &&  ( fabs(y_track ) < tube_hole  ) )
+        {
+            found_muon_ = false;
+            dirty_ = false;
+            return;
+        }
+
+        double xmin = muv_geom_.V_centres( 0 ) - na62const::muv_half_width;
+        double xmax = muv_geom_.V_centres( muv_geom_.num_strips() ) + na62const::muv_half_width;
+
+        double ymin = muv_geom_.H_centres( 0 ) - na62const::muv_half_width;
+        double ymax = muv_geom_.H_centres( muv_geom_.num_strips() ) + na62const::muv_half_width;
+
+        if ( (x_track < xmin ) || (x_track > xmax ) || (y_track < ymin ) || (y_track > ymin ) )
+        {
+            found_muon_ = false;
+            dirty_ = false;
+            return;
+        }
+
+        //Determine muon position
+        double x_muon = muv_geom_.muonchan2pos( muv_geom_.muonpos2chan( x_, 2 ) );
+        double y_muon = muv_geom_.muonchan2pos( muv_geom_.muonpos2chan( y_, 1 ) );
+
+        x_ = x_muon;
+        y_ = y_muon;
         found_muon_ = true;
         dirty_ = false;
     }
@@ -188,11 +219,8 @@ namespace fn
         //Propagate MC muon
         std::pair<double, double> muv_hit_xy = mss_.transfer( tp );
 
-        x_ = muv_hit_xy.first; // - fmod( muv_hit_xy.first  , na62const::muv_half_width);
-        y_ = muv_hit_xy.second; //- fmod( muv_hit_xy.second , na62const::muv_half_width);
-
-        //check muon has actually hit a strip
-
+        double x_ = muv_hit_xy.first;
+        double y_ = muv_hit_xy.second;
 
         return std::make_pair( x_, y_ );
     }

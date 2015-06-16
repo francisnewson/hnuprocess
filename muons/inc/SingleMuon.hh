@@ -4,6 +4,7 @@
 #include "MuonScatterSim.hh"
 #include "PolarityFinder.hh"
 #include  <boost/optional.hpp>
+#include "MuvGeom.hh"
 #if 0
 /*
  *  ____  _             _      __  __
@@ -103,6 +104,8 @@ namespace fn
 
             MuonScatterSim mss_;
             PolarityFinder pf_;
+
+            MuvGeom muv_geom_;
     };
 
     //--------------------------------------------------
