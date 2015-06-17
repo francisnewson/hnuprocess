@@ -37,11 +37,16 @@ namespace fn
         data_channels = get_yaml<vector<string>>( channel_node_, "data_channels" );
         peak_channels  = get_yaml<vector<string>>( channel_node_, "peak_channels" );
 
+        do_halo_ = halo_channels.size() > 0;
+
         //Setup input file
         input_file = get_yaml<std::string>( strat_node_, "input_file" );
 
-        m2_min_halo = get_yaml<double>( strat_node_, "min_mass_halo" );
-        m2_max_halo = get_yaml<double>( strat_node_, "max_mass_halo" );
+        if ( do_halo_ )
+        {
+            m2_min_halo = get_yaml<double>( strat_node_, "min_mass_halo" );
+            m2_max_halo = get_yaml<double>( strat_node_, "max_mass_halo" );
+        }
 
         m2_min_peak = get_yaml<double>( strat_node_, "min_mass_peak" );
         m2_max_peak = get_yaml<double>( strat_node_, "max_mass_peak" );
@@ -63,8 +68,6 @@ namespace fn
         ce.set_post_path( post_path );
 
         //Extract histograms
-        auto hsummed_halo = get_summed_histogram( 
-                ce, begin( halo_channels ), end( halo_channels ) );
 
         auto hsummed_data = get_summed_histogram( 
                 ce, begin( data_channels ), end( data_channels ) );
@@ -72,27 +75,36 @@ namespace fn
         auto hsummed_peak = get_summed_histogram( 
                 ce, begin( peak_channels ), end( peak_channels ) );
 
-        //Do halo division 
-        double halo_halo_integral =  integral( *hsummed_halo, m2_min_halo, m2_max_halo );
-        double halo_data_integral =  integral( *hsummed_data, m2_min_halo, m2_max_halo );
 
+        //Do halo division 
         double halo_scale = 1;
         double halo_scale_error = 0;
+        double peak_halo_integral = 0;
 
-        if ( halo_halo_integral < 1 )
+        if ( do_halo_ )
         {
-            std::cout << "WARNING: Ignoring halo integral" << std::endl;
-        }
-        else
-        {
-        halo_scale = halo_data_integral / halo_halo_integral;
+            auto hsummed_halo = get_summed_histogram( 
+                    ce, begin( halo_channels ), end( halo_channels ) );
 
-        halo_scale_error = halo_scale * 
-            ( 1 / std::sqrt( halo_halo_integral ) + 1 / std::sqrt( halo_data_integral ) );
+            double halo_halo_integral =  integral( *hsummed_halo, m2_min_halo, m2_max_halo );
+            double halo_data_integral =  integral( *hsummed_data, m2_min_halo, m2_max_halo );
+
+
+            if ( halo_halo_integral < 1 )
+            {
+                std::cout << "WARNING: Ignoring halo integral" << std::endl;
+            }
+            else
+            {
+                halo_scale = halo_data_integral / halo_halo_integral;
+
+                halo_scale_error = halo_scale * 
+                    ( 1 / std::sqrt( halo_halo_integral ) + 1 / std::sqrt( halo_data_integral ) );
+            }
+        peak_halo_integral =  integral( *hsummed_halo, m2_min_peak, m2_max_peak );
         }
 
         //Do km2 division
-        double peak_halo_integral =  integral( *hsummed_halo, m2_min_peak, m2_max_peak );
         double peak_data_integral =  integral( *hsummed_data, m2_min_peak, m2_max_peak );
         double peak_peak_integral =  integral( *hsummed_peak, m2_min_peak, m2_max_peak );
 
@@ -134,14 +146,14 @@ namespace fn
 
         if ( halo_strat_type == "dummy" )
         {
-        std::cout << "dummy halo" << halo_strat_type << std::endl;
+            std::cout << "dummy halo" << halo_strat_type << std::endl;
             halo_strat_.reset( new DummyScaleStrategy() );
         }
         else
         {
-        std::cout << "m2 halo" << halo_strat_type << std::endl;
-        halo_strat_.reset( new M2ScaleStrategy{
-                channel_node_, scaling_config["halo"] } );
+            std::cout << "m2 halo" << halo_strat_type << std::endl;
+            halo_strat_.reset( new M2ScaleStrategy{
+                    channel_node_, scaling_config["halo"] } );
         }
 
         //Record km2 fiducial weight and flux
@@ -159,7 +171,7 @@ namespace fn
         {
             try
             {
-            peak_fid_weight_ += fiducial_weights_.at( peak_channel );
+                peak_fid_weight_ += fiducial_weights_.at( peak_channel );
             }
             catch( std::out_of_range& e )
             {

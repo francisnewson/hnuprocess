@@ -364,8 +364,9 @@ int main( int argc, char * argv[] )
         if ( const auto& external = ratio["external"] )
         {
             std::string output_file = external.as<std::string>();
+            std::string external_name = get_yaml<std::string>( ratio, "externalname" );
             TFile texternal( output_file.c_str(), "RECREATE" );
-            htop->Write("rat_p");
+            htop->Write(external_name.c_str());
         }
     }
 }

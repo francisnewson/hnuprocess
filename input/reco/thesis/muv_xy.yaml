@@ -89,6 +89,35 @@
         - good_muv_burst
         - good_muv_burst_range
 
+- selection:
+    name: weighted_data_sample
+    type: CompositeSelection
+    children:
+        - kaon_mom_weights
+        - good_bursts
+
+- selection:
+    name: mcz
+    type: MCZCut
+    min_z: -1800
+    max_z:  8000
+
+- selection:
+    name: weighted_mc_sample
+    type: CompositeSelection
+    children:
+        - weighted_data_sample
+        - mcz
+
+- analysis:
+    name: sample_burst_count
+    type: BurstCount
+    tfile: tfout
+    folder: sample_burst_count
+    selection: weighted_mc_sample
+    codename: bursts
+
+
 # 2] SingleTrack
 - input:
     name : bf_st
@@ -389,13 +418,33 @@
 
 
 #full RK selection
+
+- selection:
+    name: km2_selection
+    type: CompositeSelection
+    children:
+        - passer
+        - weighted_data_sample
+        - dch_veto
+        - pos_trk
+        - quality_7
+        - rk_track_mom
+        - rk_pz
+        - rk_lkr_accep
+        - rk_lkr_veto
+        - rk_hot_lkr
+        - rk_dch1_acc
+        - rk_dch4_acc
+        - rk_ddead_cell
+        - rk_dcht
+
+
 - selection:
     name: muon_selection
     type: CompositeSelection
     children:
         - passer
-        - kaon_mom_weights
-        - good_bursts
+        - weighted_data_sample
         - dch_veto
         - pos_trk
         - quality_7
@@ -440,7 +489,7 @@
 - selection:
     name: muon_xy_cutout_wgt
     type: MuonTHXYWeight
-    effs_file: input/reco/conditions/muv_xy_cutout.root
+    effs_file: input/reco/conditions/muv/muv_eff_xy_cutout.root
     effs_hist: rat_xy
     inputs:
         ogt: bf_st
@@ -519,6 +568,15 @@
     selection: muon_rest_mom,
     folder: muv_eff_test,
     tfile: tfout, inputs: {ogt: bf_st} }
+
+- analysis :
+    type: Km2Plotter
+    name: km2_plots
+    folder: km2_plots
+    tfile: tfout
+    selection: km2_selection
+    inputs:
+        km2event: km2_event
 
 #- analysis:
 #    { name: muv_eff_r40_p30_eop_raw, type: MuonEfficiency,

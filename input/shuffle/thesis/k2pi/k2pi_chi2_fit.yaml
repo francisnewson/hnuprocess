@@ -96,6 +96,7 @@ output:
         - { path: fit_eop_90/scatter_b/lkr_dch_cmp/hdtx,    name: dtx/fit_eop_90_b_rebin, rebin: 5 }
         - { path: fit_eop_90/scatter_r08/lkr_dch_cmp/hdtx,    name: dtx/fit_eop_90_r08_rebin, rebin: 5 }
         - { path: fit_eop_90/scatter_s4high/lkr_dch_cmp/hdtx,    name: dtx/fit_eop_90_s4high_rebin, rebin: 5 }
+        - { path: fit_eop_90/scatter_s4high/lkr_dch_cmp/hdtx,    name: dtx/fit_eop_90_s4high, rebin: 1 }
 
           #dpy
         - { path: fit_eop_90/lkr_dch_cmp/hdpy,           name: dpy/fit_eop_90,   rebin: 1 }

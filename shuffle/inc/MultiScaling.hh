@@ -75,6 +75,8 @@ namespace fn
             double m2_max_halo;
             double m2_min_peak;
             double m2_max_peak;
+
+            bool do_halo_;
     };
 
     class DummyScaleStrategy : public ScaleStrategy
