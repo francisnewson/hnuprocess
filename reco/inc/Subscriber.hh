@@ -44,10 +44,10 @@ namespace fn
             virtual void debug_event(){};
 
             void set_name( std::string s );
-            std::string get_name();
+            std::string get_name() const;
 
             void set_id( int id );
-            int get_id();
+            int get_id() const;
 
             static void set_log( logger& log);
             static logger& get_log();

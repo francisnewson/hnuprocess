@@ -32,9 +32,9 @@ namespace fn
     class SelectionVisitor 
     {
         public:
-            virtual	bool visit_enter( Selection& ) = 0;
-            virtual	bool visit_leave( Selection& ) = 0;
-            virtual bool visit( Selection& ) = 0;
+            virtual	bool visit_enter( const Selection& ) = 0;
+            virtual	bool visit_leave( const Selection& ) = 0;
+            virtual bool visit( const Selection& ) = 0;
     };
 
     /*****************************************************
@@ -50,7 +50,7 @@ namespace fn
             virtual double get_weight() const = 0; 
             virtual ~Selection(){};
 
-            virtual bool accept( SelectionVisitor& sv );
+            virtual bool accept( SelectionVisitor& sv ) const;
     };
 
     /*****************************************************
@@ -91,19 +91,19 @@ namespace fn
 
             CompositeSelection(){};
             CompositeSelection
-                ( std::vector<Selection*> selections);
-            CompositeSelection (Selection* selection);
+                ( std::vector<const Selection*> selections);
+            CompositeSelection (const Selection* selection);
 
-            void AddChild( Selection* selection );
+            void AddChild( const Selection* selection );
 
-            bool accept( SelectionVisitor& sv );
+            bool accept( SelectionVisitor& sv ) const;
 
             REG_DEC_SUB( CompositeSelection );
 
         private:
             bool do_check () const;
             double do_weight () const;
-            std::vector<Selection*> children_;
+            std::vector<const Selection*> children_;
     };
 
 

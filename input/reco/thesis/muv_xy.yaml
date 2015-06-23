@@ -505,7 +505,7 @@
 - selection:
     name: muon_p_wgt
     type: MuonTHPWeight
-    effs_file: input/reco/conditions/muv_p.root
+    effs_file: input/reco/conditions/muv/muv_eff_p.root
     effs_hist: rat_p
     inputs:
         ogt: bf_st

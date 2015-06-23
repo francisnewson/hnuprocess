@@ -42,6 +42,10 @@ namespace fn
             TLorentzVector get_p4_mu() const;
             TLorentzVector get_p4_k() const;
 
+            double get_tx() const;
+            double get_ty() const;
+            double get_muon_phi() const;
+
             TVector3 get_vertex() const;
 
         private:

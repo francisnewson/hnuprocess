@@ -71,8 +71,8 @@ namespace fn
 #endif
 
         cd_p( &tfile_, folder_ );
-        burst_tree_->Print();
-        burst_tree_->Scan();
+        //burst_tree_->Print();
+        //burst_tree_->Scan();
         burst_tree_->Write();
         //burst_tree_.SetDirectory(0);
     }
@@ -138,7 +138,7 @@ namespace fn
         end_burst();
         cd_p( &tfile_, folder_ );
         std::cout << "Printing burst_tree" << std::endl;
-        burst_tree_->Print();
+        //burst_tree_->Print();
         burst_tree_->Write();
     }
 }

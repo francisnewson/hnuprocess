@@ -5,19 +5,29 @@ scaling:
         peakname: km2
 
         channels:
-            halo_channels: []
+            halo_channels: [ p6.data.kless.q11t.v2.pos, p6.data.km.q11t.v2.pos]
             data_channels: [ p5.data.q11t.v3.pos ]
             peak_channels: [ p5.km2.v2.pos ]
 
-        halo: { strategy: dummy }
+        halo: 
+            strategy: m2
+            input_file: tdata/muv_xy/all.muv_xy.root
+            plot_path: km2_plots/h_m2m_kmu
+
+            min_mass_halo: -0.3
+            max_mass_halo: -0.075
+            min_mass_peak: -0.01
+            max_mass_peak:  0.01
 
         mc:
             strategy: m2
             input_file: tdata/muv_xy/all.muv_xy.root
-            plot_path: muv_eff_uw_r38_p_full/h_p_total
+            plot_path: km2_plots/h_m2m_kmu
 
-            min_mass_peak: 20
-            max_mass_peak: 50 
+            min_mass_halo: -0.3
+            max_mass_halo: -0.075
+            min_mass_peak: -0.01
+            max_mass_peak:  0.01
 
     - scaling_method:
         strategy: m2
@@ -25,19 +35,29 @@ scaling:
         peakname: km2
 
         channels:
-            halo_channels: []
+            halo_channels: [ p6.data.km.q11t.v2.neg]
             data_channels: [ p5.data.q11t.v3.neg ]
             peak_channels: [ p5.km2.v2.neg ]
 
-        halo: { strategy: dummy }
+        halo: 
+            strategy: m2
+            input_file: tdata/muv_xy/all.muv_xy.root
+            plot_path: km2_plots/h_m2m_kmu
+
+            min_mass_halo: -0.3
+            max_mass_halo: -0.075
+            min_mass_peak: -0.01
+            max_mass_peak:  0.01
 
         mc:
             strategy: m2
             input_file: tdata/muv_xy/all.muv_xy.root
-            plot_path: muv_eff_uw_r38_p_full/h_p_total
+            plot_path: km2_plots/h_m2m_kmu
 
-            min_mass_peak: 20
-            max_mass_peak: 50 
+            min_mass_halo: -0.3
+            max_mass_halo: -0.075
+            min_mass_peak: -0.01
+            max_mass_peak:  0.01
 
 weights:
     fid_file: use_root
@@ -53,6 +73,7 @@ output:
 
         #dm2
         - { path: muv_eff_uw_r38_p_full/h_p_total, name: h_p_total, rebin: 1 }
+        - { path: km2_plots/h_m2m_kmu, name: h_m2m, rebin: 10 }
 
     data_plot:
         channels:
@@ -61,6 +82,7 @@ output:
         do_blind: false
 
     stack:
+
         - item:
             name: km3_pos
             scaling: mc_pos
@@ -94,6 +116,22 @@ output:
                 - p5.ke3.v2.neg
 
         - item:
+            name: k2pig_pos
+            scaling: mc_pos
+            type: k2pi
+            fid_weight: p5.k2pig.v2.pos
+            channels:
+                - p5.k2pig.v2.pos
+
+        - item:
+            name: k2pig_neg
+            scaling: mc_neg
+            type: k2pi
+            fid_weight: p5.k2pig.v2.neg
+            channels:
+                - p5.k2pig.v2.neg
+
+        - item:
             name: km2_pos
             scaling: mc_pos
             fid_weight: p5.km2.v2.pos
@@ -110,18 +148,22 @@ output:
                 - p5.km2.v2.neg
 
         - item:
-            name: k2pig_pos
+            name: halo_pos
             scaling: mc_pos
-            type: k2pi
-            fid_weight: p5.k2pig.v2.pos
+            type: halo
+            errors:
+                - halo_scale
             channels:
-                - p5.k2pig.v2.pos
+                - p6.data.kless.q11t.v2.pos
+                - p6.data.km.q11t.v2.pos
 
         - item:
-            name: k2pig_neg
+            name: halo_neg
             scaling: mc_neg
-            type: k2pi
-            fid_weight: p5.k2pig.v2.neg
+            type: halo
+            errors:
+                - halo_scale
             channels:
-                - p5.k2pig.v2.neg
+                - p6.data.km.q11t.v2.neg
+
 

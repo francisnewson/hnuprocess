@@ -113,6 +113,10 @@ namespace fn
                 150, -5000, 10000, "Z( cm) ",
                 250, 0, 25e-3, "t( rad) ");
 
+        h_z_phi_ = hs_.MakeTH2D( "h_z_phi", "Z vs T " ,
+                150, -5000, 10000, "Z( cm) ",
+                350, 0, 2*TMath::Pi() , "phi( rad) ");
+
         h_z_cda_ = hs_.MakeTH2D( "h_z_cda", "Z vs CDA" ,
                 150, -5000, 10000, "Z( cm) ",
                 100, 0, 10, "CDA (cm)" );
@@ -133,12 +137,24 @@ namespace fn
                 1000, -0.7, 0.3, "m^{2}_{miss} ( GeV^{2}/ c^{4} )",
                 100, 0, 10, "CDA (cm)" );
 
+        h_txty_ =  hs_.MakeTH2D( "h_txty", "Track direction",
+                100, -0.02, 0.02, "tx", 
+                100, -0.02, 0.02, "ty" );
+
         //----------
 
         //Slices
         h_xy_coll_ = hs_.MakeTH2D( "h_xy_coll", "XY at Final Collimator",
                 100, -200, 200, "X (cm)",
                 100, -200, 200, "Y (cm)" );
+
+        h_xy_coll_fine_ = hs_.MakeTH2D( "h_xy_coll_fine", "XY at Final Collimator",
+                100, -50, 50, "X (cm)",
+                100, -50, 50, "Y (cm)" );
+
+        h_pr_coll_ = hs_.MakeTH2D( "h_pr_coll", "r vs mom at Final Collimator",
+                100, 0, 100, "r (cm)",
+                100, 0, 100, "p (GeV)" );
 
         h_xy_DCH1_ = hs_.MakeTH2D( "h_xy_DCH1", "XY at DCH1",
                 100, -200, 200, "X (cm)",
@@ -198,11 +214,18 @@ namespace fn
         h_m2_cda_->Fill( km2re.get_m2m_kmu(), km2re.get_cda(), wgt );
         h_pt_m2m_kmu_->Fill( km2re.get_pt(), km2re.get_m2m_kmu(), wgt );
 
+        h_txty_->Fill( km2re.get_tx(), km2re.get_ty(), wgt );
+
+        h_z_phi_->Fill( km2re.get_zvertex(), km2re.get_muon_phi() );
+
         //Slices
         const SingleRecoTrack * srt = km2re.get_reco_track();
 
         TVector3 v_coll = srt->extrapolate_bf( na62const::zFinalCollimator );
         h_xy_coll_->Fill( v_coll.X(), v_coll.Y(), wgt );
+        h_xy_coll_fine_->Fill( v_coll.X(), v_coll.Y(), wgt );
+
+        h_pr_coll_->Fill( std::hypot( v_coll.X(), v_coll.Y() ), km2re.get_muon_mom(), wgt );
 
         TVector3 v_DCH1 = srt->extrapolate_us( na62const::zDch1 );
         h_xy_DCH1_->Fill( v_DCH1.X(), v_DCH1.Y(), wgt );

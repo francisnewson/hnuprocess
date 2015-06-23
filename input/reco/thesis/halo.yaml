@@ -158,7 +158,7 @@
 
 #-------- 7.] PZ (FIDUCIAL VOLUME)
 - selection: {name: fiducial_pz, type: TrackPZ,
-    shape: rectangles, points: [ [  5, 70, -2000, 9000 ] ],
+    shape: rectangles, points: [ [  3, 70, -3000, 9000 ] ],
     inputs: {ogt: bf_st} }
 
 #--------13.] Track DHC1 ACC
@@ -189,12 +189,18 @@
 - selection: {
     name: upper_pz, type: TrackPZ,
     shape: rectangles,
-    points: [ [  11, 40, 2000, 7200 ] ],
+    points: [ [  3, 40, 2000, 5800 ] ],
+    inputs: { ogt: bf_st } }
+
+- selection: {
+    name: sel_upper_pz, type: TrackPZ,
+    shape: rectangles,
+    points: [ [  11, 40, 2000, 5800 ] ],
     inputs: { ogt: bf_st } }
 
 - selection: {
     name: upper_cda, type: TrackCda,
-    min_cda: 2.5, max_cda: 6.5, #cm
+    min_cda: 5.5, max_cda: 8.0, #cm
     inputs: {ogt: bf_st } }
 
 - selection: {
@@ -204,18 +210,24 @@
 
 - selection: {
      name: upper_specific, type: CompositeSelection,
-     children: [ upper_pz, upper_cda, upper_t ] }
+     children: [ sel_upper_pz, upper_cda, upper_t ] }
 
 #LOWER
 - selection: {
     name: lower_pz, type: TrackPZ,
+    shape: rectangles,
+    points: [ [  3, 40, -1800, 500 ] ],
+    inputs: { ogt: bf_st } }
+
+- selection: {
+    name: sel_lower_pz, type: TrackPZ,
     shape: rectangles,
     points: [ [  10, 40, -1800, 500 ] ],
     inputs: { ogt: bf_st } }
 
 - selection: { 
     name: lower_cda, type: TrackCda,
-    min_cda: 1.0, max_cda: 4.0,
+    min_cda: 4.0, max_cda: 8.0,
     inputs: { ogt: bf_st } }
 
 - selection: {
@@ -225,7 +237,7 @@
 
 - selection: {
      name: lower_specific, type: CompositeSelection,
-     children: [ lower_pz, lower_cda, lower_t ] }
+     children: [ sel_lower_pz, lower_cda, lower_t ] }
 
 ###################################################
 # RK
@@ -258,6 +270,12 @@
      name: rk_specific, type: CompositeSelection,
      children: [ rk_pz, rk_cda ] }
 
+- selection: {
+    name: m2_high, type: Km2M2Miss,
+    min_m2: 0.09, max_m2: 0.13,
+    inputs: { km2event: km2_event } }
+
+
 ###################################################
 # SELECTIONS
 ###################################################
@@ -286,11 +304,25 @@
         - upper_specific
 
 - selection:
+    name: pre_upper
+    type : CompositeSelection
+    children:
+        - pre_selection
+        - upper_pz
+
+- selection:
     name: full_lower
     type : CompositeSelection
     children:
         - pre_selection
         - lower_specific
+
+- selection:
+    name: pre_lower
+    type : CompositeSelection
+    children:
+        - pre_selection
+        - lower_pz
 
 - selection:
     name: rk_like_selection
@@ -299,54 +331,80 @@
         - pre_selection
         - rk_specific
 
+- selection:
+    name: rk_like_high_m2m_selection
+    type: CompositeSelection
+    children:
+        - rk_like_selection
+        - m2_high
+
+- selection:
+    name: pre_high_m2m
+    type: CompositeSelection
+    children:
+        - pre_selection
+        - m2_high
+
+- selection:
+    name: pre_upper_high_m2m
+    type: CompositeSelection
+    children:
+        - pre_high_m2m
+        - upper_pz
+
+- selection:
+    name: pre_lower_high_m2m
+    type: CompositeSelection
+    children:
+        - pre_high_m2m
+        - lower_pz
+
 ##################################################
 #
 # ANALYSES
 #
 ##################################################
 
-- analysis :
-    type: Km2Plotter
-    name: pre_halo_plots
-    folder: pre_halo
-    tfile: tfout
-    selection: pre_selection
-    inputs:
-        km2event: km2_event
+- analysis : { type: Km2Plotter, name: pre_halo_plots, folder: pre_halo,
+    tfile: tfout, selection: pre_selection, inputs: { km2event: km2_event } }
 
-- analysis :
-    type: Km2Plotter
-    name: full_upper_halo_plots
-    folder: full_upper_halo
-    tfile: tfout
-    selection: full_upper
-    inputs:
-        km2event: km2_event
+- analysis : { type: Km2Plotter, name: pre_high_m2m_plots, folder: pre_high_m2m_plots,
+    tfile: tfout, selection: pre_high_m2m, inputs: { km2event: km2_event } }
 
-- analysis :
-    type: Km2Plotter
-    name: full_rk_like_plots
-    folder: full_rk_like_plots
-    tfile: tfout
-    selection: rk_like_selection
-    inputs:
-        km2event: km2_event
 
-- analysis :
-    type: Km2Plotter
-    name: full_lower_halo_plots
-    folder: full_lower_halo
-    tfile: tfout
-    selection: full_lower
-    inputs:
-        km2event: km2_event
+- analysis : { type: Km2Plotter, name: full_upper_halo_plots, folder: full_upper_halo,
+    tfile: tfout, selection: full_upper, inputs: { km2event: km2_event } }
 
-- analysis : 
-    name : full_summary
-    type: Summary
-    base : passer
-    source : pre_selection 
-    ostream: os_stats
+- analysis : { type: Km2Plotter, name: full_lower_halo_plots, folder: full_lower_halo,
+    tfile: tfout, selection: full_lower, inputs: { km2event: km2_event } }
+
+
+- analysis : { type: Km2Plotter, name: pre_lower_high_m2m_plots, folder: pre_lower_high_m2m_plots,
+    tfile: tfout, selection: pre_lower_high_m2m, inputs: { km2event: km2_event } }
+
+- analysis : { type: Km2Plotter, name: pre_upper_high_m2m_plots, folder: pre_upper_high_m2m_plots,
+    tfile: tfout, selection: pre_upper_high_m2m, inputs: { km2event: km2_event } }
+
+
+- analysis : {type: Km2Plotter, name: pre_upper_halo_plots, folder: pre_upper_halo,
+    tfile: tfout, selection: pre_upper, inputs: { km2event: km2_event } } 
+
+- analysis : { type: Km2Plotter, name: pre_lower_halo_plots, folder: pre_lower_halo,
+    tfile: tfout, selection: pre_lower, inputs: { km2event: km2_event } } 
+
+
+- analysis : { type: Km2Plotter, name: full_rk_like_plots, folder: full_rk_like_plots,
+    tfile: tfout, selection: rk_like_selection, inputs: { km2event: km2_event } } 
+
+- analysis : { type: Km2Plotter, name: full_rk_like_high_m2m_plots, folder: full_rk_like_high_m2m_plots,
+    tfile: tfout, selection: rk_like_high_m2m_selection, inputs: { km2event: km2_event } }
+
+
+
+
+
+- analysis : {name : full_summary, type: Summary, 
+    base : passer, source : pre_selection, ostream: os_stats } 
 
 - analysis : 
     name : rk_like_summary

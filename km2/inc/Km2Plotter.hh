@@ -83,12 +83,17 @@ namespace fn
             TH2D * h_p_z_;
             TH2D * h_z_t_;
             TH2D * h_z_cda_;
+            TH2D * h_z_phi_;
             TH2D * h_t_cda_;
             TH2D * h_m2_cda_;
             TH2D * h_m2_t_;
             TH2D * h_m2_z_;
 
+            TH2D * h_txty_;
+
+            TH2D * h_pr_coll_;
             TH2D * h_xy_coll_;
+            TH2D * h_xy_coll_fine_;
             TH2D * h_xy_DCH1_;
             TH1D * h_r_DCH1_;
             TH2D * h_xy_DCH4_;

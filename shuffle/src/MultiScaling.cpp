@@ -12,15 +12,15 @@ namespace fn
 {
     std::ostream& operator<<( std::ostream& os , const scale_result& sr )
     {
-        os << "hs: " << sr.halo_scale << " hse: " << sr.halo_scale_error 
-            << " peak: " << sr.peak_scale << " peake: " << sr.peak_scale_error;
+        os << "halo scale: " << sr.halo_scale << " ± " << sr.halo_scale_error 
+            << " peak scale: " << sr.peak_scale << " ± " << sr.peak_scale_error;
         return os;
     }
 
     void ScaleStrategy::update_scaling()
     { 
         sr = compute_scaling();
-        std::cout << sr << std::endl;
+        std::cout << sr << "\n" << std::endl;
     }
 
     M2ScaleStrategy::M2ScaleStrategy(
@@ -81,6 +81,10 @@ namespace fn
         double halo_scale_error = 0;
         double peak_halo_integral = 0;
 
+        std::cout 
+            << "Halo [" << m2_min_halo << ", " << m2_max_halo << "] "
+            << "Peak [" << m2_min_peak << ", " << m2_max_peak << "]\n" ;
+
         if ( do_halo_ )
         {
             auto hsummed_halo = get_summed_histogram( 
@@ -102,6 +106,14 @@ namespace fn
                     ( 1 / std::sqrt( halo_halo_integral ) + 1 / std::sqrt( halo_data_integral ) );
             }
         peak_halo_integral =  integral( *hsummed_halo, m2_min_peak, m2_max_peak );
+
+        std::cout 
+            << std::setw(15) << "halo_halo"
+            << std::setw(15) << "halo_data\n";
+
+        std::cout 
+            << std::setw(15) << halo_halo_integral
+            << std::setw(15) << halo_data_integral << "\n";
         }
 
         //Do km2 division
@@ -111,8 +123,17 @@ namespace fn
         double subtracted_peak = peak_data_integral -  halo_scale * peak_halo_integral ;
         double subtracted_peak_error = std::sqrt( peak_data_integral + peak_halo_integral );
 
-        std::cout << "PEAK SCALING: " << peak_halo_integral << " " << peak_data_integral << " " 
-            << peak_peak_integral << " " << subtracted_peak << std::endl;
+        std::cout 
+            << std::setw(15) << "peak_halo"
+            << std::setw(15) << "peak_data"
+            << std::setw(15) << "peak_peak"
+            << std::setw(15) << "sub_peak\n";
+
+        std::cout 
+            << std::setw(15) << peak_halo_integral
+            << std::setw(15) << peak_data_integral
+            << std::setw(15) << peak_peak_integral 
+            << std::setw(15) << subtracted_peak << std::endl;
 
         double peak_scale =  subtracted_peak  /  peak_peak_integral;
         double peak_scale_error = peak_scale *
@@ -139,19 +160,15 @@ namespace fn
         std::string mc_strat_type = get_yaml<string>( scaling_config["mc"], "strategy" );
         std::string halo_strat_type = get_yaml<string>( scaling_config["halo"], "strategy" );
 
-        std::cout << "Halo strategy type: " << halo_strat_type << std::endl;
-
         mc_strat_.reset( new M2ScaleStrategy{
                 channel_node_, scaling_config["mc"] } );
 
         if ( halo_strat_type == "dummy" )
         {
-            std::cout << "dummy halo" << halo_strat_type << std::endl;
             halo_strat_.reset( new DummyScaleStrategy() );
         }
         else
         {
-            std::cout << "m2 halo" << halo_strat_type << std::endl;
             halo_strat_.reset( new M2ScaleStrategy{
                     channel_node_, scaling_config["halo"] } );
         }
@@ -163,7 +180,11 @@ namespace fn
     void MultiScaling::compute_scaling() 
     {
         //compute scale factors
+        std::cout << "Doing MC scaling\n";
         mc_strat_->update_scaling();
+
+
+        std::cout << "Doing halo scaling\n";
         halo_strat_->update_scaling();
 
         peak_fid_weight_ = 0;
@@ -222,6 +243,7 @@ namespace fn
             scale_factor = mc_strat_->get_peak_scale() *  peak_fid_weight_  / fid_weight * br / peak_br_;
 
         }
+
         h.Scale( scale_factor );
     }
 }

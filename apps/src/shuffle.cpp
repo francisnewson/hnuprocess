@@ -105,12 +105,13 @@ int main( int argc, char * argv[] )
         extract_root_fiducial_weights( config_node["weights"]  )
         :  YAML::LoadFile(fid_filename).as<std::map<std::string, double>>();
 
-    std::cout << "Fiducial weights" << std::endl;
+    std::cout << "\nFiducial weights" << std::endl;
+        std::cout << std::setw(27) << "Channel" << std::setw(20) << "Weight" << std::endl;
     for ( auto chan : fiducial_weights )
     {
-        std::cout << chan.first << " " << chan.second << std::endl;
-
+        std::cout << std::setw(27) << chan.first << std::setw(20) << chan.second << std::endl;
     }
+    std::cout << std::string( 50, '-' ) << "\n" ;
 
     //Load branching ratios
     std::string br_filename = "input/shuffle/branching_ratios.yaml" ;
@@ -138,6 +139,8 @@ int main( int argc, char * argv[] )
 
         std::cout << "Peak scale: " << this_method.get_peak_scale() 
             << " ± " << this_method.get_peak_scale_error() << "\n";
+
+        std::cout << std::string( 50, '-' ) << "\n\n";
     }
 
     for ( const auto& scaling : scaling_info  )
@@ -201,6 +204,9 @@ int main( int argc, char * argv[] )
 
         cd_p( &tfout, name );
         hdata->Write( "hdata" );
+
+        std::cout << integral( *hs.get_total_copy(), -0.1, 0.01 )
+            <<  " " << integral( *hdata, -0.01, 0.01 ) << std::endl;
 
 
         auto hdenom = hs.get_total_copy();

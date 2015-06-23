@@ -108,6 +108,25 @@ namespace fn
         return pt_;
     }
 
+    double Km2RecoEvent::get_tx() const
+    {
+        return p4_mu_.X() / p4_mu_.Z();
+    }
+
+    double Km2RecoEvent::get_ty() const
+    {
+        return p4_mu_.Y() / p4_mu_.Z();
+    }
+
+    double Km2RecoEvent::get_muon_phi() const
+    {
+        double phi = p4_mu_.Vect().Phi();
+        if ( phi < 0 )
+            return phi + 2 * TMath::Pi();
+        else
+            return phi;
+    }
+
     //--------------------------------------------------
 
     REG_DEF_SUB( Km2Event );

@@ -26,6 +26,13 @@ plots:
       passed_name: h_xy_passed
       total_name: h_xy_total
 
+    - name: measure_p_cutout
+      rebin: 1
+      type: 1d
+      hist_folder: muv_eff_r38_all_p_xycutout
+      passed_name: h_p_passed
+      total_name: h_p_total
+
 #   - name: v_tgt_geom_cut
 #      rebin: 5
 #      type: 1d
@@ -51,6 +58,15 @@ ratios:
       dest: xyratio/cutout
       external: output/muv_eff_xy_cutout.root
       externalname: rat_xy
+
+#use measured eff(xy) to measure eff(p) for all p,
+#using the cutout region in which eff(xy) was measured
+    - source: measure_p_cutout
+      top: p5.data.q11t.v3
+      bottom: p5.km2.v2
+      dest: pratio/cutout
+      external: output/muv_eff_p_cutout.root
+      externalname: rat_p
 
 #    - source: pcorrp
 #      top: p5.data.q11t.v3

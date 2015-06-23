@@ -81,6 +81,51 @@ void muv_burst_plots( TTree * tt, path output_folder )
     }
 }
 
+void muv_burst_text( TTree * tt, path output_file )
+{
+    //get unique runs
+    muv_burst mb;
+    tt->SetBranchAddress( "muv_burst", &mb );
+
+    std::cerr << "Writing burst info to " << output_file << std::endl;
+    boost::filesystem::ofstream ofs( output_file );
+
+    ofs << std::setw( 15 ) << "run"
+        << std::setw( 15 ) << "burst_time"
+        << std::setw( 15 ) << "pass"
+        << std::setw( 15 ) << "total"
+        << std::setw( 15 ) << "eff"
+        << std::setw( 15 ) << "up"
+        << std::setw( 15 ) << "down"
+        << "\n";
+
+    Long64_t tt_entries = tt->GetEntries();
+    for ( Long64_t ient = 0 ; ient != tt_entries ; ++ient )
+    {
+        if ( !(ient % 1000) )
+        {
+            std::cerr << "Processed " << ient << " bursts!" << std::endl;
+        }
+
+        tt->GetEntry( ient );
+        double eff = mb.pass / mb.total;
+        double up = 0;
+        double down = 1;
+
+        TEfficiency::FeldmanCousinsInterval( mb.total, mb.pass, 0.68, down, up );
+
+        ofs << std::setw( 15 ) << mb.run 
+            << std::setw( 15 ) << mb.burst_time
+            << std::setw( 15 ) << mb.pass
+            << std::setw( 15 ) << mb.total
+            << std::setw( 15 ) << eff
+            << std::setw( 15 ) << up
+            << std::setw( 15 ) << down
+            << "\n" << std::flush;
+
+    }
+}
+
 void print_bursts( TTree& tt, int run, int min_burst, int max_burst, std::ostream& os )
 {
     muv_burst mb;
@@ -138,6 +183,7 @@ int main( int argc, char * argv[] )
     general.add_options()
         ( "help,h", "Display this help message")
         ( "plots,p",  "Make bad burst plots")
+        ( "text,t",  "Make bad burst text files")
         ( "bursts,b", po::value<double>(),  "Specify bad burst threshold")
         ( "input,i", po::value<path>(),  "Specify input root file")
         ( "output,o", po::value<path>(),  "Specify output")
@@ -173,9 +219,9 @@ int main( int argc, char * argv[] )
 
     TFile tfin( vm["input"].as<path>().string().c_str() );
 
-    if ( vm.count("plots") + vm.count("bursts") + vm.count("run_range") > 1 )
+    if ( vm.count("plots") + vm.count("bursts") + vm.count("run_range") + vm.count( "text" ) > 1 )
     {
-        std::cerr << "Can only do plots OR bursts OR run_range!" << std::endl;
+        std::cerr << "Can only do plots OR bursts OR run_range OR text!" << std::endl;
         exit(1);
     }
 
@@ -221,6 +267,18 @@ int main( int argc, char * argv[] )
         CachedTree ct{ tfin,  "p5.data.q11t.v3.%s/muv_bursts/T" };
         muv_burst_plots( &ct.get_tree(), output_folder );
 
+    }
+
+    if ( vm.count( "text" ) )
+    {
+        path output_file = "output/muv_bursts/all.txt";
+        if ( vm.count( "output" ) )
+        {
+            output_file = vm["output"].as<path>();
+        }
+
+        CachedTree ct{ tfin,  "p5.data.q11t.v3.%s/muv_bursts/T" };
+        muv_burst_text( &ct.get_tree(), output_file );
     }
 
     if ( vm.count( "merge") )

@@ -31,9 +31,9 @@ namespace fn
             NameVisitor();
 
             //Visitor interface
-            bool visit( Selection& ) ;
-            bool visit_enter( Selection& );
-            bool visit_leave( Selection& );
+            bool visit( const Selection& ) ;
+            bool visit_enter( const Selection& );
+            bool visit_leave( const Selection& );
 
             //Collection (vectorish) interface
             std::vector<nameset>::iterator begin();
@@ -52,9 +52,9 @@ namespace fn
     {
         public:
             SummaryWeightVisitor();
-            bool visit( Selection& ) ;
-            bool visit_enter( Selection& );
-            bool visit_leave( Selection& );
+            bool visit( const Selection& ) ;
+            bool visit_enter( const Selection& );
+            bool visit_leave( const Selection& );
 
             void set_event_weight( double weight );
 
@@ -81,9 +81,9 @@ namespace fn
     {
         public:
             SummaryVisitor();
-            bool visit( Selection& ) ;
-            bool visit_enter( Selection& ){ return true;} 
-            bool visit_leave( Selection& );
+            bool visit( const Selection& ) ;
+            bool visit_enter( const Selection& ){ return true;} 
+            bool visit_leave( const Selection& );
 
             //Collection (vectorish) interface
             typedef std::vector<int> container;

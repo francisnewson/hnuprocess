@@ -13,21 +13,21 @@ namespace fn
     NameVisitor::NameVisitor()
         :gen_(0){}
 
-    bool NameVisitor::visit_enter( Selection& s )
+    bool NameVisitor::visit_enter( const Selection& s )
     {
         //Increase depth
         ++gen_;
         return true;
     }
 
-    bool NameVisitor::visit( Selection& s )
+    bool NameVisitor::visit( const Selection& s )
     {
         //Record name of leaf
         names_.push_back( nameset{ s.get_name(), s.get_id(), gen_} );
         return true;
     }
 
-    bool NameVisitor::visit_leave( Selection& s )
+    bool NameVisitor::visit_leave( const Selection& s )
     {
         //Decrease depth
         --gen_;
@@ -56,7 +56,7 @@ namespace fn
         }
 
 
-    bool SummaryVisitor::visit( Selection& s) 
+    bool SummaryVisitor::visit( const Selection& s) 
     {
         //If selection passed, increment the vector
         //position corresponding to the selection id
@@ -72,7 +72,7 @@ namespace fn
         return false;
     }
 
-    bool SummaryVisitor::visit_leave( Selection& s )
+    bool SummaryVisitor::visit_leave( const Selection& s )
     {
         //Do the composite count on the way out
 
@@ -100,13 +100,13 @@ namespace fn
                 << weights_.size() << std::endl;
         }
 
-    bool SummaryWeightVisitor::visit_enter( Selection& )
+    bool SummaryWeightVisitor::visit_enter( const Selection& )
     {
         weight_stack_.push_back( weight_stack_.back() );
         return true;
     } 
 
-    bool SummaryWeightVisitor::visit( Selection& s) 
+    bool SummaryWeightVisitor::visit( const Selection& s) 
     {
         //If selection passed, increment the vector
         //position corresponding to the selection id
@@ -123,7 +123,7 @@ namespace fn
         return false;
     }
 
-    bool SummaryWeightVisitor::visit_leave( Selection& s )
+    bool SummaryWeightVisitor::visit_leave( const Selection& s )
     {
         //Do the composite count on the way out
         //std::cerr <<"About to visit" << std::endl;

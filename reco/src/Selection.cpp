@@ -10,7 +10,7 @@ namespace fn
      * SELECTION VISITOR
      *****************************************************/
 
-    bool Selection::accept( SelectionVisitor& sv )
+    bool Selection::accept( SelectionVisitor& sv ) const
     {
         return sv.visit( *this );
         return true;
@@ -63,13 +63,13 @@ namespace fn
 
     //Composite constructions from selections
     CompositeSelection::CompositeSelection
-        ( std::vector<Selection*> selections)
+        ( std::vector<const Selection*> selections)
         :children_ ( selections ) {}
 
-    CompositeSelection::CompositeSelection (Selection* selection)
+    CompositeSelection::CompositeSelection (const Selection* selection)
         :children_( {selection} ) {}
 
-    void CompositeSelection::AddChild( Selection* selection )
+    void CompositeSelection::AddChild( const Selection* selection )
     {
         children_.push_back( selection );
     }
@@ -102,7 +102,7 @@ namespace fn
     }
 
     //SectionVisitor interface
-    bool CompositeSelection::accept( SelectionVisitor& sv )
+    bool CompositeSelection::accept( SelectionVisitor& sv ) const
     {
         if ( sv.visit_enter( *this ) ) 
         {
@@ -120,7 +120,7 @@ namespace fn
         (YAML::Node& instruct, RecoFactory& rf )
         {
             //Collect child selections
-            std::vector<Selection*> children;
+            std::vector<const Selection*> children;
 
             YAML::Node child_list = instruct["children"];
 
@@ -130,7 +130,7 @@ namespace fn
             for (YAML::const_iterator it=child_list.begin();
                     it!=child_list.end();++it)
             {
-                Selection * child = rf.get_selection( it->as<std::string>() );
+                const Selection * child = rf.get_selection( it->as<std::string>() );
                 children.push_back( child );
             }
 
