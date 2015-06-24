@@ -182,6 +182,11 @@
         - muon_p_wgt
         - muon_xy_wgt
 
+#Autopass
+- selection:
+    name: passer
+    type : auto_pass
+
 ###################################################
 # CUTS
 ###################################################
@@ -209,14 +214,85 @@
     inputs:
         ogt: bf_st
 
+- selection:
+    name: cda_3cm
+    type: TrackCda
+    max_cda: 3.0 #cm
+    inputs:
+        ogt: bf_st
+
+#Track DHC1 ACC
+- selection:
+    name: dch1_acc
+    type: TrackRadialAcceptance
+    track_section: upstream
+    z: 9708.42 #zDCH1
+    inner: 12.0
+    outer: 115.0
+    inputs:
+        ogt: bf_st
+
+#Track DHC4 ACC
+- selection:
+    name: dch4_acc
+    type: TrackRadialAcceptance
+    track_section: downstream
+    z: 11888.0 #zDCH1
+    inner: 14.0
+    outer: 115.0
+    inputs:
+        ogt: bf_st
+
+# 9] LKr acceptance
+- selection:
+    name: rk_lkr_accep
+    type: TrackLkrAcceptance
+    margin_parameter: 8 #cm
+    inputs:
+        ogt: bf_st
+
+- selection:
+    name: rk_hot_lkr
+    type: Km2HotLkr
+    hot_cells: [ [ 134, 56 ], [ 134, 57 ] ]
+    inputs:
+        km2event: km2_event
+        km2clusters: full_km2clusters
+
+#Track time
+- selection:
+    name: rk_dcht
+    type : TrackTime
+    max_dt: 20 #ns
+    inputs:
+        ogt: bf_st
+
+#NoBadClusters
+- selection:
+    name: rk_lkr_veto
+    type: Km2NoBadCluster
+    inputs:
+        km2clusters: full_km2clusters
+
 - analysis:
     name: full_km2_breakdown
     type: Km2Breakdown
-    base: auto_pass
+    base: weighted_data_sample
     selection:
         - { cut: good_trk, plot : [] }
         - { cut: pos_trk, plot: [] }
         - { cut: quality_7, plot: [ track_quality ] }
+        - { cut: cda_3cm, plot: [ cda ] }
+        - { cut: dch1_acc, plot: [ rdch1 ] }
+        - { cut: dch4_acc, plot: [ rdch4 ] }
+        - { cut: rk_lkr_accep, plot: [ xylkr ] }
+        - { cut: rk_hot_lkr, plot: [ rdch4 ] }
+        - { cut: passer, plot: [ xylkr ], name: after_ }
+        - { cut: rk_lkr_veto, plot: [rcluster] }
+        - { cut: rk_dcht, plot: [dcht] }
+
+    good_track: good_trk
+    tfile: tfout
+    folder: km2_breakdown
     inputs:
         km2event: km2_event
-

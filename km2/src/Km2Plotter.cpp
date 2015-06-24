@@ -117,6 +117,10 @@ namespace fn
                 150, -5000, 10000, "Z( cm) ",
                 350, 0, 2*TMath::Pi() , "phi( rad) ");
 
+        h_t_phi_ = hs_.MakeTH2D( "h_t_phi", "Phi vs T " ,
+                250, 0, 25e-3, "t( rad) ",
+                350, 0, 2*TMath::Pi() , "phi( rad) ");
+
         h_z_cda_ = hs_.MakeTH2D( "h_z_cda", "Z vs CDA" ,
                 150, -5000, 10000, "Z( cm) ",
                 100, 0, 10, "CDA (cm)" );
@@ -216,7 +220,8 @@ namespace fn
 
         h_txty_->Fill( km2re.get_tx(), km2re.get_ty(), wgt );
 
-        h_z_phi_->Fill( km2re.get_zvertex(), km2re.get_muon_phi() );
+        h_z_phi_->Fill( km2re.get_zvertex(), km2re.get_muon_phi(), wgt );
+        h_t_phi_->Fill( km2re.get_opening_angle(), km2re.get_muon_phi(), wgt );
 
         //Slices
         const SingleRecoTrack * srt = km2re.get_reco_track();

@@ -126,6 +126,30 @@
     track_cluster_radius: 5, extra_lkr_check: false,
     inputs: { ogt: bf_st, ClusterCorrector: cluster_corrector } }
 
+- input:
+    name: single_muon
+    type: SingleMuon
+    method: auto
+    multiplier: 4
+    inputs:
+        ogt: bf_st
+
+- selection:
+    name: muon_xy_wgt
+    type: MuonTHXYWeight
+    effs_file: input/reco/conditions/muv_xy.root
+    effs_hist: rat_xy
+    inputs:
+        ogt: bf_st
+
+- selection:
+    name: muon_p_wgt
+    type: MuonTHPWeight
+    effs_file: input/reco/conditions/muv/muv_eff_p.root
+    effs_hist: rat_p
+    inputs:
+        ogt: bf_st
+
 
 ###################################################
 # CUTS
@@ -181,6 +205,12 @@
 - selection: { name: ddead_cell, type: TrackDDeadCell, 
     min_ddead_cell: 2.0,  inputs: {ogt: bf_st } }
 
+- selection:
+   { name: muon_req_38, type: MuonReq, multiplier: 3.8, inputs: {ogt: bf_st, sm: single_muon } }
+
+- selection:
+    { name: muon_req, type: CompositeSelection, children: [muon_req_38, muon_xy_wgt, muon_p_wgt] }
+
 ###################################################
 # PZ REGIONS
 ###################################################
@@ -212,6 +242,10 @@
      name: upper_specific, type: CompositeSelection,
      children: [ sel_upper_pz, upper_cda, upper_t ] }
 
+- selection: {
+     name: upper_specific_muv, type: CompositeSelection,
+     children: [ sel_upper_pz, upper_cda, upper_t, muon_req  ] }
+
 #LOWER
 - selection: {
     name: lower_pz, type: TrackPZ,
@@ -238,6 +272,10 @@
 - selection: {
      name: lower_specific, type: CompositeSelection,
      children: [ sel_lower_pz, lower_cda, lower_t ] }
+
+- selection: {
+     name: lower_specific_muv, type: CompositeSelection,
+     children: [ sel_lower_pz, lower_cda, lower_t, muon_req ] }
 
 ###################################################
 # RK
@@ -318,6 +356,20 @@
         - lower_specific
 
 - selection:
+    name: full_lower_muv
+    type : CompositeSelection
+    children:
+        - pre_selection
+        - lower_specific_muv
+
+- selection:
+    name: full_upper_muv
+    type : CompositeSelection
+    children:
+        - pre_selection
+        - upper_specific_muv
+
+- selection:
     name: pre_lower
     type : CompositeSelection
     children:
@@ -378,6 +430,11 @@
 - analysis : { type: Km2Plotter, name: full_lower_halo_plots, folder: full_lower_halo,
     tfile: tfout, selection: full_lower, inputs: { km2event: km2_event } }
 
+- analysis : { type: Km2Plotter, name: full_upper_halo_muv_plots, folder: full_upper_halo_muv,
+    tfile: tfout, selection: full_upper_muv, inputs: { km2event: km2_event } }
+
+- analysis : { type: Km2Plotter, name: full_lower_halo__muvplots, folder: full_lower_halo_muv,
+    tfile: tfout, selection: full_lower_muv, inputs: { km2event: km2_event } }
 
 - analysis : { type: Km2Plotter, name: pre_lower_high_m2m_plots, folder: pre_lower_high_m2m_plots,
     tfile: tfout, selection: pre_lower_high_m2m, inputs: { km2event: km2_event } }
@@ -398,10 +455,6 @@
 
 - analysis : { type: Km2Plotter, name: full_rk_like_high_m2m_plots, folder: full_rk_like_high_m2m_plots,
     tfile: tfout, selection: rk_like_high_m2m_selection, inputs: { km2event: km2_event } }
-
-
-
-
 
 - analysis : {name : full_summary, type: Summary, 
     base : passer, source : pre_selection, ostream: os_stats } 
