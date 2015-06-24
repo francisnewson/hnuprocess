@@ -186,9 +186,11 @@ namespace fn
 
             mutable BFSingleRecoTrack single_reco_track_;
 
+#if 0
             SingleRecoTrack load_computed_track
                 ( const processing_track& pt, 
                   SingleRecoTrack& srt ) const;
+#endif
 
             //track monitoring
             mutable std::vector<processing_track> proc_tracks_;

@@ -4,8 +4,8 @@ Import('*')
 lenv = env.Clone()
 
 lenv.SetRoot( root_dir )
-lenv.SetBoost( boost_dir, boost_name )
-lenv.SetYaml( yaml_dir )
+lenv.SetBoost( boost_dir, boost_name, machine )
+lenv.SetYaml( yaml_dir, machine )
 lenv.AddEvent( event_dir, 'event' )
 
 lenv.Append( CPPPATH = 'inc' )

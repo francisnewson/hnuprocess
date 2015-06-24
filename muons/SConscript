@@ -5,7 +5,7 @@ Import('*')
 lenv = env.Clone()
 
 lenv.SetRoot( root_dir )
-lenv.SetBoost( boost_dir, boost_name )
+lenv.SetBoost( boost_dir, boost_name, machine )
 lenv.AddLibs( [
 'tools', 
 'reco', 
@@ -13,7 +13,7 @@ lenv.AddLibs( [
 'km2',
 ] )
 lenv.AddEvent( event_dir, 'event' )
-lenv.SetYaml( yaml_dir )
+lenv.SetYaml( yaml_dir, machine )
 
 
 lenv.Append( CPPPATH = 'inc' )

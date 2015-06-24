@@ -5,7 +5,7 @@ Import('*')
 lenv = env.Clone()
 
 lenv.SetRoot( root_dir )
-lenv.SetBoost( boost_dir, boost_name )
+lenv.SetBoost( boost_dir, boost_name, machine )
 lenv.AddLibs( [
 'tools', 
 'reco', 
@@ -16,7 +16,7 @@ lenv.AddLibs( [
 #'k2pi',
 ] )
 lenv.AddEvent( event_dir, 'event' )
-lenv.SetYaml( yaml_dir )
+lenv.SetYaml( yaml_dir, machine )
 
 cint_builder = Builder( action = os.path.join(root_dir, 'bin', 'rootcint')+' -f $TARGET -c -p $SOURCES' )
 lenv.Append( BUILDERS = { 'Dict' : cint_builder } )

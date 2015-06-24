@@ -2,13 +2,11 @@ import os
 
 Import( 'env' )
 
-env.SetClang()
 env.Append( CPPFLAGS = ['-std=c++0x',
-'-Werror',
 '-Wall',
-'-Wno-error=unused-private-field',
 '-Wno-error=unused-variable',
-'-Wno-error=deprecated-declarations'
+'-Wno-error=deprecated-declarations',
+'-Wno-error=sign-compare',
 ] )
 
 env.Decider('MD5-timestamp')

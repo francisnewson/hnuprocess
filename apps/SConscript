@@ -5,8 +5,8 @@ Import('*')
 lenv = env.Clone()
 
 lenv.SetRoot( root_dir )
-lenv.SetBoost( boost_dir, boost_name )
-lenv.SetYaml( yaml_dir )
+lenv.SetBoost( boost_dir, boost_name, machine )
+lenv.SetYaml( yaml_dir, machine )
 lenv.AddLibs( [
             'tools',
             'reco',
@@ -24,7 +24,10 @@ lenv.AddLibs( [
 lenv.AddEvent( event_dir, 'event' )
 
 boost_libraries = [ 'program_options', 'filesystem', 'system', 'regex', 'log' ]
-lenv.Append( LIBS = [ 'boost_' + lib + '-gcc47-mt-1_55' for lib in boost_libraries] )
+if machine == 'bham':
+    lenv.Append( LIBS = [ 'boost_' + lib + '-gcc48-mt-1_55' for lib in boost_libraries] )
+else:
+    lenv.Append( LIBS = [ 'boost_' + lib + '-gcc47-mt-1_55' for lib in boost_libraries] )
 lenv.Append( LIBS = ['gfortran'] )
 
 #lenv.Append( LIBS = 'k2pivar' )
@@ -33,7 +36,7 @@ lenv.Append( LIBS = ['gfortran'] )
 lenv.Append( LIBS = 'K2piEventData' )
 lenv.Append( CPPPATH = '../dch/dict' )
 
-lenv.SetYaml( yaml_dir )
+lenv.SetYaml( yaml_dir, machine )
 
 lenv.Append( CPPPATH = 'inc' )
 for this_source in Glob( 'src/*.cpp' ):
