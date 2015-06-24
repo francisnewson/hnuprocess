@@ -5,11 +5,12 @@
 #include "stl_help.hh"
 #include "NA62Constants.hh"
 #include "Km2Clusters.hh"
+#include "ClusterEnergyCorr.hh"
 
 namespace fn
 {
     //--------------------------------------------------
-    
+
     //TRACK QUALITY
     template <> TH1D * hinit<mp_track_quality>( Km2Breakdown& km2b ) { 
         return km2b.get_hist_store().MakeTH1D(
@@ -60,30 +61,40 @@ namespace fn
         return km2b.get_single_reco_track().get_time(); }
 
     //CLUSTER DISTANCE
-    template <> TH1D * hinit<mp_dcht>( Km2Breakdown& km2b ){
+    template <> TH1D * hinit<mp_cluster_distance>( Km2Breakdown& km2b ){
+        return km2b.get_hist_store().MakeTH1D(
+                "h_cluster_distance", "Cluster distance(cm)", 200, 0, 100, "d (cm) " ); }
 
+    template <> double hfill<mp_cluster_distance>( Km2Breakdown& km2b ){
+        const Km2RecoClusters& km2rc = km2b.get_reco_clusters();
+        const ClusterCorrector& cluster_corrector = km2rc.get_cluster_corrector();
+        bool ismc= km2rc.is_mc();
+        const SingleRecoTrack& srt = km2b.get_single_reco_track();
+        double closest_distance = std::numeric_limits<double>::max();
+        for ( auto clus = km2rc.bad_begin() ; clus != km2rc.bad_end() ; ++clus )
+        {
+            CorrCluster  cc{ **clus, cluster_corrector, ismc };
+            TrackProjCorrCluster track_cluster{ cc };
+            TVector3 cluster_pos = track_cluster.get_pos();
+            TVector3 trk_lkr = srt.extrapolate_ds( cluster_pos.Z() );
+            double track_cluster_sep = (trk_lkr - cluster_pos ).Mag();
+            if ( track_cluster_sep < closest_distance )
+            {
+                closest_distance = track_cluster_sep;
+            }
+        }
+        return closest_distance;
     }
-
-    template <> double hfill<mp_dcht>( Km2Breakdown& km2b ){
-         const Km2RecoClusters& km2rc = km2b.get_reco_clusters();
-         const SingleRecoTrack& srt = km2b.get_single_reco_track();
-         for ( auto clus = km2rc.bad_begin() ; clus != km2rc.bad_end() ; ++clus )
-         {
-             TrackProjCorrCluster track_cluster{ **clus };
-             TVector3 cluster_pos = track_cluster.get_pos();
-             TVector trk_lkr = srt.extrapoloate_ds( cluster_pos.Z() );
-             double track_cluster_sep = (trk_lkr - cluster_pos ).Mag();
-             return track_cluster_sep;
-         }
 
     //--------------------------------------------------
 
     REG_DEF_SUB( Km2Breakdown );
 
     Km2Breakdown::Km2Breakdown( const Selection& sel, const Km2Event& km2e,
-            const Selection& good_track,
+            const Selection& good_track, Km2Clusters& km2c,
             TFile& tf, std::string folder)
-        :Analysis( sel ), km2e_( km2e ), good_track_( good_track), tf_(tf), folder_( folder )
+        :Analysis( sel ), km2e_( km2e ), good_track_( good_track), km2c_( km2c ),
+        tf_(tf), folder_( folder )
     {
         register_plotter<Mini1DPlot<mp_track_quality>>( "track_quality" );
         register_plotter<Mini1DPlot<mp_cda>>( "cda" );
@@ -91,11 +102,17 @@ namespace fn
         register_plotter<Mini1DPlot<mp_r_dch4>>( "rdch4" );
         register_plotter<Mini2DPlot<mp_xy_lkr>>( "xylkr" );
         register_plotter<Mini1DPlot<mp_dcht>>( "dcht" );
+        register_plotter<Mini1DPlot<mp_cluster_distance>>( "rcluster" );
     }
 
     const SingleRecoTrack& Km2Breakdown::get_single_reco_track()
     {
         return *km2re_->get_reco_track();
+    }
+
+    const Km2RecoClusters& Km2Breakdown::get_reco_clusters()
+    {
+        return *km2rc_;
     }
 
     void Km2Breakdown::add_selection( const Selection * s,
@@ -119,6 +136,7 @@ namespace fn
         if ( good_track_.check() )
         {
             km2re_ = &km2e_.get_reco_event();
+            km2rc_ = &km2c_.get_reco_clusters();
         }
 
         CompositeSelection selection_so_far;
@@ -165,9 +183,13 @@ namespace fn
 
             std::string folder = get_folder( instruct, rf );
 
-            const Selection *  good_track = rf.get_selection( get_yaml<std::string>( instruct, "good_track" ) );
+            const Selection *  good_track = 
+                rf.get_selection( get_yaml<std::string>( instruct, "good_track" ) );
 
-            auto result  = make_unique<Km2Breakdown>( *base, *km2e, *good_track, tfile, folder );
+            auto  * km2_clusters = get_km2_clusters( instruct, rf );
+
+            auto result  = make_unique<Km2Breakdown>( *base, *km2e, *good_track, 
+                    *km2_clusters, tfile, folder );
 
             const YAML::Node& selection_list = instruct["selection"];
             for ( const auto& selmap  : selection_list )

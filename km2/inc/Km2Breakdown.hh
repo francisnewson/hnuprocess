@@ -18,6 +18,9 @@ namespace fn
     class Km2Breakdown;
     class Km2Event;
     class Km2RecoEvent;
+    class Km2RecoClusters;
+    class Km2Clusters;
+    class ClusterCorrector;
     class SingleRecoTrack;
 
     class MiniPlot
@@ -115,8 +118,8 @@ namespace fn
 
     //CLUSTER DISTANCE
     struct mp_cluster_distance{};
-    template <> TH1D * hinit<mp_dcht>( Km2Breakdown& km2b );
-    template <> double hfill<mp_dcht>( Km2Breakdown& km2b );
+    template <> TH1D * hinit<mp_cluster_distance>( Km2Breakdown& km2b );
+    template <> double hfill<mp_cluster_distance>( Km2Breakdown& km2b );
 
     //--------------------------------------------------
 
@@ -124,11 +127,12 @@ namespace fn
     {
         public:
             Km2Breakdown( const Selection& sel, const Km2Event& km2e, 
-                    const Selection& good_track,
+                    const Selection& good_track, Km2Clusters& km2c,
                     TFile& tf, std::string folder  );
 
             HistStore& get_hist_store(){ return hs_; }
             const SingleRecoTrack& get_single_reco_track();
+            const Km2RecoClusters& get_reco_clusters();
 
             template <typename T>
             void register_plotter( std::string ) ;
@@ -144,6 +148,9 @@ namespace fn
             const Km2Event& km2e_;
             const Km2RecoEvent * km2re_;
             const Selection& good_track_;
+
+            const Km2Clusters& km2c_;
+            const Km2RecoClusters * km2rc_;
 
             void process_event();
             TFile& tf_;

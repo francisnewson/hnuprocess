@@ -296,3 +296,4 @@
     folder: km2_breakdown
     inputs:
         km2event: km2_event
+        km2clusters: full_km2clusters

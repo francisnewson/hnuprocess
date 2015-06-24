@@ -3,19 +3,15 @@ import os
 import subprocess
 
 #LIBRARY LOCATIONS
-root_dir = ( '/afs/cern.ch/sw/lcg/app/releases/ROOT/5.34.30/'
-+'x86_64-slc6-gcc48-opt/root' )
+root_dir = os.environ['SC_ROOT_DIR']
 
-boost_dir =  ( '/afs/cern.ch/sw/lcg/external/Boost/'
-        '1.55.0_python2.7/x86_64-slc6-gcc47-opt'
-        )
+boost_dir =  os.environ['SC_BOOST_DIR']
 
-boost_name = 'boost-1_55'
+boost_name = os.environ['SC_BOOST_NAME']
 
-yaml_dir = ( '/afs/cern.ch/user/f/fnewson/work/programs/'
-        +'yaml-cpp/yaml-cpp-0.5.1' )
+yaml_dir = os.environ['SC_YAML_DIR']
 
-event_dir = '/afs/cern.ch/user/f/fnewson/work/hnu/gopher/code/fneevent/build_sprocess/'
+event_dir = os.environ['SC_EVENT_DIR']
 
 Export ( 'root_dir boost_dir boost_name yaml_dir event_dir' )
 
