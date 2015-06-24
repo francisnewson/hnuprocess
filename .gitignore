@@ -45,6 +45,7 @@ apps/*
 !apps/src/
 !apps/obj
 !apps/Rules.mk
+!apps/SConscript
 
 #tesapps#
 testapps/*

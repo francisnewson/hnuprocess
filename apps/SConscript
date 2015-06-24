@@ -1,0 +1,42 @@
+import os
+Import('env')
+Import('*')
+
+lenv = env.Clone()
+
+lenv.SetRoot( root_dir )
+lenv.SetBoost( boost_dir, boost_name )
+lenv.SetYaml( yaml_dir )
+lenv.AddLibs( [
+            'tools',
+            'reco',
+            'corrections',
+            'tracking',
+            'conditions',
+            'clusters',
+            'kinfo',
+            'km2',
+            'dch',
+            'muons',
+            'akl',
+            'shuffle',
+            ] )
+lenv.AddEvent( event_dir, 'event' )
+
+boost_libraries = [ 'program_options', 'filesystem', 'system', 'regex', 'log' ]
+lenv.Append( LIBS = [ 'boost_' + lib + '-gcc47-mt-1_55' for lib in boost_libraries] )
+lenv.Append( LIBS = ['gfortran'] )
+
+#lenv.Append( LIBS = 'k2pivar' )
+#lenv.Append( CPPPATH = '../k2pi/dict' )
+
+lenv.Append( LIBS = 'K2piEventData' )
+lenv.Append( CPPPATH = '../dch/dict' )
+
+lenv.SetYaml( yaml_dir )
+
+lenv.Append( CPPPATH = 'inc' )
+for this_source in Glob( 'src/*.cpp' ):
+    this_target = os.path.splitext(
+            os.path.basename( env.GetBuildPath( this_source) ) )[0]
+    lenv.Program( target = this_target, source = this_source)
