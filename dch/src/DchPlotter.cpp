@@ -317,13 +317,28 @@ namespace fn
 
         std::vector<scatter_params> scatterings = {};
 
+#if 0
+        struct scatter_params
+        {
+            std::string name;
+            double angle_cutoff;
+            double angle_frequency;
+            int angle_power;
+            double mom_cutoff;
+            double mom_frequency;
+            int mom_power;
+        };
+#endif
+
         if( do_scatter )
         {
             scatterings = { 
-                { "b",       0.00085, 0.0100 , 2 , 0.08, 0.0010, 2}, 
-                { "s4"  ,    0.00110, 0.0190 , 4 , 0.16, 0.0020, 4}, 
-                { "s4high" , 0.00110, 0.0220 , 4 , 0.16, 0.0020, 4}, 
-                { "s4low"  , 0.00110, 0.0150 , 4 , 0.16, 0.0020, 4}, 
+                { "b",           0.00085, 0.0100 , 2 , 0.08, 0.0010, 2}, 
+                { "s4"  ,        0.00085, 0.0150 , 4 , 0.13, 0.0015, 4}, 
+                { "s4_p_early",  0.00085, 0.0150 , 4 , 0.09, 0.0015, 4}, 
+                { "s4_p_late" ,  0.00085, 0.0150 , 4 , 0.16, 0.0015, 4}, 
+                { "s4_p_high" ,  0.00085, 0.0150 , 4 , 0.13, 0.0020, 4}, 
+                { "s4_p_low" ,  0.00085, 0.0150 , 4 , 0.13, 0.0010, 4}, 
             };
         }
 

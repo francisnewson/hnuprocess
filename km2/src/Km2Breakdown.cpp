@@ -71,7 +71,7 @@ namespace fn
         bool ismc= km2rc.is_mc();
         const SingleRecoTrack& srt = km2b.get_single_reco_track();
         double closest_distance = std::numeric_limits<double>::max();
-        for ( auto clus = km2rc.bad_begin() ; clus != km2rc.bad_end() ; ++clus )
+        for ( auto clus = km2rc.all_begin() ; clus != km2rc.all_end() ; ++clus )
         {
             CorrCluster  cc{ **clus, cluster_corrector, ismc };
             TrackProjCorrCluster track_cluster{ cc };
