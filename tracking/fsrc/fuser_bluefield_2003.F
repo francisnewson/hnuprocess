@@ -56,8 +56,7 @@ ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 * ------------------------------------------------------------
 *
 *
-      BLUE_TUBE = '/afs/cern.ch/user/f/fnewson/work/hnu/gopher'//
-     +            '/data/offline/magbluetube_2003'
+#include "blue_tube_location.h"
 
       OPEN(UNIT=17,FILE=BLUE_TUBE,STATUS='OLD', IOSTAT=IRC)
       IF (IRC.NE.0) THEN

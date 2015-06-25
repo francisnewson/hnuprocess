@@ -3,6 +3,7 @@
 #include "GlobalStatus.hh"
 #include "RecoFactory.hh"
 #include "yaml_help.hh"
+#include "LocalStrings.hh"
 
 namespace fn
 {
@@ -158,18 +159,26 @@ namespace fn
 
     double correct_eop_energy( const fne::RecoCluster& re, bool is_mc )
     {
-        static ClusterEnergyCorr
-            cec { "/afs/cern.ch/user/f/fnewson/work/hnu"
-                "/gopher/data/detector/eopCorrfile.dat" };
+            std::string filename = 
+             "/afs/cern.ch/user/f/fnewson/work/hnu"
+                "/gopher/data/detector/eopCorrfile.dat";
+
+            filename = g_local_strings().convert( filename ).string();
+
+        static ClusterEnergyCorr cec { filename};
 
         return  cec( re, is_mc );
     }
 
     std::pair<int, int> get_cpd_cell_index( double pos_x, double pos_y)
     {
-        static ClusterEnergyCorr
-            cec { "/afs/cern.ch/user/f/fnewson/work/hnu"
-                "/gopher/data/detector/eopCorrfile.dat" };
+            std::string filename = 
+             "/afs/cern.ch/user/f/fnewson/work/hnu"
+                "/gopher/data/detector/eopCorrfile.dat";
+
+            filename = g_local_strings().convert( filename ).string();
+
+        static ClusterEnergyCorr cec { filename};
 
         int cpd;
         int cell;
@@ -247,6 +256,9 @@ namespace fn
         (YAML::Node& instruct, RecoFactory& rf )
         {
             std::string filename = get_yaml<std::string>( instruct, "filename" );
+            filename = g_local_strings().convert( filename ).string();
+            std::cout << filename << std::endl;
+
             const GlobalStatus * global_status = rf.get_global_status() ;
             bool enabled = instruct["enabled"].as<bool>( true );
 

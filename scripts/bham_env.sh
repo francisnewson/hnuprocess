@@ -9,6 +9,9 @@ export LD_LIBRARY_PATH=/home/fon/work/hnu/code/gcc/version/gcc-4.8.2/lib64:/home
 export CC=/home/fon/work/hnu/code/gcc/version/gcc-4.8.2/bin/gcc
 export CXX=/home/fon/work/hnu/code/gcc/version/gcc-4.8.2/bin/g++
 
+export LD_LIBRARY_PATH=/home/fon/work/hnu/code/python/version/Python-2.7.9/lib
+export PATH=/home/fon/work/hnu/code/python/version/Python-2.7.9/bin/:$PATH
+
 echo "Setting environment variables for SCons"
 export SC_ROOT_DIR=/home/fon/work/hnu/code/root/root-5.34.32/root
 export SC_BOOST_DIR=/home/fon/work/hnu/code/boost/boost_1_55_0

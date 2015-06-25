@@ -1,0 +1,12 @@
+#!/bin/bash
+ldd build_bham/apps/hnureco \
+		| ack  "build_bham" \
+		| awk '{print $3} END {
+			print "build_bham/apps/hnureco"
+			print "build_bham/apps/k2pi_reco"
+			print "build_bham/apps/file_description"
+			print "input"
+            print "batch"
+			print "scripts/bham_env.sh"
+		}'  \
+			| xargs tar -cvf ../binary/process.tar 

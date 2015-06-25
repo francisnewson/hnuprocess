@@ -15,7 +15,8 @@ lenv.SetYaml( yaml_dir, machine )
 
 lenv.Append( CPPPATH = 'inc' )
 
-fenv = Environment( CPPFLAGS = '-I'+os.path.abspath( '../../tracking/finc' ), CPPPATH = 'tracking/finc' )
+fenv = Environment( CPPFLAGS = ' -I'+os.path.abspath( '../../tracking/finc' ), CPPPATH = 'tracking/finc' )
+fenv.Append( CPPFLAGS = ' -I'+os.path.abspath( '../../local' ), CPPPATH = 'local' )
 fortran_tracking = fenv.SharedObject( target = 'fortran_tracking.os', source = 'fsrc/fuser_bluefield_2003.F')
 
 

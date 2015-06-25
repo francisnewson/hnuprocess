@@ -146,6 +146,7 @@
 - input:
     name: single_muon
     type: SingleMuon
+    multiplier: 4
     method: auto
     inputs:
         ogt: bf_st
@@ -153,7 +154,7 @@
 - selection:
     name: req_muon
     type: MuonReq
-    multiplier: 4
+    multiplier: 3.8
     inputs:
         sm: single_muon
         ogt: bf_st
