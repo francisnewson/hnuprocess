@@ -31,6 +31,7 @@
 - input:
     name: cluster_corrector
     type: ClusterCorrector
+    #filename: "/afs/cern.ch/user/f/fnewson/work/hnu/gopher/data/detector/eopCorrfile.dat"
     filename: "/afs/cern.ch/user/f/fnewson/work/hnu/gopher/data/detector/eopCorrfile.dat"
     enabled: true
 
