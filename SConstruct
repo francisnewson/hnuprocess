@@ -13,7 +13,7 @@ yaml_dir = os.environ['SC_YAML_DIR']
 
 event_dir = os.environ['SC_EVENT_DIR']
 
-machine = os.environ['MACHINE']
+machine = os.environ.get('MACHINE')
 
 Export ( 'root_dir boost_dir boost_name yaml_dir event_dir machine' )
 
