@@ -312,4 +312,120 @@ namespace fn
             return new Km2Angle( *km2_event, min_t, max_t );
         }
 
+    //--------------------------------------------------
+
+    REG_DEF_SUB( TrackZT);
+
+    TrackZT::TrackZT( const Km2Event& km2e,
+            std::vector<polygon_type> zt_region )
+        :km2e_( km2e), area_cut_( {zt_region} )
+        {}
+
+    bool TrackZT::do_check() const
+    {
+        const Km2RecoEvent& km2re = km2e_.get_reco_event();
+        double z_vertex = km2re.get_zvertex();
+        double angle = km2re.get_opening_angle();
+        return area_cut_.allowed({ z_vertex, angle } );
+    }
+
+    template<>
+        Subscriber * create_subscriber<TrackZT>
+        (YAML::Node& instruct, RecoFactory& rf )
+        {
+
+            const auto * km2re = get_km2_event( instruct, rf );
+            std::string shape = get_yaml<std::string>( instruct, "shape");
+
+            if ( shape == "polygon" )
+            {
+                std::vector<polygon_type> recs =
+                { get_yaml<polygon_type>( instruct, "points" )};
+
+                return new TrackZT( *km2re, recs );
+            }
+            else
+            {
+                throw std::runtime_error(
+                        "Unknown TrackZTShape" );
+            }
+        }
+
+    //--------------------------------------------------
+
+    REG_DEF_SUB( TrackTPhi);
+
+    TrackTPhi::TrackTPhi( const Km2Event& km2e,
+            std::vector<polygon_type> tphi_region )
+        :km2e_( km2e), area_cut_( {tphi_region} )
+        {}
+
+    bool TrackTPhi::do_check() const
+    {
+        const Km2RecoEvent& km2re = km2e_.get_reco_event();
+        double t = km2re.get_opening_angle();
+        double phi = km2re.get_muon_phi();
+        return area_cut_.allowed({ t, phi } );
+    }
+
+    template<>
+        Subscriber * create_subscriber<TrackTPhi>
+        (YAML::Node& instruct, RecoFactory& rf )
+        {
+
+            const auto * km2re = get_km2_event( instruct, rf );
+            std::string shape = get_yaml<std::string>( instruct, "shape");
+
+            if ( shape == "polygon" )
+            {
+                std::vector<polygon_type> recs =
+                { get_yaml<polygon_type>( instruct, "points" )};
+
+                return new TrackTPhi( *km2re, recs );
+            }
+            else
+            {
+                throw std::runtime_error(
+                        "Unknown TrackTPhiShape" );
+            }
+        }
+
+    //--------------------------------------------------
+
+    REG_DEF_SUB( TrackPT);
+
+    TrackPT::TrackPT( const Km2Event& km2e,
+            std::vector<polygon_type> pt_region )
+        :km2e_( km2e), area_cut_( {pt_region} )
+        {}
+
+        bool TrackPT::do_check() const
+        {
+            const Km2RecoEvent& km2re = km2e_.get_reco_event();
+            double t = km2re.get_opening_angle();
+            double p = km2re.get_muon_mom();
+            return area_cut_.allowed({ p , t } );
+        }
+
+    template<>
+        Subscriber * create_subscriber<TrackPT>
+        (YAML::Node& instruct, RecoFactory& rf )
+        {
+
+            const auto * km2re = get_km2_event( instruct, rf );
+            std::string shape = get_yaml<std::string>( instruct, "shape");
+
+            if ( shape == "polygon" )
+            {
+                std::vector<polygon_type> recs =
+                { get_yaml<polygon_type>( instruct, "points" )};
+
+                return new TrackPT( *km2re, recs );
+            }
+            else
+            {
+                throw std::runtime_error(
+                        "Unknown TrackPTShape" );
+            }
+        }
 }

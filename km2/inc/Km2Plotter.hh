@@ -75,6 +75,9 @@ namespace fn
             TH1D * h_z_;
             TH1D * h_pt_;
 
+            TH1D * h_rcoll_;
+            TH2D * h_z_rcoll_;
+
             TH1D * h_track_time_;
 
             TH2D * h_pt_m2m_kmu_;
@@ -91,6 +94,8 @@ namespace fn
             TH2D * h_m2_z_;
 
             TH2D * h_txty_;
+
+            TH2D * h_u_v_;
 
             TH2D * h_pr_coll_;
             TH2D * h_xy_coll_;

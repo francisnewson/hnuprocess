@@ -8,5 +8,6 @@ ldd build_O3/apps/hnureco \
 			print "input"
             print "batch"
 			print "scripts/env.sh"
+            print "local"
 		}'  \
 			| xargs tar -cvf ../binary/process.tar 

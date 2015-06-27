@@ -39,23 +39,23 @@ namespace fn
 
     template <typename T>
         class Mini1DPlot : public MiniPlot
-        {
-            private:
-                TH1D * h;
+    {
+        private:
+            TH1D * h;
 
-            public:
-                void init(  Km2Breakdown& km2b)
-                { h = hinit<T>(km2b ); }
+        public:
+            void init(  Km2Breakdown& km2b)
+            { h = hinit<T>(km2b ); }
 
-                void fill(  Km2Breakdown& km2b,  double wgt )
-                { h->Fill( hfill<T>( km2b), wgt ) ; }
+            void fill(  Km2Breakdown& km2b,  double wgt )
+            { h->Fill( hfill<T>( km2b), wgt ) ; }
 
-                void set_name( std::string name )
-                { h->SetName( name.c_str() ); }
+            void set_name( std::string name )
+            { h->SetName( name.c_str() ); }
 
-                std::string get_name()
-                { return h->GetName(); }
-        };
+            std::string get_name()
+            { return h->GetName(); }
+    };
 
     template<typename T> TH2D * h2init( Km2Breakdown& km2b ){ return 0; }
     template<typename T> std::pair<double,double> h2fill( Km2Breakdown& km2b )
@@ -63,26 +63,26 @@ namespace fn
 
     template <typename T>
         class Mini2DPlot : public MiniPlot
-        {
-            private:
-                TH2D * h;
+    {
+        private:
+            TH2D * h;
 
-            public:
-                void init(  Km2Breakdown& km2b)
-                { h = h2init<T>(km2b ); }
+        public:
+            void init(  Km2Breakdown& km2b)
+            { h = h2init<T>(km2b ); }
 
-                void fill(  Km2Breakdown& km2b,  double wgt )
-                {
-                    std::pair<double,double>  result = h2fill<T>( km2b );
-                    h->Fill( result.first, result.second, wgt ) ;
-                }
+            void fill(  Km2Breakdown& km2b,  double wgt )
+            {
+                std::pair<double,double>  result = h2fill<T>( km2b );
+                h->Fill( result.first, result.second, wgt ) ;
+            }
 
-                void set_name( std::string name )
-                { h->SetName( name.c_str() ); }
+            void set_name( std::string name )
+            { h->SetName( name.c_str() ); }
 
-                std::string get_name()
-                { return h->GetName(); }
-        };
+            std::string get_name()
+            { return h->GetName(); }
+    };
 
     //--------------------------------------------------
 
@@ -117,61 +117,77 @@ namespace fn
     template <> double hfill<mp_dcht>( Km2Breakdown& km2b );
 
     //CLUSTER DISTANCE
-    struct mp_cluster_distance{};
-    template <> TH1D * hinit<mp_cluster_distance>( Km2Breakdown& km2b );
-    template <> double hfill<mp_cluster_distance>( Km2Breakdown& km2b );
-
-    //--------------------------------------------------
-
-    class Km2Breakdown : public Analysis
+    class ClusterMiniPlot : public MiniPlot
     {
         public:
-            Km2Breakdown( const Selection& sel, const Km2Event& km2e, 
-                    const Selection& good_track, Km2Clusters& km2c,
-                    TFile& tf, std::string folder  );
-
-            HistStore& get_hist_store(){ return hs_; }
-            const SingleRecoTrack& get_single_reco_track();
-            const Km2RecoClusters& get_reco_clusters();
-
-            template <typename T>
-            void register_plotter( std::string ) ;
-            void add_selection( const Selection * s, 
-                    std::vector<std::string>& plot_types, std::string prefix = "" );
-
-            void end_processing();
+            void init( Km2Breakdown& km2b);
+            void fill( Km2Breakdown& km2b, double wgt );
+            void set_name( std::string name );
+            std::string get_name();
 
         private:
-            typedef std::map<std::string, MiniPlot*(*)(Km2Breakdown& km2b)> map_type;
-            map_type  mini_plot_map_;
+            TH1D * h_ds_;
+            TH1D * h_E_;
+            TH2D * h_ds_E_;
+};
 
-            const Km2Event& km2e_;
-            const Km2RecoEvent * km2re_;
-            const Selection& good_track_;
+    //ZT
+    struct mp_zt{};
+    template <> TH2D * h2init<mp_zt>( Km2Breakdown& km2b );
+    template <> std::pair<double,double> h2fill<mp_zt>( Km2Breakdown& km2b );
 
-            const Km2Clusters& km2c_;
-            const Km2RecoClusters * km2rc_;
+//--------------------------------------------------
 
-            void process_event();
-            TFile& tf_;
-            std::string folder_;
+class Km2Breakdown : public Analysis
+{
+    public:
+        Km2Breakdown( const Selection& sel, const Km2Event& km2e, 
+                const Selection& good_track, Km2Clusters& km2c,
+                TFile& tf, std::string folder  );
 
-            std::vector<std::pair<const Selection*, std::vector<MiniPlot*>> > selection_plots_;
-            std::vector<std::unique_ptr<MiniPlot>> plot_store_;
+        HistStore& get_hist_store(){ return hs_; }
+        const SingleRecoTrack& get_single_reco_track();
+        const Km2RecoClusters& get_reco_clusters();
+        const Km2RecoEvent& get_reco_event();
 
-            HistStore hs_;
+        template <typename T>
+            void register_plotter( std::string ) ;
+        void add_selection( const Selection * s, 
+                std::vector<std::string>& plot_types, std::string prefix = "" );
 
-            REG_DEC_SUB( Km2Breakdown );
-    };
+        void end_processing();
 
-            template <typename T>
-            void Km2Breakdown::register_plotter( std::string name ) 
-            {
-                mini_plot_map_.insert( std::make_pair( name, createInstance<T> ) );
-            }
+    private:
+        typedef std::map<std::string, MiniPlot*(*)(Km2Breakdown& km2b)> map_type;
+        map_type  mini_plot_map_;
 
-    template<>
-        Subscriber * create_subscriber<Km2Breakdown>
-        (YAML::Node& instruct, RecoFactory& rf );
+        const Km2Event& km2e_;
+        const Km2RecoEvent * km2re_;
+        const Selection& good_track_;
+
+        const Km2Clusters& km2c_;
+        const Km2RecoClusters * km2rc_;
+
+        void process_event();
+        TFile& tf_;
+        std::string folder_;
+
+        std::vector<std::pair<const Selection*, std::vector<MiniPlot*>> > selection_plots_;
+        std::vector<std::unique_ptr<MiniPlot>> plot_store_;
+
+        HistStore hs_;
+
+        REG_DEC_SUB( Km2Breakdown );
+};
+
+    template <typename T>
+void Km2Breakdown::register_plotter( std::string name ) 
+{
+    mini_plot_map_.insert( std::make_pair( name, createInstance<T> ) );
+}
+
+template<>
+Subscriber * create_subscriber<Km2Breakdown>
+(YAML::Node& instruct, RecoFactory& rf );
 }
 #endif

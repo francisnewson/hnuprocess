@@ -61,30 +61,69 @@ namespace fn
         return km2b.get_single_reco_track().get_time(); }
 
     //CLUSTER DISTANCE
-    template <> TH1D * hinit<mp_cluster_distance>( Km2Breakdown& km2b ){
-        return km2b.get_hist_store().MakeTH1D(
-                "h_cluster_distance", "Cluster distance(cm)", 200, 0, 100, "d (cm) " ); }
+    void  ClusterMiniPlot::init( Km2Breakdown& km2b ){
+        h_ds_ =  km2b.get_hist_store().MakeTH1D(
+                "h_cluster_distance", "Cluster distance(cm)", 300, 0, 300, "d (cm) " );
+        h_E_ =  km2b.get_hist_store().MakeTH1D(
+                "h_cluster_energy", "Cluster energy(cm)", 200, 0, 100, "d (cm) " );
 
-    template <> double hfill<mp_cluster_distance>( Km2Breakdown& km2b ){
+        h_ds_E_ =  km2b.get_hist_store().MakeTH2D(
+                "h_cluster_distance_energy", "Cluster distance and energy" , 
+                300, 0, 300 , "Cluster distance(cm)",
+                200, 0, 100, "Cluster energy (GeV)" );
+    }
+
+    void ClusterMiniPlot::fill( Km2Breakdown& km2b, double wgt ){
+
         const Km2RecoClusters& km2rc = km2b.get_reco_clusters();
         const ClusterCorrector& cluster_corrector = km2rc.get_cluster_corrector();
         bool ismc= km2rc.is_mc();
         const SingleRecoTrack& srt = km2b.get_single_reco_track();
-        double closest_distance = std::numeric_limits<double>::max();
-        for ( auto clus = km2rc.all_begin() ; clus != km2rc.all_end() ; ++clus )
+        double furthest_distance = 0;
+        double furthest_energy = 0;
+
+        if ( km2rc.all_size() > 0 )
         {
-            CorrCluster  cc{ **clus, cluster_corrector, ismc };
-            TrackProjCorrCluster track_cluster{ cc };
-            TVector3 cluster_pos = track_cluster.get_pos();
-            TVector3 trk_lkr = srt.extrapolate_ds( cluster_pos.Z() );
-            double track_cluster_sep = (trk_lkr - cluster_pos ).Mag();
-            if ( track_cluster_sep < closest_distance )
+
+            for ( auto clus = km2rc.all_begin() ; clus != km2rc.all_end() ; ++clus )
             {
-                closest_distance = track_cluster_sep;
+                CorrCluster  cc{ **clus, cluster_corrector, ismc };
+                TrackProjCorrCluster track_cluster{ cc };
+                TVector3 cluster_pos = track_cluster.get_pos();
+                TVector3 trk_lkr = srt.extrapolate_ds( cluster_pos.Z() );
+                double track_cluster_sep = (trk_lkr - cluster_pos ).Mag();
+                if ( track_cluster_sep > furthest_distance )
+                {
+                    furthest_distance = track_cluster_sep;
+                    furthest_energy = track_cluster.get_energy();
+                }
             }
+            h_ds_->Fill( furthest_distance, wgt );
+            h_E_->Fill( furthest_energy, wgt );
+            h_ds_E_->Fill( furthest_distance, furthest_energy, wgt );
         }
-        return closest_distance;
     }
+
+    void ClusterMiniPlot::set_name( std::string name )
+    { 
+        h_ds_->SetName(  (std::string("h_ds_") + name.c_str() ).c_str() );
+        h_E_->SetName(  (std::string("h_E_") + name.c_str() ).c_str() );
+        h_ds_E_->SetName(  (std::string("h_ds_E_") + name.c_str() ).c_str() );
+    }
+
+    std::string ClusterMiniPlot::get_name()
+    { return ""; }
+
+    //LKR
+    template <> TH2D * h2init<mp_zt>( Km2Breakdown& km2b ){
+        return km2b.get_hist_store().MakeTH2D(
+                "h_zt", "T vs Z",
+                150, -5000, 10000, "Z( cm) ",
+                250, 0, 25e-3, "t( rad) "); }
+
+    template <> std::pair<double,double> h2fill<mp_zt>( Km2Breakdown& km2b ) {
+        auto e = km2b.get_reco_event();
+        return std::make_pair( e.get_zvertex(), e.get_opening_angle() ); }
 
     //--------------------------------------------------
 
@@ -102,7 +141,8 @@ namespace fn
         register_plotter<Mini1DPlot<mp_r_dch4>>( "rdch4" );
         register_plotter<Mini2DPlot<mp_xy_lkr>>( "xylkr" );
         register_plotter<Mini1DPlot<mp_dcht>>( "dcht" );
-        register_plotter<Mini1DPlot<mp_cluster_distance>>( "rcluster" );
+        register_plotter<ClusterMiniPlot>( "rcluster" );
+        register_plotter<Mini2DPlot<mp_zt>>( "zt" );
     }
 
     const SingleRecoTrack& Km2Breakdown::get_single_reco_track()
@@ -113,6 +153,10 @@ namespace fn
     const Km2RecoClusters& Km2Breakdown::get_reco_clusters()
     {
         return *km2rc_;
+    }
+    const Km2RecoEvent& Km2Breakdown::get_reco_event()
+    {
+        return *km2re_;
     }
 
     void Km2Breakdown::add_selection( const Selection * s,

@@ -176,5 +176,70 @@ namespace fn
     template<>
         Subscriber * create_subscriber<Km2Angle>
         (YAML::Node& instruct, RecoFactory& rf );
+
+    //--------------------------------------------------
+
+    class TrackZT : public CachedSelection
+    {
+        public:
+            TrackZT( const Km2Event& km2e,
+                    std::vector<polygon_type> zt_region );
+
+        private:
+            bool do_check() const;
+
+            const Km2Event& km2e_;
+            const AreaCut area_cut_;
+
+            REG_DEC_SUB( TrackZT);
+    };
+
+    template<>
+        Subscriber * create_subscriber<TrackZT>
+        (YAML::Node& instruct, RecoFactory& rf );
+
+    //--------------------------------------------------
+    
+    class TrackTPhi : public CachedSelection
+    {
+        public:
+            TrackTPhi( const Km2Event& km2e,
+                    std::vector<polygon_type> tphi_region );
+
+        private:
+            bool do_check() const;
+
+            const Km2Event& km2e_;
+            const AreaCut area_cut_;
+
+            REG_DEC_SUB( TrackTPhi);
+    };
+
+    template<>
+        Subscriber * create_subscriber<TrackTPhi>
+        (YAML::Node& instruct, RecoFactory& rf );
+
+    //--------------------------------------------------
+    //
+    class TrackPT : public CachedSelection
+    {
+        public:
+            TrackPT( const Km2Event& km2e,
+                    std::vector<polygon_type> pt_region );
+
+        private:
+            bool do_check() const;
+
+            const Km2Event& km2e_;
+            const AreaCut area_cut_;
+
+            REG_DEC_SUB( TrackPT);
+    };
+
+    template<>
+        Subscriber * create_subscriber<TrackPT>
+        (YAML::Node& instruct, RecoFactory& rf );
+
+    //--------------------------------------------------
 }
 #endif

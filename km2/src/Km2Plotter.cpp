@@ -83,11 +83,12 @@ namespace fn
         h_pt_ = hs_.MakeTH1D( "h_pt", "P_T",
                 100, 0, 0.5, "#P_T (GeV)" );
 
-        h_z_ = hs_.MakeTH1D( "h_z", "Z Decay Vertex (cm)",
-                120, -2000, 10000, "Z (cm)" );
+        h_z_ = hs_.MakeTH1D( "h_z", "Z Decay Vertex (cm)", 120, -2000, 10000, "Z (cm)" );
 
         h_track_time_ = hs_.MakeTH1D( "h_track_time", "Track time",
                 200, -100, 100, "t (ns)" );
+
+        h_rcoll_ = hs_.MakeTH1D( "h_rcoll", "Radius at final collimator", 205, 0, 250, "R (cm)" );
 
         //----------
 
@@ -112,6 +113,10 @@ namespace fn
         h_z_t_ = hs_.MakeTH2D( "h_z_t", "Z vs T " ,
                 150, -5000, 10000, "Z( cm) ",
                 250, 0, 25e-3, "t( rad) ");
+
+        h_u_v_ = hs_.MakeTH2D( "h_u_v_", "U vs V " ,
+                150, 0, -1, "U ",
+                250, 0, -1, "V ");
 
         h_z_phi_ = hs_.MakeTH2D( "h_z_phi", "Z vs T " ,
                 150, -5000, 10000, "Z( cm) ",
@@ -144,6 +149,10 @@ namespace fn
         h_txty_ =  hs_.MakeTH2D( "h_txty", "Track direction",
                 100, -0.02, 0.02, "tx", 
                 100, -0.02, 0.02, "ty" );
+
+        h_z_rcoll_ =  hs_.MakeTH2D( "h_z_rcoll", "R(coll) vs Z ",
+                130, -3000, 10000, "z(cm)", 
+                200, 0, 200, "rcoll(cm)" );
 
         //----------
 
@@ -206,6 +215,12 @@ namespace fn
 
         h_track_time_->Fill( km2re.get_reco_track()->get_adjusted_time() , wgt );
 
+        const SingleRecoTrack * srt = km2re.get_reco_track();
+        TVector3 v_coll = srt->extrapolate_bf( na62const::zFinalCollimator );
+
+        h_rcoll_->Fill( std::hypot( v_coll.X(), v_coll.Y() ), wgt );
+        h_z_rcoll_->Fill( km2re.get_zvertex(), std::hypot( v_coll.X(), v_coll.Y() ), wgt );
+
         //Kinematic correlations
         h_p_t_->Fill( km2re.get_muon_mom(), km2re.get_opening_angle(), wgt );
         h_p_cda_->Fill( km2re.get_muon_mom(), km2re.get_cda(), wgt );
@@ -218,15 +233,20 @@ namespace fn
         h_m2_cda_->Fill( km2re.get_m2m_kmu(), km2re.get_cda(), wgt );
         h_pt_m2m_kmu_->Fill( km2re.get_pt(), km2re.get_m2m_kmu(), wgt );
 
+        double z = km2re.get_zvertex();
+        double t = km2re.get_opening_angle();
+        double u = 2 * ( na62const::zDch4 - z ) * std::tan( t ) / 10;
+        double v = std::pow( (na62const::zDch4 - z ) / ( 2 * 10 ) , 2 ) - std::pow( std::tan( t ), 2 );
+
+        h_u_v_->Fill( u, v , wgt );
+
         h_txty_->Fill( km2re.get_tx(), km2re.get_ty(), wgt );
 
         h_z_phi_->Fill( km2re.get_zvertex(), km2re.get_muon_phi(), wgt );
         h_t_phi_->Fill( km2re.get_opening_angle(), km2re.get_muon_phi(), wgt );
 
         //Slices
-        const SingleRecoTrack * srt = km2re.get_reco_track();
 
-        TVector3 v_coll = srt->extrapolate_bf( na62const::zFinalCollimator );
         h_xy_coll_->Fill( v_coll.X(), v_coll.Y(), wgt );
         h_xy_coll_fine_->Fill( v_coll.X(), v_coll.Y(), wgt );
 

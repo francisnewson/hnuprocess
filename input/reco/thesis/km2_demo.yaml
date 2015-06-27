@@ -31,7 +31,6 @@
 - input:
     name: cluster_corrector
     type: ClusterCorrector
-    #filename: "/afs/cern.ch/user/f/fnewson/work/hnu/gopher/data/detector/eopCorrfile.dat"
     filename: "/afs/cern.ch/user/f/fnewson/work/hnu/gopher/data/detector/eopCorrfile.dat"
     enabled: true
 
@@ -276,6 +275,68 @@
     inputs:
         km2clusters: full_km2clusters
 
+- selection:
+    name: muv_acc
+    type: TrackXYUVAcceptance
+    track_section: ds
+    z: 13012.0 #MUV3
+    min_x: -135.0
+    max_x:  135.0
+    min_y: -135.0
+    max_y:  135.0
+    min_u: -135.0
+    max_u:  135.0
+    min_v: -135.0
+    max_v:  135.0
+    inputs:
+        ogt: bf_st
+
+- selection:
+    name: zt_cut
+    type: TrackZT
+    track_section: us
+    shape: polygon
+    points:
+        - [  -935,   0.0097 ]
+        - [  -495, 0.0080]
+        - [  -170,  0.0062]
+        - [   230,    0.0050]
+        - [   855,   0.0040]
+        - [  1565,   0.0030]
+        - [  2044,   0.0028]
+        - [  2400,  0.0014]
+        - [  2225,  0 ]
+        - [  2185,  0 ]
+        - [  10000, 0 ]
+        - [  10000, 0.1 ]
+        - [   -935, 0.1 ]
+        - [   -935, 0.0097 ]
+    inputs:
+        km2event: km2_event
+
+- selection:
+    name: zt_cut
+    type: TrackTPhi
+    track_section: us
+    shape: polygon
+    points:
+        - 0.009435636 -0.0019405051
+        - 0.010204361 0.5843015
+        - 0.010245147 1.2571541
+        - 0.008522116 1.9605523
+        - 0.007241205 2.4188466
+        - 0.006510817 3.0041392
+        - 0.0063092164    3.6530917
+        - 0.007144468 4.1602197
+        - 0.008069264 4.390358
+        - 0.009611458 4.5971403
+        - 0.010248647 5.0329027
+        - 0.010224307 5.499908
+        - 0.008876637 6.08481
+        - 0.008588876 6.322096
+
+
+
 - analysis:
     name: full_km2_breakdown
     type: Km2Breakdown
@@ -283,6 +344,8 @@
     selection:
         - { cut: good_trk, plot : [] }
         - { cut: pos_trk, plot: [] }
+        - { cut: zt_cut, plot: [ zt ] }
+        - { cut: passer, plot: [ zt ], name: after_ }
         - { cut: quality_7, plot: [ track_quality ] }
         - { cut: cda_3cm, plot: [ cda ] }
         - { cut: dch1_acc, plot: [ rdch1 ] }
