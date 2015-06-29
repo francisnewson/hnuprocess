@@ -5,8 +5,8 @@ scaling:
         peakname: km2
 
         channels:
-            halo_channels: [ p6.data.km.q11t.v2.pos, p6.data.kless.q11t.v2.pos  ]
-            data_channels: [ p5.data.q11t.v3.pos ]
+            halo_channels: [ p6.data.km.q1.v2.pos, p6.data.kless.q1.v2.pos  ]
+            data_channels: [ p5.data.q1.v2.pos ]
             peak_channels: [ p5.km2.v2.pos ]
 
         halo: 
@@ -43,8 +43,8 @@ scaling:
         peakname: km2
 
         channels:
-            halo_channels: [ p6.data.km.q11t.v2.neg ]
-            data_channels: [ p5.data.q11t.v3.neg ]
+            halo_channels: [ p6.data.km.q1.v2.neg ]
+            data_channels: [ p5.data.q1.v2.neg ]
             peak_channels: [ p5.km2.v2.neg ]
 
         halo: 
@@ -94,11 +94,14 @@ output:
         - { path: full_upper_halo/h_p, name: halo_upper_p, rebin: 1  }
         - { path: full_upper_halo/h_p_z, name: halo_upper_pz, rebin: 1  }
         - { path: full_upper_halo/h_cda, name: halo_upper_cda, rebin: 1  }
+        - { path: full_upper_halo/h_t, name: halo_upper_t, rebin: 5  }
+        - { path: full_upper_halo/h_t_phi, name: halo_upper_phi,
+        collapse_y: true, rebin: 5  }
 
     data_plot:
         channels:
-            - p5.data.q11t.v3.pos
-            - p5.data.q11t.v3.neg
+            - p5.data.q1.v2.pos
+            - p5.data.q1.v2.neg
         do_blind: false
 
     stack:
@@ -173,8 +176,8 @@ output:
             errors:
                 - halo_scale
             channels:
-                - p6.data.kless.q11t.v2.pos
-                - p6.data.km.q11t.v2.pos
+                - p6.data.kless.q1.v2.pos
+                - p6.data.km.q1.v2.pos
 
         - item:
             name: halo_neg
@@ -183,7 +186,7 @@ output:
             errors:
                 - halo_scale
             channels:
-                - p6.data.km.q11t.v2.neg
+                - p6.data.km.q1.v2.neg
 
         - item:
             name: km2_pos
