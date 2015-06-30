@@ -117,24 +117,68 @@ namespace fn
 
     //--------------------------------------------------
 
-    class K3piPT : public CachedSelection
+    class K3piPT2 : public CachedSelection
     {
         public:
-            K3piPT ( const K3piReco& k2pi_reco, 
-                    double max_pt );
+            K3piPT2 ( const K3piReco& k2pi_reco, 
+                    double max_pt2 );
 
         private:
             bool do_check() const;
             const K3piReco& k3pi_reco_;
 
-            double max_pt_;
+            double max_pt2_;
 
-            REG_DEC_SUB( K3piPT );
+            REG_DEC_SUB( K3piPT2 );
     };
 
     template<>
-        Subscriber * create_subscriber<K3piPT>
+        Subscriber * create_subscriber<K3piPT2>
         (YAML::Node& instruct, RecoFactory& rf );
 
+    //--------------------------------------------------
+
+    class K3piM2M : public CachedSelection
+    {
+        public:
+            K3piM2M ( const K3piReco& k2pi_reco, 
+                    double half_width );
+
+        private:
+            bool do_check() const;
+            const K3piReco& k3pi_reco_;
+
+            double half_width_;
+
+            REG_DEC_SUB( K3piM2M );
+    };
+
+    template<>
+        Subscriber * create_subscriber<K3piM2M>
+        (YAML::Node& instruct, RecoFactory& rf );
+
+    //--------------------------------------------------
+
+    class K3piZVertex : public CachedSelection
+    {
+        public:
+            K3piZVertex ( const K3piReco& k2pi_reco, 
+                    double min_z, double max_z );
+
+        private:
+            bool do_check() const;
+            const K3piReco& k3pi_reco_;
+
+            double min_z_;
+            double max_z_;
+
+            REG_DEC_SUB( K3piZVertex );
+    };
+
+    template<>
+        Subscriber * create_subscriber<K3piZVertex>
+        (YAML::Node& instruct, RecoFactory& rf );
+
+    //--------------------------------------------------
 }
 #endif

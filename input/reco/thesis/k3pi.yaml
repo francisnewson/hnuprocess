@@ -119,6 +119,28 @@
     inputs:
         k3pi_reco:  k3pi_event
 
+- selection:
+    name: max_pt2
+    type: K3piPT2
+    max_pt2: 0.001
+    inputs:
+        k3pi_reco:  k3pi_event
+
+- selection:
+    name: zvertex
+    type: K3piZVertex
+    min_z: -1800
+    max_z: 7000
+    inputs:
+        k3pi_reco:  k3pi_event
+
+- selection:
+    name: m2m
+    type: K3piM2M
+    half_width: 0.0015
+    inputs:
+        k3pi_reco:  k3pi_event
+
 ###################################################
 # SELECTIONS
 ###################################################
@@ -132,6 +154,9 @@
         - track_sep
         - max_dy
         - chi2 
+        - zvertex
+        - m2m
+        - max_pt2
 
 
 ###################################################

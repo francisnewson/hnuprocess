@@ -17,7 +17,7 @@ namespace fn
 
     void K3piRecoEvent::update( int charge, double chi2,
             double min_dch1_sep, double max_dy_dch4, double max_eop, 
-            TLorentzVector p4_total )
+            TLorentzVector p4_total, TVector3 vertex, TVector3 kaon_mom )
     {
         charge_ = charge;
         chi2_ = chi2;
@@ -25,14 +25,17 @@ namespace fn
         max_dy_dch4_ = max_dy_dch4;
         max_eop_ = max_eop;
         p4_total_ = p4_total;
+        vertex_ = vertex;
+        kaon_mom_ = kaon_mom;
     }
             int K3piRecoEvent::get_charge() const { return charge_; }
             double K3piRecoEvent::get_chi2() const{ return chi2_; }
             double K3piRecoEvent::get_min_dch1_sep() const { return min_dch1_sep_ ; }
             double K3piRecoEvent::get_max_dy_dch4_sep() const { return max_dy_dch4_; }
             double K3piRecoEvent::get_max_eop() const { return max_eop_; }
-            double K3piRecoEvent::get_pt() const { return p4_total_.Pt(); }
+            double K3piRecoEvent::get_pt() const { return p4_total_.Vect().Perp( kaon_mom_ ); }
             double K3piRecoEvent::get_mom() const{ return p4_total_.P(); }
+            double K3piRecoEvent::get_z_vertex() const{ return vertex_.Z(); }
 
             double K3piRecoEvent::get_invariant_mass2() const
             {
@@ -43,9 +46,9 @@ namespace fn
 
     REG_DEF_SUB( K3piReco );
 
-    K3piReco::K3piReco( const fne::Event * e,
+    K3piReco::K3piReco( const fne::Event * e, int charge,
             const KaonTrack& kt, const ClusterCorrector& cc )
-        :e_( e ), kt_( kt ),cc_( cc)
+        :e_( e ), kt_( kt ),cc_( cc), req_charge_( charge )
     {
     }
 
@@ -93,10 +96,9 @@ namespace fn
         //require 3 tracks
         if ( rv->nvertextracks != 3 ) {return false; }
 
-        //require +1 charge
-        //if ( rv->charge != 1 ) {return ; }
-
+        //check charge
         int charge = rv->charge;
+        if ( ( req_charge_) != 0 && (req_charge_ != charge) ){ return false; }
 
         //extract track momenta and dch impact points
         std::vector<TLorentzVector> momenta;
@@ -197,7 +199,8 @@ namespace fn
                 }
             }
         }
-        re_.update( charge, chi2, min_dch1_sep, max_dy_dch4, max_eop, total_4mom );
+        re_.update( charge, chi2, min_dch1_sep, max_dy_dch4, max_eop, total_4mom, 
+                {rv->x, rv->y, rv->z}, kt_.get_kaon_3mom() );
 
         return true;
     }
@@ -214,7 +217,9 @@ namespace fn
 
             const ClusterCorrector * cc = get_cluster_corrector( instruct, rf );
 
-            return new K3piReco{ e, *kt, *cc};
+            int charge = get_yaml_default<int>( instruct, "charge", 0 );
+
+            return new K3piReco{ e, charge,  *kt, *cc};
         }  
 
     //Calculate dch4 y shift

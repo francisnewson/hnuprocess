@@ -1,6 +1,7 @@
 #include "k3pi_selections.hh"
 #include "K3piReco.hh"
 #include "yaml_help.hh"
+#include "NA62Constants.hh"
 namespace fn
 {
     REG_DEF_SUB( FoundK3pi );
@@ -112,23 +113,76 @@ namespace fn
 
     //--------------------------------------------------
 
-    REG_DEF_SUB( K3piPT );
+    REG_DEF_SUB( K3piPT2 );
 
-    K3piPT::K3piPT ( const K3piReco& k3pi_reco, double max_pt )
-        :k3pi_reco_( k3pi_reco), max_pt_( max_pt ){}
+    K3piPT2::K3piPT2 ( const K3piReco& k3pi_reco, double max_pt2 )
+        :k3pi_reco_( k3pi_reco), max_pt2_( max_pt2 ){}
 
-    bool K3piPT::do_check() const
+    bool K3piPT2::do_check() const
     {
         auto & k3pi_reco_event = k3pi_reco_.get_k3pi_reco_event();
-        return k3pi_reco_event.get_pt() < max_pt_;
+        return std::pow( k3pi_reco_event.get_pt(), 2) < max_pt2_;
     }
 
     template<>
-        Subscriber * create_subscriber<K3piPT>
+        Subscriber * create_subscriber<K3piPT2>
         (YAML::Node& instruct, RecoFactory& rf )
         {
             K3piReco * k3pi_reco = get_sub<K3piReco>( instruct, rf );
-            double max_pt = get_yaml<double>( instruct, "max_pt" );
-            return new K3piPT( *k3pi_reco, max_pt );
+            double max_pt2 = get_yaml<double>( instruct, "max_pt2" );
+            return new K3piPT2( *k3pi_reco, max_pt2 );
         }
+
+    //--------------------------------------------------
+
+    REG_DEF_SUB( K3piM2M );
+
+    K3piM2M::K3piM2M ( const K3piReco& k3pi_reco, double half_width )
+        :k3pi_reco_( k3pi_reco), half_width_( half_width ){}
+
+    bool K3piM2M::do_check() const
+    {
+        auto & k3pi_reco_event = k3pi_reco_.get_k3pi_reco_event();
+        double m2 = k3pi_reco_event.get_invariant_mass2();
+
+        return ( m2 > na62const::mK2 - half_width_ ) && ( m2 < na62const::mK2 + half_width_ );
+    }
+
+    template<>
+        Subscriber * create_subscriber<K3piM2M>
+        (YAML::Node& instruct, RecoFactory& rf )
+        {
+            K3piReco * k3pi_reco = get_sub<K3piReco>( instruct, rf );
+            double half_width = get_yaml<double>( instruct, "half_width" );
+            return new K3piM2M( *k3pi_reco, half_width );
+        }
+
+    //--------------------------------------------------
+    
+    REG_DEF_SUB( K3piZVertex );
+
+    K3piZVertex::K3piZVertex ( const K3piReco& k3pi_reco, double min_z, double max_z )
+        :k3pi_reco_( k3pi_reco), min_z_( min_z ), max_z_( max_z) {}
+
+    bool K3piZVertex::do_check() const
+    {
+        auto & k3pi_reco_event = k3pi_reco_.get_k3pi_reco_event();
+        double z = k3pi_reco_event.get_z_vertex();
+
+        return z > min_z_ && z < max_z_;
+
+    }
+
+    template<>
+        Subscriber * create_subscriber<K3piZVertex>
+        (YAML::Node& instruct, RecoFactory& rf )
+        {
+            K3piReco * k3pi_reco = get_sub<K3piReco>( instruct, rf );
+            double min_z = get_yaml<double>( instruct, "min_z" );
+            double max_z = get_yaml<double>( instruct, "max_z" );
+            return new K3piZVertex( *k3pi_reco, min_z , max_z );
+        }
+
+
+    //--------------------------------------------------
 }

@@ -41,11 +41,13 @@ namespace fn
             double get_pt() const;
             double get_mom() const;
             double get_invariant_mass2() const;
+            double get_z_vertex() const;
 
             void update( int charge, double chi2,
                     double min_dch1_sep, 
                     double max_dy_dch4, double max_eop, 
-                    TLorentzVector p4_total );
+                    TLorentzVector p4_total,
+                    TVector3 vertex, TVector3 kaon_mom);
 
         private:
             int charge_;
@@ -54,12 +56,14 @@ namespace fn
             double max_dy_dch4_;
             double max_eop_;
             TLorentzVector p4_total_;
+            TVector3 vertex_;
+            TVector3 kaon_mom_;
     };
 
     class K3piReco : public Subscriber
     {
         public:
-            K3piReco( const fne::Event * e, 
+            K3piReco( const fne::Event * e, int charge,
                     const KaonTrack & kt, const ClusterCorrector& cc );
             void end_processing();
 
@@ -75,6 +79,8 @@ namespace fn
                 const KaonTrack& kt_;
 
                 const ClusterCorrector& cc_;
+
+                int req_charge_;
 
 
                 mutable bool dirty_;
