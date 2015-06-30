@@ -20,6 +20,7 @@ lenv.AddLibs( [
             'muons',
             'akl',
             'shuffle',
+            'k3pi',
             ] )
 lenv.AddEvent( event_dir, 'event' )
 

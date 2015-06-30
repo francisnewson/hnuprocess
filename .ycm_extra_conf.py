@@ -55,27 +55,30 @@ flags = [
 'c++',
 # This path will only work on OS X, but extra paths that don't exist are not
 # harmful
-'-I',  '/afs/cern.ch/user/f/fnewson/work/hnu/gopher/code/process/clusters/inc',
-'-I',  '/afs/cern.ch/user/f/fnewson/work/hnu/gopher/code/process/conditions/inc',
-'-I',  '/afs/cern.ch/user/f/fnewson/work/hnu/gopher/code/process/reco/inc',
-'-I',  '/afs/cern.ch/user/f/fnewson/work/hnu/gopher/code/process/corrections/inc',
-'-I',  '/afs/cern.ch/user/f/fnewson/work/hnu/gopher/code/process/tools/inc',
-'-I',  '/afs/cern.ch/user/f/fnewson/work/hnu/gopher/code/process/tracking/inc',
-'-I',  '/afs/cern.ch/user/f/fnewson/work/hnu/gopher/code/process/kinfo/inc',
-'-I',  '/afs/cern.ch/user/f/fnewson/work/hnu/gopher/code/process/km2/inc',
-'-I',  '/afs/cern.ch/user/f/fnewson/work/hnu/gopher/code/process/k2pi/inc',
-'-I',  '/afs/cern.ch/user/f/fnewson/work/hnu/gopher/code/process/akl/inc',
-'-I',  '/afs/cern.ch/user/f/fnewson/work/hnu/gopher/code/process/k2pi/dict',
-'-I',  '/afs/cern.ch/user/f/fnewson/work/hnu/gopher/code/process/dch/inc',
-'-I',  '/afs/cern.ch/user/f/fnewson/work/hnu/gopher/code/process/dch/dict',
-'-I',  '/afs/cern.ch/user/f/fnewson/work/hnu/gopher/code/process/muons/inc',
-'-I',  '/afs/cern.ch/user/f/fnewson/work/hnu/gopher/code/process/shuffle/inc',
+#'-I',  '/afs/cern.ch/user/f/fnewson/work/hnu/gopher/code/process/clusters/inc',
+#'-I',  '/afs/cern.ch/user/f/fnewson/work/hnu/gopher/code/process/conditions/inc',
+#'-I',  '/afs/cern.ch/user/f/fnewson/work/hnu/gopher/code/process/reco/inc',
+#'-I',  '/afs/cern.ch/user/f/fnewson/work/hnu/gopher/code/process/corrections/inc',
+#'-I',  '/afs/cern.ch/user/f/fnewson/work/hnu/gopher/code/process/tools/inc',
+#'-I',  '/afs/cern.ch/user/f/fnewson/work/hnu/gopher/code/process/tracking/inc',
+#'-I',  '/afs/cern.ch/user/f/fnewson/work/hnu/gopher/code/process/kinfo/inc',
+#'-I',  '/afs/cern.ch/user/f/fnewson/work/hnu/gopher/code/process/km2/inc',
+#'-I',  '/afs/cern.ch/user/f/fnewson/work/hnu/gopher/code/process/k2pi/inc',
+#'-I',  '/afs/cern.ch/user/f/fnewson/work/hnu/gopher/code/process/akl/inc',
+#'-I',  '/afs/cern.ch/user/f/fnewson/work/hnu/gopher/code/process/k2pi/dict',
+#'-I',  '/afs/cern.ch/user/f/fnewson/work/hnu/gopher/code/process/dch/inc',
+#'-I',  '/afs/cern.ch/user/f/fnewson/work/hnu/gopher/code/process/dch/dict',
+#'-I',  '/afs/cern.ch/user/f/fnewson/work/hnu/gopher/code/process/muons/inc',
+#'-I',  '/afs/cern.ch/user/f/fnewson/work/hnu/gopher/code/process/shuffle/inc',
 '-isystem',  '/afs/cern.ch/sw/lcg/app/releases/ROOT/5.34.14/x86_64-slc6-gcc46-opt/root/include',
 '-isystem',  '/afs/cern.ch/sw/lcg/external/Boost/1.55.0_python2.7/x86_64-slc6-gcc47-opt/include/boost-1_55',
 '-isystem',  '/afs/cern.ch/user/f/fnewson/work/hnu/gopher/code/fneevent/inc',
 '-isystem',  '/afs/cern.ch/user/f/fnewson/work/programs/yaml-cpp/yaml-cpp-0.5.1/include/',
 '-isystem', '/afs/cern.ch/sw/lcg/contrib/gcc/4.8.1/x86_64-slc6-gcc48-opt/include/c++/4.8.1'
 ]
+
+for folder in [ 'clusters', 'conditions', 'reco', 'corrections', 'tools', 'tracking', 'kinfo', 'km2', 'dch', 'k3pi', 'muons', 'shuffle' ]:
+    flags.extend( ['-I', '/afs/cern.ch/user/f/fnewson/work/hnu/gopher/code/process/' + folder  + '/inc' ] )
 
 
 # Set this to the absolute path to the folder (NOT the file!) containing the

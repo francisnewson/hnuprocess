@@ -1,0 +1,156 @@
+#k3pi selection for beam analyssi
+#
+#-------------------------------------------------- 
+
+###################################################
+# FILE MANAGEMENT
+###################################################
+
+- output:
+    name: tfout
+    type: tfile
+    filename: k3pi_plots.root
+
+- output:
+    name: text_out
+    type: ostream
+    filename: cerr
+
+###################################################
+# STANDARD CORRECTIONS
+###################################################
+
+- input:
+    name: kaon_track
+    type: KaonTrack
+    kaon_type: auto
+    beam_mapping: input/reco/beam/beam_mapping.yaml
+
+- selection:
+    name: kaon_mom_weights
+    kt: kaon
+    type: KaonMomWeight
+    crude_weights: input/reco/mod/kaon_crude_weights.dat
+    fine_weights: input/reco/mod/kaon_fine_weights.dat
+
+- input:
+    name: cluster_corrector
+    type: ClusterCorrector
+    filename: "/afs/cern.ch/user/f/fnewson/work/hnu/gopher/data/detector/eopCorrfile.dat"
+    enabled: true
+
+# 1]Bad bursts
+- selection:
+    name: good_phys_burst
+    type: BadBurst
+    burst_list: "input/reco/conditions/bad_phys_burst.dat"
+
+- selection:
+    name: good_dch_burst
+    type: BadBurst
+    burst_list: "input/reco/conditions/bad_dch_burst.dat"
+
+- selection:
+    name: good_muv_burst
+    type: BadBurst
+    burst_list: "input/reco/conditions/bad_muv_burst.90.dat"
+
+- selection:
+    name: good_muv_burst_range
+    type: BadBurstRange
+    burst_range_list: "input/reco/conditions/bad_muv_burst_ranges.dat"
+
+###################################################
+# INPUTS
+###################################################
+
+
+- subscriber:
+    name: k3pi_event
+    type: K3piReco
+    tfile: tfout
+    folder: old_k3pi_plots
+    selection: passer
+    inputs:
+        kt: kaon_track
+        ClusterCorrector: cluster_corrector
+
+###################################################
+# CUTS
+###################################################
+
+#Autopass
+- selection:
+    name: passer
+    type : auto_pass
+
+#found k3pi
+- selection:
+    name: found_k3pi
+    type: FoundK3pi
+    inputs:
+        k3pi_reco:  k3pi_event
+
+- selection:
+    name: pos_vertex
+    type: K3piCharge
+    charge: +1
+    inputs:
+        k3pi_reco:  k3pi_event
+
+- selection:
+    name: track_sep
+    type: K3piTrackSep
+    min_track_sep:  0.5
+    inputs:
+        k3pi_reco:  k3pi_event
+
+- selection:
+    name: max_dy
+    type: K3piDY
+    max_dy:  0.6
+    inputs:
+        k3pi_reco:  k3pi_event
+
+- selection:
+    name: chi2
+    type: K3piChi2
+    max_chi2: 40
+    inputs:
+        k3pi_reco:  k3pi_event
+
+###################################################
+# SELECTIONS
+###################################################
+
+- selection:
+    name: k3pi_full
+    type: CompositeSelection
+    children:
+        - found_k3pi
+        - pos_vertex
+        - track_sep
+        - max_dy
+        - chi2 
+
+
+###################################################
+# ANALYSES
+###################################################
+
+- analysis:
+    name: k3pi_plots
+    type: K3piPlots
+    selection: k3pi_full
+    tfile: tfout
+    folder: k3pi_plots
+    inputs:
+        k3pi_reco: k3pi_event
+
+- analysis : 
+    name : k3pi_summary
+    type: Summary
+    base : passer
+    source : k3pi_full 
+    ostream: text_out
+
