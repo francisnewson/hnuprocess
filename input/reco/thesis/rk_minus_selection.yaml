@@ -101,6 +101,14 @@
     codename: bursts
 
 - analysis:
+    name: data_burst_count
+    type: BurstCount
+    tfile: tfout
+    folder: data_burst_count
+    selection: weighted_data_sample
+    codename: data_bursts
+
+- analysis:
     type: Summary
     name: weighted_fid_summary
     base: passer
@@ -206,6 +214,25 @@
     min_eop: 0.0, max_eop: 0.85, check_multiple: true,
     inputs: { km2clusters: km2_clusters, ogt: bf_st } }
 
+#-------KM2 S2] m2miss
+- selection:
+    name: rk_km2_m2m
+    type: Km2PM2Miss
+    shape: rectangles
+    points:
+        - [ 13, 20, -16e-3, 13e-3 ]
+        - [ 20, 25, -14e-3, 11e-3 ]
+        - [ 25, 30, -13e-3, 10e-3 ]
+        - [ 30, 35, -13e-3, 10e-3 ]
+        - [ 35, 40, -13e-3, 10e-3 ] 
+        - [ 40, 45, -13e-3, 10e-3 ]
+        - [ 45, 50, -13e-3, 10e-3 ]
+        - [ 50, 55, -14e-3, 11e-3 ]
+        - [ 55, 60, -15e-3, 12e-3 ]
+        - [ 60, 65, -16e-3, 12e-3 ]
+    inputs:
+        km2event: km2_event
+
 
 ###################################################
 # SELECTIONS
@@ -237,6 +264,14 @@
         - weighted_rk_minus_track_selection
         - rk_hot_lkr
         - rk_lkr_veto
+        - km2_eop
+
+- selection:
+    name : weighted_rk_minus_mass_cut_sel
+    type: CompositeSelection
+    children:
+        - weighted_rk_minus_selection
+        - rk_km2_m2m
 
 ###################################################
 # ANALYSES
@@ -246,7 +281,7 @@
     type: Summary
     name: stats_summary
     base: passer
-    source: weighted_rk_minus_selection
+    source: weighted_rk_minus_mass_cut_sel
     ostream: os_stats
 
 - analysis:
@@ -257,3 +292,11 @@
     selection: weighted_rk_minus_selection
     inputs:
         km2event: km2_event
+
+- analysis:
+    name: mass_cut_burst_count
+    type: BurstCount
+    tfile: tfout
+    folder: mass_cut_counts
+    selection: weighted_rk_minus_selection
+    codename: peak_bursts
