@@ -31,10 +31,10 @@ namespace fn
             virtual std::string get_name() = 0;
     };
 
-    template<typename T> MiniPlot * createInstance( Km2Breakdown& km2b)
-    { T * result = new T{}; result->init( km2b ); return result; }
+    template<typename T> MiniPlot * createInstance( HistStore& hs)
+    { T * result = new T{}; result->init( hs ); return result; }
 
-    template<typename T> TH1D * hinit( Km2Breakdown& km2b ){ return 0; }
+    template<typename T> TH1D * hinit( HistStore& hs ){ return 0; }
     template<typename T> double hfill( Km2Breakdown& km2b ){ return 0; }
 
     template <typename T>
@@ -44,8 +44,8 @@ namespace fn
             TH1D * h;
 
         public:
-            void init(  Km2Breakdown& km2b)
-            { h = hinit<T>(km2b ); }
+            void init( HistStore& hs )
+            { h = hinit<T>(hs ); }
 
             void fill(  Km2Breakdown& km2b,  double wgt )
             { h->Fill( hfill<T>( km2b), wgt ) ; }
@@ -57,7 +57,7 @@ namespace fn
             { return h->GetName(); }
     };
 
-    template<typename T> TH2D * h2init( Km2Breakdown& km2b ){ return 0; }
+    template<typename T> TH2D * h2init( HistStore& hs ){ return 0; }
     template<typename T> std::pair<double,double> h2fill( Km2Breakdown& km2b )
     { return {0,0}; }
 
@@ -68,8 +68,8 @@ namespace fn
             TH2D * h;
 
         public:
-            void init(  Km2Breakdown& km2b)
-            { h = h2init<T>(km2b ); }
+            void init( HistStore& hs )
+            { h = h2init<T>(hs ); }
 
             void fill(  Km2Breakdown& km2b,  double wgt )
             {
@@ -85,42 +85,47 @@ namespace fn
     };
 
     //--------------------------------------------------
+    
+    //M2M QUALITY
+    struct mp_m2m{};
+    template <> TH1D * hinit<mp_m2m>( HistStore& hs );
+    template <> double hfill<mp_m2m>( Km2Breakdown& km2b );
 
     //TRACK QUALITY
     struct mp_track_quality{};
-    template <> TH1D * hinit<mp_track_quality>( Km2Breakdown& km2b );
+    template <> TH1D * hinit<mp_track_quality>( HistStore& hs );
     template <> double hfill<mp_track_quality>( Km2Breakdown& km2b );
 
     //CDA
     struct mp_cda{};
-    template <> TH1D * hinit<mp_cda>( Km2Breakdown& km2b );
+    template <> TH1D * hinit<mp_cda>( HistStore& hs );
     template <> double hfill<mp_cda>( Km2Breakdown& km2b );
 
     //DCH1
     struct mp_r_dch1{};
-    template <> TH1D * hinit<mp_r_dch1>( Km2Breakdown& km2b );
+    template <> TH1D * hinit<mp_r_dch1>( HistStore& hs );
     template <> double hfill<mp_r_dch1>( Km2Breakdown& km2b );
 
     //DCH4
     struct mp_r_dch4{};
-    template <> TH1D * hinit<mp_r_dch4>( Km2Breakdown& km2b );
+    template <> TH1D * hinit<mp_r_dch4>( HistStore& hs );
     template <> double hfill<mp_r_dch4>( Km2Breakdown& km2b );
 
     //LKR
     struct mp_xy_lkr{};
-    template <> TH2D * h2init<mp_xy_lkr>( Km2Breakdown& km2b );
+    template <> TH2D * h2init<mp_xy_lkr>( HistStore& hs );
     template <> std::pair<double,double> h2fill<mp_xy_lkr>( Km2Breakdown& km2b );
 
     //DCHT
     struct mp_dcht{};
-    template <> TH1D * hinit<mp_dcht>( Km2Breakdown& km2b );
+    template <> TH1D * hinit<mp_dcht>( HistStore& hs );
     template <> double hfill<mp_dcht>( Km2Breakdown& km2b );
 
     //CLUSTER DISTANCE
     class ClusterMiniPlot : public MiniPlot
     {
         public:
-            void init( Km2Breakdown& km2b);
+            void init( HistStore& hs );
             void fill( Km2Breakdown& km2b, double wgt );
             void set_name( std::string name );
             std::string get_name();
@@ -129,65 +134,93 @@ namespace fn
             TH1D * h_ds_;
             TH1D * h_E_;
             TH2D * h_ds_E_;
-};
+            TH2D * h_ds_t_;
+    };
 
     //ZT
     struct mp_zt{};
-    template <> TH2D * h2init<mp_zt>( Km2Breakdown& km2b );
+    template <> TH2D * h2init<mp_zt>( HistStore& hs );
     template <> std::pair<double,double> h2fill<mp_zt>( Km2Breakdown& km2b );
 
-//--------------------------------------------------
+    //TPHI
+    struct mp_tphi{};
+    template <> TH2D * h2init<mp_tphi>( HistStore& hs );
+    template <> std::pair<double,double> h2fill<mp_tphi>( Km2Breakdown& km2b );
 
-class Km2Breakdown : public Analysis
-{
-    public:
-        Km2Breakdown( const Selection& sel, const Km2Event& km2e, 
-                const Selection& good_track, Km2Clusters& km2c,
-                TFile& tf, std::string folder  );
+    //--------------------------------------------------
 
-        HistStore& get_hist_store(){ return hs_; }
-        const SingleRecoTrack& get_single_reco_track();
-        const Km2RecoClusters& get_reco_clusters();
-        const Km2RecoEvent& get_reco_event();
+    typedef std::map<std::string, MiniPlot*(*)(HistStore& hs)> MiniPlotMap;
 
-        template <typename T>
-            void register_plotter( std::string ) ;
-        void add_selection( const Selection * s, 
-                std::vector<std::string>& plot_types, std::string prefix = "" );
+    class SelPlot
+    {
+        public:
+            SelPlot( TFile& tf, std::string folder, MiniPlotMap& mpm  );
+            void AddMiniPlot( std::string plot_type );
+            void Fill( Km2Breakdown& km2b, double pre_wgt, bool passed, double post_wgt );
+            void Write();
 
-        void end_processing();
+        private:
+            TFile& tf_;
+            std::string folder_;
+            MiniPlotMap& mpm_;
 
-    private:
-        typedef std::map<std::string, MiniPlot*(*)(Km2Breakdown& km2b)> map_type;
-        map_type  mini_plot_map_;
+            std::vector<std::unique_ptr<MiniPlot>> plot_store_;
 
-        const Km2Event& km2e_;
-        const Km2RecoEvent * km2re_;
-        const Selection& good_track_;
+            HistStore pre_hs_;
+            std::vector<MiniPlot*> pre_;
 
-        const Km2Clusters& km2c_;
-        const Km2RecoClusters * km2rc_;
+            HistStore post_hs_;
+            std::vector<MiniPlot*> post_;
+    };
 
-        void process_event();
-        TFile& tf_;
-        std::string folder_;
 
-        std::vector<std::pair<const Selection*, std::vector<MiniPlot*>> > selection_plots_;
-        std::vector<std::unique_ptr<MiniPlot>> plot_store_;
+    class Km2Breakdown : public Analysis
+    {
+        public:
+            Km2Breakdown( const Selection& sel, const Km2Event& km2e, 
+                    const Selection& good_track, Km2Clusters& km2c,
+                    TFile& tf, std::string folder  );
 
-        HistStore hs_;
+            const SingleRecoTrack& get_single_reco_track();
+            const Km2RecoClusters& get_reco_clusters();
+            const Km2RecoEvent& get_reco_event();
 
-        REG_DEC_SUB( Km2Breakdown );
-};
+            template <typename T>
+                void register_plotter( std::string ) ;
+            void add_selection( const Selection * s, 
+                    std::vector<std::string>& plot_types, std::string prefix = "" );
+
+            void end_processing();
+
+        private:
+            typedef std::map<std::string, MiniPlot*(*)(HistStore& hs)> map_type;
+            map_type  mini_plot_map_;
+
+            const Km2Event& km2e_;
+            const Km2RecoEvent * km2re_;
+            const Selection& good_track_;
+
+            const Km2Clusters& km2c_;
+            const Km2RecoClusters * km2rc_;
+
+            void process_event();
+            TFile& tf_;
+            std::string folder_;
+
+            std::vector<std::pair<const Selection*, SelPlot* >> sel_plots_;
+            std::vector<std::unique_ptr<SelPlot>> sel_plot_store_;
+
+            REG_DEC_SUB( Km2Breakdown );
+    };
 
     template <typename T>
-void Km2Breakdown::register_plotter( std::string name ) 
-{
-    mini_plot_map_.insert( std::make_pair( name, createInstance<T> ) );
-}
+        void Km2Breakdown::register_plotter( std::string name ) 
+        {
+            mini_plot_map_.insert( std::make_pair( name, createInstance<T> ) );
+        }
 
-template<>
-Subscriber * create_subscriber<Km2Breakdown>
-(YAML::Node& instruct, RecoFactory& rf );
+    template<>
+        Subscriber * create_subscriber<Km2Breakdown>
+        (YAML::Node& instruct, RecoFactory& rf );
 }
 #endif

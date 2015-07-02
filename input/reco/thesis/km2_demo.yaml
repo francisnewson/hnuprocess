@@ -315,25 +315,29 @@
         km2event: km2_event
 
 - selection:
-    name: zt_cut
+    name: tphi_cut
     type: TrackTPhi
     track_section: us
     shape: polygon
     points:
-        - 0.009435636 -0.0019405051
-        - 0.010204361 0.5843015
-        - 0.010245147 1.2571541
-        - 0.008522116 1.9605523
-        - 0.007241205 2.4188466
-        - 0.006510817 3.0041392
-        - 0.0063092164    3.6530917
-        - 0.007144468 4.1602197
-        - 0.008069264 4.390358
-        - 0.009611458 4.5971403
-        - 0.010248647 5.0329027
-        - 0.010224307 5.499908
-        - 0.008876637 6.08481
-        - 0.008588876 6.322096
+        - [ 0.0094 , -0.00 ]
+        - [ 0.0102 , 0.5843015 ]
+        - [ 0.0102 , 1.2571541 ]
+        - [ 0.0085 , 1.9605523 ]
+        - [ 0.0072 , 2.4188466 ]
+        - [ 0.0065 , 3.0041392 ]
+        - [ 0.00634,     3.6530917 ] 
+        - [ 0.0071 , 4.1602197 ]
+        - [ 0.0080 , 4.390358 ]
+        - [ 0.0096 , 4.5971403 ]
+        - [ 0.0102 , 5.0329027 ]
+        - [ 0.0102 , 5.499908 ]
+        - [ 0.0088 , 6.08481 ]
+        - [ 0.0085 , 6.322096 ]
+        - [ 0.0000 , 6.322096 ]
+        - [ 0.0000 , 0 ]
+    inputs: 
+        km2event: km2_event
 
 
 
@@ -342,19 +346,18 @@
     type: Km2Breakdown
     base: weighted_data_sample
     selection:
-        - { cut: good_trk, plot : [] }
-        - { cut: pos_trk, plot: [] }
-        - { cut: zt_cut, plot: [ zt ] }
-        - { cut: passer, plot: [ zt ], name: after_ }
-        - { cut: quality_7, plot: [ track_quality ] }
-        - { cut: cda_3cm, plot: [ cda ] }
-        - { cut: dch1_acc, plot: [ rdch1 ] }
-        - { cut: dch4_acc, plot: [ rdch4 ] }
-        - { cut: rk_lkr_accep, plot: [ xylkr ] }
-        - { cut: rk_hot_lkr, plot: [ rdch4 ] }
-        - { cut: passer, plot: [ xylkr ], name: after_ }
-        - { cut: rk_lkr_veto, plot: [rcluster] }
-        - { cut: rk_dcht, plot: [dcht] }
+    -  {  cut:  good_trk,      plot:  []              }
+    -  {  cut:  pos_trk,       plot:  [ m2m             ]   }
+    -  {  cut:  zt_cut,        plot:  [ zt,             m2m ]  }
+    -  {  cut:  tphi_cut,      plot:  [ tphi,           m2m ]  }
+    -  {  cut:  quality_7,     plot:  [ track_quality,  m2m ]  }
+    -  {  cut:  cda_3cm,       plot:  [ cda,            m2m ]  }
+    -  {  cut:  dch1_acc,      plot:  [ rdch1,          m2m ]  }
+    -  {  cut:  dch4_acc,      plot:  [ rdch4,          m2m ]  }
+    -  {  cut:  rk_lkr_accep,  plot:  [ xylkr,          m2m ]  }
+    -  {  cut:  rk_hot_lkr,    plot:  [ rdch4,          m2m ]  }
+    -  {  cut:  rk_lkr_veto,   plot:  [ rcluster,       m2m ]  }
+    -  {  cut:  rk_dcht,       plot:  [dcht,            m2m ]  }
 
     good_track: good_trk
     tfile: tfout

@@ -115,8 +115,8 @@ namespace fn
                 250, 0, 25e-3, "t( rad) ");
 
         h_u_v_ = hs_.MakeTH2D( "h_u_v_", "U vs V " ,
-                150, 0, -1, "U ",
-                250, 0, -1, "V ");
+                150, 0, 25, "U ",
+                250, 0, 500e3, "V ");
 
         h_z_phi_ = hs_.MakeTH2D( "h_z_phi", "Z vs T " ,
                 150, -5000, 10000, "Z( cm) ",

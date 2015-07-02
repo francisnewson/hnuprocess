@@ -48,6 +48,9 @@ namespace fn
                 ::iterator iterator;
 
             typedef std::vector<std::unique_ptr<TH1>>
+                ::size_type size_type;
+
+            typedef std::vector<std::unique_ptr<TH1>>
                 ::const_iterator const_iterator;
 
             iterator begin(){ return std::begin(fHists); }
@@ -58,6 +61,9 @@ namespace fn
 
             const_iterator end() const
             { return std::end(fHists); }
+
+            size_type size() const
+            { return fHists.size(); }
 
 			HistStore() {}
 			void AddHistogram(std::unique_ptr<TH1> h );
