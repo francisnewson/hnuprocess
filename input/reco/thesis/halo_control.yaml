@@ -516,6 +516,8 @@
 #
 ##################################################
 
+- analysis : { type: Km2Plotter, name: pre_plots, folder: pre_plots,
+    tfile: tfout, selection: pre_selection, inputs: { km2event : km2_event } }
 
 - analysis : { type: Km2Plotter, name: pre_upper_plots, folder: pre_upper_plots,
     tfile: tfout, selection: pre_upper, inputs: { km2event : km2_event } }
