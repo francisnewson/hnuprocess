@@ -10,6 +10,20 @@
 ###################################################
 
 - output:
+    name: os_cerr
+    type: ostream
+    filename: cerr
+
+- output:
+    name: os_stats
+    type: ostream
+    filename: halo_stats.dat
+
+- output:
+    name: tfout
+    type: tfile
+    filename: halo_plots.root
+- output:
     name: tfout
     type: tfile
     filename: halo_plots.root
@@ -40,20 +54,6 @@
     filename: "/afs/cern.ch/user/f/fnewson/work/hnu/gopher/data/detector/eopCorrfile.dat"
     enabled: true
 
-- output:
-    name: os_cerr
-    type: ostream
-    filename: cerr
-
-- output:
-    name: os_stats
-    type: ostream
-    filename: halo_stats.dat
-
-- output:
-    name: tfout
-    type: tfile
-    filename: halo_plots.root
 
 ###################################################
 # DATA SAMPLE DEFINITION
