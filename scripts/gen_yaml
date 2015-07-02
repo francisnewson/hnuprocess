@@ -1,0 +1,22 @@
+#!/bin/env python
+import argparse
+import yaml
+
+def km2_plotter( a ):
+    name =  '_'.join( [a.selection, 'plots' ] )
+
+    print( ('- analysis : {{ type: Km2Plotter, name: {name}, folder: {folder},\n'
+    +'\ttfile: tfout, selection: {selection}, inputs: {{ km2event : km2_event }} }}\n').format(
+        name = name, folder = name, selection = a.selection ) )
+
+
+parser = argparse.ArgumentParser( prog = 'gen_yaml' )
+subparsers = parser.add_subparsers( help = 'sub-command help' , dest = 'type' )
+
+parser_km2_plotter = subparsers.add_parser( 'Km2Plotter', help = 'Km2Plotter help')
+parser_km2_plotter.add_argument( 'selection' )
+parser_km2_plotter.set_defaults( func =km2_plotter )
+
+args = parser.parse_args()
+
+args.func(args)
