@@ -4,6 +4,7 @@
 #include <string>
 #include "TTree.h"
 #include "yaml_help.hh"
+#include <iosfwd>
 #if 0
 /*
  *   __ _     _            _       _      __                  _   _
@@ -15,6 +16,7 @@
  *
 */
 #endif
+
 namespace fn
 {
     //function to extract fiducial counts from MC
@@ -27,7 +29,15 @@ namespace fn
             Long64_t nEntries = tt->GetEntries();
             double total_weight = 0.0;
             T  weight = 0;
-            tt->SetBranchAddress( branch.c_str(), &weight );
+            Int_t check = tt->SetBranchAddress( branch.c_str(), &weight );
+            if ( check != 0 )
+            {
+                throw std::runtime_error( 
+                        std::string("https://root.cern.ch/root/html/"
+                            "TTree.html#TTree:CheckBranchAddressType")
+                        + std::to_string( check ) );
+
+            }
             tt->SetBranchStatus( "*", 0 );
             tt->SetBranchStatus( branch.c_str(), 1 );
             for ( int i = 0 ; i != nEntries ; ++i )
@@ -40,5 +50,11 @@ namespace fn
 
     std::map<std::string,double> extract_root_fiducial_weights
         ( const YAML::Node& fid_conf  );
+
+    std::map<std::string,double> extract_all_root_fiducial_weights
+        ( const YAML::Node& fid_conf );
+
+    void print_fid_weights( const std::map<std::string, double>& fid_weights,
+            std::ostream& os );
 }
 #endif

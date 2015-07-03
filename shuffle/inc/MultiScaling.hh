@@ -77,6 +77,7 @@ namespace fn
             double m2_max_peak;
 
             bool do_halo_;
+            bool do_peak_;
     };
 
     class DummyScaleStrategy : public ScaleStrategy
@@ -106,6 +107,8 @@ namespace fn
             double get_halo_scale_error() const;
             double get_peak_scale() const;
             double get_peak_scale_error() const;
+
+            double get_fiducial_flux() const;
 
         private:
             std::unique_ptr<ScaleStrategy> mc_strat_;

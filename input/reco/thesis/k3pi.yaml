@@ -39,6 +39,10 @@
     filename: "/afs/cern.ch/user/f/fnewson/work/hnu/gopher/data/detector/eopCorrfile.dat"
     enabled: true
 
+###################################################
+# DATA SAMPLE DEFINITION
+###################################################
+
 # 1]Bad bursts
 - selection:
     name: good_phys_burst
@@ -59,6 +63,44 @@
     name: good_muv_burst_range
     type: BadBurstRange
     burst_range_list: "input/reco/conditions/bad_muv_burst_ranges.dat"
+
+- selection:
+    name: weighted_data_sample
+    type: CompositeSelection
+    children:
+        - kaon_mom_weights
+        - good_phys_burst
+        - good_dch_burst
+        - good_muv_burst
+
+- selection:
+    name: mcz
+    type: MCZCut
+    min_z: -1800
+    max_z:  8000
+
+- selection:
+    name: weighted_mc_sample
+    type: CompositeSelection
+    children:
+        - weighted_data_sample
+        - mcz
+
+- analysis:
+    name: sample_burst_count
+    type: BurstCount
+    tfile: tfout
+    folder: sample_burst_count
+    selection: weighted_mc_sample
+    codename: bursts
+
+- analysis:
+    name: data_burst_count
+    type: BurstCount
+    tfile: tfout
+    folder: data_burst_count
+    selection: weighted_data_sample
+    codename: data_bursts
 
 ###################################################
 # INPUTS
@@ -149,6 +191,7 @@
     name: k3pi_full
     type: CompositeSelection
     children:
+        - weighted_data_sample
         - found_k3pi
         - pos_vertex
         - track_sep

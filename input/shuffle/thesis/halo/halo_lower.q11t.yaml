@@ -106,36 +106,17 @@ output:
 
     stack:
         - item:
-            name: km3_pos
-            scaling: mc_pos
-            type: km3
-            fid_weight: p5.km3.v2.pos
-            channels:
-                - p5.km3.v2.pos
+            { name: km3_pos, scaling: mc_pos, type: km3, fid_weight: p5.km3.v2.pos,
+            channels: [ p5.km3.v2.pos ]  }
 
-        - item:
-            name: km3_neg
-            scaling: mc_neg
-            type: km3
-            fid_weight: p5.km3.v2.neg
-            channels:
-                - p5.km3.v2.neg
+        - item: { name: km3_neg, scaling: mc_neg, type: km3, fid_weight: p5.km3.v2.neg,
+            channels: [ p5.km3.v2.neg ]  }
 
-        - item:
-            name: k3pi0_pos
-            scaling: mc_pos
-            fid_weight: p5.k3pi0.v2.pos
-            type: k3pi0
-            channels:
-                - p5.k3pi0.v2.pos
+        - item: { name: k3pi0_pos, scaling: mc_pos, fid_weight: p5.k3pi0.v2.pos,
+            type: k3pi0, channels: [ p5.k3pi0.v2.pos ] }
 
-        - item:
-            name: k3pi0_neg
-            scaling: mc_neg
-            fid_weight: p5.k3pi0.v2.neg
-            type: k3pi0
-            channels:
-                - p5.k3pi0.v2.neg
+        - item: { name: k3pi0_neg, scaling: mc_neg, fid_weight: p5.k3pi0.v2.neg,
+            type: k3pi0, channels: [ p5.k3pi0.v2.neg ] }
 
         - item:
             name: k3pi_pos

@@ -97,26 +97,44 @@ int main( int argc, char * argv[] )
 
 
     //Load fiducial weights
-    std::string fid_filename = get_yaml<std::string>( config_node["weights"], "fid_file" );
+    std::map<std::string, double> fiducial_weights;
 
+    std::string fid_filename = get_yaml<std::string>( config_node["weights"], "fid_file" );
     bool from_root = fn::contains( fid_filename, "root" );
 
-    auto fiducial_weights = from_root ?
-        extract_root_fiducial_weights( config_node["weights"]  )
-        :  YAML::LoadFile(fid_filename).as<std::map<std::string, double>>();
-
-    std::cout << "\nFiducial weights" << std::endl;
-        std::cout << std::setw(27) << "Channel" << std::setw(20) << "Weight" << std::endl;
-    for ( auto chan : fiducial_weights )
+    if ( !from_root )
     {
-        std::cout << std::setw(27) << chan.first << std::setw(20) << chan.second << std::endl;
+        fiducial_weights =  YAML::LoadFile(fid_filename).as<std::map<std::string, double>>();
     }
-    std::cout << std::string( 50, '-' ) << "\n" ;
+    else
+    {
+        if ( fid_filename == "use_multi_root"  )
+        {fiducial_weights = extract_all_root_fiducial_weights( config_node["weights"] );}
+        else
+        {
+            fiducial_weights = extract_root_fiducial_weights( config_node["weights"]  );
+        }
+    }
+
+    //print fiducial weights
+    print_fid_weights( fiducial_weights, std::cout );
+
+    //check fiducial weights
+    if ( config_node["check_weights"] )
+    {
+        auto check_fid_weights = extract_all_root_fiducial_weights( config_node["check_weights"] );
+    }
+    else
+    {
+        std::cout << "Not checking any fiducial weights" << std::endl;
+
+    }
 
     //Load branching ratios
     std::string br_filename = "input/shuffle/branching_ratios.yaml" ;
     auto branching_ratios = YAML::LoadFile(br_filename).as<std::map<std::string, double>>();
 
+    //Load scaling info
     const YAML::Node& scaling_node = config_node["scaling"];
     std::map<std::string, MultiScaling> scaling_info;
 
@@ -124,6 +142,8 @@ int main( int argc, char * argv[] )
     {
         const YAML::Node & method_node = scaling_method["scaling_method"];
         std::string method_name = get_yaml<std::string>( method_node, "name" );
+
+        std::cout << "\n##  " << method_name << "  ##\n";
 
         //Create Km2Scaling object in map
         auto insertion  =
@@ -139,6 +159,8 @@ int main( int argc, char * argv[] )
 
         std::cout << "Peak scale: " << this_method.get_peak_scale() 
             << " ± " << this_method.get_peak_scale_error() << "\n";
+
+        std::cout << "Fiducial flux: " << this_method.get_fiducial_flux() << "\n";
 
         std::cout << std::string( 50, '-' ) << "\n\n";
     }

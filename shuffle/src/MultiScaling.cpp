@@ -40,6 +40,8 @@ namespace fn
 
         do_halo_ = halo_channels.size() > 0;
 
+        do_peak_ = peak_channels.size() > 0;
+
         //Setup input file
         input_file = get_yaml<std::string>( strat_node_, "input_file" );
 
@@ -49,8 +51,11 @@ namespace fn
             m2_max_halo = get_yaml<double>( strat_node_, "max_mass_halo" );
         }
 
-        m2_min_peak = get_yaml<double>( strat_node_, "min_mass_peak" );
-        m2_max_peak = get_yaml<double>( strat_node_, "max_mass_peak" );
+        if ( do_peak_ )
+        {
+            m2_min_peak = get_yaml<double>( strat_node_, "min_mass_peak" );
+            m2_max_peak = get_yaml<double>( strat_node_, "max_mass_peak" );
+        }
 
         post_path = get_yaml<std::string>( strat_node_, "plot_path") ;
     }
@@ -106,39 +111,45 @@ namespace fn
                 halo_scale_error = halo_scale * 
                     ( 1 / std::sqrt( halo_halo_integral ) + 1 / std::sqrt( halo_data_integral ) );
             }
-        peak_halo_integral =  integral( *hsummed_halo, m2_min_peak, m2_max_peak );
+            peak_halo_integral =  integral( *hsummed_halo, m2_min_peak, m2_max_peak );
 
-        std::cout 
-            << std::setw(15) << "halo_halo"
-            << std::setw(15) << "halo_data\n";
+            std::cout 
+                << std::setw(15) << "halo_halo"
+                << std::setw(15) << "halo_data\n";
 
-        std::cout 
-            << std::setw(15) << halo_halo_integral
-            << std::setw(15) << halo_data_integral << "\n";
+            std::cout 
+                << std::setw(15) << halo_halo_integral
+                << std::setw(15) << halo_data_integral << "\n";
         }
 
-        //Do km2 division
-        double peak_data_integral =  integral( *hsummed_data, m2_min_peak, m2_max_peak );
-        double peak_peak_integral =  integral( *hsummed_peak, m2_min_peak, m2_max_peak );
+        double peak_scale = 1;
+        double peak_scale_error = 0;
 
-        double subtracted_peak = peak_data_integral -  halo_scale * peak_halo_integral ;
-        double subtracted_peak_error = std::sqrt( peak_data_integral + peak_halo_integral );
+        if ( do_peak_ )
+        {
+            //Do km2 division
+            double peak_data_integral =  integral( *hsummed_data, m2_min_peak, m2_max_peak );
+            double peak_peak_integral =  integral( *hsummed_peak, m2_min_peak, m2_max_peak );
 
-        std::cout 
-            << std::setw(15) << "peak_halo"
-            << std::setw(15) << "peak_data"
-            << std::setw(15) << "peak_peak"
-            << std::setw(15) << "sub_peak\n";
+            double subtracted_peak = peak_data_integral -  halo_scale * peak_halo_integral ;
+            double subtracted_peak_error = std::sqrt( peak_data_integral + peak_halo_integral );
 
-        std::cout 
-            << std::setw(15) << peak_halo_integral
-            << std::setw(15) << peak_data_integral
-            << std::setw(15) << peak_peak_integral 
-            << std::setw(15) << subtracted_peak << std::endl;
+            std::cout 
+                << std::setw(15) << "peak_halo"
+                << std::setw(15) << "peak_data"
+                << std::setw(15) << "peak_peak"
+                << std::setw(15) << "sub_peak\n";
 
-        double peak_scale =  subtracted_peak  /  peak_peak_integral;
-        double peak_scale_error = peak_scale *
-            ( subtracted_peak_error / subtracted_peak + 1 / sqrt( peak_peak_integral ) );
+            std::cout 
+                << std::setw(15) << peak_halo_integral
+                << std::setw(15) << peak_data_integral
+                << std::setw(15) << peak_peak_integral 
+                << std::setw(15) << subtracted_peak << std::endl;
+
+            peak_scale =  subtracted_peak  /  peak_peak_integral;
+            peak_scale_error = peak_scale *
+                ( subtracted_peak_error / subtracted_peak + 1 / sqrt( peak_peak_integral ) );
+        }
 
         return scale_result{ halo_scale, halo_scale_error, peak_scale, peak_scale_error };
     }
@@ -161,8 +172,15 @@ namespace fn
         std::string mc_strat_type = get_yaml<string>( scaling_config["mc"], "strategy" );
         std::string halo_strat_type = get_yaml<string>( scaling_config["halo"], "strategy" );
 
+        if ( mc_strat_type == "dummy" )
+        {
+            mc_strat_.reset( new DummyScaleStrategy() );
+        }
+        else
+        {
         mc_strat_.reset( new M2ScaleStrategy{
                 channel_node_, scaling_config["mc"] } );
+        }
 
         if ( halo_strat_type == "dummy" )
         {
@@ -204,15 +222,13 @@ namespace fn
 
         try
         {
-        peak_br_ = brs_.at( peak_name_ );
+            peak_br_ = brs_.at( peak_name_ );
         }
         catch( std::out_of_range& e )
         {
-                std::cout << "Missing branching ratio for: " + peak_name_ << std::endl;
-                throw;
+            std::cout << "Missing branching ratio for: " + peak_name_ << std::endl;
+            throw;
         }
-
-        std::cout << "Peak fiducial flux: "  << mc_strat_->get_peak_scale() * peak_fid_weight_  / peak_br_ << std::endl;
     }
 
     double MultiScaling::get_halo_scale() const
@@ -234,6 +250,11 @@ namespace fn
         return mc_strat_->get_peak_scale_error();
     }
 
+    double MultiScaling::get_fiducial_flux() const
+    {
+        return mc_strat_->get_peak_scale() * peak_fid_weight_  / peak_br_;
+    }
+
     void MultiScaling::scale_hist( TH1& h, const YAML::Node& instruct ) const
     {
         double scale_factor = 1;
@@ -249,14 +270,11 @@ namespace fn
         }
         else
         {
-            //double fid_weight = fiducial_weights_.at( get_yaml<std::string>( instruct, "fid_weight" ) );
             auto fid_weight_key =  get_yaml<std::string>( instruct, "fid_weight" );
             double fid_weight = at( fiducial_weights_, fid_weight_key, "Missing fid_weight: " + fid_weight_key );
             double br = brs_.at( type );
-            scale_factor = mc_strat_->get_peak_scale() *  peak_fid_weight_  / fid_weight * br / peak_br_;
-
+            scale_factor = get_fiducial_flux() * br  / fid_weight;
         }
-
         h.Scale( scale_factor );
     }
 }
