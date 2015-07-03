@@ -8,6 +8,7 @@
 #include <boost/filesystem/path.hpp>
 #include <iostream>
 #include <iomanip>
+#include "stl_help.hh"
 namespace fn
 {
     std::ostream& operator<<( std::ostream& os , const scale_result& sr )
@@ -201,7 +202,17 @@ namespace fn
             }
         }
 
+        try
+        {
         peak_br_ = brs_.at( peak_name_ );
+        }
+        catch( std::out_of_range& e )
+        {
+                std::cout << "Missing branching ratio for: " + peak_name_ << std::endl;
+                throw;
+        }
+
+        std::cout << "Peak fiducial flux: "  << mc_strat_->get_peak_scale() * peak_fid_weight_  / peak_br_ << std::endl;
     }
 
     double MultiScaling::get_halo_scale() const
@@ -238,7 +249,9 @@ namespace fn
         }
         else
         {
-            double fid_weight = fiducial_weights_.at( get_yaml<std::string>( instruct, "fid_weight" ) );
+            //double fid_weight = fiducial_weights_.at( get_yaml<std::string>( instruct, "fid_weight" ) );
+            auto fid_weight_key =  get_yaml<std::string>( instruct, "fid_weight" );
+            double fid_weight = at( fiducial_weights_, fid_weight_key, "Missing fid_weight: " + fid_weight_key );
             double br = brs_.at( type );
             scale_factor = mc_strat_->get_peak_scale() *  peak_fid_weight_  / fid_weight * br / peak_br_;
 

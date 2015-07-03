@@ -1,0 +1,118 @@
+scaling:
+    - scaling_method:
+        strategy: m2
+        name: mc_pos
+        peakname: km2
+
+        channels:
+            halo_channels: [ p5.data.q1.v2.pos]
+            data_channels: [ p6.data.km.q1.v2.pos ]
+            peak_channels: [ p6.km2.v2.pos ]
+
+        halo:
+            strategy: m2
+            input_file: tdata/rk_minus/all.rk_minus.root
+            plot_path: km2_rk_full/h_m2m_kmu
+
+            min_mass_halo: -0.3
+            max_mass_halo: -0.075
+            min_mass_peak: -0.01
+            max_mass_peak:  0.01
+
+        mc:
+            strategy: m2
+            input_file: tdata/rk_minus/all.rk_minus.root
+            plot_path: km2_rk_full/h_m2m_kmu
+
+            min_mass_halo: -0.3
+            max_mass_halo: -0.075
+            min_mass_peak: -0.01
+            max_mass_peak:  0.01
+
+    - scaling_method:
+        strategy: m2
+        name: mc_neg
+        peakname: km2
+
+        channels:
+            halo_channels: [ p5.data.q1.v2.neg ]
+            data_channels: [ p6.data.km.q1.v2.neg ]
+            peak_channels: [ p6.km2.v2.neg ]
+
+        halo:
+            strategy: m2
+            input_file: tdata/rk_minus/all.rk_minus.root
+            plot_path: km2_rk_full/h_m2m_kmu
+
+            min_mass_halo: -0.3
+            max_mass_halo: -0.075
+            min_mass_peak: -0.01
+            max_mass_peak:  0.01
+
+        mc:
+            strategy: m2
+            input_file: tdata/rk_minus/all.rk_minus.root
+            plot_path: km2_rk_full/h_m2m_kmu
+            input_file: tdata/rk_minus/all.rk_minus.root
+            plot_path: km2_rk_full/h_m2m_kmu
+
+            min_mass_halo: -0.3
+            max_mass_halo: -0.075
+            min_mass_peak: -0.01
+            max_mass_peak:  0.01
+
+weights:
+    fid_file: use_root
+    root_file: tdata/rk_minus/all.rk_minus.root
+    pre : ""
+    post: "sample_burst_count/bursts"
+    branch:  "weight"
+
+output:
+    input_file: tdata/rk_minus/all.rk_minus.root
+
+    plots: 
+        - { path: km2_rk_full/h_m2m_kmu, name: km2_m2m, rebin: 20 }
+
+    data_plot:
+        channels:
+            - p6.data.km.q1.v2.pos
+            - p6.data.km.q1.v2.neg
+        do_blind: false
+        min_blind: 0.09
+        max_blind: 0.3
+
+    stack:
+        - item:
+            name: halo_pos
+            scaling: mc_pos
+            type: halo
+            errors:
+                - halo_scale
+            channels:
+                - p5.data.q1.v2.pos
+
+        - item:
+            name: halo_neg
+            scaling: mc_neg
+            type: halo
+            errors:
+                - halo_scale
+            channels:
+                - p5.data.q1.v2.neg
+
+        - item:
+            name: km2_pos
+            scaling: mc_pos
+            fid_weight: p6.km2.v2.pos
+            type: km2
+            channels:
+                - p6.km2.v2.pos
+
+        - item:
+            name: km2_neg
+            scaling: mc_neg
+            fid_weight: p6.km2.v2.neg
+            type: km2
+            channels:
+                - p6.km2.v2.neg

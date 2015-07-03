@@ -58,5 +58,19 @@ namespace fn
         }
 
     bool contains( const std::string& s1, const std::string& s2 );
+
+    //map at with feedback
+    template <typename Container>
+        typename Container::mapped_type at( Container const& c, const typename Container::key_type& key, const std::string err )
+        {
+            try
+            {
+                return c.at( key );
+            }
+            catch( std::out_of_range& e )
+            {
+                throw std::out_of_range(  e.what() + ( " " +  err )  );
+            }
+        }
 }
 #endif
