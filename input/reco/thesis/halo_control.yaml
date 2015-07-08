@@ -326,8 +326,21 @@
     inputs: { km2event: km2_event } }
 
 - selection: {
+    name: ctrl_lower_neg_m2m_cut, type: Km2M2Miss,
+    min_m2: -0.3, max_m2: -0.05,
+    inputs: { km2event: km2_event } }
+
+- selection: {
      name: ctrl_lower_sel, type: CompositeSelection,
      children: [ zt_dn, ctrl_zt_dn, ctrl_lower_m2m, ctrl_lower_pz, ctrl_lower_cda, ctrl_lower_t ] }
+
+- selection: {
+     name: ctrl_lower_sel_full_m2m, type: CompositeSelection,
+     children: [ zt_dn, ctrl_zt_dn, ctrl_lower_pz, ctrl_lower_cda, ctrl_lower_t ] }
+
+- selection: {
+     name: ctrl_lower_sel_neg_m2m, type: CompositeSelection,
+     children: [ zt_dn, ctrl_zt_dn, ctrl_lower_neg_m2m_cut, ctrl_lower_pz, ctrl_lower_cda, ctrl_lower_t ] }
 
 - selection: {
      name: ctrl_lower_sel_muv, type: CompositeSelection,
@@ -336,6 +349,14 @@
 ###################################################
 # SIGNAL REGIONS
 ###################################################
+
+- selection:
+    name: signal_track_mom
+    type: TrackMomentum
+    min: 10
+    max: 65
+    inputs:
+        ogt: bf_st
 
 #UPPER
 - selection:
@@ -383,7 +404,7 @@
 
 - selection: {
     name: signal_upper_sel, type: CompositeSelection,
-    children: [ zt_up, tphi_up_signal, zt_up_signal, my_cda ] }
+    children: [ zt_up, tphi_up_signal, zt_up_signal, signal_track_mom,  my_cda ] }
 
 #LOWER
 - selection:
@@ -421,7 +442,7 @@
 
 - selection: {
     name: signal_lower_sel, type: CompositeSelection,
-    children: [ zt_dn, zt_dn_signal, pt_dn_signal, my_cda ] }
+    children: [ zt_dn, zt_dn_signal, pt_dn_signal, signal_track_mom, my_cda ] }
         
 ###################################################
 # RK
@@ -489,6 +510,10 @@
 
 - selection: { name: ctrl_lower, type : CompositeSelection, children:  [ pre_selection, ctrl_lower_sel ]  }
 
+- selection: { name: ctrl_lower_full_m2m, type : CompositeSelection, children:  [ pre_selection, ctrl_lower_sel_full_m2m ]  }
+
+- selection: { name: ctrl_lower_neg_m2m, type : CompositeSelection, children:  [ pre_selection, ctrl_lower_sel_neg_m2m ]  }
+
 
 - selection: { name: ctrl_upper_muv, type : CompositeSelection, children:  [ pre_selection, ctrl_upper_sel_muv ]  }
 
@@ -498,6 +523,10 @@
 - selection: { name: signal_upper, type : CompositeSelection, children:  [ pre_selection, signal_upper_sel ]  }
 
 - selection: { name: signal_lower, type : CompositeSelection, children:  [ pre_selection, signal_lower_sel ]  }
+
+- selection: { name: signal_upper_muv, type : CompositeSelection, children:  [ pre_selection, signal_upper_sel, muon_req ]  }
+
+- selection: { name: signal_lower_muv, type : CompositeSelection, children:  [ pre_selection, signal_lower_sel, muon_req ]  }
 
 
 - selection: { name: rk_like_selection, type: CompositeSelection, children: [ pre_selection, rk_specific ] }
@@ -531,6 +560,12 @@
 - analysis : { type: Km2Plotter, name: ctrl_lower_plots, folder: ctrl_lower_plots,
     tfile: tfout, selection: ctrl_lower, inputs: { km2event : km2_event } }
 
+- analysis : { type: Km2Plotter, name: ctrl_lower_full_m2m_plots, folder: ctrl_lower_full_m2m_plots,
+    tfile: tfout, selection: ctrl_lower_full_m2m, inputs: { km2event : km2_event } }
+
+- analysis : { type: Km2Plotter, name: ctrl_lower_neg_m2m_plots, folder: ctrl_lower_neg_m2m_plots,
+    tfile: tfout, selection: ctrl_lower_neg_m2m, inputs: { km2event : km2_event } }
+
 - analysis : { type: Km2Plotter, name: ctrl_upper_muv_plots, folder: ctrl_upper_muv_plots,
     tfile: tfout, selection: ctrl_upper_muv, inputs: { km2event : km2_event } }
 
@@ -542,6 +577,12 @@
 
 - analysis : { type: Km2Plotter, name: signal_lower_plots, folder: signal_lower_plots,
     tfile: tfout, selection: signal_lower, inputs: { km2event : km2_event } }
+
+- analysis : { type: Km2Plotter, name: signal_upper_muv_plots, folder: signal_upper_muv_plots,
+    tfile: tfout, selection: signal_upper_muv, inputs: { km2event : km2_event } }
+
+- analysis : { type: Km2Plotter, name: signal_lower_muv_plots, folder: signal_lower_muv_plots,
+    tfile: tfout, selection: signal_lower_muv, inputs: { km2event : km2_event } }
 
 - analysis : { type: Km2Plotter, name: rk_like_selection_plots, folder: rk_like_selection_plots,
     tfile: tfout, selection: rk_like_selection, inputs: { km2event : km2_event } }

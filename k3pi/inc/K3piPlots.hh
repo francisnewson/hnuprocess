@@ -42,6 +42,7 @@ namespace fn
             TH1D * h_pt_;
             TH1D * h_chi2_;
             TH1D * h_p_;
+            TH2D * h_m2m_p_;
 
             REG_DEC_SUB( K3piPlots );
     };

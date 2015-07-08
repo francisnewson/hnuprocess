@@ -1,0 +1,127 @@
+scaling:
+    - scaling_method:
+        strategy: m2
+        name: mc_pos_lower
+        peakname: km2
+
+        channels: &poschannels
+            halo_channels: [ p6.data.kless.q11t.v2.pos  ]
+            data_channels: [ p5.data.q11t.v3.pos ]
+            peak_channels: [ p5.km2.v2.pos ]
+
+        halo: &m2mdwnstrat { 
+        strategy: m2,
+        input_file: tdata/halo_control/all.halo_control.root,
+        plot_path: ctrl_lower_full_m2m_plots/h_m2m_kmu,
+        min_mass_halo: -0.2, max_mass_halo: -0.05,
+        min_mass_peak: -0.01, max_mass_peak:  0.01 }
+
+        mc: *m2mdwnstrat
+
+    - scaling_method:
+        strategy: m2
+        name: mc_neg_lower
+        peakname: km2
+
+        channels: &negchannels
+            halo_channels: [ p6.data.km.q11t.v2.neg ]
+            data_channels: [ p5.data.q11t.v3.neg ]
+            peak_channels: [ p5.km2.v2.neg ]
+
+        halo: *m2mdwnstrat
+        mc: *m2mdwnstrat
+
+    - scaling_method:
+        strategy: m2
+        name: mc_pos_upper
+        peakname: km2
+
+        channels: *poschannels
+
+        halo: &uphalostrat {
+            strategy: m2,
+            input_file: tdata/halo_control/all.halo_control.root,
+            plot_path: ctrl_upper_plots/h_z,
+            min_mass_halo: 2500, max_mass_halo: 5500,
+            min_mass_peak: 2000, max_mass_peak: 3000 }
+
+        mc: &mcupstrat {
+            strategy: m2,
+            input_file: tdata/halo_control/all.halo_control.root,
+            plot_path: rk_like_selection_plots/h_m2m_kmu,
+            min_mass_halo: -0.3, max_mass_halo: -0.025,
+            min_mass_peak: -0.01, max_mass_peak:  0.01 }
+
+    - scaling_method:
+        strategy: m2
+        name: mc_neg_upper
+        peakname: km2
+        channels: *negchannels
+        halo:  *uphalostrat
+        mc: *mcupstrat
+
+weights:
+    fid_file: use_root
+    root_file: "tdata/halo_control/all.halo_control.root"
+    pre : ""
+    post: "sample_burst_count/bursts"
+    branch:  "weight"
+
+output_list:
+    -  { input_file: tdata/halo_control/all.halo_control.root,
+
+    plots: [
+        { path: signal_upper_plots/h_m2m_kmu, name: halo_sig_upper_m2m, rebin: 25} ,
+        { path: signal_upper_muv_plots/h_m2m_kmu, name: halo_sig_muv_upper_m2m, rebin: 25} ],
+
+    data_plot: { channels: [ p5.data.q11t.v3.pos ],
+    do_blind: true,  min_blind: 0.09, max_blind: 0.3 },
+
+    stack: [
+        item: { name: halo_pos, scaling: mc_pos_upper,
+        type: halo, channels: [p6.data.kless.q11t.v2.pos] }, 
+
+        item: { name: k3pi_pos, scaling: mc_pos_upper,
+        type: k3pi, fid_weight: p5.k3pi.v2.pos, channels: [p5.k3pi.v2.pos] } ,
+
+        item: { name: k2pig_pos, scaling: mc_pos_upper,
+        type: k2pi, fid_weight: p5.k2pig.v2.pos, channels: [p5.k2pig.v2.pos] } ,
+
+        item: { name: k3pi0_pos, scaling: mc_pos_upper,
+        type: k3pi0, fid_weight: p5.k3pi0.v2.pos, channels: [p5.k3pi0.v2.pos] } ,
+
+        item: { name: km3_pos, scaling: mc_pos_upper,
+        type: km3, fid_weight: p5.km3.v2.pos, channels: [p5.km3.v2.pos] } ,
+
+        item: { name: km2_pos, scaling: mc_pos_lower,
+        type: km2, fid_weight: p5.km2.v2.pos, channels: [p5.km2.v2.pos] } 
+    ] }
+
+    -  { input_file: tdata/halo_control/all.halo_control.root,
+
+    plots: [
+        { path: signal_lower_plots/h_m2m_kmu, name: halo_sig_lower_m2m, rebin: 25} ,
+        { path: signal_lower_muv_plots/h_m2m_kmu, name: halo_sig_muv_lower_m2m, rebin: 25} ],
+
+    data_plot: { channels: [ p5.data.q11t.v3.pos ],
+    do_blind: true,  min_blind: 0.09, max_blind: 0.135 },
+
+    stack: [
+        item: { name: halo_pos, scaling: mc_pos_lower,
+        type: halo, channels: [p6.data.kless.q11t.v2.pos] }, 
+
+        item: { name: k3pi_pos, scaling: mc_pos_lower,
+        type: k3pi, fid_weight: p5.k3pi.v2.pos, channels: [p5.k3pi.v2.pos] } ,
+
+        item: { name: k2pig_pos, scaling: mc_pos_lower,
+        type: k2pi, fid_weight: p5.k2pig.v2.pos, channels: [p5.k2pig.v2.pos] } ,
+
+        item: { name: k3pi0_pos, scaling: mc_pos_lower,
+        type: k3pi0, fid_weight: p5.k3pi0.v2.pos, channels: [p5.k3pi0.v2.pos] } ,
+
+        item: { name: km3_pos, scaling: mc_pos_lower,
+        type: km3, fid_weight: p5.km3.v2.pos, channels: [p5.km3.v2.pos] } ,
+
+        item: { name: km2_pos, scaling: mc_pos_lower,
+        type: km2, fid_weight: p5.km2.v2.pos, channels: [p5.km2.v2.pos] } 
+    ] }

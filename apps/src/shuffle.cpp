@@ -9,6 +9,7 @@
 #include "yaml-cpp/exceptions.h"
 #include "RatioCanvas.hh"
 #include "fiducial_functions.hh"
+#include "Shuffler.hh"
 
 int main( int argc, char * argv[] )
 {
@@ -174,6 +175,24 @@ int main( int argc, char * argv[] )
     //Build Stack
     //**************************************************
 
+
+    //Setup output
+    TFile tfout( output_filename.string().c_str() , "RECREATE" );
+
+    if ( config_node["output"] )
+    {
+        do_the_shuffle( config_node["output"], tfout, scaling_info );
+    }
+
+    if ( config_node["output_list"] )
+    {
+        for ( const auto& output_node : config_node["output_list" ] )
+        {
+            do_the_shuffle( output_node, tfout, scaling_info );
+        }
+    }
+
+#if 0
     //Setup input
     path stack_input_file = get_yaml<std::string>( config_node["output"], "input_file" );
     TFile tfstackin( stack_input_file.string().c_str() );
@@ -185,9 +204,6 @@ int main( int argc, char * argv[] )
 
     auto data_channels = get_yaml<std::vector<std::string>>(
             config_node["output"]["data_plot"], "channels" );
-
-    //Setup output
-    TFile tfout( output_filename.string().c_str() , "RECREATE" );
 
     //get plot list
     const YAML::Node& plots = config_node["output"]["plots"];
@@ -250,6 +266,7 @@ int main( int argc, char * argv[] )
         std::cout << std::string(  50, ' ' ) 
             << "bg: " << hdenom->Integral() << " dt:" << hdata->Integral() << std::endl;
     }
+#endif
 
     exit(0);
 
@@ -263,6 +280,6 @@ int main( int argc, char * argv[] )
     //Compute limits
     //**************************************************
 
-    ce_stack.set_rebin( 1 );
+    //ce_stack.set_rebin( 1 );
     // UpperLimitExtractor ule( config_node["output"], config_node["mass_window"], ce_stack, scaling_info );
 }

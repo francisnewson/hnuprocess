@@ -179,7 +179,7 @@
 - selection:
     name: m2m
     type: K3piM2M
-    half_width: 0.0015
+    half_width: 0.003
     inputs:
         k3pi_reco:  k3pi_event
 

@@ -31,5 +31,7 @@ channel_lists:
         - p6.data.km.q11t.v2.pos
         - p6.data.kless.q11t.v2.neg
         - p6.data.km.q11t.v2.neg
+        - p6.k3pi.v2.pos
+        - p6.k3pi.v2.neg
         - klesska+
         - klesspi+

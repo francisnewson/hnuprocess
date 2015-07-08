@@ -27,6 +27,8 @@ if machine == 'bham':
 
     env.SetBhamGCC()
 
+    env['ENV']['TERM'] = os.environ['TERM']
+
     VariantDir(env['variantDir'], '.' )
     SConscript( os.path.join( env['variantDir'], 'SConscript' ),
             exports = 'env')
@@ -40,6 +42,7 @@ else:
     env['variantDir'] = 'build_O3'
     env.Append( CPPFLAGS = ['-O3', '-ggdb'] )
     env.Append( CPPFLAGS = ['-std=c++0x', '-Wno-error=unused-private-field', ] )
+    env['ENV']['TERM'] = os.environ['TERM']
     env.SetClang()
     VariantDir(env['variantDir'], '.' )
     SConscript( os.path.join( env['variantDir'], 'SConscript' ),

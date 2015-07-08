@@ -1,0 +1,22 @@
+- output:
+    name: text_out
+    type: ostream
+    filename: cerr
+
+#Autopass
+- selection:
+    name: passer
+    type : auto_pass
+
+- analysis:
+    name: print_mc
+    type: PrintMc
+    ostream: text_out
+    selection: passer
+
+- analysis : 
+    name : summary
+    type: Summary
+    base : passer
+    source : passer 
+    ostream: text_out

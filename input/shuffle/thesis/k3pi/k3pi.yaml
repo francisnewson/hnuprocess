@@ -1,0 +1,40 @@
+scaling:
+    - scaling_method:
+        strategy: m2
+        name: mc_pos
+        peakname: k3pi
+
+        channels:  &halochannels
+            halo_channels: []
+            data_channels: [ p5.data.k3pi.v4.pos ]
+            peak_channels: [p5.k3pi.v4.pos]
+
+        mc: {
+            strategy: m2, input_file: tdata/k3pi/all.k3pi.root, plot_path: k3pi_plots/h_dm2m, 
+            min_mass_peak: -0.002, max_mass_peak: 0.002 }
+
+        halo: { strategy: dummy }
+
+####
+
+weights:
+    fid_file: use_multi_root
+    files:
+        - {  root_file: "tdata/k3pi/all.k3pi.root", pre: "", 
+        post: sample_burst_count/bursts, branch: "weight"  }
+
+output_list:
+    -  { input_file: tdata/k3pi/all.k3pi.root,
+
+    plots: [
+        { path: k3pi_plots/h_m2m, name: k2pi_m2m, rebin: 10  },
+        { path: k3pi_plots/h_p, name: k2pi_p, rebin: 10  },
+        { path: k3pi_plots/h_pt, name: k2pi_pt, rebin: 10  }
+    ],
+
+    data_plot: { channels: [p5.data.k3pi.v4.pos ], do_blind: false },
+
+    stack: [
+        item: { name: k3pi_pos, scaling: mc_pos,
+        type: k3pi, fid_weight: p5.k3pi.v4.pos, channels: [p5.k3pi.v4.pos] } 
+    ] }

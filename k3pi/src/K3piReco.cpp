@@ -150,8 +150,6 @@ namespace fn
             }
         }
 
-        //if ( min_separation < 0.5 ){ return; }
-
         //find max track deflection in y at DCH4
         double max_dy_dch4 = 0;
         for( const auto& rt : tracks )

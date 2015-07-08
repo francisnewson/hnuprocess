@@ -9,33 +9,19 @@ scaling:
             data_channels: [ p5.data.q11t.v3.pos ]
             peak_channels: [ p5.km2.v2.pos ]
 
-        halo: 
-            strategy: m2
-            input_file: tdata/halo_control/all.halo_control.root
-            #plot_path: full_upper_halo/h_m2m_kmu
-            plot_path: ctrl_upper_halo/h_z
+        halo: &halostrat {
+            strategy: m2,
+            input_file: tdata/halo_control/all.halo_control.root,
+            plot_path: ctrl_upper_plots/h_z,
+            min_mass_halo: 2500, max_mass_halo: 5500,
+            min_mass_peak: 2000, max_mass_peak: 3000 }
 
-            #min_mass_halo: 0.05
-            #max_mass_halo: 0.08
-            #min_mass_peak: -0.01
-            #max_mass_peak:  0.01
-            min_mass_halo: 2500
-            max_mass_halo: 5500
-            min_mass_peak: 2000
-            max_mass_peak: 3000
-
-        mc:
-            strategy: m2
-            input_file: tdata/halo_control/all.halo_control.root
-            plot_path: full_rk_like_plots/h_m2m_kmu
-            #plot_path: full_upper_halo/h_m2m_kmu
-
-            min_mass_halo: -0.3
-            max_mass_halo: -0.025
-            #min_mass_halo: 0.05
-            #max_mass_halo: 0.08
-            min_mass_peak: -0.01
-            max_mass_peak:  0.01
+        mc: &mcstrat {
+            strategy: m2,
+            input_file: tdata/halo_control/all.halo_control.root,
+            plot_path: rk_like_selection_plots/h_m2m_kmu,
+            min_mass_halo: -0.3, max_mass_halo: -0.025,
+            min_mass_peak: -0.01, max_mass_peak:  0.01 }
 
     - scaling_method:
         strategy: m2
@@ -47,34 +33,9 @@ scaling:
             data_channels: [ p5.data.q11t.v3.neg ]
             peak_channels: [ p5.km2.v2.neg ]
 
-        halo: 
-            strategy: m2
-            input_file: tdata/halo_control/all.halo_control.root
-            #plot_path: full_upper_halo/h_m2m_kmu
-            plot_path: ctrl_upper_halo/h_z
+        halo:  *halostrat
 
-            #min_mass_halo: 0.05
-            #max_mass_halo: 0.08
-            #min_mass_peak: -0.01
-            #max_mass_peak:  0.01
-            min_mass_halo: 2500
-            max_mass_halo: 5500
-            min_mass_peak: 2000
-            max_mass_peak: 3000
-
-
-        mc:
-            strategy: m2
-            input_file: tdata/halo_control/all.halo_control.root
-            plot_path: full_rk_like_plots/h_m2m_kmu
-            #plot_path: full_upper_halo/h_m2m_kmu
-
-            min_mass_halo: -0.3
-            max_mass_halo: -0.025
-            #min_mass_halo: 0.05
-            #max_mass_halo: 0.08
-            min_mass_peak: -0.01
-            max_mass_peak:  0.01
+        mc: *mcstrat
 
 weights:
     fid_file: use_root
@@ -87,16 +48,17 @@ output:
     input_file: tdata/halo_control/all.halo_control.root
 
     plots:
-        - { path: ctrl_upper_halo/h_m2m_kmu, name: halo_upper_m2m, rebin: 20  }
-        - { path: full_rk_like_plots/h_m2m_kmu, name: rk_m2m, rebin: 20  }
-        - { path: full_rk_like_plots/h_cda, name: rk_cda, rebin: 1   }
-        - { path: ctrl_upper_halo/h_z, name: halo_upper_z, rebin: 1  }
-        - { path: ctrl_upper_halo/h_p, name: halo_upper_p, rebin: 1  }
-        - { path: ctrl_upper_halo/h_p_z, name: halo_upper_pz, rebin: 1   }
-        - { path: ctrl_upper_halo/h_cda, name: halo_upper_cda, rebin: 1  }
-        - { path: ctrl_upper_halo/h_t, name: halo_upper_t, rebin: 5  }
-        - { path: ctrl_upper_halo/h_t_phi, name: halo_upper_phi, 
-        collapse_y: true, rebin: 5  }
+        - { path: ctrl_upper_plots/h_m2m_kmu, name: halo_upper_m2m, rebin: 20  }
+        - { path: rk_like_selection_plots/h_m2m_kmu, name: rk_m2m, rebin: 20  }
+        - { path: rk_like_selection_plots/h_cda, name: rk_cda, rebin: 1   }
+        - { path: ctrl_upper_plots/h_z, name: halo_upper_z, rebin: 1  }
+        - { path: ctrl_upper_plots/h_p, name: halo_upper_p, rebin: 1  }
+        - { path: ctrl_upper_plots/h_p_z, name: halo_upper_pz, rebin: 1   }
+        - { path: ctrl_upper_plots/h_cda, name: halo_upper_cda, rebin: 1  }
+        - { path: ctrl_upper_plots/h_t, name: halo_upper_t, rebin: 5  }
+        - { path: ctrl_upper_plots/h_t_phi, name: halo_upper_phi, collapse_y: true, rebin: 5  }
+        - { path: signal_upper_plots/h_z_t, name: halo_signal_upper_zt, rebin : 1 }
+        - { path: signal_upper_plots/h_m2m_kmu, name: halo_signal_upper_m2m, rebin : 20 }
 
     data_plot:
         channels:

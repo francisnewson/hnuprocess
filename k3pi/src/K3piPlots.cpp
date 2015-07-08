@@ -21,7 +21,7 @@ namespace fn
                 1000, 0, 5, "p_{T}" );
 
         h_p_ = hs_.MakeTH1D( "h_p", "Kaon momentum", 
-                1000, 0, 100, "p" );
+                1500, 0, 200, "p" );
 
         h_chi2_ = hs_.MakeTH1D( "h_chi2_", "Chi2", 
                 1000, 0, 100, "chi2" );
