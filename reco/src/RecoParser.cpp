@@ -48,7 +48,22 @@ namespace fn
                 YAML::const_iterator instruct_it  = it->begin();
                 assert(it->Type() == YAML::NodeType::Map);
 
-                const YAML::Node& instruct = instruct_it->second;
+                //Copy instruct node
+                YAML::Node instruct = instruct_it->second;
+
+                //Load extra info from file if requested
+                if ( instruct_it->second["includefile"] )
+                {
+                    std::string include_filename = instruct_it->second["includefile"].as<std::string>() ;
+                    YAML::Node file_node = YAML::LoadFile( include_filename );
+                    for (YAML::const_iterator fit=file_node.begin();
+                            fit!=file_node.end();++fit)
+                    {
+                       instruct[ fit->first ]  = fit->second ;
+                    }
+                }
+
+                //const YAML::Node& instruct = instruct_it->second;
                 std::string cat = instruct_it->first.as<std::string>();
 
                 if ( cat == "exec" )
