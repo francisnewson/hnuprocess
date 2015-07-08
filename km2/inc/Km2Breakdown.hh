@@ -2,6 +2,7 @@
 #define KM2BREAKDOWN_HH
 #include "Analysis.hh"
 #include "HistStore.hh"
+#include <boost/optional.hpp>
 #if 0
 /*
  *  _  __          ____  ____                 _       _
@@ -22,6 +23,7 @@ namespace fn
     class Km2Clusters;
     class ClusterCorrector;
     class SingleRecoTrack;
+    class SingleMuon;
 
     class MiniPlot
     {
@@ -57,6 +59,39 @@ namespace fn
             { return h->GetName(); }
     };
 
+    //--------------------------------------------------
+    
+    template<typename T> boost::optional<double> hoptfill( Km2Breakdown& km2b )
+    { return boost::optional<double>{} ; }
+
+    template <typename T>
+        class Mini1DPlotOpt : public MiniPlot
+    {
+        private:
+            TH1D * h;
+
+        public:
+            void init( HistStore& hs )
+            { h = hinit<T>(hs ); }
+
+            void fill(  Km2Breakdown& km2b,  double wgt )
+            { 
+                boost::optional<double> result = hoptfill<T>( km2b );
+                if ( result )
+                {
+                h->Fill( *result, wgt ) ;
+                }
+            }
+
+            void set_name( std::string name )
+            { h->SetName( name.c_str() ); }
+
+            std::string get_name()
+            { return h->GetName(); }
+    };
+
+    //--------------------------------------------------
+
     template<typename T> TH2D * h2init( HistStore& hs ){ return 0; }
     template<typename T> std::pair<double,double> h2fill( Km2Breakdown& km2b )
     { return {0,0}; }
@@ -85,11 +120,49 @@ namespace fn
     };
 
     //--------------------------------------------------
+
+    template<typename T> 
+        boost::optional<std::pair<double,double>> h2optfill( Km2Breakdown& km2b )
+    { return boost::optional<std::pair<double,double>>{}  ; }
+
+    template <typename T>
+        class Mini2DPlotOpt : public MiniPlot
+    {
+        private:
+            TH2D * h;
+
+        public:
+            void init( HistStore& hs )
+            { h = h2init<T>(hs ); }
+
+            void fill(  Km2Breakdown& km2b,  double wgt )
+            {
+                boost::optional<std::pair<double,double>>  result = h2optfill<T>( km2b );
+                if ( result )
+                {
+                h->Fill( result->first, result->second, wgt ) ;
+                }
+            }
+
+            void set_name( std::string name )
+            { h->SetName( name.c_str() ); }
+
+            std::string get_name()
+            { return h->GetName(); }
+    };
+
+
+    //--------------------------------------------------
     
-    //M2M QUALITY
+    //M2M 
     struct mp_m2m{};
     template <> TH1D * hinit<mp_m2m>( HistStore& hs );
     template <> double hfill<mp_m2m>( Km2Breakdown& km2b );
+
+    //TRACK MOM
+    struct mp_mom{};
+    template <> TH1D * hinit<mp_mom>( HistStore& hs );
+    template <> double hfill<mp_mom>( Km2Breakdown& km2b );
 
     //TRACK QUALITY
     struct mp_track_quality{};
@@ -115,6 +188,11 @@ namespace fn
     struct mp_xy_lkr{};
     template <> TH2D * h2init<mp_xy_lkr>( HistStore& hs );
     template <> std::pair<double,double> h2fill<mp_xy_lkr>( Km2Breakdown& km2b );
+
+    //MUV
+    struct mp_xy_muv{};
+    template <> TH2D * h2init<mp_xy_muv>( HistStore& hs );
+    template <> std::pair<double,double> h2fill<mp_xy_muv>( Km2Breakdown& km2b );
 
     //DCHT
     struct mp_dcht{};
@@ -142,10 +220,24 @@ namespace fn
     template <> TH2D * h2init<mp_zt>( HistStore& hs );
     template <> std::pair<double,double> h2fill<mp_zt>( Km2Breakdown& km2b );
 
+    //PT
+    struct mp_pt{};
+    template <> TH2D * h2init<mp_pt>( HistStore& hs );
+    template <> std::pair<double,double> h2fill<mp_pt>( Km2Breakdown& km2b );
+
     //TPHI
     struct mp_tphi{};
     template <> TH2D * h2init<mp_tphi>( HistStore& hs );
     template <> std::pair<double,double> h2fill<mp_tphi>( Km2Breakdown& km2b );
+
+    //MUON
+    struct mp_muon{};
+    template <> TH2D * h2init<mp_muon>( HistStore& hs );
+    template <> boost::optional<std::pair<double,double>> h2optfill<mp_muon>( Km2Breakdown& km2b );
+
+    struct mp_muonr{};
+    template <> TH1D * hinit<mp_muonr>( HistStore& hs );
+    template <>boost::optional<double> hoptfill<mp_muonr>( Km2Breakdown& km2b );
 
     //--------------------------------------------------
 
@@ -179,11 +271,13 @@ namespace fn
         public:
             Km2Breakdown( const Selection& sel, const Km2Event& km2e, 
                     const Selection& good_track, Km2Clusters& km2c,
+                    const SingleMuon& sm,
                     TFile& tf, std::string folder  );
 
             const SingleRecoTrack& get_single_reco_track();
             const Km2RecoClusters& get_reco_clusters();
             const Km2RecoEvent& get_reco_event();
+            const SingleMuon& get_single_muon();
 
             template <typename T>
                 void register_plotter( std::string ) ;
@@ -202,6 +296,8 @@ namespace fn
 
             const Km2Clusters& km2c_;
             const Km2RecoClusters * km2rc_;
+
+            const SingleMuon&  sm_;
 
             void process_event();
             TFile& tf_;

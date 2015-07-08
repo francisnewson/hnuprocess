@@ -11,6 +11,21 @@
     type: tfile
     filename: km2_plots.root
 
+- output:
+    name: text_out
+    type: ostream
+    filename: cerr
+
+- output:
+    name: stats_out
+    type: ostream
+    filename: km2_stats.dat
+
+- output:
+    name: debug_out
+    type: ostream
+    filename: km2_debug.dat
+
 ###################################################
 # STANDARD CORRECTIONS
 ###################################################
@@ -33,21 +48,6 @@
     type: ClusterCorrector
     filename: "/afs/cern.ch/user/f/fnewson/work/hnu/gopher/data/detector/eopCorrfile.dat"
     enabled: true
-
-- output:
-    name: text_out
-    type: ostream
-    filename: cerr
-
-- output:
-    name: stats_out
-    type: ostream
-    filename: km2_stats.dat
-
-- output:
-    name: debug_out
-    type: ostream
-    filename: km2_debug.dat
 
 # 1]Bad bursts
 - selection:
@@ -100,6 +100,14 @@
     folder: sample_burst_count
     selection: weighted_mc_sample
     codename: bursts
+
+- analysis:
+    name: data_burst_count
+    type: BurstCount
+    tfile: tfout
+    folder: data_burst_count
+    selection: weighted_data_sample
+    codename: data_bursts
 
 ###################################################
 # INPUTS
@@ -238,7 +246,7 @@
     name: dch4_acc
     type: TrackRadialAcceptance
     track_section: downstream
-    z: 11888.0 #zDCH1
+    z: 11888.0 #zDCH4
     inner: 14.0
     outer: 115.0
     inputs:
@@ -276,6 +284,14 @@
         km2clusters: full_km2clusters
 
 - selection:
+    name: signal_track_mom
+    type: TrackMomentum
+    min: 10
+    max: 65
+    inputs:
+        ogt: bf_st
+
+- selection:
     name: muv_acc
     type: TrackXYUVAcceptance
     track_section: ds
@@ -291,58 +307,296 @@
     inputs:
         ogt: bf_st
 
+- selection: { name: ddead_cell, type: TrackDDeadCell, 
+    min_ddead_cell: 2.0,  inputs: {ogt: bf_st } }
+
+###################################################
+# SIGNAL REGIONS
+###################################################
+
+#UPPPER
+
 - selection:
-    name: zt_cut
+    name: zt_up_def
+    includefile: input/reco/thesis/cuts/zt_up_def.inc.yaml
+    inputs:
+        km2event: km2_event
+
+- selection:
+    name: zt_up_sig
+    includefile: input/reco/thesis/cuts/zt_up_sig.inc.yaml
+    inputs:
+        km2event: km2_event
+
+- selection:
+    name: tphi_up
+    includefile: input/reco/thesis/cuts/tphi_up_sig.inc.yaml
+    inputs: 
+        km2event: km2_event
+
+#LOWER
+
+- selection:
+    name: zt_dn_def
+    includefile: input/reco/thesis/cuts/zt_dn_def.inc.yaml
+    inputs:
+        km2event: km2_event
+
+- selection:
+    name: zt_dn_sig
+    includefile: input/reco/thesis/cuts/zt_dn_sig.inc.yaml
+    inputs:
+        km2event: km2_event
+
+- selection:
+    name: pt_dn_sig
+    includefile: input/reco/thesis/cuts/pt_dn_sig.inc.yaml
+    imputs:
+        km2event: km2_event
+
+###################################################
+# CONTROL REGIONS
+###################################################
+
+- selection: {name: fiducial_pz, type: TrackPZ,
+    shape: rectangles, points: [ [  3, 70, -3000, 9000 ] ],
+    inputs: {ogt: bf_st} }
+
+- selection:
+      name: pre_selection
+      type: CompositeSelection
+      children:
+        - weighted_data_sample
+        - good_trk
+        - pos_trk
+        - quality_7
+        - fiducial_pz
+        - dch1_acc
+        - dch4_acc
+        - rk_hot_lkr
+        - rk_lkr_veto
+        - rk_dcht
+        - ddead_cell
+
+- selection: {
+    name: ctrl_cda, type: TrackCda,
+    min_cda: 0, max_cda: 6.0, #cm
+    inputs: {ogt: bf_st } }
+
+- selection: {
+    name: ctrl_t, type: Km2Angle,
+    min_t: 0, max_t: 0.013,
+    inputs: { km2event: km2_event } }
+
+#--------------------------------------------------
+
+#UPPER
+- selection: {
+    name: ctrl_upper_pz, type: TrackPZ,
+    shape: rectangles,
+    points: [ [  11, 45, 2000, 5800 ] ],
+    inputs: { ogt: bf_st } }
+
+- selection: {
+     name: ctrl_upper_sel, type: CompositeSelection,
+     children: [ pre_selection, zt_up_def, ctrl_upper_pz, ctrl_cda, ctrl_t ] }
+
+- selection: {
+     name: ctrl_upper_sel_muv, type: CompositeSelection,
+     children: [ctrl_upper_sel, muv_acc, muon_veto  ] }
+
+#--------------------------------------------------
+
+#LOWER
+- selection:
+    name: ctrl_zt_dn
     type: TrackZT
     track_section: us
     shape: polygon
     points:
-        - [  -935,   0.0097 ]
-        - [  -495, 0.0080]
-        - [  -170,  0.0062]
-        - [   230,    0.0050]
-        - [   855,   0.0040]
-        - [  1565,   0.0030]
-        - [  2044,   0.0028]
-        - [  2400,  0.0014]
-        - [  2225,  0 ]
-        - [  2185,  0 ]
-        - [  10000, 0 ]
-        - [  10000, 0.1 ]
-        - [   -935, 0.1 ]
-        - [   -935, 0.0097 ]
-    inputs:
-        km2event: km2_event
+        - [  10000,  0.25 ] 
+        - [  10000,  0.00 ] 
+        - [    500,  0.00 ] 
+        - [  -1000,  0.003 ] 
+        - [  -1500,  0.005 ] 
+        - [  -2000,  0.012 ] 
+        - [  -2000,  0.25 ] 
+        - [  10000,  0.25 ] 
+    inputs: { km2event: km2_event } 
+
+- selection: {
+    name: ctrl_lower_pz, type: TrackPZ,
+    shape: rectangles,
+    points: [ [  11, 50, -2000, 10000 ] ],
+    inputs: { ogt: bf_st } }
+
+- selection: {
+     name: ctrl_lower_sel, type: CompositeSelection,
+     children: [ pre_selection, zt_dn_def, ctrl_zt_dn, ctrl_lower_pz, ctrl_cda, ctrl_t ] }
+
+- selection: {
+     name: ctrl_lower_sel_muv, type: CompositeSelection,
+     children: [ ctrl_lower_sel, muv_acc, muon_veto ] }
+
+###################################################
+# SELECTIONS
+###################################################
 
 - selection:
-    name: tphi_cut
-    includefile: input/reco/thesis/cuts/old_thphi_cut.inc.yaml
-    inputs: 
-        km2event: km2_event
+    name: full_km2_up
+    type: CompositeSelection
+    children:
+        - weighted_data_sample
+        - good_trk
+        - zt_up_def
+        - pos_trk
+        - signal_track_mom
+        - zt_up_sig
+        - muv_acc
+        - muon_veto
+        - quality_7
+        - cda_3cm
+        - dch1_acc
+        - dch4_acc
+        - ddead_cell
+        - rk_lkr_accep
+        - rk_hot_lkr
+        - rk_lkr_veto
+        - rk_dcht
+        - tphi_up
 
+- selection:
+    name: full_km2_dn
+    type: CompositeSelection
+    children:
+        - weighted_data_sample
+        - good_trk
+        - zt_dn_def
+        - pos_trk
+        - signal_track_mom
+        - zt_dn_sig
+        - pt_dn_sig
+        - muv_acc
+        - muon_veto
+        - quality_7
+        - cda_3cm
+        - dch1_acc
+        - dch4_acc
+        - ddead_cell
+        - rk_lkr_accep
+        - rk_hot_lkr
+        - rk_lkr_veto
+        - rk_dcht
 
+###################################################
+# ANALYSES
+###################################################
 
 - analysis:
-    name: full_km2_breakdown
+    name: full_km2_breakdown_up
     type: Km2Breakdown
     base: weighted_data_sample
     selection:
-    -  {  cut:  good_trk,      plot:  []              }
-    -  {  cut:  pos_trk,       plot:  [ m2m             ]   }
-    -  {  cut:  zt_cut,        plot:  [ zt,             m2m ]  }
-    -  {  cut:  tphi_cut,      plot:  [ tphi,           m2m ]  }
-    -  {  cut:  quality_7,     plot:  [ track_quality,  m2m ]  }
-    -  {  cut:  cda_3cm,       plot:  [ cda,            m2m ]  }
-    -  {  cut:  dch1_acc,      plot:  [ rdch1,          m2m ]  }
-    -  {  cut:  dch4_acc,      plot:  [ rdch4,          m2m ]  }
-    -  {  cut:  rk_lkr_accep,  plot:  [ xylkr,          m2m ]  }
-    -  {  cut:  rk_hot_lkr,    plot:  [ rdch4,          m2m ]  }
-    -  {  cut:  rk_lkr_veto,   plot:  [ rcluster,       m2m ]  }
-    -  {  cut:  rk_dcht,       plot:  [dcht,            m2m ]  }
+    -  {  cut:  good_trk,              plot:  []              }
+    -  {  cut:  zt_up_def,             plot:  [ zt,             m2m ]  }
+    -  {  cut:  pos_trk,               plot:  [ m2m             ]   }
+    -  {  cut:  signal_track_mom,      plot:  [ mom,            m2m ]  }
+    -  {  cut:  zt_up_sig,             plot:  [ zt,             m2m ]  }
+    -  {  cut:  muv_acc,               plot:  [ muv_acc,        m2m ]  }
+    -  {  cut:  muon_veto,             plot:  [ muon, muonr,    m2m ]  }
+    -  {  cut:  quality_7,             plot:  [ track_quality,  m2m ]  }
+    -  {  cut:  cda_3cm,               plot:  [ cda,            m2m ]  }
+    -  {  cut:  dch1_acc,              plot:  [ rdch1,          m2m ]  }
+    -  {  cut:  dch4_acc,              plot:  [ rdch4,          m2m ]  }
+    -  {  cut:  ddead_cell,            plot:  [                 m2m ]  }
+    -  {  cut:  rk_lkr_accep,          plot:  [ xylkr,          m2m ]  }
+    -  {  cut:  rk_hot_lkr,            plot:  [ xylkr,          m2m ]  }
+    -  {  cut:  rk_lkr_veto,           plot:  [ rcluster,       m2m ]  }
+    -  {  cut:  rk_dcht,               plot:  [ dcht,           m2m ]  }
+    -  {  cut:  tphi_up,               plot:  [ tphi,           m2m ]  }
 
     good_track: good_trk
     tfile: tfout
-    folder: km2_breakdown
+    folder: km2_breakdown_upper
     inputs:
         km2event: km2_event
         km2clusters: full_km2clusters
+        sm: single_muon
+
+
+- analysis:
+    name: full_km2_breakdown_dn
+    type: Km2Breakdown
+    base: weighted_data_sample
+    selection:
+    -  {  cut:  good_trk,              plot:  []              }
+    -  {  cut:  zt_dn_def,             plot:  [ zt,             m2m ]  }
+    -  {  cut:  pos_trk,               plot:  [ m2m             ]   }
+    -  {  cut:  signal_track_mom,      plot:  [mom,             m2m ]  }
+    -  {  cut:  zt_dn_sig,             plot:  [ zt,             m2m ]  }
+    -  {  cut:  pt_dn_sig,             plot:  [ pt,             m2m ]  }
+    -  {  cut:  muv_acc,               plot:  [ muv_acc,        m2m ]  }
+    -  {  cut:  muon_veto,             plot:  [ muon, muonr,    m2m ]  }
+    -  {  cut:  quality_7,             plot:  [ track_quality,  m2m ]  }
+    -  {  cut:  cda_3cm,               plot:  [ cda,            m2m ]  }
+    -  {  cut:  dch1_acc,              plot:  [ rdch1,          m2m ]  }
+    -  {  cut:  dch4_acc,              plot:  [ rdch4,          m2m ]  }
+    -  {  cut:  ddead_cell,            plot:  [                 m2m ]  }
+    -  {  cut:  rk_lkr_accep,          plot:  [ xylkr,          m2m ]  }
+    -  {  cut:  rk_hot_lkr,            plot:  [ xylkr,          m2m ]  }
+    -  {  cut:  rk_lkr_veto,           plot:  [ rcluster,       m2m ]  }
+    -  {  cut:  rk_dcht,               plot:  [ dcht,           m2m ]  }
+
+    good_track: good_trk
+    tfile: tfout
+    folder: km2_breakdown_lower
+    inputs:
+        km2event: km2_event
+        km2clusters: full_km2clusters
+        sm: single_muon
+
+- analysis : { type: Km2Plotter, name: full_up_plots, folder: full_km2_up,
+    tfile: tfout, selection: full_km2_up, inputs: { km2event : km2_event } }
+
+- analysis : { type: Km2Plotter, name: full_dn_plots, folder: full_km2_dn,
+    tfile: tfout, selection: full_km2_dn, inputs: { km2event : km2_event } }
+
+- analysis : { type: Km2Plotter, name: ctrl_up_plots, folder: full_km2_up,
+    tfile: tfout, selection: ctrl_upper_sel, inputs: { km2event : km2_event } }
+
+- analysis : { type: Km2Plotter, name: ctrl_dn_plots, folder: ctrl_km2_dn,
+    tfile: tfout, selection: ctrl_lower_sel, inputs: { km2event : km2_event } }
+
+- analysis : { type: Km2Plotter, name: full_up_plots_muv, folder: full_km2_up_muv,
+    tfile: tfout, selection: ctrl_upper_sel_muv, inputs: { km2event : km2_event } }
+
+- analysis : { type: Km2Plotter, name: ctrl_dn_plots_muv, folder: ctrl_km2_dn_muv,
+    tfile: tfout, selection: ctrl_lower_sel_muv, inputs: { km2event : km2_event } }
+
+- analysis : 
+    name : full_summary_upper
+    type: Summary
+    base : passer
+    source : full_km2_up 
+    ostream: text_out
+
+- analysis : 
+    name : full_summary_upper_file
+    type: Summary
+    base : passer
+    source : full_km2_up 
+    ostream: stats_out
+
+- analysis : 
+    name : full_summary_lower
+    type: Summary
+    base : passer
+    source : full_km2_dn 
+    ostream: text_out
+
+- analysis : 
+    name : full_summary_lower_file
+    type: Summary
+    base : passer
+    source : full_km2_dn 
+    ostream: stats_out

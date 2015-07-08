@@ -12,6 +12,7 @@ lenv.AddLibs( [
 'tracking',
 'clusters',
 'dch',
+'muons',
 ] )
 lenv.AddEvent( event_dir, 'event' )
 lenv.SetYaml( yaml_dir, machine )

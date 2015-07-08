@@ -1,0 +1,11 @@
+#PT DN SIG
+type: TrackPT
+shape: polygon
+points:
+    - [  0, 0.000 ]
+    - [  0, 0.015 ]
+    - [ 12, 0.000 ]
+    - [ 100, 0.000 ] 
+    - [ 100, 0.500 ] 
+    - [ 0, 0.500 ] 
+inputs: { km2event: km2_event } 

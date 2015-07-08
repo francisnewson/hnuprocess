@@ -1,6 +1,7 @@
 #include "Km2Breakdown.hh"
 #include "Km2Reco.hh"
 #include "SingleTrack.hh"
+#include "SingleMuon.hh"
 #include "yaml_help.hh"
 #include "stl_help.hh"
 #include "NA62Constants.hh"
@@ -12,13 +13,21 @@ namespace fn
 {
     //--------------------------------------------------
 
-    //M2M QUALITY
+    //M2M 
     template <> TH1D * hinit<mp_m2m>( HistStore& hs ) { 
         return hs.MakeTH1D(
-                "h_km2_m2m", "MissingMass2", 1000, -0.7, 0.3, "m^{2}_{miss} (GeV^{2}/c)"); }
+                "h_km2_m2m", "MissingMass2", 10000, -0.7, 0.3, "m^{2}_{miss} (GeV^{2}/c)"); }
 
     template <> double hfill<mp_m2m>( Km2Breakdown& km2b ) { 
         return km2b.get_reco_event().get_m2m_kmu(); }
+
+    //TRACK MOM
+    template <> TH1D * hinit<mp_mom>( HistStore& hs ) { 
+        return hs.MakeTH1D(
+                "h_km2_mom", "Momentum", 1000, 0, 100, "p (GeV/c)"); }
+
+    template <> double hfill<mp_mom>( Km2Breakdown& km2b ) { 
+        return km2b.get_reco_event().get_muon_mom(); }
 
     //TRACK QUALITY
     template <> TH1D * hinit<mp_track_quality>( HistStore& hs ) { 
@@ -51,7 +60,7 @@ namespace fn
                 "h_r_dch4", "Radius at DCH4", 200, 0, 200, "r at DCH4 (cm)" ); }
 
     template <> double hfill<mp_r_dch4>( Km2Breakdown& km2b ) { 
-        return km2b.get_single_reco_track().extrapolate_us( na62const::zDch4).Perp(); }
+        return km2b.get_single_reco_track().extrapolate_ds( na62const::zDch4).Perp(); }
 
     //LKR
     template <> TH2D * h2init<mp_xy_lkr>( HistStore& hs ){
@@ -61,6 +70,17 @@ namespace fn
     template <> std::pair<double,double> h2fill<mp_xy_lkr>( Km2Breakdown& km2b ) {
         TVector3 point = km2b.get_single_reco_track().extrapolate_ds( na62const::zLkr);
         return std::make_pair( point.X(), point.Y() ); }
+
+    //MUV
+    template <> TH2D * h2init<mp_xy_muv>( HistStore& hs ){
+        return hs.MakeTH2D(
+                "h_xy_muv", "XY at MUV", 200, -200, 200, "x (cm)", 200, -200, 200, "y (cm)"); }
+
+    template <> std::pair<double,double> h2fill<mp_xy_muv>( Km2Breakdown& km2b ) {
+        const auto& track = km2b.get_single_reco_track();
+        double x = track.extrapolate_ds( na62const::zMuv2 ).X();
+        double y = track.extrapolate_ds( na62const::zMuv1 ).Y();
+        return std::make_pair( x, y ); }
 
     //DCHT
     template <> TH1D * hinit<mp_dcht>( HistStore& hs ) {
@@ -113,19 +133,7 @@ namespace fn
                 h_ds_E_->Fill( track_cluster_sep, track_cluster.get_energy(), wgt );
                 h_ds_t_->Fill( track_cluster_sep, (*clus)->time - srt.get_time(), wgt );
 
-#if 0
-                if ( track_cluster_sep > furthest_distance )
-                {
-                    furthest_distance = track_cluster_sep;
-                    furthest_energy = track_cluster.get_energy();
-                }
-#endif
             }
-#if 0
-            h_ds_->Fill( furthest_distance, wgt );
-            h_E_->Fill( furthest_energy, wgt );
-            h_ds_E_->Fill( furthest_distance, furthest_energy, wgt );
-#endif
         }
     }
 
@@ -139,7 +147,7 @@ namespace fn
     std::string ClusterMiniPlot::get_name()
     { return ""; }
 
-    //LKR
+    //ZT
     template <> TH2D * h2init<mp_zt>( HistStore& hs ){
         return hs.MakeTH2D(
                 "h_zt", "T vs Z",
@@ -149,6 +157,21 @@ namespace fn
     template <> std::pair<double,double> h2fill<mp_zt>( Km2Breakdown& km2b ) {
         auto e = km2b.get_reco_event();
         return std::make_pair( e.get_zvertex(), e.get_opening_angle() ); }
+
+    //PT
+    template <> TH2D * h2init<mp_pt>( HistStore& hs )
+    {
+        return hs.MakeTH2D(
+                "h_pt", "T vs P",
+                100, 0, 100, "P(GeV/c) ",
+                250, 0, 25e-3, "t(rad) "); 
+    }
+
+    template <> std::pair<double,double> h2fill<mp_pt>( Km2Breakdown& km2b )
+    {
+        auto e = km2b.get_reco_event();
+        return std::make_pair( e.get_muon_mom(), e.get_opening_angle() ); 
+    }
 
     //TPHI
     template <> TH2D * h2init<mp_tphi>( HistStore& hs )
@@ -161,8 +184,60 @@ namespace fn
 
     template <> std::pair<double,double> h2fill<mp_tphi>( Km2Breakdown& km2b )
     {
-        auto e = km2b.get_reco_event();
+        const auto& e = km2b.get_reco_event();
         return std::make_pair( e.get_opening_angle(), e.get_muon_phi() );
+    }
+
+    //MUON
+    template <> TH2D * h2init<mp_muon>( HistStore& hs )
+    {
+        return hs.MakeTH2D( "h_muon_xy", "Distance from track to muon",
+                100, -200, 200, "Distance X (cm)" ,
+                100, -200, 200, "Distance Y (cm)"  );
+    }
+
+    template <> boost::optional<std::pair<double,double>> h2optfill<mp_muon>( Km2Breakdown& km2b )
+    {
+        boost::optional<std::pair<double,double>> result;
+        const auto &muon = km2b.get_single_muon();
+        const auto& srt = km2b.get_single_reco_track();
+
+        if ( muon.found() )
+        {
+            double track_x = srt.extrapolate_ds( na62const::zMuv2 ).X();
+            double track_y = srt.extrapolate_ds( na62const::zMuv1 ).Y();
+
+            double muv_x = muon.x();
+            double muv_y = muon.y();
+
+            result.reset( std::pair<double, double>(  muv_x  - track_x , muv_y - track_y )  );
+        }
+        return result;
+    }
+
+    template <> TH1D * hinit<mp_muonr>( HistStore& hs )
+    {
+        return hs.MakeTH1D( "h_muon_dist", "Distance from track to muon",
+                100, 0, 100, "Distance (cm)" );
+    }
+
+    template <>boost::optional<double> hoptfill<mp_muonr>( Km2Breakdown& km2b )
+    {
+        boost::optional<double> result;
+        const auto &muon = km2b.get_single_muon();
+        const auto& srt = km2b.get_single_reco_track();
+
+        if ( muon.found() )
+        {
+            double track_x = srt.extrapolate_ds( na62const::zMuv2 ).X();
+            double track_y = srt.extrapolate_ds( na62const::zMuv1 ).Y();
+
+            double muv_x = muon.x();
+            double muv_y = muon.y();
+
+            result.reset( std::hypot(  muv_x  - track_x , muv_y - track_y )  );
+        }
+        return result;
     }
 
     //--------------------------------------------------
@@ -208,11 +283,11 @@ namespace fn
     {
         if ( pre_hs_.size() > 0 )
         {
-        cd_p( &tf_,  boost::filesystem::path{folder_}/ "pre" );
-        pre_hs_.Write();
+            cd_p( &tf_,  boost::filesystem::path{folder_}/ "pre" );
+            pre_hs_.Write();
 
-        cd_p( &tf_,  boost::filesystem::path{folder_}/ "post" );
-        post_hs_.Write();
+            cd_p( &tf_,  boost::filesystem::path{folder_}/ "post" );
+            post_hs_.Write();
         }
     }
 
@@ -221,21 +296,27 @@ namespace fn
     REG_DEF_SUB( Km2Breakdown );
 
     Km2Breakdown::Km2Breakdown( const Selection& sel, const Km2Event& km2e,
-            const Selection& good_track, Km2Clusters& km2c,
+            const Selection& good_track, Km2Clusters& km2c, const SingleMuon& sm,
             TFile& tf, std::string folder)
         :Analysis( sel ), km2e_( km2e ), good_track_( good_track), km2c_( km2c ),
+        sm_( sm ),
         tf_(tf), folder_( folder )
     {
         register_plotter<Mini1DPlot<mp_m2m>>( "m2m" );
+        register_plotter<Mini1DPlot<mp_mom>>( "mom" );
         register_plotter<Mini1DPlot<mp_track_quality>>( "track_quality" );
         register_plotter<Mini1DPlot<mp_cda>>( "cda" );
         register_plotter<Mini1DPlot<mp_r_dch1>>( "rdch1" );
         register_plotter<Mini1DPlot<mp_r_dch4>>( "rdch4" );
         register_plotter<Mini2DPlot<mp_xy_lkr>>( "xylkr" );
+        register_plotter<Mini2DPlot<mp_xy_muv>>( "muv_acc" );
         register_plotter<Mini1DPlot<mp_dcht>>( "dcht" );
         register_plotter<ClusterMiniPlot>( "rcluster" );
         register_plotter<Mini2DPlot<mp_zt>>( "zt" );
+        register_plotter<Mini2DPlot<mp_pt>>( "pt" );
         register_plotter<Mini2DPlot<mp_tphi>>( "tphi" );
+        register_plotter<Mini2DPlotOpt<mp_muon>>( "muon" );
+        register_plotter<Mini1DPlotOpt<mp_muonr>>( "muonr" );
     }
 
     const SingleRecoTrack& Km2Breakdown::get_single_reco_track()
@@ -252,19 +333,33 @@ namespace fn
         return *km2re_;
     }
 
+    const SingleMuon& Km2Breakdown::get_single_muon()
+    {
+        return sm_;
+    }
+
     void Km2Breakdown::add_selection( const Selection * s,
             std::vector<std::string>& plot_types, std::string prefix  )
     {
         boost::filesystem::path folder_name = boost::filesystem::path{ folder_ } / (prefix + s->get_name());
 
-        sel_plot_store_.emplace_back( make_unique<SelPlot>( tf_, folder_name.string() , mini_plot_map_ ) );
-
-        for( auto& plot_type : plot_types )
+        try
         {
-            sel_plot_store_.back()->AddMiniPlot( plot_type );
-        }
 
-        sel_plots_.push_back( std::make_pair( s, sel_plot_store_.back().get() ) );
+            sel_plot_store_.emplace_back( make_unique<SelPlot>( tf_, folder_name.string() , mini_plot_map_ ) );
+
+            for( auto& plot_type : plot_types )
+            {
+                sel_plot_store_.back()->AddMiniPlot( plot_type );
+            }
+
+            sel_plots_.push_back( std::make_pair( s, sel_plot_store_.back().get() ) );
+        }
+        catch( std::exception& e )
+        {
+            std::cerr << "Stuck making " << folder_name.string() << std::endl;
+            throw;
+        }
     }
 
     void Km2Breakdown::process_event()
@@ -280,9 +375,10 @@ namespace fn
 
         for( auto& sel_plot : sel_plots_ )
         {
-            double wgt_so_far = selection_so_far.get_weight();
+            selection_so_far.new_event();
+            double wgt_so_far = get_weight() *  selection_so_far.get_weight();
             double passed = sel_plot.first->check();
-            double pass_wgt = sel_plot.first->get_weight() * wgt_so_far;
+            double pass_wgt =  sel_plot.first->get_weight() * wgt_so_far;
 
             sel_plot.second->Fill( *this, wgt_so_far, passed, pass_wgt );
 
@@ -324,8 +420,10 @@ namespace fn
 
             auto  * km2_clusters = get_km2_clusters( instruct, rf );
 
+            auto * single_muon = get_single_muon( instruct, rf );
+
             auto result  = make_unique<Km2Breakdown>( *base, *km2e, *good_track, 
-                    *km2_clusters, tfile, folder );
+                    *km2_clusters, *single_muon, tfile, folder );
 
             const YAML::Node& selection_list = instruct["selection"];
             for ( const auto& selmap  : selection_list )
