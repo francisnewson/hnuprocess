@@ -535,7 +535,7 @@
     -  {  cut:  signal_track_mom,      plot:  [mom,             m2m ]  }
     -  {  cut:  zt_dn_sig,             plot:  [ zt,             m2m ]  }
     -  {  cut:  pt_dn_sig,             plot:  [ pt,             m2m ]  }
-    -  {  cut:  muv_acc,               plot:  [ muv_acc,        m2m ]  }
+    -  {  cut:  muv_acc,               plot:  [ muv_acc, pm2m,  m2m ]  }
     -  {  cut:  muon_veto,             plot:  [ muon, muonr,    m2m ]  }
     -  {  cut:  quality_7,             plot:  [ track_quality,  m2m ]  }
     -  {  cut:  cda_3cm,               plot:  [ cda,            m2m ]  }
@@ -544,7 +544,7 @@
     -  {  cut:  ddead_cell,            plot:  [                 m2m ]  }
     -  {  cut:  rk_lkr_accep,          plot:  [ xylkr,          m2m ]  }
     -  {  cut:  rk_hot_lkr,            plot:  [ xylkr,          m2m ]  }
-    -  {  cut:  rk_lkr_veto,           plot:  [ rcluster,       m2m ]  }
+    -  {  cut:  rk_lkr_veto,           plot:  [ rcluster, pm2m, m2m ]  }
     -  {  cut:  rk_dcht,               plot:  [ dcht,           m2m ]  }
 
     good_track: good_trk
@@ -567,7 +567,7 @@
 - analysis : { type: Km2Plotter, name: ctrl_dn_plots, folder: ctrl_km2_dn,
     tfile: tfout, selection: ctrl_lower_sel, inputs: { km2event : km2_event } }
 
-- analysis : { type: Km2Plotter, name: full_up_plots_muv, folder: full_km2_up_muv,
+- analysis : { type: Km2Plotter, name: ctrl_up_plots_muv, folder: full_km2_up_muv,
     tfile: tfout, selection: ctrl_upper_sel_muv, inputs: { km2event : km2_event } }
 
 - analysis : { type: Km2Plotter, name: ctrl_dn_plots_muv, folder: ctrl_km2_dn_muv,

@@ -93,6 +93,7 @@ namespace fn
                     //catch up until upper limit is >= key
                     while ( current_range_->second < key )
                     {
+                        if ( current_range_ == ranges_.end() ){ return false; }
                         ++current_range_;
                     }
 

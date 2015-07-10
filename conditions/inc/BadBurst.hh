@@ -78,6 +78,9 @@ namespace fn
                 :event_( e )
                 {
                     burst_ranges_.load_info( start, finish );
+
+                    BOOST_LOG_SEV( get_log(), always_print )
+                        << "Loaded ranges" ;
                 }
 
         private: 

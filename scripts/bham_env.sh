@@ -1,4 +1,8 @@
 #!/bin/bash
+
+echo "Loading /disk/homedisk/home/fon/work/hnu/code/scripts/env"
+source /disk/homedisk/home/fon/work/hnu/code/scripts/env
+
 echo "Loading ROOT 5.34.30 x86_64-sl6-gcc48-opt ..."
 source /home/fon/work/hnu/code/root/root-5.34.32/root/bin/thisroot.sh
 echo "Loading python py27 ... "
@@ -9,7 +13,7 @@ export LD_LIBRARY_PATH=/home/fon/work/hnu/code/gcc/version/gcc-4.8.2/lib64:/home
 export CC=/home/fon/work/hnu/code/gcc/version/gcc-4.8.2/bin/gcc
 export CXX=/home/fon/work/hnu/code/gcc/version/gcc-4.8.2/bin/g++
 
-export LD_LIBRARY_PATH=/home/fon/work/hnu/code/python/version/Python-2.7.9/lib
+export LD_LIBRARY_PATH=/home/fon/work/hnu/code/python/version/Python-2.7.9/lib:$LD_LIBRARY_PATH
 export PATH=/home/fon/work/hnu/code/python/version/Python-2.7.9/bin/:$PATH
 
 echo "Setting environment variables for SCons"

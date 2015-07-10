@@ -121,10 +121,23 @@ namespace fn
     {
         using std::string;
 
-        const auto& scaling =
-            scaling_info_.at( get_yaml<string>( instruct, "scaling" ) );
+        auto scaling_name = get_yaml<string>( instruct, "scaling" );
 
-        scaling.scale_hist( h, instruct );
+        try
+        {
+            const auto& scaling =
+                scaling_info_.at( scaling_name);
+            scaling.scale_hist( h, instruct );
+        }
+        catch( std::exception& e )
+        {
+            std::cout << "Problem looking for : " << scaling_name << std::endl;
+            for ( auto& si : scaling_info_ )
+            {
+                std::cout << si.first << std::endl;
+            }
+            throw;
+        }
     }
 
     void HistStacker::color_hist(  TH1& h, const YAML::Node& instruct  )

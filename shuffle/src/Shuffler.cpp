@@ -44,12 +44,27 @@ namespace fn
             std::string name = get_yaml<std::string>( plot_node, "name");
             std::string path = get_yaml<std::string>( plot_node, "path");
 
-            std::cout << "Plotting: " <<  std::setw(40) << name << "   from    " << path <<  std::endl;
+            std::cout << "\nPlotting: " <<  std::setw(40) << name << "   from    " << path <<  std::endl;
 
             ce_stack.set_rebin( plot_node["rebin"].as<int>( 1 ) );
             ce_stack.reset_collapse();
-            ce_stack.set_collapse_x( plot_node["collapse_x"].as<bool>( false ) );
-            ce_stack.set_collapse_y( plot_node["collapse_y"].as<bool>( false ) );
+
+
+            if ( plot_node["collapse_x"].as<bool>( false ) )
+            {
+                if ( plot_node["min"] && plot_node["max"] )
+                {
+                    ce_stack.set_collapse_x( true, plot_node["min"].as<double>(), plot_node["max"].as<double>() );
+                }
+            }
+
+            if ( plot_node["collapse_y"].as<bool>( false ) )
+            {
+                if ( plot_node["min"] && plot_node["max"] )
+                {
+                    ce_stack.set_collapse_y( true , plot_node["min"].as<double>(), plot_node["max"].as<double>() );
+                }
+            }
 
             ce_stack.set_post_path( path );
 
@@ -70,13 +85,22 @@ namespace fn
             std::unique_ptr<TH1> hdata =  get_summed_histogram( ce_stack,
                     begin( data_channels), end( data_channels ) );
 
-            format_data_hist( *hdata, output_node["data_plot"] );
+            if ( plot_node["blinding"] )
+            {
+                std::cout << "Extra Blinding!" << std::endl;
+                format_data_hist( *hdata, plot_node["blinding"] );
+            }
+            else
+            {
+                format_data_hist( *hdata, output_node["blinding"] );
+            }
 
             cd_p( &tfout, name );
             hdata->Write( "hdata" );
 
-            std::cout << integral( *hs.get_total_copy(), -0.1, 0.01 )
-                <<  " " << integral( *hdata, -0.01, 0.01 ) << std::endl;
+            std::cout  << std::setw(40) << "Peak integrals: "
+                << "bg: " << integral( *hs.get_total_copy(), -0.1, 0.01 ) 
+                <<  " dt:" << integral( *hdata, -0.01, 0.01 ) << std::endl;
 
 
             auto hdenom = hs.get_total_copy();
@@ -95,7 +119,7 @@ namespace fn
             RatioCanvas rc( *hdenom, *hdata, *hratio);
             rc.Write( "c_comp");
 
-            std::cout << std::string(  50, ' ' ) 
+            std::cout << std::setw(40 ) << "Total integrals: " 
                 << "bg: " << hdenom->Integral() << " dt:" << hdata->Integral() << std::endl;
         }
     }

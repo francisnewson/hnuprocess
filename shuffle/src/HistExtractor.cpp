@@ -38,13 +38,19 @@ namespace fn
     { post_ = p; }
 
     void ChannelHistExtractor::reset_collapse()
-    { col_x_ = false; col_y_ = false; }
+    { col_x_ = false; col_y_ = false; col_range_ = false; }
 
     void ChannelHistExtractor::set_collapse_x( bool col_x)
     { col_x_ = col_x; }
 
     void ChannelHistExtractor::set_collapse_y( bool col_y)
     { col_y_ = col_y;}
+
+    void ChannelHistExtractor::set_collapse_x( bool col_x, double min, double max)
+    { col_x_ = col_x; col_range_ = true; min_val_ = min ; max_val_ = max; }
+
+    void ChannelHistExtractor::set_collapse_y( bool col_y, double min, double max)
+    { col_y_ = col_y; col_range_ = true; min_val_ = min ; max_val_ = max; }
 
     std::unique_ptr<TH1> ChannelHistExtractor::get_hist ( boost::filesystem::path p )
     {
@@ -66,18 +72,41 @@ namespace fn
 
             if( col_x_ )
             {
-                TH1D * y_proj = ptr_2d->ProjectionX();
-                result.reset( y_proj );
+                if ( col_range_ )
+                {
+                    TH1D * y_proj = ptr_2d->ProjectionX(
+                            "_",
+                            ptr_2d->GetYaxis()->FindBin( min_val_ ), 
+                            ptr_2d->GetYaxis()->FindBin( max_val_ )
+                            );
+                    result.reset( y_proj );
+                }
+                else
+                {
+                    TH1D * y_proj = ptr_2d->ProjectionX();
+                    result.reset( y_proj );
+                }
                 result->SetDirectory(0);
             }
             else if ( col_y_ )
             {
-                TH1D * x_proj = ptr_2d->ProjectionY();
-                result.reset( x_proj );
+                if ( col_range_ )
+                {
+                    TH1D * x_proj = ptr_2d->ProjectionY(
+                            "_",
+                            ptr_2d->GetXaxis()->FindBin( min_val_ ), 
+                            ptr_2d->GetXaxis()->FindBin( max_val_ )
+                            );
+                    result.reset( x_proj );
+                }
+                else
+                {
+                    TH1D * x_proj = ptr_2d->ProjectionY();
+                    result.reset( x_proj );
+                }
                 result->SetDirectory(0);
             }
         }
-
         return result;
     }
 

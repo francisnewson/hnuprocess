@@ -164,6 +164,11 @@ namespace fn
     template <> TH1D * hinit<mp_mom>( HistStore& hs );
     template <> double hfill<mp_mom>( Km2Breakdown& km2b );
 
+    //M2M MOM
+    struct mp_pm2m{};
+    template <> TH2D * h2init<mp_pm2m>( HistStore& hs );
+    template <> std::pair<double,double> h2fill<mp_pm2m>( Km2Breakdown& km2b );
+
     //TRACK QUALITY
     struct mp_track_quality{};
     template <> TH1D * hinit<mp_track_quality>( HistStore& hs );

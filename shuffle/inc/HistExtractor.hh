@@ -44,6 +44,10 @@ namespace fn
             void reset_collapse();
             void set_collapse_x( bool col_x);
             void set_collapse_y( bool col_y);
+
+            void set_collapse_x( bool col_x, double min, double max);
+            void set_collapse_y( bool col_y, double min, double max);
+
             virtual std::unique_ptr<TH1> get_hist ( boost::filesystem::path p );
 
         private:
@@ -51,8 +55,12 @@ namespace fn
             boost::filesystem::path post_;
             FNTFile& fntf_;
             int rebin_;
+
             bool col_x_;
             bool col_y_;
+            bool col_range_;
+            double min_val_;
+            double max_val_;
     };
 
     template <class IT>
