@@ -1,0 +1,6 @@
+#source me
+source ./scripts/bham_env.sh
+
+echo "Loading python"
+source /disk/homedisk/home/fon/work/hnu/code/python/venv/hnu/bin/activate
+python --version

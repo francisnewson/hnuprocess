@@ -1,0 +1,32 @@
+#!/bin/bash
+
+instruct=$1
+shift
+source /disk/homedisk/home/fon/work/hnu/code/python/venv/hnu/bin/activate
+
+getyaml () {
+    cat $instruct | shyaml get-value $1
+}
+
+app=$( getyaml run.app )
+channel=$( getyaml run.channel )
+runlist=$( getyaml run.runlist )
+mission=$( getyaml run.mission )
+prefix=$( getyaml run.prefix )
+count=$( getyaml run.count )
+
+printf "\nMission file is:"
+printf "\n==================================================\n\n"
+
+cat $mission
+
+printf "\n\n==================================================\n\n"
+
+mkdir -p output
+
+if grep --quiet castor $runlist; then
+    stager_get -f $runlist
+fi
+
+#run the command!
+$app -c $channel -l $runlist -m $mission --auto -p $prefix $count

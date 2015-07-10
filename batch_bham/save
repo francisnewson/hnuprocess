@@ -1,0 +1,42 @@
+#!/bin/env python
+import argparse
+import yaml
+import shutil
+import subprocess
+import errno
+import os
+import sys
+
+def mkdir_p(path):
+    try:
+        os.makedirs(path)
+    except OSError as exc:
+        if exc.errno == errno.EEXIST and os.path.isdir(path):
+            pass
+        else:
+            raise
+
+#read commmand line arguments
+parser = argparse.ArgumentParser()
+parser.add_argument( 'config_file' )
+args = parser.parse_args()
+sys.stderr.write ("Reading from {0}\n".format( args.config_file ) )
+
+#load config file
+config_file = open ( args.config_file )
+config = yaml.load( config_file )
+
+#get mission file
+mission = config['run']['mission']
+
+#get output options
+save = config['save']
+
+#do local
+for source, dest in save['local'].items():
+    sys.stderr.write ( "Copying {0} to {1}\n".format( source, dest ))
+    mkdir_p( os.path.dirname( dest ) )
+    try:
+        shutil.copy( source, dest )
+    except IOError:
+        print( 'Could not copy {0} to {1}\n'.format( source, dest ) )
