@@ -8,11 +8,16 @@
 #include "TVector3.h"
 #include "TLorentzVector.h"
 #include <iosfwd>
+#include <memory>
 
 namespace fn
 {
-    //COLORS
+    template <class T> T * tclone( const T& h ){ return static_cast<T*>( h.Clone() ); }
 
+    template <class T> std::unique_ptr<T> uclone( const std::unique_ptr<T>& u )
+    { return std::unique_ptr<T>( static_cast<T*>( u->Clone() ) ); }
+
+    //COLORS
     class RootColors
     {
         public:
@@ -60,6 +65,11 @@ namespace fn
         }
 
     void mkdir_p( TFile& f, boost::filesystem::path p );
+
+    //--------------------------------------------------
+    
+    std::unique_ptr<TFile> get_tfile
+        ( boost::filesystem::path filename, Option_t* option="" );
 
     //--------------------------------------------------
 

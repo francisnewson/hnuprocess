@@ -2,6 +2,7 @@
 #include "Rtypes.h"
 #include <iostream>
 #include <iomanip>
+#include "stl_help.hh"
 
 
 namespace fn
@@ -84,6 +85,22 @@ namespace fn
         if ( !dir )
         {( f.mkdir(fname) );}
     }
+    //--------------------------------------------------
+
+    std::unique_ptr<TFile> get_tfile
+        ( boost::filesystem::path filename, Option_t* option )
+        {
+            auto result = make_unique<TFile>( filename.string().c_str(), option);
+            if ( result->IsZombie() )
+            {
+                throw std::runtime_error( filename.string() + " IsZombie()!" );
+            }
+            if ( ! result->IsOpen() )
+            {
+                throw std::runtime_error( filename.string() + "failed IsOpen()!" );
+            }
+            return result;
+        }
 
     //--------------------------------------------------
 

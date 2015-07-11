@@ -170,16 +170,16 @@
 - selection:
     name: muon_xy_wgt
     type: MuonTHXYWeight
-    effs_file: input/reco/conditions/muv_xy.root
-    effs_hist: rat_xy
+    effs_file: input/reco/conditions/muv/muv_eff_all.root
+    effs_hist: muv_eff_xy
     inputs:
         ogt: bf_st
 
 - selection:
     name: muon_p_wgt
     type: MuonTHPWeight
-    effs_file: input/reco/conditions/muv_p.root
-    effs_hist: rat_p
+    effs_file: input/reco/conditions/muv/muv_eff_all.root
+    effs_hist: muv_eff_p
     inputs:
         ogt: bf_st
 
@@ -292,20 +292,37 @@
         ogt: bf_st
 
 - selection:
-    name: muv_acc
+    name: muv_acc_octagonal
     type: TrackXYUVAcceptance
     track_section: ds
     z: 13012.0 #MUV3
-    min_x: -135.0
-    max_x:  135.0
-    min_y: -135.0
-    max_y:  135.0
-    min_u: -135.0
-    max_u:  135.0
-    min_v: -135.0
-    max_v:  135.0
+    min_x: -130.0
+    max_x:  130.0
+    min_y: -130.0
+    max_y:  130.0
+    min_u: -130.0
+    max_u:  130.0
+    min_v: -130.0
+    max_v:  130.0
     inputs:
         ogt: bf_st
+
+- selection:
+    name: muv_acc_radial
+    type: TrackRadialAcceptance
+    track_section: upstream
+    z: 12778.0 #zMUV1
+    inner: 15.0
+    outer: 200.0
+    inputs:
+        ogt: bf_st
+
+- selection:
+    name: muv_acc
+    type: CompositeSelection
+    children:
+    - muv_acc_octagonal
+    - muv_acc_radial
 
 - selection: { name: ddead_cell, type: TrackDDeadCell, 
     min_ddead_cell: 2.0,  inputs: {ogt: bf_st } }
@@ -502,8 +519,8 @@
     -  {  cut:  pos_trk,               plot:  [ m2m             ]   }
     -  {  cut:  signal_track_mom,      plot:  [ mom,            m2m ]  }
     -  {  cut:  zt_up_sig,             plot:  [ zt,             m2m ]  }
-    -  {  cut:  muv_acc,               plot:  [ muv_acc,        m2m ]  }
-    -  {  cut:  muon_veto,             plot:  [ muon, muonr,    m2m ]  }
+    -  {  cut:  muv_acc,               plot:  [ muv_acc, pm2m,       m2m ]  }
+    -  {  cut:  muon_veto,             plot:  [ muon, muonr, muv_acc,  m2m ]  }
     -  {  cut:  quality_7,             plot:  [ track_quality,  m2m ]  }
     -  {  cut:  cda_3cm,               plot:  [ cda,            m2m ]  }
     -  {  cut:  dch1_acc,              plot:  [ rdch1,          m2m ]  }
@@ -536,7 +553,7 @@
     -  {  cut:  zt_dn_sig,             plot:  [ zt,             m2m ]  }
     -  {  cut:  pt_dn_sig,             plot:  [ pt,             m2m ]  }
     -  {  cut:  muv_acc,               plot:  [ muv_acc, pm2m,  m2m ]  }
-    -  {  cut:  muon_veto,             plot:  [ muon, muonr,    m2m ]  }
+    -  {  cut:  muon_veto,             plot:  [ muon, muv_acc,  muonr,    m2m ]  }
     -  {  cut:  quality_7,             plot:  [ track_quality,  m2m ]  }
     -  {  cut:  cda_3cm,               plot:  [ cda,            m2m ]  }
     -  {  cut:  dch1_acc,              plot:  [ rdch1,          m2m ]  }
@@ -561,13 +578,13 @@
 - analysis : { type: Km2Plotter, name: full_dn_plots, folder: full_km2_dn,
     tfile: tfout, selection: full_km2_dn, inputs: { km2event : km2_event } }
 
-- analysis : { type: Km2Plotter, name: ctrl_up_plots, folder: full_km2_up,
+- analysis : { type: Km2Plotter, name: ctrl_up_plots, folder: ctrl_km2_up,
     tfile: tfout, selection: ctrl_upper_sel, inputs: { km2event : km2_event } }
 
 - analysis : { type: Km2Plotter, name: ctrl_dn_plots, folder: ctrl_km2_dn,
     tfile: tfout, selection: ctrl_lower_sel, inputs: { km2event : km2_event } }
 
-- analysis : { type: Km2Plotter, name: ctrl_up_plots_muv, folder: full_km2_up_muv,
+- analysis : { type: Km2Plotter, name: ctrl_up_plots_muv, folder: ctrl_km2_up_muv,
     tfile: tfout, selection: ctrl_upper_sel_muv, inputs: { km2event : km2_event } }
 
 - analysis : { type: Km2Plotter, name: ctrl_dn_plots_muv, folder: ctrl_km2_dn_muv,
