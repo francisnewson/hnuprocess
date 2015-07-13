@@ -33,6 +33,16 @@ namespace fn
         auto data_channels = get_yaml<std::vector<std::string>>(
                 output_node["data_plot"], "channels" );
 
+        //Prepare signal plots
+        const YAML::Node& signals_node = output_node["signals"];
+        std::map<std::string, std::vector<std::string>> signal_instruct;
+        for ( const auto& signal : signals_node )
+        {
+            std::string name = signal["name"].as<std::string>();
+            std::vector<std::string> channels = signal["channels"].as<std::vector<std::string>>();
+            signal_instruct.insert( std::make_pair( name, channels ) );
+        }
+
         //Setup output
         TFile& tfout = output_file;
 
@@ -56,6 +66,10 @@ namespace fn
                 {
                     ce_stack.set_collapse_x( true, plot_node["min"].as<double>(), plot_node["max"].as<double>() );
                 }
+                else
+                {
+                    ce_stack.set_collapse_x( true);
+                }
             }
 
             if ( plot_node["collapse_y"].as<bool>( false ) )
@@ -63,6 +77,10 @@ namespace fn
                 if ( plot_node["min"] && plot_node["max"] )
                 {
                     ce_stack.set_collapse_y( true , plot_node["min"].as<double>(), plot_node["max"].as<double>() );
+                }
+                else
+                {
+                    ce_stack.set_collapse_y( true);
                 }
             }
 
@@ -82,6 +100,7 @@ namespace fn
             cd_p( &tfout, name );
             hs.write_total("hbg") ;
 
+            //Do data plots
             std::unique_ptr<TH1> hdata =  get_summed_histogram( ce_stack,
                     begin( data_channels), end( data_channels ) );
 
@@ -121,6 +140,18 @@ namespace fn
 
             std::cout << std::setw(40 ) << "Total integrals: " 
                 << "bg: " << hdenom->Integral() << " dt:" << hdata->Integral() << std::endl;
+
+            //Do signal plots
+            cd_p( &tfout, boost::filesystem::path{ name }/ "signal_hists" );
+            for ( const auto& signal_plot : signal_instruct )
+            {
+                std::string name = signal_plot.first;
+                const std::vector<std::string> channels = signal_plot.second;
+                std::unique_ptr<TH1> hsig =  get_summed_histogram( ce_stack,
+                        begin( channels), end( channels ) );
+                hsig->Write( name.c_str() );
+            }
+
         }
     }
 }
