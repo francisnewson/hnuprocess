@@ -248,8 +248,14 @@ namespace fn
     //BF
 
     processing_track::processing_track( const processing_track& other )
-        :corr_mom( other.corr_mom ), unscattered_mom( other.unscattered_mom), vert( other.vert ), good( other.good ),
-        rt_( other.rt_ ), rt( &rt_ ), orig_rt( other.orig_rt )
+        :corr_mom( other.corr_mom ),
+        unscattered_mom( other.unscattered_mom),
+        vert( other.vert ),
+        adjusted_time( other.adjusted_time ),
+        good( other.good ),
+        rt_( other.rt_ ),
+        rt( &rt_ ),
+        orig_rt( other.orig_rt )
     {}
 
     void swap
@@ -259,6 +265,7 @@ namespace fn
             swap( first.corr_mom, second.corr_mom );
             swap( first.unscattered_mom, second.unscattered_mom );
             swap( first.vert, second.vert );
+            swap( first.adjusted_time, second.adjusted_time );
             swap( first.good, second.good );
             swap( first.rt_, second.rt_ );
             swap( first.orig_rt, second.orig_rt );

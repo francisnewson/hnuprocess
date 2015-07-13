@@ -126,7 +126,7 @@ namespace fn
         CorrCluster  cc{ *rc, cluster_corrector_, mc_ };
 
         //Is it Brehmsstrahlung
-        TVector3 brehm_trkLkr = srt.extrapolate_bf( na62const::zLkr );
+        TVector3 brehm_trkLkr = srt.extrapolate_bf( na62const::zLkr + 30 );
         PhotonProjCorrCluster photon_cluster{ cc };
         TVector3 photon_pos = photon_cluster.get_pos();
         double brehm_sep =  (brehm_trkLkr - photon_pos).Mag();
