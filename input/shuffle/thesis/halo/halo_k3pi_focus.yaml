@@ -1,0 +1,117 @@
+####
+
+weights:
+    fid_file: use_multi_root
+    files:
+        - {  root_file: "tdata/rk_minus/all.rk_minus.root", pre: "", 
+        post: sample_burst_count/bursts, branch: "weight"  }
+
+        - {  root_file: "tdata/k3pi_crosstalk/all.k3pi_crosstalk.root", pre: "", 
+        post: sample_burst_count/bursts, branch: "weight"  }
+
+####
+
+check_weights:
+    fid_file: use_multi_root
+    files:
+        - {  root_file: "tdata/rk_minus/all.rk_minus.root", pre: "", 
+        post: data_burst_count/data_bursts, branch: "weight"  }
+
+        - {  root_file: "tdata/k3pi_crosstalk/all.k3pi_crosstalk.root", pre: "", 
+        post: data_burst_count/data_bursts, branch: "weight"  }
+
+####
+
+scaling:
+    - scaling_method:
+        strategy: m2
+        name: halo_k3pi
+        peakname: k3pi
+
+        channels:  &k3pichannels
+            halo_channels: [ p6.data.kless.q1.v2.pos]
+            data_channels: [ p6.data.km.q1.v2.pos ]
+            peak_channels: [ p6.k3pi.v2.pos]
+
+        halo: &k3pistrat {
+            strategy: m2, input_file: tdata/k3pi_crosstalk/all.k3pi_crosstalk.root, plot_path: km2_k3pi/h_m2m_kmu, 
+            min_mass_halo: -0.3, max_mass_halo: 0.05, min_mass_peak : 0.11, max_mass_peak : 0.14 }
+
+        mc: *k3pistrat
+
+
+    - scaling_method:
+        strategy: m2
+        name: rk_minus
+        peakname: km2
+
+        channels: 
+            halo_channels: [ p5.data.q1.v2.pos]
+            data_channels: [ p6.data.km.q1.v2.pos ]
+            peak_channels: [ p6.km2.v2.pos ]
+
+        halo: &km2strat {
+            strategy: m2, input_file: tdata/rk_minus/all.rk_minus.root, plot_path: km2_rk_full/h_m2m_kmu,
+            min_mass_halo: -0.3, max_mass_halo: -0.075, min_mass_peak: -0.01, max_mass_peak:  0.01 }
+
+        mc: *km2strat
+
+output_list:
+    -  { input_file: tdata/k3pi_crosstalk/all.k3pi_crosstalk.root,
+
+    plots: [
+        { path: km2_k3pi/h_m2m_kmu, name: k3pi/hm2m, rebin: 25  },
+        { path: km2_k3pi/h_p, name: k3pi/hp, rebin: 2  },
+    ],
+
+    blinding: &blinding { do_blind: false } ,
+
+    data_plot: &ctdata { channels: [ p6.data.km.q1.v2.pos ] },
+
+    stack: [
+        item: { name: halo_kless_pos, scaling: halo_k3pi,
+        type: halo, channels: [p6.data.kless.q1.v2.pos] }, 
+
+        item: { name: k3pi_pos, scaling: halo_k3pi,
+        type: k3pi, fid_weight: p6.k3pi.v2.pos, channels: [p6.k3pi.v2.pos] } 
+    ] }
+
+###
+
+    -  { input_file: tdata/k3pi_crosstalk/all.k3pi_crosstalk.root,
+
+    plots:  [
+        { path: km2_k3pi/h_m2m_kmu, name: rk_minus/hm2m, rebin: 25  },
+        { path: km2_k3pi/h_p, name: rk_minus/hp, rebin: 2  },
+    ],
+
+    blinding: *blinding,
+    data_plot: *ctdata,
+
+    stack: [
+        item: { name: halo_kless_pos, scaling: rk_minus,
+        type: halo, channels: [p6.data.kless.q1.v2.pos] }, 
+
+        item: { name: k3pi_pos, scaling: rk_minus,
+        type: k3pi, fid_weight: p6.k3pi.v2.pos, channels: [p6.k3pi.v2.pos] } 
+    ] }
+
+#   - { input_file : tdata/rk_minus/all.rk_minus.root,
+
+#   plots : [ 
+#   { path: km2_rk_full/h_m2m_kmu, name: rk_minus/km2_m2m, rebin: 20}
+#   ],
+
+#   blinding: *blinding,
+#   data_plot: { channels: [p6.data.km.q1.v2.pos ] },
+
+#   stack: [
+#       item: { name: halo_kless_pos, scaling: rk_minus,
+#       type: halo, channels: [p6.data.kless.q1.v2.pos] }, 
+
+#       item: { name: km2_pos, scaling: rk_minus,
+#       type: km2, fid_weight: p6.km2.v2.pos, channels: [p6.km2.v2.pos] } 
+#       ] }
+
+####
+

@@ -70,12 +70,18 @@ namespace fn
             { throw std::runtime_error(
                     "Attempt to collapse both x and y in " + p.string()  ); }
 
+            auto name = Form( "%s/%s/%s",
+                    pre_.string().c_str(),
+                    p.string().c_str(),
+                    post_.string().c_str() );
+
             if( col_x_ )
             {
+
                 if ( col_range_ )
                 {
                     TH1D * y_proj = ptr_2d->ProjectionX(
-                            "_",
+                            name,
                             ptr_2d->GetYaxis()->FindBin( min_val_ ), 
                             ptr_2d->GetYaxis()->FindBin( max_val_ )
                             );
@@ -93,7 +99,7 @@ namespace fn
                 if ( col_range_ )
                 {
                     TH1D * x_proj = ptr_2d->ProjectionY(
-                            "_",
+                            name,
                             ptr_2d->GetXaxis()->FindBin( min_val_ ), 
                             ptr_2d->GetXaxis()->FindBin( max_val_ )
                             );

@@ -1,3 +1,6 @@
+data_chan: &dataposchan [ p5.data.q11t.v3.pos ]
+#data_chan: &dataposchan [ p5.data.q1.v4.pos ]
+
 scaling:
     - scaling_method:
         strategy: m2
@@ -6,7 +9,7 @@ scaling:
 
         channels: &poschannels
             halo_channels: [ p6.data.kless.q11t.v2.pos  ]
-            data_channels: [ p5.data.q11t.v3.pos ]
+            data_channels:  *dataposchan 
             peak_channels: [ p5.km2.v2.pos ]
 
         halo: &m2mdwnhalo { 
@@ -22,6 +25,22 @@ scaling:
         plot_path: rk_km2_sel/h_m2m_kmu,
         min_mass_halo: -0.2, max_mass_halo: -0.05,
         min_mass_peak: -0.01, max_mass_peak:  0.01 }
+
+    - scaling_method:
+        strategy: m2
+        name: mc_pos_upper
+        peakname: km2
+
+        channels: *poschannels
+
+        halo: &m2mupstrat { 
+        strategy: m2,
+        input_file: tdata/km2_demo/all.km2_demo.root,
+        plot_path: ctrl_km2_up/h_m2m_kmu,
+        min_mass_halo: -0.2, max_mass_halo: -0.05,
+        min_mass_peak: -0.01, max_mass_peak:  0.01 }
+
+        mc: *mcscale
 
     - scaling_method:
         strategy: m2
@@ -48,22 +67,13 @@ scaling:
 
         mc: *mcscale
 
-    - scaling_method:
-        strategy: m2
-        name: mc_pos_upper
-        peakname: km2
 
-        channels: *poschannels
-
-        halo: &m2mupstrat { 
-        strategy: m2,
-        input_file: tdata/km2_demo/all.km2_demo.root,
-        plot_path: ctrl_km2_up/h_m2m_kmu,
-        min_mass_halo: -0.2, max_mass_halo: -0.05,
-        min_mass_peak: -0.01, max_mass_peak:  0.01 }
-
-        mc: *m2mupstrat
-
+signals: &signals [
+     { name: hnu_275, channels: [mc.p5.hnu.275.nodk.pos] },
+     { name: hnu_300, channels: [mc.p5.hnu.300.nodk.pos] },
+     { name: hnu_325, channels: [mc.p5.hnu.325.nodk.pos] },
+     { name: hnu_350, channels: [mc.p5.hnu.350.nodk.pos] }
+     ]
 
 weights:
     fid_file: use_root
@@ -84,14 +94,86 @@ output_list:
 
     plots: [
         #rk selection
-        { path: rk_km2_sel/h_m2m_kmu, name: rk/h_m2m_mkmu, rebin: 2 },
-        { path: rk_km2_sel/h_p, name: rk/h_p, rebin: 2 },
-        { path: rk_km2_sel/h_z, name: rk/h_z, rebin: 2 },
-        { path: rk_km2_sel/h_t, name: rk/h_t, rebin: 2 },
-        { path: rk_km2_sel/h_cda, name: rk/h_cda, rebin: 1 }
+        { path: rk_km2_sel/h_m2m_kmu, name: rk/all/h_m2m_mkmu, rebin: 10 },
+        { path: rk_km2_sel/h_p, name: rk/all/h_p, rebin: 2 },
+        { path: rk_km2_sel/h_z, name: rk/all/h_z, rebin: 2 },
+        { path: rk_km2_sel/h_m2_z, name: rk/all/h_m2mz, rebin: 2 },
+        { path: rk_km2_sel/h_t, name: rk/all/h_t, rebin: 2 },
+        { path: rk_km2_sel/h_z_t, name: rk/all/h_z_t, rebin: 2 },
+        { path: rk_km2_sel/h_cda, name: rk/all/h_cda, rebin: 1 },
+        { path: rk_km2_sel/h_m2_z, name: rk/all/h_high_m2m_z, collapse_y: true, min: 0.09, max: 0.2 },
+        { path: rk_km2_sel/h_p_m2m_kmu, name: rk/all/h_high_m2m_p, collapse_y: true, min: 0.09, max: 0.2 },
+        { path: rk_km2_sel/h_m2_t, name: rk/all/h_high_m2m_t, collapse_y: true, min: 0.09, max: 0.2 },
+
+        { path: rk_km2_up_sel/h_m2m_kmu, name: rk/up/h_m2m_mkmu, rebin: 10 },
+        { path: rk_km2_up_sel/h_p, name: rk/up/h_p, rebin: 2 },
+        { path: rk_km2_up_sel/h_z, name: rk/up/h_z, rebin: 2 },
+        { path: rk_km2_up_sel/h_t, name: rk/up/h_t, rebin: 2 },
+        { path: rk_km2_up_sel/h_cda, name: rk/up/h_cda, rebin: 1 },
+        { path: rk_km2_up_sel/h_m2_z, name: rk/up/h_high_m2m_z, collapse_y: true, min: 0.09, max: 0.2 },
+        { path: rk_km2_up_sel/h_p_m2m_kmu, name: rk/up/h_high_m2m_p, collapse_y: true, min: 0.09, max: 0.2 },
+        { path: rk_km2_up_sel/h_m2_t, name: rk/up/h_high_m2m_t, collapse_y: true, min: 0.09, max: 0.2 },
+
+        { path: rk_km2_muv_up_sel/h_m2m_kmu, name: rk/up_muv/h_m2m_mkmu, rebin: 10 },
+        { path: rk_km2_muv_up_sel/h_p, name: rk/up_muv/h_p, rebin: 2 },
+        { path: rk_km2_muv_up_sel/h_z, name: rk/up_muv/h_z, rebin: 2 },
+        { path: rk_km2_muv_up_sel/h_t, name: rk/up_muv/h_t, rebin: 2 },
+        { path: rk_km2_muv_up_sel/h_cda, name: rk/up_muv/h_cda, rebin: 1 },
+        { path: rk_km2_muv_up_sel/h_m2_z, name: rk/up_muv/h_high_m2m_z, collapse_y: true, min: 0.09, max: 0.2 },
+        { path: rk_km2_muv_up_sel/h_p_m2m_kmu, name: rk/up_muv/h_high_m2m_p, collapse_y: true, min: 0.09, max: 0.2 },
+        { path: rk_km2_muv_up_sel/h_m2_t, name: rk/up_muv/h_bad_m2m_t, collapse_y: true, min: 0.03, max: 0.08 },
+        { path: rk_km2_muv_up_sel/h_m2_z, name: rk/up_muv/h_bad_m2m_z, collapse_y: true, min: 0.03, max: 0.08 },
+        { path: rk_km2_muv_up_sel/h_m2_t, name: rk/up_muv/h_high_m2m_t, collapse_y: true, min: 0.09, max: 0.2 },
+
+        { path: rk_km2_dn_sel/h_m2m_kmu, name: rk/dn/h_m2m_mkmu, rebin: 10 },
+        { path: rk_km2_dn_sel/h_p, name: rk/dn/h_p, rebin: 2 },
+        { path: rk_km2_dn_sel/h_z, name: rk/dn/h_z, rebin: 2 },
+        { path: rk_km2_dn_sel/h_t, name: rk/dn/h_t, rebin: 2 },
+        { path: rk_km2_dn_sel/h_cda, name: rk/dn/h_cda, rebin: 1 },
+        { path: rk_km2_dn_sel/h_m2_z, name: rk/dn/h_high_m2m_z, collapse_y: true, min: 0.09, max: 0.2 },
+        { path: rk_km2_dn_sel/h_p_m2m_kmu, name: rk/dn/h_high_m2m_p, collapse_y: true, min: 0.09, max: 0.2 },
+        { path: rk_km2_dn_sel/h_m2_t, name: rk/dn/h_high_m2m_t, collapse_y: true, min: 0.09, max: 0.2 },
+
+        { path: rk_km2_muv_dn_sel/h_m2m_kmu, name: rk/dn_muv/h_m2m_mkmu, rebin: 10 },
+        { path: rk_km2_muv_dn_sel/h_p, name: rk/dn_muv/h_p, rebin: 2 },
+        { path: rk_km2_muv_dn_sel/h_z, name: rk/dn_muv/h_z, rebin: 2 },
+        { path: rk_km2_muv_dn_sel/h_t, name: rk/dn_muv/h_t, rebin: 2 },
+        { path: rk_km2_muv_dn_sel/h_cda, name: rk/dn_muv/h_cda, rebin: 1 },
+        { path: rk_km2_muv_dn_sel/h_m2_z, name: rk/dn_muv/h_high_m2m_z, collapse_y: true, min: 0.09, max: 0.2 },
+        { path: rk_km2_muv_dn_sel/h_p_m2m_kmu, name: rk/dn_muv/h_high_m2m_p, collapse_y: true, min: 0.09, max: 0.2 },
+        { path: rk_km2_muv_dn_sel/h_m2_t, name: rk/dn_muv/h_bad_m2m_t, collapse_y: true, min: 0.03, max: 0.08 },
+        { path: rk_km2_muv_dn_sel/h_m2_z, name: rk/dn_muv/h_bad_m2m_z, collapse_y: true, min: 0.03, max: 0.08 },
+        { path: rk_km2_muv_dn_sel/h_p_m2m_kmu, name: rk/dn_muv/h_bad_m2m_p, collapse_y: true, min: 0.03, max: 0.08 },
+        { path: rk_km2_muv_dn_sel/h_m2_t, name: rk/dn_muv/h_high_m2m_t, collapse_y: true, min: 0.09, max: 0.2 },
+
+        { path: clean_rk_km2_muv_up_sel/h_m2m_kmu, name: rk/clean_up_muv/h_m2m_mkmu, rebin: 10 },
+        { path: clean_rk_km2_muv_up_sel/h_p, name: rk/clean_up_muv/h_p, rebin: 2 },
+        { path: clean_rk_km2_muv_up_sel/h_z, name: rk/clean_up_muv/h_z, rebin: 2 },
+        { path: clean_rk_km2_muv_up_sel/h_t, name: rk/clean_up_muv/h_t, rebin: 2 },
+        { path: clean_rk_km2_muv_up_sel/h_cda, name: rk/clean_up_muv/h_cda, rebin: 1 },
+        { path: clean_rk_km2_muv_up_sel/h_m2_z, name: rk/clean_up_muv/h_high_m2m_z, collapse_y: true, min: 0.09, max: 0.2 },
+        { path: clean_rk_km2_muv_up_sel/h_p_m2m_kmu, name: rk/clean_up_muv/h_high_m2m_p, collapse_y: true, min: 0.09, max: 0.2 },
+        { path: clean_rk_km2_muv_up_sel/h_m2_t, name: rk/clean_up_muv/h_high_m2m_t, collapse_y: true, min: 0.09, max: 0.2 },
+        { path: clean_rk_km2_muv_up_sel/h_m2_t, name: rk/clean_up_muv/h_bad_m2m_t, collapse_y: true, min: 0.03, max: 0.08 },
+        { path: clean_rk_km2_muv_up_sel/h_m2_z, name: rk/clean_up_muv/h_bad_m2m_z, collapse_y: true, min: 0.03, max: 0.08 },
+        { path: clean_rk_km2_muv_up_high_m2m_sel/h_z_t, name: rk/clean_up_muv/h_high_m2m_zt },
+
+        { path: clean_rk_km2_muv_dn_sel/h_m2m_kmu, name: rk/clean_dn_muv/h_m2m_mkmu, rebin: 10 },
+        { path: clean_rk_km2_muv_dn_sel/h_p, name: rk/clean_dn_muv/h_p, rebin: 2 },
+        { path: clean_rk_km2_muv_dn_sel/h_z, name: rk/clean_dn_muv/h_z, rebin: 2 },
+        { path: clean_rk_km2_muv_dn_sel/h_t, name: rk/clean_dn_muv/h_t, rebin: 2 },
+        { path: clean_rk_km2_muv_dn_sel/h_cda, name: rk/clean_dn_muv/h_cda, rebin: 1 },
+        { path: clean_rk_km2_muv_dn_sel/h_m2_z, name: rk/clean_dn_muv/h_high_m2m_z, collapse_y: true, min: 0.09, max: 0.2 },
+        { path: clean_rk_km2_muv_dn_sel/h_p_m2m_kmu, name: rk/clean_dn_muv/h_high_m2m_p, collapse_y: true, min: 0.09, max: 0.2 },
+        { path: clean_rk_km2_muv_dn_sel/h_m2_t, name: rk/clean_dn_muv/h_bad_m2m_t, collapse_y: true, min: 0.03, max: 0.08 },
+        { path: clean_rk_km2_muv_dn_sel/h_m2_z, name: rk/clean_dn_muv/h_bad_m2m_z, collapse_y: true, min: 0.03, max: 0.08 },
+        { path: clean_rk_km2_muv_dn_sel/h_p_m2m_kmu, name: rk/clean_dn_muv/h_bad_m2m_p, collapse_y: true, min: 0.03, max: 0.08 },
+        { path: clean_rk_km2_muv_dn_sel/h_m2_t, name: rk/clean_dn_muv/h_high_m2m_t, collapse_y: true, min: 0.09, max: 0.2 },
+        { path: clean_rk_km2_muv_dn_high_m2m_sel/h_z_t, name: rk/clean_dn_muv/h_high_m2m_zt },
+
         ],
 
-        data_plot: { channels: [ p5.data.q11t.v3.pos ] } ,
+        data_plot: { channels: *dataposchan }  ,
 
         stack: [
             item: { name: halo_pos, scaling: rk_pos,
@@ -114,7 +196,10 @@ output_list:
 
         item: { name: km2_pos, scaling: rk_pos,
         type: km2, fid_weight: p5.km2.v2.pos, channels: [p5.km2.v2.pos] } 
-            ] 
+            ],
+
+        signals : *signals
+
             }
 
     - { 
@@ -149,7 +234,7 @@ output_list:
 
             ],
 
-        data_plot: { channels: [ p5.data.q11t.v3.pos ] } ,
+        data_plot: { channels: *dataposchan }  ,
 
         stack: [
             item: { name: halo_pos, scaling: mc_pos_lower_pre_muv,
@@ -184,16 +269,15 @@ output_list:
         { path: full_km2_dn/h_p_z, name: full_km2/dn/h_pz, rebin: 2}, 
         { path: full_km2_dn/h_p, name: full_km2/dn/h_p, rebin: 2}, 
         { path: full_km2_dn/h_z, name: full_km2/dn/h_z, rebin: 2}, 
+        { path: full_km2_dn/h_z_t, name: full_km2/dn/h_zt, rebin: 2}, 
         { path: full_km2_dn/h_p_m2m_kmu, name: full_km2/dn/h_pm2m, rebin: 2}, 
+        { path: full_km2_dn/h_m2_t, name: full_km2/dn/h_bad_m2m_t, collapse_y: true, min: 0.03, max: 0.08 },
+        { path: full_km2_dn/h_m2_z, name: full_km2/dn/h_bad_m2m_z, collapse_y: true, min: 0.03, max: 0.08 },
+        { path: full_km2_dn/h_p_m2m_kmu, name: full_km2/dn/h_bad_m2m_p, collapse_y: true, min: 0.03, max: 0.08 },
 
-        { path: full_km2_up/h_m2m_kmu, name: full_km2/up/h_m2m, rebin: 25, blinding: *myblind }, 
-        { path: full_km2_up/h_p_z, name: full_km2/up/h_pz, rebin: 2}, 
-        { path: full_km2_up/h_p, name: full_km2/up/h_p, rebin: 2}, 
-        { path: full_km2_up/h_z, name: full_km2/up/h_z, rebin: 2}, 
-        { path: full_km2_up/h_p_m2m_kmu, name: full_km2/up/h_pm2m, rebin: 2}, 
             ],
 
-        data_plot: { channels: [ p5.data.q11t.v3.pos ] } ,
+        data_plot: { channels: *dataposchan }  ,
 
         stack: [
             item: { name: halo_pos, scaling: mc_pos_lower,
@@ -217,13 +301,6 @@ output_list:
         item: { name: km2_pos, scaling: mc_pos_lower,
         type: km2, fid_weight: p5.km2.v2.pos, channels: [p5.km2.v2.pos] } 
             ],
-
-        signals: [
-             { name: hnu_275, channels: [mc.p5.hnu.275.nodk.pos] },
-             { name: hnu_300, channels: [mc.p5.hnu.300.nodk.pos] },
-             { name: hnu_325, channels: [mc.p5.hnu.325.nodk.pos] },
-             { name: hnu_350, channels: [mc.p5.hnu.350.nodk.pos] }
-        ]
         
     }
 
@@ -233,11 +310,15 @@ output_list:
     blinding: { do_blind: false },
 
     plots: [
-        { path: full_km2_up/h_m2m_kmu, name: full_km2_up_m2m, rebin: 25}, 
-        { path: full_km2_up/h_p_z, name: full_km2_up_pz, rebin: 2}, 
-        { path: full_km2_up/h_p, name: full_km2_up_p, rebin: 2} ],
 
-        data_plot: { channels: [ p5.data.q11t.v3.pos ] },
+        { path: full_km2_up/h_m2m_kmu, name: full_km2/up/h_m2m, rebin: 25, blinding: *myblind }, 
+        { path: full_km2_up/h_p_z, name: full_km2/up/h_pz, rebin: 2}, 
+        { path: full_km2_up/h_p, name: full_km2/up/h_p, rebin: 2}, 
+        { path: full_km2_up/h_z, name: full_km2/up/h_z, rebin: 2}, 
+        { path: full_km2_up/h_p_m2m_kmu, name: full_km2/up/h_pm2m, rebin: 2}, 
+        ],
+
+        data_plot: { channels: *dataposchan }  ,
 
         stack: [
             item: { name: halo_pos, scaling: mc_pos_upper,

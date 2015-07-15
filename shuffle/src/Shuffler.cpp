@@ -145,11 +145,12 @@ namespace fn
             cd_p( &tfout, boost::filesystem::path{ name }/ "signal_hists" );
             for ( const auto& signal_plot : signal_instruct )
             {
-                std::string name = signal_plot.first;
+                std::string hname = signal_plot.first;
                 const std::vector<std::string> channels = signal_plot.second;
                 std::unique_ptr<TH1> hsig =  get_summed_histogram( ce_stack,
                         begin( channels), end( channels ) );
-                hsig->Write( name.c_str() );
+                hsig->SetDirectory(0);
+                hsig->Write( hname.c_str() );
             }
 
         }

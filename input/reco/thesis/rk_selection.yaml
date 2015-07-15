@@ -360,10 +360,10 @@
 - input:
     name: single_muon
     type: SingleMuon
+    multiplier: 4
     method: auto
     inputs:
         ogt: auto_bf_st
-
 
 - selection:
     name: muv_acc
@@ -428,7 +428,7 @@
         - auto_good_trk
         - auto_pos_trk
         - auto_quality_7
-        - auto_rk_tgt_pz
+        - auto_rk_pz
         - auto_cda_35mm
         - auto_dch1_acc
         - auto_dch4_acc

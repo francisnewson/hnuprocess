@@ -410,6 +410,31 @@
     inputs: { km2clusters: rk_km2clusters, ogt: bf_st } }
 
 ###################################################
+# Cleanup cuts
+###################################################
+
+- selection:
+    name: clean_zt
+    type: TrackZT
+    track_section: us
+    shape: polygon
+    points:
+        - [  -1000,  0.0025 ] 
+        - [   7000,  0.0025 ] 
+        - [   7000,  0.0100 ] 
+        - [  -1000,  0.0100 ] 
+    inputs: { km2event: km2_event } 
+
+- selection:
+    name: high_m2m
+    type: Km2PM2Miss
+    shape: rectangles
+    points:
+        - [ 0, 1000, 0.009, 0.020]
+    inputs: { km2event: km2_event }
+
+
+###################################################
 # SIGNAL REGIONS
 ###################################################
 
@@ -644,6 +669,18 @@
 
 -  selection: { name: rk_km2_muv_dn_sel, type: CompositeSelection,
     children: [  rk_km2_muv_sel, zt_dn_def ] }
+
+-  selection: { name: clean_rk_km2_muv_up_sel, type: CompositeSelection,
+    children: [  rk_km2_muv_sel, zt_up_def, clean_zt ] }
+
+-  selection: { name: clean_rk_km2_muv_dn_sel, type: CompositeSelection,
+    children: [  rk_km2_muv_sel, zt_dn_def, clean_zt ] }
+
+-  selection: { name: clean_rk_km2_muv_up_high_m2m_sel, type: CompositeSelection,
+    children: [  rk_km2_muv_sel, zt_up_def, clean_zt, high_m2m  ] }
+
+-  selection: { name: clean_rk_km2_muv_dn_high_m2m_sel, type: CompositeSelection,
+    children: [  rk_km2_muv_sel, zt_dn_def, clean_zt, high_m2m ] }
           
 
 ###################################################
@@ -719,6 +756,8 @@
 - analysis : { type: Km2Plotter, name: full_dn_plots, folder: full_km2_dn,
     tfile: tfout, selection: full_km2_dn, inputs: { km2event : km2_event } }
 
+###
+
 - analysis : { type: Km2Plotter, name: ctrl_up_plots, folder: ctrl_km2_up,
     tfile: tfout, selection: ctrl_upper_sel, inputs: { km2event : km2_event } }
 
@@ -730,6 +769,10 @@
 
 - analysis : { type: Km2Plotter, name: ctrl_dn_plots_muv, folder: ctrl_km2_dn_muv,
     tfile: tfout, selection: ctrl_lower_sel_muv, inputs: { km2event : km2_event } }
+
+
+###
+
 
 - analysis : { type: Km2Plotter, name: rk_selection, folder: rk_km2_sel,
     tfile: tfout, selection: rk_km2_sel, inputs: { km2event : km2_event } }
@@ -746,8 +789,17 @@
 - analysis : { type: Km2Plotter, name: rk_selection_muv_dn, folder: rk_km2_muv_dn_sel,
     tfile: tfout, selection: rk_km2_muv_dn_sel, inputs: { km2event : km2_event } }
 
-- analysis : { type: Km2Plotter, name: rk_m2m_selection, folder: rk_km2_m2m_sel, mini: true,
-    tfile: tfout, selection: rk_km2_m2m_sel, inputs: { km2event : km2_event } }
+- analysis : { type: Km2Plotter, name: clean_rk_selection_muv_up, folder: clean_rk_km2_muv_up_sel,
+    tfile: tfout, selection: clean_rk_km2_muv_up_sel, inputs: { km2event : km2_event } }
+
+- analysis : { type: Km2Plotter, name: clean_rk_selection_muv_dn, folder: clean_rk_km2_muv_dn_sel,
+    tfile: tfout, selection: clean_rk_km2_muv_dn_sel, inputs: { km2event : km2_event } }
+
+- analysis : { type: Km2Plotter, name: clean_rk_selection_muv_up_high_m2m, folder: clean_rk_km2_muv_up_high_m2m_sel,
+    tfile: tfout, selection: clean_rk_km2_muv_up_high_m2m_sel, inputs: { km2event : km2_event } }
+
+- analysis : { type: Km2Plotter, name: clean_rk_selection_muv_dn_high_m2m, folder: clean_rk_km2_muv_dn_high_m2m_sel,
+    tfile: tfout, selection: clean_rk_km2_muv_dn_high_m2m_sel, inputs: { km2event : km2_event } }
 
 - analysis : 
     name : full_summary_upper
