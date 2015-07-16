@@ -1,8 +1,13 @@
-./build_O3/apps/shuffle -m input/shuffle/halo/halo_h_m2m_kmu_halo_upper.yaml -o output/halo_h_m2m_kmu_halo_upper.root
-./build_O3/apps/shuffle -m input/shuffle/halo/halo_h_p_halo_upper.yaml -o output/halo_h_p_halo_upper.root
-./build_O3/apps/shuffle -m input/shuffle/halo/halo_h_cda_halo_upper.yaml -o output/halo_h_cda_halo_upper.root
-./build_O3/apps/shuffle -m input/shuffle/halo/halo_h_z_halo_upper.yaml -o output/halo_h_z_halo_upper.root
-./build_O3/apps/shuffle -m input/shuffle/halo/halo_h_m2m_kmu_halo_lower.yaml -o output/halo_h_m2m_kmu_halo_lower.root
-./build_O3/apps/shuffle -m input/shuffle/halo/halo_h_p_halo_lower.yaml -o output/halo_h_p_halo_lower.root
-./build_O3/apps/shuffle -m input/shuffle/halo/halo_h_cda_halo_lower.yaml -o output/halo_h_cda_halo_lower.root
-./build_O3/apps/shuffle -m input/shuffle/halo/halo_h_z_halo_lower.yaml -o output/halo_h_z_halo_lower.root
+p5.data.q11t.v3.neg.list
+p5.data.q11t.v3.pos.list
+p5.km2.v2.neg.list
+p5.km2.v2.pos.list
+p6.data.kless.q11t.v2.pos.list
+p6.data.km.q11t.v2.neg.list
+p6.data.km.q11t.v2.pos.list
+p6.k3pi.v2.neg.list
+p6.k3pi.v2.pos.list
+p6.km2.v2.neg.list
+p6.km2.v2.pos.list
+p5.k3pi.v2.neg.list
+p5.k3pi.v2.pos.list

@@ -21,7 +21,7 @@ namespace fn
     void ScaleStrategy::update_scaling()
     { 
         sr = compute_scaling();
-        std::cout << sr << "\n" << std::endl;
+        //std::cout << sr << "\n" << std::endl;
     }
 
     M2ScaleStrategy::M2ScaleStrategy(
@@ -87,9 +87,11 @@ namespace fn
         double halo_scale_error = 0;
         double peak_halo_integral = 0;
 
+#if 0
         std::cout 
             << "Halo [" << m2_min_halo << ", " << m2_max_halo << "] "
             << "Peak [" << m2_min_peak << ", " << m2_max_peak << "]\n" ;
+#endif
 
         if ( do_halo_ )
         {
@@ -113,6 +115,7 @@ namespace fn
             }
             peak_halo_integral =  integral( *hsummed_halo, m2_min_peak, m2_max_peak );
 
+#if 0
             std::cout 
                 << std::setw(15) << "halo_halo"
                 << std::setw(15) << "halo_data\n";
@@ -120,6 +123,7 @@ namespace fn
             std::cout 
                 << std::setw(15) << halo_halo_integral
                 << std::setw(15) << halo_data_integral << "\n";
+#endif 
         }
 
         double peak_scale = 1;
@@ -134,6 +138,7 @@ namespace fn
             double subtracted_peak = peak_data_integral -  halo_scale * peak_halo_integral ;
             double subtracted_peak_error = std::sqrt( peak_data_integral + peak_halo_integral );
 
+#if 0
             std::cout 
                 << std::setw(15) << "peak_halo"
                 << std::setw(15) << "peak_data"
@@ -145,6 +150,7 @@ namespace fn
                 << std::setw(15) << peak_data_integral
                 << std::setw(15) << peak_peak_integral 
                 << std::setw(15) << subtracted_peak << std::endl;
+#endif
 
             peak_scale =  subtracted_peak  /  peak_peak_integral;
             peak_scale_error = peak_scale *
@@ -199,11 +205,11 @@ namespace fn
     void MultiScaling::compute_scaling() 
     {
         //compute scale factors
-        std::cout << "Doing MC scaling\n";
+        //std::cout << "Doing MC scaling\n";
         mc_strat_->update_scaling();
 
 
-        std::cout << "Doing halo scaling\n";
+        //std::cout << "Doing halo scaling\n";
         halo_strat_->update_scaling();
 
         peak_fid_weight_ = 0;

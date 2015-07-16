@@ -14,14 +14,24 @@
  * |_| |_|\__,_|\__,_|\___|_|\__,_|_|___|_|  \__,_|_| |_|\___|\__|_|\___/|_| |_|___/
  *                                 |_____|
  *
-*/
+ */
 #endif
 
 namespace fn
 {
+    template <class T>
+        bool tolerance( const T& a, const T& b, const T& tol )
+        {
+            if ( ( a!=0) && (b !=0 ))
+            { 
+                return ( fabs( a - b ) / ( fabs(a) + fabs(b) ) <= tol );
+            }
+            else return ( a == b );
+        }
+
     //function to extract fiducial counts from MC
     std::map<std::string,double> extract_fiducial_weights
-        ( std::string filename, std::string pre, std::string post );
+        ( std::string filename, std::string pre, std::string post, std::string branch );
 
     template <typename T>
         double sum_variable( std::string branch, TTree* tt )
@@ -56,5 +66,9 @@ namespace fn
 
     void print_fid_weights( const std::map<std::string, double>& fid_weights,
             std::ostream& os );
+
+    bool check_fiducial_weights
+        ( std::vector<std::map<std::string,std::string>> burst_trees );
+
 }
 #endif

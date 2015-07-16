@@ -90,6 +90,9 @@ namespace fn
 
         h_rcoll_ = hs_.MakeTH1D( "h_rcoll", "Radius at final collimator", 205, 0, 250, "R (cm)" );
 
+        h_kick_ = hs_.MakeTH1D( "h_kick", "Kick in x at MPN33",
+                300, -0.300, 0.300, "p_kick ( GeV)" );
+
         //----------
 
         //Kinematic correlations
@@ -244,6 +247,15 @@ namespace fn
 
         h_z_phi_->Fill( km2re.get_zvertex(), km2re.get_muon_phi(), wgt );
         h_t_phi_->Fill( km2re.get_opening_angle(), km2re.get_muon_phi(), wgt );
+
+
+        TVector3 us_mom = srt->get_us_mom();
+        TVector3 ds_mom = srt->get_ds_mom();
+
+        TVector3 mom_kick = ds_mom - us_mom;
+
+        h_kick_->Fill( mom_kick.X(), wgt );
+
 
         //Slices
 

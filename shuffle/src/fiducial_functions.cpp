@@ -7,6 +7,8 @@
 #include <cassert>
 #include <iostream>
 #include <iomanip>
+#include "yaml_help.hh"
+
 namespace fn
 {
 
@@ -102,7 +104,6 @@ namespace fn
                     }
                 }
             }
-
             return result;
         }
 
@@ -118,4 +119,54 @@ namespace fn
         }
         os << std::string( 50, '-' ) << "\n" ;
     }
+
+    bool check_fiducial_weights
+        ( std::vector<std::map<std::string,std::string>> burst_trees )
+        {
+            if ( burst_trees.size() < 2 )
+            {
+                return true;
+            }
+
+            bool result = true;
+
+            std::map<std::string, double> all_weights;
+
+            for (const auto& burst_tree : burst_trees )
+            {
+                std::map<std::string, double> this_weights = extract_fiducial_weights( 
+                        burst_tree.at("root_file" ), burst_tree.at("pre"), 
+                            burst_tree.at("post"), burst_tree.at("branch" ) );
+
+                for( const auto& chan : this_weights )
+                {
+                    auto existing = all_weights.find( chan.first );
+                    if ( existing == all_weights.end() )
+                    {
+                        all_weights.insert( chan );
+                    }
+                    else
+                    {
+#if 0
+                        std::cout << std::setw(25) << chan.first
+                            << std::setw(20) << existing->second
+                            << std::setw(20) << chan.second << std::endl;
+#endif
+
+                        double a = existing->second;
+                        double b = chan.second;
+
+                        if ( ! tolerance( a, b, 0.0001 ) )
+                        {
+                            std::cout << "Mismatch: " << chan.first
+                            << std::setw(20) << existing->second
+                            << std::setw(20) << chan.second << std::endl;
+                            result = false;
+                        }
+                    }
+                }
+            }
+
+            return result;
+        }
 }
