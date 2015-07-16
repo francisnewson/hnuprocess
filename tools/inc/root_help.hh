@@ -21,11 +21,11 @@ namespace fn
     class RootColors
     {
         public:
-        RootColors();
-        int operator()( std::string name ) const;
+            RootColors();
+            int operator()( std::string name ) const;
 
         private:
-        std::map<std::string, int> colors_;
+            std::map<std::string, int> colors_;
     };
 
     int root_color( std::string name );
@@ -48,6 +48,18 @@ namespace fn
     double flux_ratio( const TH1D& a, const TH1D& b ,
             double centre, double half_width );
 
+    template <typename T>
+        T * get_object( TFile& tf, std::string name )
+        {
+            T * h = 0;
+            tf.GetObject( name.c_str(), h );
+            if( !h )
+            {
+                throw std::runtime_error( "Can't find " + name );
+            }
+            return h;
+        }
+
     template < class T = TH1>
         std::unique_ptr<T> extract_hist
         (  TFile& tf , boost::filesystem::path p )
@@ -67,7 +79,7 @@ namespace fn
     void mkdir_p( TFile& f, boost::filesystem::path p );
 
     //--------------------------------------------------
-    
+
     std::unique_ptr<TFile> get_tfile
         ( boost::filesystem::path filename, Option_t* option="" );
 
@@ -75,8 +87,8 @@ namespace fn
 
     //OSTREAM
     std::ostream& operator<<( std::ostream& os, const TVector3& tv );
-  
+
     std::ostream& operator<<
-    ( std::ostream& os, const TLorentzVector &tv );
+        ( std::ostream& os, const TLorentzVector &tv );
 }
 #endif
