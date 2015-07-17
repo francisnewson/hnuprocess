@@ -1,0 +1,25 @@
+###################################################
+# STANDARD CORRECTIONS
+###################################################
+
+#automatically load the correct kind of kaon track
+#(including 1 + beta corrections)
+- input:
+    name: kaon_track
+    type: KaonTrack
+    kaon_type: auto
+    beam_mapping: input/reco/beam/beam_mapping.yaml
+
+#kaon weights
+- selection:
+    name: kaon_mom_weights
+    type: KaonMomWeight
+    crude_weights: "input/reco/mod/kaon_crude_weights.dat"
+    fine_weights: "input/reco/mod/kaon_fine_weights.dat"
+
+#standard cluster corretions
+- input:
+    name: cluster_corrector
+    type: ClusterCorrector
+    filename: "/afs/cern.ch/user/f/fnewson/work/hnu/gopher/data/detector/eopCorrfile.dat"
+    enabled: true

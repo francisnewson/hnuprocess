@@ -59,6 +59,7 @@ namespace fn
 			const fne::Event * get_event_ptr() const;
 
 			void status_report( std::ostream& os );
+			void full_report( std::ostream& os );
 
 			//Event progressing
 			bool auto_next_event();

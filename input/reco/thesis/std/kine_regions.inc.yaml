@@ -1,0 +1,264 @@
+###################################################
+# ZT REGIONS
+###################################################
+
+- selection:
+    name: zt_dn
+    type: TrackZT
+    track_section: us
+    shape: polygon
+    points:
+        - [ -3000,  0.000 ] 
+        - [ -3000,  0.012 ] 
+        - [  -500,  0.012 ] 
+        - [  2000,  0.005 ] 
+        - [  4000,  0.003 ] 
+        - [  8000,  0.001 ] 
+        - [  8000,  0.000 ] 
+        - [ -3000,  0.000 ] 
+    inputs: { km2event: km2_event } 
+
+- selection:
+    name: zt_up
+    type: TrackZT
+    track_section: us
+    shape: polygon
+    points:
+        - [ 10000,  0.001 ] 
+        - [  8000,  0.001 ] 
+        - [  4000,  0.003 ] 
+        - [  2000,  0.005 ] 
+        - [  -500,  0.012 ] 
+        - [  -500,  0.025 ] 
+        - [ 10000,  0.025 ] 
+        - [ 10000,  0.001 ] 
+    inputs: { km2event: km2_event } 
+
+###################################################
+# CONTROL REGIONS
+###################################################
+
+#UPPER
+- selection: {
+    name: ctrl_upper_pz, type: TrackPZ,
+    shape: rectangles,
+    points: [ [  11, 45, 2000, 5800 ] ],
+    inputs: { ogt: bf_st } }
+
+- selection: {
+    name: ctrl_upper_cda, type: TrackCda,
+    min_cda: 5.5, max_cda: 8.0, #cm
+    inputs: {ogt: bf_st } }
+
+- selection: {
+    name: ctrl_upper_t, type: Km2Angle,
+    min_t: 0, max_t: 0.013,
+    inputs: { km2event: km2_event } }
+
+- selection: {
+     name: ctrl_upper_sel, type: CompositeSelection,
+     children: [ zt_up, ctrl_upper_pz, ctrl_upper_cda, ctrl_upper_t ] }
+
+- selection: {
+     name: ctrl_upper_sel_muv, type: CompositeSelection,
+     children: [zt_up, ctrl_upper_pz, ctrl_upper_cda, ctrl_upper_t, muon_req  ] }
+
+ #--------------------------------------------------
+
+#LOWER
+- selection:
+    name: ctrl_zt_dn
+    type: TrackZT
+    track_section: us
+    shape: polygon
+    points:
+        - [  10000,  0.25 ] 
+        - [  10000,  0.00 ] 
+        - [    500,  0.00 ] 
+        - [  -1000,  0.003 ] 
+        - [  -1500,  0.005 ] 
+        - [  -2000,  0.012 ] 
+        - [  -2000,  0.25 ] 
+        - [  10000,  0.25 ] 
+    inputs: { km2event: km2_event } 
+
+- selection: {
+    name: ctrl_lower_pz, type: TrackPZ,
+    shape: rectangles,
+    points: [ [  10, 50, -2000, 10000 ] ],
+    inputs: { ogt: bf_st } }
+
+- selection: { 
+    name: ctrl_lower_cda, type: TrackCda,
+    min_cda: 0.0, max_cda: 6.0,
+    inputs: { ogt: bf_st } }
+
+- selection: {
+    name: ctrl_lower_t, type: Km2Angle,
+    min_t: 0.000, max_t: 0.013,
+    inputs: { km2event: km2_event } }
+
+- selection: {
+    name: ctrl_lower_m2m, type: Km2M2Miss,
+    min_m2: 0.06, max_m2: 0.2,
+    inputs: { km2event: km2_event } }
+
+- selection: {
+    name: ctrl_lower_neg_m2m_cut, type: Km2M2Miss,
+    min_m2: -0.3, max_m2: -0.05,
+    inputs: { km2event: km2_event } }
+
+- selection: {
+     name: ctrl_lower_sel, type: CompositeSelection,
+     children: [ zt_dn, ctrl_zt_dn, ctrl_lower_m2m, ctrl_lower_pz, ctrl_lower_cda, ctrl_lower_t ] }
+
+- selection: {
+     name: ctrl_lower_sel_full_m2m, type: CompositeSelection,
+     children: [ zt_dn, ctrl_zt_dn, ctrl_lower_pz, ctrl_lower_cda, ctrl_lower_t ] }
+
+- selection: {
+     name: ctrl_lower_sel_neg_m2m, type: CompositeSelection,
+     children: [ zt_dn, ctrl_zt_dn, ctrl_lower_neg_m2m_cut, ctrl_lower_pz, ctrl_lower_cda, ctrl_lower_t ] }
+
+- selection: {
+     name: ctrl_lower_sel_muv, type: CompositeSelection,
+     children: [ zt_dn, ctrl_zt_dn, ctrl_lower_m2m, ctrl_lower_pz, ctrl_lower_cda, ctrl_lower_t, muon_req ] }
+
+###################################################
+# SIGNAL REGIONS
+###################################################
+
+#UPPER
+- selection:
+    name: tphi_up_signal
+    type: TrackTPhi
+    shape: polygon
+    points:
+        - [0.000 , 0.00 ]
+        - [0.020 , 0.00 ]
+        - [0.020 , 0.73 ]
+        - [0.012 , 0.90 ]
+        - [0.009 , 1.51 ]
+        - [0.006 , 2.30 ]
+        - [0.005 , 2.60 ]
+        - [0.004 , 3.20 ]
+        - [0.004 , 3.40 ]
+        - [0.005 , 4.00 ]
+        - [0.006 , 4.30 ]
+        - [0.009 , 4.77 ]
+        - [0.012 , 5.38 ]
+        - [0.020 , 5.55 ]
+        - [0.020 , 6.40 ]
+        - [0.000 , 6.40 ]
+        - [0.000 , 0.00 ]
+    inputs: { km2event: km2_event } 
+
+- selection:
+    name: zt_up_signal
+    type: TrackZT
+    track_section: us
+    shape: polygon
+    points:
+        - [ 10000,  0.000 ] 
+        - [ 10000,  0.004 ] 
+        - [  9000,  0.004 ] 
+        - [  7000,  0.005 ] 
+        - [  5000,  0.006 ] 
+        - [  3000,  0.009 ] 
+        - [  2000,  0.010 ] 
+        - [  2000,  0.025 ] 
+        - [     0,  0.025 ] 
+        - [     0,  0.000 ] 
+        - [ 10000,  0.000 ] 
+    inputs: { km2event: km2_event } 
+
+- selection: {
+    name: signal_upper_sel, type: CompositeSelection,
+    children: [ zt_up, tphi_up_signal, zt_up_signal, track_mom_10_65,  cda_35mm ] }
+
+#LOWER
+- selection:
+    name: zt_dn_signal
+    type: TrackZT
+    track_section: us
+    shape: polygon
+    points:
+        - [  -950 ,  0.0200 ] 
+        - [  -950 ,  0.0110 ] 
+        - [  -825 ,  0.0085 ] 
+        - [  -325 ,  0.0060 ] 
+        - [   500 ,  0.0040 ] 
+        - [  1500 ,  0.0030 ] 
+        - [  2575 ,  0.0025 ] 
+        - [  2900 ,  0.0016 ] 
+        - [  3000 ,  0.0000 ] 
+        - [ 10000 ,  0.0000 ] 
+        - [ 10000 ,  0.0200 ] 
+        - [  -950 ,  0.0200 ] 
+    inputs: { km2event: km2_event } 
+
+- selection:
+    name: pt_dn_signal
+    type: TrackPT
+    shape: polygon
+    points:
+        - [  0, 0.000 ]
+        - [  0, 0.015 ]
+        - [ 12, 0.000 ]
+        - [ 100, 0.000 ] 
+        - [ 100, 0.500 ] 
+        - [ 0, 0.500 ] 
+    inputs: { km2event: km2_event } 
+
+- selection: {
+    name: signal_lower_sel, type: CompositeSelection,
+    children: [ zt_dn, zt_dn_signal, pt_dn_signal, track_mom_10_65, cda_35mm ] }
+
+###################################################
+# RK
+###################################################
+
+- selection:
+    name: rk_pz
+    type: TrackPZ
+    shape: rectangles
+    points:
+        - [ 13, 20, -1000, 9000 ]
+        - [ 20, 25, -1000, 9000 ]
+        - [ 25, 30,     0, 9000 ]
+        - [ 30, 35,   500, 9000 ]
+        - [ 35, 40,   500, 9000 ] 
+        - [ 40, 45,   500, 9000 ]
+        - [ 45, 50,  1000, 9000 ]
+        - [ 50, 55,  1000, 9000 ]
+        - [ 55, 60,  1500, 9000 ]
+        - [ 60, 65,  1500, 9000 ]
+    inputs:
+        ogt: bf_st
+
+- selection: {
+     name: rk_specific, type: CompositeSelection,
+     children: [ rk_pz, cda_35mm ] }
+
+- selection: {
+    name: m2_high, type: Km2M2Miss,
+    min_m2: 0.09, max_m2: 0.13,
+    inputs: { km2event: km2_event } }
+
+###################################################
+# K3pi CROSSTALK
+###################################################
+
+- selection:
+    name: k3pi_zt
+    type: TrackZT
+    track_section: us
+    shape: polygon
+    points:
+        - [   4000,  0.001 ]
+        - [   6000,  0.002 ]
+        - [   7500,  0.004 ]
+        - [   8000,  0.006 ]
+        - [   4000,  0.006 ]
+        - [   4000,  0.001 ]
+    inputs: { km2event: km2_event }

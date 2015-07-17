@@ -41,6 +41,6 @@ extract_k2pi.yaml
 -----------------
 To be reprocessed with k2pi_reco
 
-halo.yaml
+halo_control.yaml
 ---------
 Halo enriched selections to study P5/P6 agreement.

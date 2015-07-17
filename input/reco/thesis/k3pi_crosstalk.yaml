@@ -25,88 +25,8 @@
     type: ostream
     filename: km2_k3pi_debug.dat
 
-###################################################
-# STANDARD CORRECTIONS
-###################################################
-
-- input:
-    name: kaon_track
-    type: KaonTrack
-    kaon_type: auto
-    beam_mapping: input/reco/beam/beam_mapping.yaml
-
-- selection:
-    name: kaon_mom_weights
-    kt: kaon
-    type: KaonMomWeight
-    crude_weights: input/reco/mod/kaon_crude_weights.dat
-    fine_weights: input/reco/mod/kaon_fine_weights.dat
-
-- input:
-    name: cluster_corrector
-    type: ClusterCorrector
-    filename: "/afs/cern.ch/user/f/fnewson/work/hnu/gopher/data/detector/eopCorrfile.dat"
-    enabled: true
-
-# 1]Bad bursts
-- selection:
-    name: good_phys_burst
-    type: BadBurst
-    burst_list: "input/reco/conditions/bad_phys_burst.dat"
-
-- selection:
-    name: good_dch_burst
-    type: BadBurst
-    burst_list: "input/reco/conditions/bad_dch_burst.dat"
-
-- selection:
-    name: good_muv_burst
-    type: BadBurst
-    burst_list: "input/reco/conditions/bad_muv_burst.90.dat"
-
-- selection:
-    name: good_muv_burst_range
-    type: BadBurstRange
-    burst_range_list: "input/reco/conditions/bad_muv_burst_ranges.dat"
-
-- selection:
-    name: weighted_data_sample
-    type: CompositeSelection
-    children:
-        - kaon_mom_weights
-        - good_phys_burst
-        - good_dch_burst
-        - good_muv_burst
-        - good_muv_burst_range
-
-- selection:
-    name: mcz
-    type: MCZCut
-    min_z: -1800
-    max_z:  8000
-
-- selection:
-    name: weighted_mc_sample
-    type: CompositeSelection
-    children:
-        - weighted_data_sample
-        - mcz
-
-- analysis:
-    name: sample_burst_count
-    type: BurstCount
-    tfile: tfout
-    folder: sample_burst_count
-    selection: weighted_mc_sample
-    codename: bursts
-
-- analysis:
-    name: data_burst_count
-    type: BurstCount
-    tfile: tfout
-    folder: data_burst_count
-    selection: weighted_data_sample
-    codename: data_bursts
+@include "input/reco/thesis/std/corrections.inc.yaml"
+@include "input/reco/thesis/std/data_sample.inc.yaml"
 
 ###################################################
 # INPUTS
@@ -140,9 +60,9 @@
 
 #Km2Clusters
 - input:
-    name: full_km2clusters
+    name: km2_clusters
     type: Km2Clusters
-    noise_energy: 5 #GeV
+    noise_energy: 3 #GeV
     noise_time: 12 #ns
     brehm_radius: 0 #cm
     track_cluster_radius: 40 #cm
@@ -162,177 +82,37 @@
         ogt: bf_st
         ClusterCorrector: cluster_corrector
 
+- input:
+    name: single_muon
+    type: SingleMuon
+    method: auto
+    multiplier: 4
+    inputs:
+        ogt: bf_st
+
+- selection:
+    name: muon_xy_wgt
+    type: MuonTHXYWeight
+    effs_file: input/reco/conditions/muv_xy.root
+    effs_hist: rat_xy
+    inputs:
+        ogt: bf_st
+
+- selection:
+    name: muon_p_wgt
+    type: MuonTHPWeight
+    effs_file: input/reco/conditions/muv/muv_eff_p.root
+    effs_hist: rat_p
+    inputs:
+        ogt: bf_st
+
 #Autopass
 - selection:
     name: passer
     type : auto_pass
 
-###################################################
-# CUTS
-###################################################
-
-#Found ogt
-- selection:
-    name: good_trk
-    type : FoundGoodTrack
-    inputs :
-        ogt: bf_st
-
-#Track charge
-- selection:
-    name: pos_trk
-    type : TrackCharge
-    charge: +1
-    inputs :
-        ogt: bf_st
-
-#Track charge
-- selection:
-    name: neg_trk
-    type : TrackCharge
-    charge: -1
-    inputs :
-        ogt: bf_st
-
-#Track quality
-- selection:
-    name: quality_7
-    type: TrackQuality
-    quality: 0.7
-    inputs:
-        ogt: bf_st
-
-- selection:
-    name: cda_3cm
-    type: TrackCda
-    max_cda: 3.0 #cm
-    inputs:
-        ogt: bf_st
-
-- selection:
-    name: cda_35mm
-    type: TrackCda
-    max_cda: 3.5 #cm
-    inputs:
-        ogt: bf_st
-
-- selection:
-    name: cda_40mm
-    type: TrackCda
-    max_cda: 4.0 #cm
-    inputs:
-        ogt: bf_st
-
-#Track DHC1 ACC
-- selection:
-    name: dch1_acc
-    type: TrackRadialAcceptance
-    track_section: upstream
-    z: 9708.42 #zDCH1
-    inner: 12.0
-    outer: 115.0
-    inputs:
-        ogt: bf_st
-
-#Track DHC4 ACC
-- selection:
-    name: dch4_acc
-    type: TrackRadialAcceptance
-    track_section: downstream
-    z: 11888.0 #zDCH4
-    inner: 14.0
-    outer: 115.0
-    inputs:
-        ogt: bf_st
-
-# 9] LKr acceptance
-- selection:
-    name: rk_lkr_accep
-    type: TrackLkrAcceptance
-    margin_parameter: 8 #cm
-    inputs:
-        ogt: bf_st
-
-- selection:
-    name: full_hot_lkr
-    type: Km2HotLkr
-    hot_cells: [ [ 134, 56 ], [ 134, 57 ] ]
-    inputs:
-        km2event: km2_event
-        km2clusters: full_km2clusters
-
-- selection:
-    name: rk_hot_lkr
-    type: Km2HotLkr
-    hot_cells: [ [ 134, 56 ], [ 134, 57 ] ]
-    inputs:
-        km2event: km2_event
-        km2clusters: rk_km2clusters
-
-#Track time
-- selection:
-    name: rk_dcht
-    type : TrackTime
-    max_dt: 20 #ns
-    inputs:
-        ogt: bf_st
-
-#NoBadClusters
-- selection:
-    name: full_lkr_veto
-    type: Km2NoBadCluster
-    inputs:
-        km2clusters: full_km2clusters
-
-- selection:
-    name: rk_lkr_veto
-    type: Km2NoBadCluster
-    inputs:
-        km2clusters: rk_km2clusters
-
-- selection:
-    name: signal_track_mom
-    type: TrackMomentum
-    min: 10
-    max: 65
-    inputs:
-        ogt: bf_st
-
-- selection:
-    name: rk_pz
-    type: TrackPZ
-    shape: rectangles
-    points:
-        - [ 13, 20, -1000, 9000 ]
-        - [ 20, 25, -1000, 9000 ]
-        - [ 25, 30,     0, 9000 ]
-        - [ 30, 35,   500, 9000 ]
-        - [ 35, 40,   500, 9000 ] 
-        - [ 40, 45,   500, 9000 ]
-        - [ 45, 50,  1000, 9000 ]
-        - [ 50, 55,  1000, 9000 ]
-        - [ 55, 60,  1500, 9000 ]
-        - [ 60, 65,  2500, 9000 ]
-    inputs:
-        ogt: bf_st
-
-- selection: { name: ddead_cell, type: TrackDDeadCell, 
-    min_ddead_cell: 2.0,  inputs: {ogt: bf_st } }
-
-
-- selection:
-    name: k3pi_zt
-    type: TrackZT
-    track_section: us
-    shape: polygon
-    points:
-        - [   4000,  0.001 ] 
-        - [   6000,  0.002 ] 
-        - [   7500,  0.004 ] 
-        - [   8000,  0.006 ] 
-        - [   4000,  0.006 ] 
-        - [   4000,  0.001 ] 
-    inputs: { km2event: km2_event } 
+@include "input/reco/thesis/std/selections.inc.yaml"
+@include "input/reco/thesis/std/kine_regions.inc.yaml"
 
 ###################################################
 # SELECTIONS

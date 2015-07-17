@@ -70,5 +70,26 @@ namespace fn
             logger& log_;
     };
 
+    /*****************************************************
+     * PreParse
+     *
+     * A preprocessor for yaml config files
+     *
+     *****************************************************/
+
+    class PreParse
+    {
+        public:
+            PreParse( boost::filesystem::path source );
+            void process();
+            void process( boost::filesystem::path source);
+            void dump( boost::filesystem::path dumppath );
+
+        private:
+            boost::filesystem::path source_;
+            std::vector<std::string> lines_;
+    };
+
+    void pre_parse( boost::filesystem::path source, boost::filesystem::path dest );
 }
 #endif

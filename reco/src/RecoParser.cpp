@@ -4,6 +4,9 @@
 #include "stl_help.hh"
 #include "yaml_help.hh"
 #include <boost/regex.hpp>
+#include <boost/algorithm/string.hpp>
+#include <boost/algorithm/string/predicate.hpp>
+#include <boost/filesystem/fstream.hpp>
 #include <iomanip>
 namespace fn
 {
@@ -26,11 +29,16 @@ namespace fn
     //Process a YAML file
     void RecoParser::parse( boost::filesystem::path config )
     {
+        auto mangled_config =
+            boost::filesystem::path{ "tmp" } / config.filename() ;
+
         BOOST_LOG_SEV( log_, startup)
-            << "RECOPARSER: Parsing " << config;
+            << "RECOPARSER: Parsing " << config << " via " << mangled_config ;
+
+        pre_parse( config, mangled_config );
 
         //Load file
-        YAML::Node config_node = YAML::LoadFile( config.string() );
+        YAML::Node config_node = YAML::LoadFile( mangled_config.string() );
         assert(config_node.Type() == YAML::NodeType::Sequence);
 
         //Loop over items
@@ -59,7 +67,7 @@ namespace fn
                     for (YAML::const_iterator fit=file_node.begin();
                             fit!=file_node.end();++fit)
                     {
-                       instruct[ fit->first ]  = fit->second ;
+                        instruct[ fit->first ]  = fit->second ;
                     }
                 }
 
@@ -225,11 +233,17 @@ namespace fn
 
     void ExecParser::parse( boost::filesystem::path config)
     {
+
+        auto mangled_config =
+            boost::filesystem::path{ "tmp" } / config.filename() ;
+
         BOOST_LOG_SEV( log_, startup)
-            << "EXECPARSER: Parsing " << config;
+            << "EXECPARSER: Parsing " << config << " via " << mangled_config ;
+
+        pre_parse( config, mangled_config );
 
         //Load file
-        YAML::Node config_node = YAML::LoadFile( config.string() );
+        YAML::Node config_node = YAML::LoadFile( mangled_config.string() );
         assert(config_node.Type() == YAML::NodeType::Sequence);
 
         bool found_exec = false;
@@ -324,5 +338,47 @@ namespace fn
             bool found ( std::find( mc_skip_.begin(), mc_skip_.end(), run) != mc_skip_.end() );
             return found;
         }
+    }
+
+    //--------------------------------------------------
+
+    PreParse::PreParse( boost::filesystem::path source )
+        :source_( source )
+    {}
+
+    void PreParse::process() { process( source_ ); }
+
+    void PreParse::process( boost::filesystem::path source)
+    {
+        boost::filesystem::ifstream ifs( source );
+        if ( ! ifs ){ throw std::runtime_error( "Can't find " + source.string() ); }
+        for( std::string line ; std::getline( ifs, line ); )
+        {
+
+            if ( boost::algorithm::contains( line, "@include" ) )
+            {
+                std::vector<std::string> tokens;
+                boost::split( tokens, line, boost::is_any_of( "\" " ) , boost::token_compress_on );
+                std::cerr << "Including: " << tokens[1] << std::endl;
+                process( tokens[1] );
+            }
+            else
+            {
+                lines_.push_back( line );
+            }
+        }
+    }
+
+    void PreParse::dump( boost::filesystem::path dumppath )
+    {
+        boost::filesystem::ofstream ofs( dumppath );
+        std::copy( begin( lines_), end(lines_ ), std::ostream_iterator<std::string>( ofs, "\n" ) );
+    }
+
+    void pre_parse( boost::filesystem::path source, boost::filesystem::path dest )
+    {
+        PreParse pp( source );
+        pp.process();
+        pp.dump( dest );
     }
 }

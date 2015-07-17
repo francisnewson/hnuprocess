@@ -83,6 +83,17 @@ namespace fn
                     os_ << std::endl;
                 }
 
+                void full_report( std::ostream& os_ )
+                {
+                    os_ << "SUBCRIBERS: \n";
+
+                    for ( const  auto& sub : event_subs_ )
+                    {
+                        os_ << sub->get_name() << "\n";
+                    }
+
+                }
+
                 //Action
                 void new_event( int tree )
                 {

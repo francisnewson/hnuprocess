@@ -41,6 +41,7 @@ runlists
 test
 halo_out
 
+tmp/*
 local/*
 
 #apps#

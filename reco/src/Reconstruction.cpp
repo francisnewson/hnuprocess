@@ -85,6 +85,11 @@ namespace fn
 
     }
 
+    void Reconstruction::full_report( std::ostream& os )
+    {
+        notifyer_.full_report( os );
+    }
+
     //----------------------------------------------------------------------
 
     //EVENT PROCESSING

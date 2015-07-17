@@ -24,6 +24,9 @@ namespace fn
 
             bool is_mc = rf.is_mc();
 
+            std::cerr << "SINGLEMUON" << std::endl;
+            BOOST_LOG_SEV( rf.get_log(), always_print ) << "SingleMuon: " << method;
+
             if ( method == "raw" )
             {
                 return new RawSingleMuon( event, *st );
@@ -39,16 +42,21 @@ namespace fn
             }
             else if ( method == "auto" )
             {
-                if ( is_mc )
+
+                if ( rf.is_halo() )
                 {
-                    return new MCScatterSingleMuon( event, *st );
-                }
-                else if ( rf.is_halo() )
-                {
+                    BOOST_LOG_SEV( rf.get_log(), always_print ) << "SingleMuon: ==> Halo";
                     return new HaloScatterSingleMuon( event, *st );
+                }
+
+                else if ( is_mc )
+                {
+                    BOOST_LOG_SEV( rf.get_log(), always_print ) << "SingleMuon: ==> MC";
+                    return new MCScatterSingleMuon( event, *st );
                 }
                 else
                 {
+                    BOOST_LOG_SEV( rf.get_log(), always_print) << "SingleMuon: ==> Data";
                     double multiplier = get_yaml<double>( instruct, "multiplier" );
                     return new DataMuRec( event, *st, multiplier );
                 }
