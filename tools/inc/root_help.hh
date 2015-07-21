@@ -13,10 +13,26 @@
 namespace fn
 {
     template <class T> T * tclone( const T& h ){ return static_cast<T*>( h.Clone() ); }
+    template <class T> T * tclone( const T& h, std::string s )
+    { return static_cast<T*>( h.Clone(s.c_str()) ); }
 
     template <class T> std::unique_ptr<T> uclone( const std::unique_ptr<T>& u )
     { return std::unique_ptr<T>( static_cast<T*>( u->Clone() ) ); }
 
+    template <class IT>
+std::unique_ptr<TH1D> sum_hists( IT begin, IT end )
+{
+    std::unique_ptr<TH1D> result{ static_cast<TH1D*>( (*begin)->Clone() ) };
+    result->Reset();
+    result->SetDirectory(0);
+
+    for( auto current = begin; current != end  ; ++current )
+    {
+        result->Add( &*(*current) );
+    }
+
+    return result;
+}
     //COLORS
     class RootColors
     {

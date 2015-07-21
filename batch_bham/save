@@ -40,3 +40,11 @@ for source, dest in save['local'].items():
         shutil.copy( source, dest )
     except IOError:
         print( 'Could not copy {0} to {1}\n'.format( source, dest ) )
+
+for source, dest in save['lustre'].items():
+    sys.stderr.write ( "Copying {0} to {1}\n".format( source, dest ))
+    mkdir_p( os.path.dirname( dest ) )
+    try:
+        shutil.copy( source, dest )
+    except IOError:
+        print( 'Could not copy {0} to {1}\n'.format( source, dest ) )

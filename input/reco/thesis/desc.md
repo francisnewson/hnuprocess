@@ -42,5 +42,14 @@ extract_k2pi.yaml
 To be reprocessed with k2pi_reco
 
 halo_control.yaml
----------
+-----------------
 Halo enriched selections to study P5/P6 agreement.
+Also includes control regions and final seelction
+
+k3pi.yaml
+---------
+A k3pi selection to study kaon momentum
+
+km2_demo.yaml
+-------------
+Step by step cuts

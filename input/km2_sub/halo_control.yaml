@@ -1,0 +1,19 @@
+fid:  {
+    root_file: "tdata/halo_control/all.halo_control.root",
+    pre: "", post: "sample_burst_count/bursts", branch: "weight" }
+
+files:
+    input: "tdata/halo_control/all.halo_control.root"
+
+names:
+    ib: p5.km2.v2
+    intp: p5.km2.intp.v4
+    intm: p5.km2.intm.v4
+    sdp: p5.km2.sdp.v4
+    sdm: p5.km2.sdm.v4
+    full: p5.km2.full
+
+plots:
+    - rk_like_selection_plots/h_m2m_kmu
+    - signal_upper_plots/h_m2m_kmu
+    - signal_lower_plots/h_m2m_kmu

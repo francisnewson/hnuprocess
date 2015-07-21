@@ -1,3 +1,4 @@
 #!/bin/bash
 #open recent root file
-root -l  output/$(ls -t output/ | grep root | head -n1 )
+nfile=${1:-1}
+root -l  $(prep ls -t output/ | grep root | head -n$nfile )

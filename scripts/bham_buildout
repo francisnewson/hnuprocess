@@ -9,5 +9,6 @@ ldd build_bham/apps/hnureco \
             print "batch_bham"
 			print "scripts/bham_env.sh"
             print "local"
+            print "tmp"
 		}'  \
 			| xargs tar -cvf ../binary/process.tar 

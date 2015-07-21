@@ -22,6 +22,7 @@
 #endif
 namespace fn
 {
+#if 0
     class RootColors
     {
         public:
@@ -33,6 +34,7 @@ namespace fn
     };
 
     int root_color( std::string name );
+#endif
 
     class HistFormatter
     {
@@ -82,6 +84,8 @@ namespace fn
             std::map<std::string, MultiScaling>& scaling_info_;
             const HistFormatter& formatter_;
     };
+
+    void de_zero_hist( TH1& h );
 
 }
 #endif

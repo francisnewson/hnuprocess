@@ -1,0 +1,24 @@
+#!/bin/bash
+
+instruct=$1
+shift
+source /disk/homedisk/home/fon/work/hnu/code/python/venv/hnu/bin/activate
+
+getyaml () {
+    cat $instruct | shyaml get-value $1
+}
+
+app=$( getyaml run.app )
+channel=$( getyaml run.channel )
+runlist=$( getyaml run.runlist )
+mission=$( getyaml run.mission )
+
+printf "\nMission  is:"  $mission
+
+printf "\n\n==================================================\n\n"
+
+mkdir -p output
+
+#run the command!
+$app -s $mission -c $channel -l $runlist -o output/k2pi_plots.root
+ls -lh output/k2pi_plots.root

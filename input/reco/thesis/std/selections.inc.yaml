@@ -12,7 +12,7 @@
 
 #-------- 3.] Track charge
 - selection: { name: neg_trk, type : TrackCharge,
-    charge: +1, inputs : {ogt: bf_st} }
+    charge: -1, inputs : {ogt: bf_st} }
 
 #------- 4.] Track quality
 - selection: { name: quality_7, type: TrackQuality,
@@ -74,6 +74,39 @@
     name: cda_40mm, type: TrackCda,
     min_cda: 0.0, max_cda: 4.0,
     inputs: { ogt: bf_st } }
+
+- selection:
+    name: muv_acc_octagonal
+    type: TrackXYUVAcceptance
+    track_section: ds
+    z: 13012.0 #MUV3
+    min_x: -130.0
+    max_x:  130.0
+    min_y: -130.0
+    max_y:  130.0
+    min_u: -130.0
+    max_u:  130.0
+    min_v: -130.0
+    max_v:  130.0
+    inputs:
+        ogt: bf_st
+
+- selection:
+    name: muv_acc_radial
+    type: TrackRadialAcceptance
+    track_section: upstream
+    z: 12778.0 #zMUV1
+    inner: 15.0
+    outer: 200.0
+    inputs:
+        ogt: bf_st
+
+- selection:
+    name: muv_acc
+    type: CompositeSelection
+    children:
+    - muv_acc_octagonal
+    - muv_acc_radial
 
 - selection:
    { name: muon_req_38, type: MuonReq, multiplier: 3.8, inputs: {ogt: bf_st, sm: single_muon } }

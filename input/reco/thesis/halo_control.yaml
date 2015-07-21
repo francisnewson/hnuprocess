@@ -92,6 +92,7 @@
         - fiducial_pz
         - dch1_acc
         - dch4_acc
+        - muv_acc
         - rk_hot_lkr
         - rk_lkr_veto
         - rk_dcht
@@ -203,6 +204,21 @@
 
 - analysis : {name : full_summary, type: Summary, 
     base : passer, source : pre_selection, ostream: os_stats } 
+
+#############
+
+- selection : { type : Q11TTrigger, name : q11t }
+
+- analysis : { type : TriggerEffs, name : pre_trig_eff, folder : pre_trig_eff,
+    tfile: tfout, base: pre_selection, source: q11t, inputs : { km2event: km2_event } }
+
+- analysis : { type : TriggerEffs, name : sig_up_trig_eff, folder : sig_up_trig_eff,
+    tfile: tfout, base: signal_upper_muv, source: q11t, inputs : { km2event: km2_event } }
+
+- analysis : { type : TriggerEffs, name : sig_dn_trig_eff, folder : sig_dn_trig_eff,
+    tfile: tfout, base: signal_lower_muv, source: q11t, inputs : { km2event: km2_event } }
+
+#############
 
 - analysis : 
     name : rk_like_summary

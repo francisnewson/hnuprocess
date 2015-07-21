@@ -5,8 +5,8 @@ scaling:
         peakname: km2
 
         channels: &poschannels
-            halo_channels: [ p6.data.kless.q11t.v2.pos  ]
-            data_channels: [ p5.data.q11t.v3.pos ]
+            halo_channels: [ p6.data.kless.q1.v2.pos  ]
+            data_channels: [ p5.data.q1.v4.pos ]
             peak_channels: [ p5.km2.v2.pos ]
 
         halo: &m2mdwnstrat { 
@@ -24,8 +24,8 @@ scaling:
         peakname: km2
 
         channels: &negchannels
-            halo_channels: [ p6.data.km.q11t.v2.neg ]
-            data_channels: [ p5.data.q11t.v3.neg ]
+            halo_channels: [ p6.data.km.q1.v2.neg ]
+            data_channels: [ p5.data.q1.v4.neg ]
             peak_channels: [ p5.km2.v2.neg ]
 
         halo: *m2mdwnstrat
@@ -75,13 +75,13 @@ output_list:
         { path: signal_upper_plots/h_m2m_kmu, name: halo_sig_upper_m2m, rebin: 25} ,
         { path: signal_upper_muv_plots/h_m2m_kmu, name: halo_sig_muv_upper_m2m, rebin: 25} ],
 
-    data_plot: { channels: [ p5.data.q11t.v3.pos ] },
+    data_plot: { channels: [ p5.data.q1.v4.pos ] },
 
     blinding: { do_blind: true,  min_blind: 0.09, max_blind: 0.135 },
 
     stack: [
         item: { name: halo_pos, scaling: mc_pos_upper,
-        type: halo, channels: [p6.data.kless.q11t.v2.pos] }, 
+        type: halo, channels: [p6.data.kless.q1.v2.pos] }, 
 
         item: { name: k3pi_pos, scaling: mc_pos_upper,
         type: k3pi, fid_weight: p5.k3pi.v2.pos, channels: [p5.k3pi.v2.pos] } ,
@@ -103,14 +103,15 @@ output_list:
 
     plots: [
         { path: signal_lower_plots/h_m2m_kmu, name: halo_sig_lower_m2m, rebin: 25} ,
-        { path: signal_lower_muv_plots/h_m2m_kmu, name: halo_sig_muv_lower_m2m, rebin: 25} ],
+        { path: signal_lower_muv_plots/h_m2m_kmu, name: halo_sig_muv_lower_m2m, rebin: 25} ,
+        { path: ctrl_lower_full_m2m_plots/h_m2m_kmu, name: ctrl_lower, rebin: 25} ],
 
     blinding : { do_blind: true,  min_blind: 0.09, max_blind: 0.135 },
-    data_plot: { channels: [ p5.data.q11t.v3.pos ]},
+    data_plot: { channels: [ p5.data.q1.v4.pos ]},
 
     stack: [
         item: { name: halo_pos, scaling: mc_pos_lower,
-        type: halo, channels: [p6.data.kless.q11t.v2.pos] }, 
+        type: halo, channels: [p6.data.kless.q1.v2.pos] }, 
 
         item: { name: k3pi_pos, scaling: mc_pos_lower,
         type: k3pi, fid_weight: p5.k3pi.v2.pos, channels: [p5.k3pi.v2.pos] } ,

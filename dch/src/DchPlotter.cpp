@@ -334,11 +334,10 @@ namespace fn
         {
             scatterings = { 
                 { "b",           0.00085, 0.0100 , 2 , 0.08, 0.0010, 2}, 
-                { "s4"  ,        0.00085, 0.0150 , 4 , 0.13, 0.0015, 4}, 
-                { "s4_p_early",  0.00085, 0.0150 , 4 , 0.09, 0.0015, 4}, 
-                { "s4_p_late" ,  0.00085, 0.0150 , 4 , 0.16, 0.0015, 4}, 
-                { "s4_p_high" ,  0.00085, 0.0150 , 4 , 0.13, 0.0020, 4}, 
-                { "s4_p_low" ,  0.00085, 0.0150 , 4 , 0.13, 0.0010, 4}, 
+                { "s4_85_150_09_15",   0.00085, 0.0150 , 4 , 0.09, 0.0015, 4}, 
+                { "s4_85_150_16_15" ,  0.00085, 0.0150 , 4 , 0.16, 0.0015, 4}, 
+                { "s4_85_150_13_20" ,  0.00085, 0.0150 , 4 , 0.13, 0.0020, 4}, 
+                { "s4_85_150_13_10" ,  0.00085, 0.0150 , 4 , 0.13, 0.0010, 4}, 
             };
         }
 
@@ -346,12 +345,12 @@ namespace fn
 
         for ( auto scat :  scatterings )
         {
-            std::cout << "SCATTERING: " << std::setw(6) << scat.name;
-            std::cout << "angle_cutoff: " << scat.angle_cutoff;
-            std::cout << "angle_frequency: " << scat.angle_frequency;
+            std::cout << "SCATTERING: " << std::setw(25) << scat.name;
+            std::cout << " angle_cutoff: " << std::setw(10) << scat.angle_cutoff;
+            std::cout << " angle_frequency: " << std::setw(10) << scat.angle_frequency;
 
-            std::cout << "mom_cutoff: " << scat.mom_cutoff;
-            std::cout << "mom_frequency: " << scat.mom_frequency << "\n";
+            std::cout << " mom_cutoff: " << std::setw(10) << scat.mom_cutoff;
+            std::cout << " mom_frequency: " << std::setw(10) << scat.mom_frequency << "\n";
 
             scatterers_.push_back( TrackPowerScatterer( 
                         scat.angle_cutoff, scat.angle_frequency, scat.angle_power,
@@ -362,6 +361,8 @@ namespace fn
 
             scatter_plots_.push_back( DchPlotter( tf_, folder.string() ) );
         }
+
+        std::cout << std::endl;
     }
 
     void DchAnalysis::add_dch_selection( DchSelection* dch_selection )
@@ -437,5 +438,46 @@ namespace fn
         {
             plots.write();
         }
+    }
+
+    //--------------------------------------------------
+
+    K2piMuvEff::K2piMuvEff( Selection& sel, const Selection& muv,
+            K2piEventData& k2pi_data, const SingleTrack& st,
+            TFile& tf, std::string folder )
+        :Analysis( sel ), muv_( muv ), st_( st ), k2pi_data_( k2pi_data ),
+         tf_( tf ), folder_( folder )
+    {
+        h_xy_passed_ = hs_.MakeTH2D( "h_xy_passed", "XY MUV Passed",
+                150, -150, 150, "x (cm)", 150, -150, 150, "y (cm)" );
+
+        h_xy_total_ = hs_.MakeTH2D( "h_xy_total", "XY MUV Total",
+                150, -150, 150, "x (cm)", 150, -150, 150, "y (cm)" );
+    }
+
+    void K2piMuvEff::process_event()
+    {
+        const auto& srt = st_.get_single_track();
+        double x = srt.extrapolate_ds( na62const::zMuv2 ).X();
+        double y = srt.extrapolate_ds( na62const::zMuv1 ).Y();
+
+        double wgt = k2pi_data_.weight * get_weight();
+
+        h_xy_total_->Fill( x, y, wgt );
+
+        if ( muv_.check() )
+        {
+            double passed_wgt = wgt * muv_.get_weight();
+            h_xy_passed_->Fill( x, y, passed_wgt );
+        }
+    }
+
+    void K2piMuvEff::end_processing()
+    {
+        cd_p( &tf_, folder_ );
+        hs_.Write();
+        h_xy_passed_->Divide( h_xy_total_ );
+        h_xy_passed_->Write( "h_xy_ratio" );
+
     }
 }

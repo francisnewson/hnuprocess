@@ -158,5 +158,31 @@ namespace fn
         std::vector<TrackPowerScatterer> scatterers_;
         std::vector<DchSelection*> dch_selections_;
     };
+
+    //--------------------------------------------------
+
+    class K2piMuvEff : public Analysis
+    {
+        public:
+            K2piMuvEff( Selection& sel, const Selection& muv,
+                    K2piEventData& k2pi_data, const SingleTrack& st,
+                    TFile& tf, std::string folder );
+
+            void end_processing();
+
+        private:
+            void process_event();
+
+            const Selection& muv_;
+            const SingleTrack& st_;
+            K2piEventData& k2pi_data_;
+
+            TFile& tf_;
+            std::string folder_;
+
+            HistStore hs_;
+            TH2D * h_xy_passed_;
+            TH2D * h_xy_total_;
+    };
 }
 #endif

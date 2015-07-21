@@ -262,3 +262,15 @@
         - [   4000,  0.006 ]
         - [   4000,  0.001 ]
     inputs: { km2event: km2_event }
+
+###################################################
+# BONUS
+###################################################
+
+- selection:
+    name: relaxed_pzt_cut
+    type: TrackPZT
+    regions_file: "input/reco/km2/relaxed_pzt.yaml"
+    inputs:
+        ogt: bf_st
+        kt: kaon_track

@@ -1,10 +1,12 @@
 #include "HistStacker.hh"
 #include "yaml_help.hh"
+#include "root_help.hh"
 #include "Rtypes.h"
 #include <iomanip>
 
 namespace fn
 {
+#if 0
     RootColors::RootColors()
         :colors_{ 
             {"kWhite", kWhite}, {"kBlack", kBlack},
@@ -31,6 +33,7 @@ namespace fn
         static const RootColors rc;
         return rc( name );
     }
+#endif
 
     HistFormatter::HistFormatter( std::string filename )
     {
@@ -102,6 +105,7 @@ namespace fn
             auto h = load_hist(instruct);
             scale_hist( *h, instruct );
             color_hist( *h, instruct );
+            de_zero_hist( *h );
             stack_.Add( std::move( h ) );
         }
     }
@@ -164,4 +168,17 @@ namespace fn
         result->SetDirectory(0);
         return result;
     }
+
+    void de_zero_hist( TH1& h )
+    {
+        int nBins = h.GetNbinsX();
+
+        for ( int ibin = 0 ; ibin != nBins +1 ; ++ ibin )
+        {
+            double value = h.GetBinContent( ibin );
+            if ( value < 0 ){ h.SetBinContent( ibin, 0 );
+            }
+        }
+    }
+
 }

@@ -320,6 +320,9 @@ namespace fn
 
         //--------------------
 
+        //NO MUV
+        CompositeSelection * no_muv = new CompositeSelection(  {passer} );
+       
         //NO FIT 
         CompositeSelection * no_fit_raw = new CompositeSelection( 
                 { track_track_cluster_sep_cut,  track_cluster_sep_cut, min_photon_radius_cut, muv_acc, muv_cut } );
@@ -341,7 +344,8 @@ namespace fn
 
         //DODGY
         CompositeSelection * dodgy_selection = new CompositeSelection(
-                { track_track_cluster_sep_cut,  track_cluster_sep_cut, min_photon_radius_cut, muv_acc, muv_cut, eop_cut_90, bad_prob_cut } );
+                { track_track_cluster_sep_cut,  track_cluster_sep_cut, 
+                min_photon_radius_cut, muv_acc, muv_cut, eop_cut_90, bad_prob_cut } );
         dodgy_selection->set_name("dodgy_selection");
         k2pirb.add_selection( dodgy_selection);
 
@@ -380,36 +384,51 @@ namespace fn
         auto select_fit_folder =  k2pirb.get_folder("select_fit_k2pi_plots");
         std::cout << "Select fit folder: " << select_fit_folder << std::endl;
 
+        bool do_scatter = true;
+        bool dont_do_scatter = true;
+
         DchAnalysis * no_fit_raw_plots  = new DchAnalysis(
-                *no_fit_raw, k2pirb.tfout, k2pirb.get_folder( "no_fit_raw_plots" ), k2pirb.event, "raw", k2pirb.is_mc, false );
+                *no_fit_raw, k2pirb.tfout, k2pirb.get_folder( "no_fit_raw_plots" ),
+                k2pirb.event, "raw", k2pirb.is_mc, dont_do_scatter );
 
         DchAnalysis * no_fit_fit_plots  = new DchAnalysis(
-                *no_fit_raw, k2pirb.tfout, k2pirb.get_folder( "no_fit_fit_plots" ), k2pirb.event, "fit", k2pirb.is_mc, false );
+                *no_fit_raw, k2pirb.tfout, k2pirb.get_folder( "no_fit_fit_plots" ),
+                k2pirb.event, "fit", k2pirb.is_mc, dont_do_scatter );
 
         DchAnalysis * no_fit_full_plots  = new DchAnalysis(
-                *no_fit_full, k2pirb.tfout, k2pirb.get_folder( "no_fit_full_plots"), k2pirb.event, "raw", k2pirb.is_mc, false );
+                *no_fit_full, k2pirb.tfout, k2pirb.get_folder( "no_fit_full_plots"),
+                k2pirb.event, "raw", k2pirb.is_mc, dont_do_scatter );
 
         DchAnalysis * fit_eop_90_plots  = new DchAnalysis(
-                *fit_selection_eop_90, k2pirb.tfout, k2pirb.get_folder( "fit_eop_90") ,k2pirb.event, "fit", k2pirb.is_mc, true );
+                *fit_selection_eop_90, k2pirb.tfout, k2pirb.get_folder( "fit_eop_90") ,
+                k2pirb.event, "fit", k2pirb.is_mc, do_scatter );
 
         DchAnalysis * fit_eop_90_plots_no_cda  = new DchAnalysis(
-                *fit_selection_eop_90, k2pirb.tfout, k2pirb.get_folder( "fit_eop_90_no_cda") ,k2pirb.event, "fit", k2pirb.is_mc, true );
+                *fit_selection_eop_90, k2pirb.tfout, k2pirb.get_folder( "fit_eop_90_no_cda") ,
+                k2pirb.event, "fit", k2pirb.is_mc, do_scatter );
 
         DchAnalysis * fit_eop_80_plots  = new DchAnalysis(
-                *fit_selection_eop_80, k2pirb.tfout, k2pirb.get_folder( "fit_eop_80") ,k2pirb.event, "fit", k2pirb.is_mc, false );
+                *fit_selection_eop_80, k2pirb.tfout, k2pirb.get_folder( "fit_eop_80") ,
+                k2pirb.event, "fit", k2pirb.is_mc, dont_do_scatter );
 
         DchAnalysis * fit_eop_90_raw_plots  = new DchAnalysis(
-                *fit_selection_eop_90, k2pirb.tfout, k2pirb.get_folder( "fit_eop_90_raw") ,k2pirb.event, "raw", k2pirb.is_mc, true );
+                *fit_selection_eop_90, k2pirb.tfout, k2pirb.get_folder( "fit_eop_90_raw") ,
+                k2pirb.event, "raw", k2pirb.is_mc, do_scatter );
 
         DchAnalysis * fit_dodgy_plots  = new DchAnalysis(
-                *dodgy_selection, k2pirb.tfout, k2pirb.get_folder( "dodgy_fit") ,k2pirb.event, "fit", k2pirb.is_mc, true );
+                *dodgy_selection, k2pirb.tfout, k2pirb.get_folder( "dodgy_fit") ,
+                k2pirb.event, "fit", k2pirb.is_mc, do_scatter );
 
 
         DchAnalysis * raw_dodgy_plots  = new DchAnalysis(
-                *dodgy_selection, k2pirb.tfout, k2pirb.get_folder( "dodgy_raw") ,k2pirb.event, "raw", k2pirb.is_mc, true );
+                *dodgy_selection, k2pirb.tfout, k2pirb.get_folder( "dodgy_raw"),
+                k2pirb.event, "raw", k2pirb.is_mc, do_scatter );
 
         auto * burst_count = new K2piBurstCount( *passer, k2pirb.tfout,
                 k2pirb.get_folder("burst_count"), k2pirb.event );
+
+        K2piMuvEff * muv_eff = new K2piMuvEff( *no_muv, *muv_cut,
+                k2pirb.event, *st, k2pirb.tfout, k2pirb.get_folder( "muv_eff") );
 
 
         k2pirb.add_analysis( no_fit_raw_plots );
@@ -436,6 +455,7 @@ namespace fn
         k2pirb.add_analysis( raw_dodgy_plots );
 
         k2pirb.add_analysis( burst_count );
+        k2pirb.add_analysis( muv_eff );
 
         Summary  * full_no_fit_summary = new Summary( *passer, *no_fit_full, std::cout );
         full_no_fit_summary->set_name("full_no_fit_summary");

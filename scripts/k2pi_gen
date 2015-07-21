@@ -1,0 +1,17 @@
+#!/usr/bin/env python
+import os.path as osp
+
+def print_plots( pre, sel, post, name, rebin ):
+    return '- {{ path: {0}, name: {1}, rebin: {2} }}'.format( 
+            osp.join( pre, sel, post), name, rebin )
+
+
+sels = ['scatter_s4_85_150_09_15', 'scatter_s4_85_150_16_15',
+        'scatter_s4_85_150_13_20', 'scatter_s4_85_150_13_10' ]
+
+plots = ['hdm2_pi0']
+
+for sel in sels:
+    for plot in plots:
+        print( print_plots( 'fit_eop_90', sel,  plot, osp.join(plot, 'feop90_' + sel ) , 20 ) )
+

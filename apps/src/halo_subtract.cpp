@@ -1,6 +1,7 @@
 #include "easy_app.hh"
 #include "yaml_help.hh"
 #include "stl_help.hh"
+#include "root_help.hh"
 #include "HistExtractor.hh"
 #include "HistStacker.hh"
 #include "TFile.h"
@@ -50,6 +51,7 @@ int main( int argc, char * argv[] )
         ( "help,h", "Display this help message")
         ( "mission,m", po::value<path>(),  "Specify mission yaml file")
         ( "output,o", po::value<path>(),  "Specify output root file")
+        ( "log,l", po::value<path>(),  "Specify log root file")
         ;
 
     po::options_description desc("Allowed options");
@@ -71,7 +73,7 @@ int main( int argc, char * argv[] )
         exit( 1 );
     }
 
-    path output_filename = "output/shuffle.root";
+    path output_filename = "output/halo_sub.root";
 
     if ( vm.count( "output" ) )
     {
@@ -79,6 +81,15 @@ int main( int argc, char * argv[] )
     }
 
     TFile tfout( output_filename.string().c_str(), "RECREATE" );
+
+    path log_filename = "output/halo_sub_log.root";
+
+    if ( vm.count( "log" ) )
+    {
+        log_filename = vm["log"].as<path>() ;
+    }
+
+    TFile tflog( log_filename.string().c_str(), "RECREATE" );
 
     path mission;
     std::string mission_name;
@@ -163,9 +174,71 @@ int main( int argc, char * argv[] )
 
     std::cerr << "\nCorrection factor: " << correction_factor << std::endl;
 
+    //save log plots
+    //Set up input file
+    path scale_input_file = get_yaml<std::string>( calib_k3pi_node["mc"], "input_file" );
+    TFile scale_tf( scale_input_file.string().c_str() );
+    RootTFileWrapper scale_rtfw( scale_tf );
+    ChannelHistExtractor scale_ce( scale_rtfw );
+
+    //Get channel lists
+    std::vector<std::string> scale_halo_channels 
+        = calib_k3pi_node["channels"]["halo_channels"].as<std::vector<std::string>>();
+
+    std::vector<std::string> scale_peak_channels 
+        =  calib_k3pi_node["channels"]["peak_channels"].as<std::vector<std::string>>();
+
+    std::vector<std::string> scale_data_channels 
+        =  calib_k3pi_node["channels"]["data_channels"].as<std::vector<std::string>>();
+
+    scale_ce.set_post_path( get_yaml<std::string>( calib_k3pi_node["mc"], "plot_path" ) );
+
+    std::unique_ptr<TH1> scale_hpeak = get_summed_histogram(
+            scale_ce, begin( scale_peak_channels ), end( scale_peak_channels));
+
+    std::unique_ptr<TH1> scale_hdata = get_summed_histogram(
+            scale_ce, begin( scale_data_channels ), end( scale_data_channels));
+
+    std::unique_ptr<TH1> scale_hhalo = get_summed_histogram(
+            scale_ce, begin( scale_halo_channels ), end( scale_halo_channels));
+
+    YAML::Node dummy = YAML::Load( "do_blind: false" );
+    HistFormatter formatter( "input/shuffle/colors.yaml" );
+
+    formatter.format( *scale_hpeak, "k3pi" );
+    formatter.format( *scale_hhalo, "halo" );
+    format_data_hist( *scale_hdata, dummy  );
+
+    scale_hpeak->Rebin(50);
+    scale_hhalo->Rebin(50);
+    scale_hdata->Rebin(50);
+
+    cd_p( &tflog, "k3pi_scaling" );
+    scale_hdata->Write( "h_data" );
+
+    scale_hhalo->Scale( calib_k3pi_scaling.get_halo_scale() ); 
+    scale_hhalo->Write( "h_halo" );
+
+    auto  scale_hpeak_k3pi = uclone( scale_hpeak );
+    scale_hpeak_k3pi->Scale( calib_k3pi_scaling.get_peak_scale() );
+    scale_hpeak_k3pi->Write( "h_peak_k3pi_scale" );
+
+    THStack h_k3pi_scale;
+    h_k3pi_scale.Add( scale_hhalo.get() );
+    h_k3pi_scale.Add( scale_hpeak_k3pi.get() );
+    h_k3pi_scale.Write( "hs_k3pi_scale" );
+
+    auto  scale_hpeak_km2 = uclone( scale_hpeak );
+    scale_hpeak_km2->Scale( calib_km2_scaling.get_peak_scale() );
+    scale_hpeak_km2->Write( "h_peak_km2_scale" );
+
+    THStack h_km2_scale;
+    h_km2_scale.Add( scale_hhalo.get() );
+    h_km2_scale.Add( scale_hpeak_km2.get() );
+    h_km2_scale.Write( "hs_km2_scale" );
+
     std::cerr << "--------------------------------------------------\n";
 
-    //POSITIVE POLARITY
 
     YAML::Node subtractions_node = config_node["subtractions"];
 
@@ -236,14 +309,4 @@ int main( int argc, char * argv[] )
             hhalo->Write( write_path.filename().string().c_str() );
         }
     }
-
-    //NEGATIVE POLARITY
-
-    //estimate k- flux from km2
-
-    //use correction factor
-
-    //subtract k3pi
-
-    //save plots
 }

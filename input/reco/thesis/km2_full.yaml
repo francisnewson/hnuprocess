@@ -14,34 +14,6 @@
     filename: km2_plots.root
 
 - output:
-    name: tfstats
-    type: tfile
-    filename: km2_stats.root
-
-###################################################
-# STANDARD CORRECTIONS
-###################################################
-
-- input:
-    name: kaon_track
-    type: KaonTrack
-    kaon_type: auto
-    beam_mapping: input/reco/beam/beam_mapping.yaml
-
-- selection:
-    name: kaon_mom_weights
-    kt: kaon
-    type: KaonMomWeight
-    crude_weights: input/reco/mod/kaon_crude_weights.dat
-    fine_weights: input/reco/mod/kaon_fine_weights.dat
-
-- input:
-    name: cluster_corrector
-    type: ClusterCorrector
-    filename: "/afs/cern.ch/user/f/fnewson/work/hnu/gopher/data/detector/eopCorrfile.dat"
-    enabled: true
-
-- output:
     name: text_out
     type: ostream
     filename: cerr
@@ -56,113 +28,40 @@
     type: ostream
     filename: km2_debug.dat
 
-# 1]Bad bursts
-- selection:
-    name: good_phys_burst
-    type: BadBurst
-    burst_list: "input/reco/conditions/bad_phys_burst.dat"
 
-- selection:
-    name: good_dch_burst
-    type: BadBurst
-    burst_list: "input/reco/conditions/bad_dch_burst.dat"
+@include "input/reco/thesis/std/corrections.inc.yaml"
 
-- selection:
-    name: good_muv_burst
-    type: BadBurst
-    burst_list: "input/reco/conditions/bad_muv_burst.90.dat"
-
-- selection:
-    name: good_muv_burst_range
-    type: BadBurstRange
-    burst_range_list: "input/reco/conditions/bad_muv_burst_ranges.dat"
-
-- selection:
-    name: weighted_data_sample
-    type: CompositeSelection
-    children:
-        - kaon_mom_weights
-        - good_phys_burst
-        - good_dch_burst
-        - good_muv_burst
-        - good_muv_burst_range
-
-- selection:
-    name: mcz
-    type: MCZCut
-    min_z: -1800
-    max_z:  8000
-
-- selection:
-    name: weighted_mc_sample
-    type: CompositeSelection
-    children:
-        - weighted_data_sample
-        - mcz
-
-- analysis:
-    name: sample_burst_count
-    type: BurstCount
-    tfile: tfstats
-    folder: sample_burst_count
-    selection: weighted_mc_sample
-    codename: bursts
+@include "input/reco/thesis/std/data_sample.inc.yaml"
 
 ###################################################
 # INPUTS
 ###################################################
 
 #SingleTrack
-- input:
-    name : bf_st
-    type : SingleTrack
-    method : BF
+- input: { name : bf_st,
+    type : SingleTrack, method : BF,
+    init_min_mom: 3.0 ,
+    init_max_mom: 75.0, init_max_cda: 15.0,
+    init_min_z: -2000.0, init_max_z:  9000.0 ,
+    dch_merge_sep: 0.5,
+    inputs: { kt: kaon_track} }
 
-    init_min_mom: 3.0 
-    init_max_mom: 75.0
+#----------km2 event
+- input: { name: km2_event, type: Km2Event,
+    inputs: { ogt: bf_st, kt: kaon_track } }
 
-    init_max_cda: 15.0
-
-    init_min_z: -2000.0
-    init_max_z:  9000.0
-
-    dch_merge_sep: 0.5
-
-    inputs:
-        kt: kaon_track
-
-- input:
-    name: km2_event
-    type: Km2Event
-    inputs:
-        ogt: bf_st
-        kt: kaon_track
-
-#Km2Clusters
-- input:
-    name: full_km2clusters
-    type: Km2Clusters
-    noise_energy: 5 #GeV
-    noise_time: 12 #ns
-    brehm_radius: 0 #cm
-    track_cluster_radius: 40 #cm
-    inputs:
-        ogt: bf_st
-        ClusterCorrector: cluster_corrector
+#---------km2 clusters
+- input: { name: km2_clusters, type: Km2Clusters,
+    noise_energy: 3, noise_time: 12, brehm_radius: 0 ,
+    track_cluster_radius: 40, extra_lkr_check: false,
+    inputs: { ogt: bf_st, ClusterCorrector: cluster_corrector } }
 
 - input:
     name: single_muon
     type: SingleMuon
     method: auto
-    inputs:
-        ogt: bf_st
-
-- selection:
-    name: req_muon
-    type: MuonReq
     multiplier: 4
     inputs:
-        sm: single_muon
         ogt: bf_st
 
 - selection:
@@ -176,173 +75,92 @@
 - selection:
     name: muon_p_wgt
     type: MuonTHPWeight
-    effs_file: input/reco/conditions/muv_p.root
+    effs_file: input/reco/conditions/muv/muv_eff_p.root
     effs_hist: rat_p
     inputs:
         ogt: bf_st
 
-- selection:
-    name: muon_veto
-    type: CompositeSelection
-    children:
-        - req_muon
-        - muon_p_wgt
-        - muon_xy_wgt
+@include "input/reco/thesis/std/selections.inc.yaml"
+
+@include "input/reco/thesis/std/kine_regions.inc.yaml"
+
+###################################################
+# SELECTIONS
+###################################################
 
 #Autopass
 - selection:
     name: passer
     type : auto_pass
 
-###################################################
-# CUTS
-###################################################
-
-#Found ogt
-- selection:
-    name: good_trk
-    type : FoundGoodTrack
-    inputs :
-        ogt: bf_st
-
-#Track charge
-- selection:
-    name: pos_trk
-    type : TrackCharge
-    charge: +1
-    inputs :
-        ogt: bf_st
-
-#Track quality
-- selection:
-    name: quality_7
-    type: TrackQuality
-    quality: 0.7
-    inputs:
-        ogt: bf_st
 
 - selection:
-    name: cda_2cm
-    type: TrackCda
-    max_cda: 2.0 #cm
-    inputs:
-        ogt: bf_st
-
-#Track DHC1 ACC
-- selection:
-    name: dch1_acc
-    type: TrackRadialAcceptance
-    track_section: upstream
-    z: 9708.42 #zDCH1
-    inner: 12.0
-    outer: 115.0
-    inputs:
-        ogt: bf_st
-
-#Track DHC4 ACC
-- selection:
-    name: dch4_acc
-    type: TrackRadialAcceptance
-    track_section: downstream
-    z: 11888.0 #zDCH1
-    inner: 14.0
-    outer: 115.0
-    inputs:
-        ogt: bf_st
-
-#Track time
-- selection:
-    name: rk_dcht
-    type : TrackTime
-    max_dt: 20 #ns
-    inputs:
-        ogt: bf_st
-
-- selection:
-    name: rk_hot_lkr
-    type: Km2HotLkr
-    hot_cells: [ [ 134, 56 ], [ 134, 57 ] ]
-    inputs:
-        km2event: km2_event
-        km2clusters: full_km2clusters
-
-#NoBadClusters
-- selection:
-    name: rk_lkr_veto
-    type: Km2NoBadCluster
-    inputs:
-        km2clusters: full_km2clusters
-
-# 9] LKr acceptance
-- selection:
-    name: rk_lkr_accep
-    type: TrackLkrAcceptance
-    margin_parameter: 8 #cm
-    inputs:
-        ogt: bf_st
-
-- selection:
-    name: relaxed_pzt_cut
-    type: TrackPZT
-    regions_file: "input/reco/km2/relaxed_pzt.yaml"
-    inputs:
-        ogt: bf_st
-        kt: kaon_track
-
-- selection:
-    name: muv_acc
-    type: TrackXYUVAcceptance
-    track_section: ds
-    z: 13012.0 #MUV3
-    min_x: -135.0
-    max_x:  135.0
-    min_y: -135.0
-    max_y:  135.0
-    min_u: -135.0
-    max_u:  135.0
-    min_v: -135.0
-    max_v:  135.0
-    inputs:
-        ogt: bf_st
-
-- selection:
-    name : hnu_selection
+    name : pre_selection
     type: CompositeSelection
     children:
         - weighted_data_sample
         - good_trk
         - pos_trk
         - quality_7
-        - cda_2cm
+        - fiducial_pz
         - dch1_acc
         - dch4_acc
+        - muv_acc
         - rk_lkr_veto
         - rk_hot_lkr
         - rk_lkr_accep
         - rk_dcht
-        - muv_acc
-        - muon_veto
-        - relaxed_pzt_cut
+        - ddead_cell
+
+- selection: { name: signal_upper_muv, type : CompositeSelection,
+    children:  [ pre_selection, signal_upper_sel, muon_req ]  }
+
+- selection: { name: signal_lower_muv, type : CompositeSelection, 
+    children:  [ pre_selection, signal_lower_sel, muon_req ]  }
 
 - analysis : 
-    name : full_summary
-    type: Summary
-    base : passer
-    source : hnu_selection 
-    ostream: text_out
+     name : up_summary
+     type: Summary
+     base : passer
+     source : signal_upper_muv 
+     ostream: text_out
 
 - analysis : 
-    name : full_summary_file
-    type: Summary
-    base : passer
-    source : hnu_selection 
-    ostream: stats_out
+     name : dn_summary
+     type: Summary
+     base : passer
+     source : signal_lower_muv 
+     ostream: text_out
+
+- analysis : 
+     name : up_summary_file
+     type: Summary
+     base : passer
+     source : signal_upper_muv 
+     ostream: stats_out
+
+- analysis : 
+     name : dn_summary_file
+     type: Summary
+     base : passer
+     source : signal_lower_muv 
+     ostream: stats_out
+
 
 - analysis :
-    type: Km2Plotter
-    name: km2_full_plots
-    folder: full_km2
-    tfile: tfout
-    selection: hnu_selection
-    inputs:
-        km2event: km2_event
+     type: Km2Plotter
+     name: km2_up_plots
+     folder: signal_upper_muv
+     tfile: tfout
+     selection: signal_upper_muv
+     inputs:
+         km2event: km2_event
+
+- analysis :
+     type: Km2Plotter
+     name: km2_dn_plots
+     folder: signal_lower_muv
+     tfile: tfout
+     selection: signal_lower_muv
+     inputs:
+         km2event: km2_event

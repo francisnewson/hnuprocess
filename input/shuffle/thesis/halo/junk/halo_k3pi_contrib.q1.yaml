@@ -1,0 +1,173 @@
+scaling:
+    - scaling_method:
+        strategy: m2
+        name: halo_pos_upper
+        peakname: km2
+
+        channels:  &halochannels
+            halo_channels: [ p6.data.kless.q1.v2.pos]
+            data_channels: [ p6.data.km.q1.v2.pos ]
+            peak_channels: []
+
+        halo: {
+            strategy: m2, input_file: tdata/halo_control/all.halo_control.root, plot_path: ctrl_upper_plots/h_m2m_kmu, 
+            min_mass_halo: -0.3, max_mass_halo: 0.05 }
+
+        mc: { strategy: dummy }
+
+    - scaling_method:
+        strategy: m2
+        name: halo_pos_lower
+        peakname: km2
+
+        channels:  *halochannels
+
+        halo: {
+            strategy: m2, input_file: tdata/halo_control/all.halo_control.root, plot_path: ctrl_lower_full_m2m_plots/h_m2m_kmu, 
+            min_mass_halo: -0.3, max_mass_halo: 0.05 }
+
+        mc: { strategy: dummy }
+
+    - scaling_method:
+        strategy: m2
+        name: k3pi_pos_upper
+        peakname: k3pi
+
+        channels:
+            halo_channels: [ p6.data.kless.q1.v2.pos ]
+            data_channels: [ p6.data.km.q1.v2.pos ]
+            peak_channels: [ p6.k3pi.v2.pos ]
+
+        halo : {
+            strategy: m2, input_file: tdata/halo_control/all.halo_control.root, plot_path: signal_upper_plots/h_m2m_kmu, 
+            min_mass_peak: 0.12, max_mass_peak: 0.14 , min_mass_halo: -0.3, max_mass_halo: 0.05 }
+
+        mc:  {
+            strategy: m2, input_file: tdata/halo_control/all.halo_control.root, plot_path: signal_upper_plots/h_m2m_kmu, 
+            min_mass_peak: 0.12, max_mass_peak: 0.14 , min_mass_halo: -0.3, max_mass_halo: 0.05 }
+
+    - scaling_method:
+        strategy: m2
+        name: k3pi_pos_lower
+        peakname: k3pi
+
+        channels:
+            halo_channels: [ p6.data.kless.q1.v2.pos ]
+            data_channels: [ p6.data.km.q1.v2.pos ]
+            peak_channels: [ p6.k3pi.v2.pos ]
+
+        halo : {
+            strategy: m2, input_file: tdata/halo_control/all.halo_control.root, plot_path: signal_lower_plots/h_m2m_kmu, 
+            min_mass_peak: 0.13, max_mass_peak: 0.145 , min_mass_halo: -0.3, max_mass_halo: 0.05 }
+
+        mc:  {
+            strategy: m2, input_file: tdata/halo_control/all.halo_control.root, plot_path: signal_lower_plots/h_m2m_kmu, 
+            min_mass_peak: 0.13, max_mass_peak: 0.145 , min_mass_halo: -0.3, max_mass_halo: 0.05 }
+
+
+####
+
+    - scaling_method:
+        strategy: m2
+        name: mc_pos
+        peakname: km2
+
+        channels: 
+            halo_channels: [ p6.data.kless.q1.v2.pos]
+            data_channels: [ p6.data.km.q1.v2.pos ]
+            peak_channels: [ p6.km2.v2.pos ]
+
+        halo: {
+            strategy: m2, input_file: tdata/rk_minus/all.rk_minus.root, plot_path: km2_rk_full/h_m2m_kmu,
+            min_mass_halo: -0.3, max_mass_halo: -0.075, min_mass_peak: -0.01, max_mass_peak:  0.01 }
+
+        mc: {
+            strategy: m2, input_file: tdata/rk_minus/all.rk_minus.root, plot_path: km2_rk_full/h_m2m_kmu, 
+            min_mass_halo: -0.3, max_mass_halo: -0.075, min_mass_peak: -0.01, max_mass_peak:  0.01  }
+
+####
+
+weights:
+    fid_file: use_multi_root
+    files:
+        - {  root_file: "tdata/rk_minus/all.rk_minus.root", pre: "", 
+        post: sample_burst_count/bursts, branch: "weight"  }
+
+        - {  root_file: "tdata/halo_control/all.halo_control.root", pre: "", 
+        post: sample_burst_count/bursts, branch: "weight"  }
+
+####
+
+check_weights:
+    fid_file: use_multi_root
+    files:
+        - {  root_file: "tdata/rk_minus/all.rk_minus.root", pre: "", 
+        post: data_burst_count/data_bursts, branch: "weight"  }
+
+        - {  root_file: "tdata/halo_control/all.halo_control.root", pre: "", 
+        post: data_burst_count/data_bursts, branch: "weight"  }
+
+####
+
+output_list:
+    -  { input_file: tdata/halo_control/all.halo_control.root,
+
+    blinding: { do_blind : false },
+
+    plots: [
+        { path: signal_upper_plots/h_m2m_kmu, name: halo_sig_upper_m2m, rebin: 50  },
+        { path: ctrl_upper_plots/h_m2m_kmu, name: halo_ctrl_upper_m2m, rebin: 50  },
+        { path: signal_upper_plots/h_cda, name: halo_sig_upper_cda, rebin: 1  }
+    ],
+
+    data_plot: { channels: [ p6.data.km.q1.v2.pos ] },
+
+    stack: [
+        item: { name: halo_kless_pos, scaling: k3pi_pos_upper,
+        type: halo, channels: [p6.data.kless.q1.v2.pos] }, 
+
+        item: { name: k3pi_pos, scaling: k3pi_pos_upper,
+        type: k3pi, fid_weight: p6.k3pi.v2.pos, channels: [p6.k3pi.v2.pos] } 
+    ] }
+
+####
+
+    -  { input_file: tdata/halo_control/all.halo_control.root,
+    plots: [
+        { path: signal_lower_plots/h_m2m_kmu, name: halo_sig_lower_m2m, rebin: 50  },
+        { path: signal_lower_plots/h_z, name: halo_sig_lower_z, rebin: 10  },
+        { path: signal_lower_plots/h_cda, name: halo_sig_lower_cda, rebin: 1  },
+        { path: ctrl_lower_plots/h_m2m_kmu, name: halo_ctrl_lower_m2m, rebin: 50  }
+    ],
+
+    blinding: { do_blind : false },
+
+    data_plot: { channels: [ p6.data.km.q1.v2.pos ] },
+
+    stack: [
+        item: { name: halo_kless_pos, scaling: halo_pos_lower,
+        type: halo, channels: [p6.data.kless.q1.v2.pos] }, 
+
+        item: { name: k3pi_pos, scaling: k3pi_pos_lower,
+        type: k3pi, fid_weight: p6.k3pi.v2.pos, channels: [p6.k3pi.v2.pos] } 
+    ] }
+
+####
+
+    - { input_file: tdata/rk_minus/all.rk_minus.root,
+    plots: [ { path:  km2_rk_full/h_m2m_kmu, name: h_km_m2m, rebin: 20 } ],
+
+    blinding: { do_blind : false },
+
+    data_plot: { channels: [p6.data.km.q1.v2.pos] },
+
+    stack: [
+        item: { name: halo_kless_pos, scaling: mc_pos,
+        type: halo, channels: [ p6.data.kless.q1.v2.pos] },
+
+        item: { name: km2_minus, scaling: mc_pos,
+        type: km2, fid_weight: p6.km2.v2.pos, channels: [ p6.km2.v2.pos] }
+        ] }
+
+
+

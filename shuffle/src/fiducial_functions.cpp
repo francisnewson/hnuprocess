@@ -37,7 +37,9 @@ namespace fn
                 folder->GetObject( post.c_str(), tt );
                 if ( ! tt )
                 {
-                    throw std::runtime_error( "Can't find " + post );
+                    std::cout << "Missing fiducial weights for " << folder->GetName() << std::endl;
+                    //throw std::runtime_error( "Can't find " + post );
+                    continue;
                 }
 
 
