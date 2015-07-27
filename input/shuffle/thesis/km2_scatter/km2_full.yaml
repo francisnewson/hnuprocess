@@ -1,201 +1,128 @@
+var:
+    pos_halo: &poshalo p6.halo.q11t.pos
+    pos_data: &posdata p5.data.q11t.v3.pos
+    neg_halo: &neghalo p6.halo.q11t.neg
+    neg_data: &negdata p5.data.q11t.v3.neg
+
+    pos_channels: &poschannels
+            halo_channels: [ *poshalo ]
+            data_channels: [ *posdata ]
+            peak_channels: [ p5.km2.v2.pos ]
+
+    neg_channels: &negchannels
+            halo_channels: [ *neghalo ]
+            data_channels: [ *negdata ]
+            peak_channels: [ p5.km2.v2.neg ]
+
+    down_strat: &dwnstrat {
+        strategy: m2,
+        input_file: tdata/staging/all.halo_control.root,
+        plot_path: ctrl_lower_full_m2m_plots/h_m2m_kmu,
+        min_mass_halo: -0.2, max_mass_halo: -0.05,
+        min_mass_peak: -0.01, max_mass_peak:  0.01 }
+
+    up_strat: &upstrat {
+        strategy: m2,
+        input_file: tdata/staging/all.halo_control.root,
+        plot_path: ctrl_upper_muv_plots/h_z,
+        min_mass_halo: 2500, max_mass_halo: 5500,
+        min_mass_peak: 2000, max_mass_peak: 3000 }
+
+    mc_strat: &mcstrat {
+        strategy: m2,
+        input_file: tdata/staging/all.halo_control.root,
+        plot_path: rk_like_selection_plots/h_m2m_kmu,
+        min_mass_halo: -0.2, max_mass_halo: -0.05,
+        min_mass_peak: -0.01, max_mass_peak:  0.01 }
+
 scaling:
     - scaling_method:
         strategy: m2
-        name: mc_pos
+        name: pos_lower
         peakname: km2
 
-        channels:
-            halo_channels:
-                - p6.data.kless.q11t.v2.pos
-                - p6.data.km.q11t.v2.pos
-
-            data_channels:
-                - p5.data.q11t.v3.pos
-
-            peak_channels:
-                - p5.km2.v2.pos
-
-        halo:
-            strategy: m2
-            input_file: tdata/km2_full/all.km2_full.root
-            plot_path: full_km2/h_m2m_kmu
-
-            min_mass_halo: -0.3
-            max_mass_halo: -0.075
-            min_mass_peak: -0.01
-            max_mass_peak:  0.01
-
-        mc:
-            strategy: m2
-            input_file: tdata/km2_full/all.km2_full.root
-            plot_path: full_km2/h_m2m_kmu
-
-            min_mass_halo: -0.3
-            max_mass_halo: -0.075
-            min_mass_peak: -0.01
-            max_mass_peak:  0.01
+        channels: *poschannels
+        halo: *dwnstrat
+        mc: *mcstrat
 
     - scaling_method:
         strategy: m2
-        name: mc_neg
+        name: neg_lower
         peakname: km2
 
-        channels:
-            halo_channels:
-                - p6.data.km.q11t.v2.neg
+        channels: *negchannels
+        halo: *dwnstrat
+        mc: *mcstrat
 
-            data_channels:
-                - p5.data.q11t.v3.neg
+    - scaling_method:
+        strategy: m2
+        name: pos_upper
+        peakname: km2
 
-            peak_channels:
-                - p5.km2.v2.neg
+        channels: *poschannels
+        halo: *upstrat
+        mc: *mcstrat
 
-        halo:
-            strategy: m2
-            input_file: tdata/km2_full/all.km2_full.root
-            plot_path: full_km2/h_m2m_kmu
-
-            min_mass_halo: -0.3
-            max_mass_halo: -0.075
-            min_mass_peak: -0.01
-            max_mass_peak:  0.01
-
-        mc:
-            strategy: m2
-            input_file: tdata/km2_full/all.km2_full.root
-            plot_path: full_km2/h_m2m_kmu
-
-            min_mass_halo: -0.3
-            max_mass_halo: -0.075
-            min_mass_peak: -0.01
-            max_mass_peak:  0.01
+    - scaling_method:
+        strategy: m2
+        name: neg_upper
+        peakname: km2
+        channels: *negchannels
+        halo:  *upstrat
+        mc: *mcstrat
 
 weights:
     fid_file: use_root
-    root_file: "tdata/km2_full/all.km2_full.root"
+    root_file: "tdata/km2_noscat/all.km2_noscat.root"
     pre : ""
     post: "sample_burst_count/bursts"
     branch:  "weight"
 
-mass_windows:
-    method: params
-    x0: 0.390
-    res0: 0.0035
-    offset: 0
+output_list:
+    - {
+        input_file: tdata/km2_noscat/all.km2_full.root,
 
-output:
-    input_file: tdata/km2_full/all.km2_full.root
+        plots: [
+            { path: signal_upper_muv/h_m2m_kmu, name: full_m2m, rebin: 10 } ,
+            { path: signal_lower_muv/h_m2m_kmu, name: full_m2m, rebin: 10 } ],
 
-    plots: 
-    - path: full_km2/h_m2m_kmu
-      name: full_m2m
-      rebin: 10
+        blinding: { do_blind: true, min_blind: 0.09, max_blind: 0.135 } ,
 
-    data_plot:
-        channels:
-            - p5.data.q11t.v3.pos
-            - p5.data.q11t.v3.neg
-        do_blind: true
-        min_blind: 0.09
-        max_blind: 0.3
+    data_plot: { channels: { p5.data.q11t.v3.pos , p5.data.q11t.v3.neg } },
 
-    stack:
-        - item:
-            name: ke3_pos
-            scaling: mc_pos
-            type: ke3
-            fid_weight: p5.ke3.v2.pos
-            channels:
-                - p5.ke3.v2.pos
+    stack: [
+         item: {  name: ke3_pos, scaling: mc_pos, type: ke3,
+            fid_weight: p5.ke3.v2.pos, channels: [ p5.ke3.v2.pos ] } ,
 
-        - item:
-            name: ke3_neg
-            scaling: mc_neg
-            type: ke3
-            fid_weight: p5.ke3.v2.neg
-            channels:
-                - p5.ke3.v2.neg
+         item: {  name: ke3_neg, scaling: mc_neg, type: ke3,
+            fid_weight: p5.ke3.v2.neg, channels: [ p5.ke3.v2.neg] },
 
-        - item:
-            name: km3_pos
-            scaling: mc_pos
-            type: km3
-            fid_weight: p5.km3.v2.pos
-            channels:
-                - p5.km3.v2.pos
+         item: { name: km3_pos, scaling: mc_pos, type: km3,
+            fid_weight: p5.km3.v2.pos, channels: [ p5.km3.v2.pos ] },
 
-        - item:
-            name: km3_neg
-            scaling: mc_neg
-            type: km3
-            fid_weight: p5.km3.v2.neg
-            channels:
-                - p5.km3.v2.neg
+         item: { name: km3_neg, scaling: mc_neg, type: km3,
+          fid_weight: p5.km3.v2.neg, channels: [ p5.km3.v2.neg ] },
 
-        - item:
-            name: k3pi_pos
-            scaling: mc_pos
-            fid_weight: p5.k3pi.v2.pos
-            type: k3pi
-            channels:
-                - p5.k3pi.v2.pos
+         item: { name: k3pi_pos, scaling: mc_pos, type: k3pi,
+          fid_weight: p5.k3pi.v2.pos, channels: [ p5.k3pi.v2.pos ] },
 
-        - item:
-            name: k3pi_neg
-            scaling: mc_neg
-            fid_weight: p5.k3pi.v2.neg
-            type: k3pi
-            channels:
-                - p5.k3pi.v2.neg
+         item: { name: k3pi_neg, scaling: mc_neg, type: k3pi,
+          fid_weight: p5.k3pi.v2.neg, channels: [ p5.k3pi.v2.neg ] },
 
-        - item:
-            name: k2pig_pos
-            scaling: mc_pos
-            type: k2pi
-            fid_weight: p5.k2pig.v2.pos
-            channels:
-                - p5.k2pig.v2.pos
+         item: { name: k2pig_pos, scaling: mc_pos, type: k2pi,
+          fid_weight: p5.k2pig.v2.pos, channels: [ p5.k2pig.v2.pos] },
 
-        - item:
-            name: k2pig_neg
-            scaling: mc_neg
-            type: k2pi
-            fid_weight: p5.k2pig.v2.neg
-            channels:
-                - p5.k2pig.v2.neg
+         item: { name: k2pig_neg, scaling: mc_neg, type: k2pi,
+            fid_weight: p5.k2pig.v2.neg, channels: [ p5.k2pig.v2.neg ] },
 
+         item: { name: halo_pos, scaling: mc_pos, type: halo,
+           errors: [ halo_scale ], 
+           channels: [p6.data.kless.q11t.v2.pos,  p6.data.km.q11t.v2.pos ] },
 
-        - item:
-            name: halo_pos
-            scaling: mc_pos
-            type: halo
-            errors:
-                - halo_scale
-            channels:
-                - p6.data.kless.q11t.v2.pos
-                - p6.data.km.q11t.v2.pos
+         item: { name: halo_neg, scaling: mc_neg, type: halo,
+           errors: halo_scale, channels:, [ p6.data.km.q11t.v2.neg ] },
 
-        - item:
-            name: halo_neg
-            scaling: mc_neg
-            type: halo
-            errors:
-                - halo_scale
-            channels:
-                - p6.data.km.q11t.v2.neg
+         item: { name: km2_pos, scaling: mc_pos, type: km2,
+           fid_weight: p5.km2.v2.pos, channels: [ p5.km2.v2.pos ] } ,
 
-        - item:
-            name: km2_pos
-            scaling: mc_pos
-            fid_weight: p5.km2.v2.pos
-            type: km2
-            channels:
-                - p5.km2.v2.pos
-
-        - item:
-            name: km2_neg
-            scaling: mc_neg
-            fid_weight: p5.km2.v2.neg
-            type: km2
-            channels:
-                - p5.km2.v2.neg
+           }

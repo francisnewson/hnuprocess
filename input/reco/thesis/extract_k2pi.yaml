@@ -246,6 +246,7 @@
     name: single_muon
     type: SingleMuon
     method: auto
+    multiplier: 4
     inputs:
         ogt: bf_st
 

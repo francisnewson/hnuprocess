@@ -109,6 +109,7 @@ namespace fn
             double get_peak_scale_error() const;
 
             double get_fiducial_flux() const;
+            double get_fiducial_flux_error() const;
 
         private:
             std::unique_ptr<ScaleStrategy> mc_strat_;

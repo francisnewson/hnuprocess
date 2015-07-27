@@ -318,14 +318,23 @@ namespace fn
         muv_acc->set_name( "muv_acc" );
         k2pirb.add_selection( muv_acc );
 
+        Selection * muv_inner_acc = new TrackRadialAcceptance( *st,
+                TrackRadialAcceptance::track_section::ds,
+                na62const::zMuv1, 20.0, 200.0 );
+        muv_inner_acc->set_name( "muv_inner_acc" );
+        k2pirb.add_selection( muv_inner_acc );
+
         //--------------------
 
         //NO MUV
         CompositeSelection * no_muv = new CompositeSelection(  {passer} );
+        k2pirb.add_selection( no_muv );
+        CompositeSelection * no_muv_acc = new CompositeSelection(  {passer, muv_acc, muv_inner_acc} );
+        k2pirb.add_selection( no_muv_acc );
        
         //NO FIT 
         CompositeSelection * no_fit_raw = new CompositeSelection( 
-                { track_track_cluster_sep_cut,  track_cluster_sep_cut, min_photon_radius_cut, muv_acc, muv_cut } );
+                { track_track_cluster_sep_cut,  track_cluster_sep_cut, min_photon_radius_cut, muv_acc, muv_inner_acc, muv_cut } );
         no_fit_raw->set_name( "no_fit_raw" );
         k2pirb.add_selection( no_fit_raw );
 
@@ -345,7 +354,7 @@ namespace fn
         //DODGY
         CompositeSelection * dodgy_selection = new CompositeSelection(
                 { track_track_cluster_sep_cut,  track_cluster_sep_cut, 
-                min_photon_radius_cut, muv_acc, muv_cut, eop_cut_90, bad_prob_cut } );
+                min_photon_radius_cut, muv_acc, muv_inner_acc,  muv_cut, eop_cut_90, bad_prob_cut } );
         dodgy_selection->set_name("dodgy_selection");
         k2pirb.add_selection( dodgy_selection);
 
@@ -387,6 +396,7 @@ namespace fn
         bool do_scatter = true;
         bool dont_do_scatter = true;
 
+#if 0
         DchAnalysis * no_fit_raw_plots  = new DchAnalysis(
                 *no_fit_raw, k2pirb.tfout, k2pirb.get_folder( "no_fit_raw_plots" ),
                 k2pirb.event, "raw", k2pirb.is_mc, dont_do_scatter );
@@ -398,6 +408,7 @@ namespace fn
         DchAnalysis * no_fit_full_plots  = new DchAnalysis(
                 *no_fit_full, k2pirb.tfout, k2pirb.get_folder( "no_fit_full_plots"),
                 k2pirb.event, "raw", k2pirb.is_mc, dont_do_scatter );
+#endif
 
         DchAnalysis * fit_eop_90_plots  = new DchAnalysis(
                 *fit_selection_eop_90, k2pirb.tfout, k2pirb.get_folder( "fit_eop_90") ,
@@ -407,6 +418,7 @@ namespace fn
                 *fit_selection_eop_90, k2pirb.tfout, k2pirb.get_folder( "fit_eop_90_no_cda") ,
                 k2pirb.event, "fit", k2pirb.is_mc, do_scatter );
 
+#if 0
         DchAnalysis * fit_eop_80_plots  = new DchAnalysis(
                 *fit_selection_eop_80, k2pirb.tfout, k2pirb.get_folder( "fit_eop_80") ,
                 k2pirb.event, "fit", k2pirb.is_mc, dont_do_scatter );
@@ -423,6 +435,7 @@ namespace fn
         DchAnalysis * raw_dodgy_plots  = new DchAnalysis(
                 *dodgy_selection, k2pirb.tfout, k2pirb.get_folder( "dodgy_raw"),
                 k2pirb.event, "raw", k2pirb.is_mc, do_scatter );
+#endif
 
         auto * burst_count = new K2piBurstCount( *passer, k2pirb.tfout,
                 k2pirb.get_folder("burst_count"), k2pirb.event );
@@ -430,13 +443,16 @@ namespace fn
         K2piMuvEff * muv_eff = new K2piMuvEff( *no_muv, *muv_cut,
                 k2pirb.event, *st, k2pirb.tfout, k2pirb.get_folder( "muv_eff") );
 
+        K2piMuvEff * muv_acc_eff = new K2piMuvEff( *no_muv_acc, *muv_cut,
+                k2pirb.event, *st, k2pirb.tfout, k2pirb.get_folder( "muv_acc_eff") );
 
-        k2pirb.add_analysis( no_fit_raw_plots );
-        k2pirb.add_analysis( no_fit_fit_plots );
-        k2pirb.add_analysis( no_fit_full_plots );
-        k2pirb.add_analysis( fit_eop_80_plots );
+
+        //k2pirb.add_analysis( no_fit_raw_plots );
+        //k2pirb.add_analysis( no_fit_fit_plots );
+        //k2pirb.add_analysis( no_fit_full_plots );
+        //k2pirb.add_analysis( fit_eop_80_plots );
         k2pirb.add_analysis( fit_eop_90_plots );
-        k2pirb.add_analysis( fit_eop_90_raw_plots );
+        //k2pirb.add_analysis( fit_eop_90_raw_plots );
 
         //add dch selections
         for ( auto an = k2pirb.an_begin() ; an != k2pirb.an_end() ; ++an )
@@ -451,11 +467,12 @@ namespace fn
         fit_eop_90_plots_no_cda->add_dch_selection( z_cut_m1500_6500 );
         fit_eop_90_plots_no_cda->add_dch_selection( track_mom_cut_10_60 );
 
-        k2pirb.add_analysis( fit_dodgy_plots );
-        k2pirb.add_analysis( raw_dodgy_plots );
+        //k2pirb.add_analysis( fit_dodgy_plots );
+        //k2pirb.add_analysis( raw_dodgy_plots );
 
         k2pirb.add_analysis( burst_count );
         k2pirb.add_analysis( muv_eff );
+        k2pirb.add_analysis( muv_acc_eff );
 
         Summary  * full_no_fit_summary = new Summary( *passer, *no_fit_full, std::cout );
         full_no_fit_summary->set_name("full_no_fit_summary");

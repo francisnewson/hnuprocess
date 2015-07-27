@@ -105,7 +105,7 @@ namespace fn
             auto h = load_hist(instruct);
             scale_hist( *h, instruct );
             color_hist( *h, instruct );
-            de_zero_hist( *h );
+            //de_zero_hist( *h );
             stack_.Add( std::move( h ) );
         }
     }

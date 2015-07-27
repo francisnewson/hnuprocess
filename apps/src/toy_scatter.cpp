@@ -1,5 +1,6 @@
 #include "easy_app.hh"
 #include "TF1.h"
+#include "TMath.h"
 #include "HistStore.hh"
 #include "TRandom3.h"
 
@@ -28,7 +29,7 @@ std::unique_ptr<TF1> quartic_scattering( std::string name, double peak )
     //Function peaks at peak
 
     std::unique_ptr<TF1> result{ new TF1
-        ( name.c_str(), "1/x**4 * tanh( pow( x*[0], 6 ) )", -5*peak, 5*peak )  };
+        ( name.c_str(), "1/x**4 * tanh( pow( x*[0], 6 ) )", -15*peak, 15*peak )  };
 
 
     //Magic number to get peak in the right place
@@ -38,6 +39,24 @@ std::unique_ptr<TF1> quartic_scattering( std::string name, double peak )
     result->SetParameter( 0, p0 );
     return result;
 }
+
+std::unique_ptr<TF1> cubic_scattering( std::string name, double peak )
+{
+    //Function tends to magnitude/x^2
+    //Function peaks at peak
+
+    std::unique_ptr<TF1> result{ new TF1
+        ( name.c_str(), "1/x**3 * tanh( pow( x*[0], 5 ) )", -15*peak, 15*peak )  };
+
+
+    //Magic number to get peak in the right place
+    double xscale = 0.983;
+    double p0 = xscale / peak;
+
+    result->SetParameter( 0, p0 );
+    return result;
+}
+
 
 int main( int argc, char * argv[] )
 {
@@ -50,7 +69,9 @@ int main( int argc, char * argv[] )
         ( "width,w", po::value<double>(), "Width parameter")
         ( "tail,t", po::value<double>(), "Tail scale")
         ( "gaus,g", po::value<double>(), "Gaus scale")
-        ( "sigma,s", po::value<double>(), "Gaussian width");
+        ( "sigma,s", po::value<double>(), "Gaussian width")
+        ( "rate,r", po::value<double>(), "Scattering rate")
+        ( "output,o", po::value<std::string>(), "Output");
 
     po::options_description desc("Allowed options");
     desc.add( general );
@@ -119,22 +140,29 @@ int main( int argc, char * argv[] )
     std::cout << "Computed gaussian integral: " << g_integral << std::endl;
 
     //Tail
-    auto ftail = quadratic_scattering( "ftail", width_param );
+    auto ftail =   quartic_scattering ( "ftail", width_param );
     ftail->SetNpx( 2000 );
     double t_integral = ftail->Integral( 0, 10 * width_param );
     std::cout << "Computed tail integral: " << t_integral << std::endl;
 
     //rate
-    double rate = (tail*t_integral) / (gaus_scale *g_integral);
+    double rate = tail * ( t_integral / g_integral ) * TMath::Power(width_param, 4 ) / TMath::TanH( TMath::Power( 0.965, 6 ) );
     std::cout << "Scattering rate: " << rate << std::endl;
+
+    if ( vm.count( "rate" ) )
+    {
+        rate = vm["rate"].as<double>();
+        std::cout << "Overriding scattering rate: " << rate << std::endl;
+    }
 
     std::vector<double> rates;
     std::vector<TH1D*> hcombos;
     std::vector<TH1D*> htails;
 
-    for ( int i = 0; i != 10; ++i )
+    for ( int i = 0; i != 1; ++i )
     {
-        double ratio = 0.2 * i * rate;
+        //double ratio = 1 * i * rate;
+        double ratio =  rate;
         rates.push_back( ratio );
         hcombos.push_back( hs.MakeTH1D( Form( "hcombo_%d", i ), Form( "COMBO, %f", ratio ),
                     1000, -0.01, 0.01, "x" ) );
@@ -158,7 +186,7 @@ int main( int argc, char * argv[] )
         double orig = fgaus.GetRandom();
         hgaus->Fill( orig );
 
-        for (  int i = 0 ; i != 10 ; ++i )
+        for (  int i = 0 ; i != 1 ; ++i )
         {
             //std::cout<< "Shift" << std::endl;
             double shift = ftail->GetRandom();
@@ -176,6 +204,21 @@ int main( int argc, char * argv[] )
         }
     }
 
-    TFile fout( "output/toy_scatter.root", "RECREATE" );
+    htails[0]->Scale( rate );
+
+    htails[0]->Scale(  1.0 / hgaus->GetMaximum() );
+    hcombos[0]->Scale( 1.0 / hgaus->GetMaximum() );
+    hgaus->Scale( 1.0 / hgaus->GetMaximum() );
+
+    std::string output_filename = "output/toy_scatter.root" ;
+
+    if ( vm.count("output") )
+    {
+        output_filename = vm["output"].as<std::string>();
+    }
+
+    std::cout << "Writing to " << output_filename.c_str() << std::endl;
+
+    TFile fout( output_filename.c_str(), "RECREATE" );
     hs.Write();
 }

@@ -60,16 +60,16 @@
 - selection:
     name: muon_xy_wgt
     type: MuonTHXYWeight
-    effs_file: input/reco/conditions/muv_xy.root
-    effs_hist: rat_xy
+    effs_file: input/reco/conditions/muv/muv_eff_all.root
+    effs_hist: muv_eff_xy
     inputs:
         ogt: bf_st
 
 - selection:
     name: muon_p_wgt
     type: MuonTHPWeight
-    effs_file: input/reco/conditions/muv/muv_eff_p.root
-    effs_hist: rat_p
+    effs_file: input/reco/conditions/muv/muv_eff_all.root
+    effs_hist: muv_eff_p
     inputs:
         ogt: bf_st
 

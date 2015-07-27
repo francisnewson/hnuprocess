@@ -94,7 +94,7 @@
 - selection:
     name: muv_acc_radial
     type: TrackRadialAcceptance
-    track_section: upstream
+    track_section: downstream
     z: 12778.0 #zMUV1
     inner: 15.0
     outer: 200.0

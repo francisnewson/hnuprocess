@@ -4,10 +4,84 @@
 #include "HistExtractor.hh"
 #include "fiducial_functions.hh"
 #include "TFile.h"
+#include "Limiter.hh"
 #include <cmath>
 #include <numeric>
 #include <boost/io/ios_state.hpp>
 #include <boost/regex.hpp>
+
+void print_result( std::ostream& os, const HnuLimParams& hlp, const HnuLimResult& hlr )
+{
+    boost::io::ios_flags_saver fs( os );
+    os.setf(std::ios::fixed, std::ios::floatfield);
+    os.precision(4);
+
+    os << "===========================================\n";
+    os << hlp.get_chan() << "\n";
+    os << "-------------------------------------------\n";
+    os << "Mean: " << hlp.get_mass() << " MeV/c^2 -> " << hlp.get_mean() << " GeV^2/c^4\n";
+    os << "Width: " << hlp.get_width() << "\n";
+    os << "Acc: " << hlp.get_full_acceptance() << " ->  " 
+        << hlp.get_width_acceptance() << " ± " << hlp.get_width_acceptance_err() << "\n";
+    os << "-------------------------------------------\n";
+    os << "Trig eff: " << hlr.trig_eff << " ± " << hlr.trig_err << "\n";
+    os << "Background: " << hlr.background << " ± " << hlr.background_err << "\n" ;
+    os << "Acc Sig limit: " << hlr.acc_sig_ul << "\n";
+    os << "Orig Sig limit: " << hlr.orig_sig_ul << " " << hlr.rolke_orig_sig_ul << "\n";
+    os.setf(std::ios_base::scientific, std::ios_base::floatfield);
+    os << "BR limit: " << hlr.ul_br  << " U2 limit: " << hlr.ul_u2 << "\n";
+}
+
+void print_headings( std::ostream& os )
+{
+    os 
+        << std::setw(20) << "channel"
+        << std::setw(15) << "mass"
+        << std::setw(15) << "mean"
+        << std::setw(15) << "sqrt(mean)"
+        << std::setw(15) << "full_acc"
+        << std::setw(15) << "width"
+        << std::setw(15) << "final_acc"
+        << std::setw(15) << "final_acc_err"
+        << std::setw(15) << "trig_eff"
+        << std::setw(15) << "trig_err"
+        << std::setw(15) << "bg"
+        << std::setw(15) << "bg_err"
+        << std::setw(15) << "ul_acc_sig"
+        << std::setw(15) << "ul_orig_sig"
+        << std::setw(15) << "ul_br"
+        << std::setw(15) << "ul_u2"
+        << std::endl;
+}
+
+void print_flat_result( std::ostream& os, const HnuLimParams& hlp, const HnuLimResult& hlr )
+{
+        boost::io::ios_flags_saver fs( os );
+        os.setf(std::ios::fixed, std::ios::floatfield);
+        os.precision(5);
+
+    os 
+        << std::setw(20) << hlp.get_chan()
+        << std::setw(15) << hlp.get_mass()
+        << std::setw(15) << hlp.get_mean()
+        << std::setw(15) << std::sqrt(hlp.get_mean() )
+        << std::setw(15) << hlp.get_full_acceptance()
+        << std::setw(15) << hlp.get_width()
+        << std::setw(15) << hlp.get_width_acceptance()
+        << std::setw(15) << hlp.get_width_acceptance_err()
+        << std::setw(15) <<  hlr.trig_eff
+        << std::setw(15) <<  hlr.trig_err
+        << std::setw(15) <<  hlr.background
+        << std::setw(15) <<  hlr.background_err;
+
+    os.setf(std::ios_base::scientific, std::ios_base::floatfield);
+    os
+        << std::setw(15) <<  hlr.acc_sig_ul
+        << std::setw(15) <<  hlr.orig_sig_ul
+        << std::setw(15) <<  hlr.ul_br
+        << std::setw(15) <<  hlr.ul_u2
+        << std::endl;
+}
 
 int main()
 {
@@ -16,96 +90,52 @@ int main()
     auto fid_weights = extract_fiducial_weights
         ( filename, "", "sample_burst_count/bursts", "weight"  );
 
-    //print_fid_weights( fid_weights, std::cout );
-
     TFile tf {filename.c_str()};
-    tf.Print();
 
+    TFile tfout{ "output/signal_shapes.root", "RECREATE" };
 
-    std::vector<std::string> channels{
-        "mc.p5.hnu.200.nodk", "mc.p5.hnu.205.nodk",
-            "mc.p5.hnu.210.nodk", "mc.p5.hnu.215.nodk",
-            "mc.p5.hnu.220.nodk", "mc.p5.hnu.225.nodk",
-            "mc.p5.hnu.230.nodk", "mc.p5.hnu.235.nodk",
-            "mc.p5.hnu.240.nodk", "mc.p5.hnu.245.nodk",
-            "mc.p5.hnu.250.nodk", "mc.p5.hnu.255.nodk",
-            "mc.p5.hnu.260.nodk", "mc.p5.hnu.265.nodk",
-            "mc.p5.hnu.270.nodk", "mc.p5.hnu.275.nodk",
-            "mc.p5.hnu.280.nodk", "mc.p5.hnu.285.nodk",
-            "mc.p5.hnu.290.nodk", "mc.p5.hnu.295.nodk",
-            "mc.p5.hnu.300.nodk", "mc.p5.hnu.305.nodk",
-            "mc.p5.hnu.310.nodk", "mc.p5.hnu.315.nodk",
-            "mc.p5.hnu.320.nodk", "mc.p5.hnu.325.nodk",
-            "mc.p5.hnu.330.nodk", "mc.p5.hnu.335.nodk",
-            "mc.p5.hnu.340.nodk", "mc.p5.hnu.345.nodk",
-            "mc.p5.hnu.350.nodk", "mc.p5.hnu.355.nodk",
-            "mc.p5.hnu.360.nodk", "mc.p5.hnu.365.nodk",
-            "mc.p5.hnu.370.nodk", "mc.p5.hnu.375.nodk",
-            "mc.p5.hnu.380.nodk", "mc.p5.hnu.385.nodk"
-    };
-
-    std::vector<std::string> pols { "pos", "neg" };
-    std::vector<std::string> regs { "signal_upper_muv", "signal_lower_muv" };
+    std::vector<int> masses;
+    for( int m = 250 ; m != 390 ; m += 5 )
+    { masses.push_back( m ); }
 
     std::ostream& os = std::cout;
 
-    os 
-        << std::setw(20) << "channel"
-        << std::setw(12) << "mass"
-        << std::setw(12) << "mean"
-        << std::setw(12) << "sqrt(mean)"
-        << std::setw(12) << "acc"
-        << std::endl;
 
-    for ( const auto& chan : channels )
+    std::vector<std::string> regions { "signal_upper_muv", "signal_lower_muv" };
+
+    std::string bg_filename = "tdata/staging/all.mass_plots.root";
+    TFile tfbg{ bg_filename.c_str() };
+
+    std::string trig_filename = "tdata/halo_control/all.halo_control.root" ;
+    TFile tftrig{ trig_filename.c_str() };
+
+    std::vector<std::string> background_channels
+    { "halo", "k3pi", "k2pig", "k3pi0", "km3", "km2" };
+
+    TFile tfscat { "tdata/staging/km2_scat.root"};
+    TFile tfnoscat { "tdata/staging/km2_noscat.root"};
+
+    ScatterContrib sc{ tfnoscat, tfscat };
+
+    Limiter lm{ tfbg, tftrig, regions };
+    lm.set_bg_channels( background_channels);
+    lm.set_trig_regions( { "sig_up_trig_eff", "sig_dn_trig_eff" } );
+    lm.set_scatter_contrib( sc );
+
+    std::ofstream ofs( "output/lim.txt" );
+    print_headings( ofs );
+
+
+    for ( const auto& mass : masses )
     {
-        std::vector<std::unique_ptr<TH1D>> hists;
-        std::vector<double> this_fid_weight;
 
-        try
-        {
+        HnuLimParams hlp( tf, fid_weights, regions, mass );
 
-            for ( const auto& pol : pols  )
-            {
-                for( const auto& reg : regs )
-                {
-                    path p = path{ (chan + "." + pol ) } / reg / "h_m2m_kmu";
-                    auto h = extract_hist<TH1D>( tf,  p );
-                    hists.emplace_back( std::move( h ) );
-                }
+        auto limres = lm.get_limit( hlp );
+        print_result( os, hlp, limres );
+        print_flat_result( ofs, hlp, limres );
 
-                this_fid_weight.push_back( fid_weights[ (chan + "." + pol) ] );
-            }
-
-        }
-        catch( std::exception& e )
-        {
-            //std::cerr << e.what() << std::endl;
-            continue;
-        }
-
-        auto hsum = sum_hists( begin( hists ), end( hists ) );
-        double mean = hsum->GetMean();
-        double int_total = integral( *hsum, 0, 0.2 );
-        double fid_total = std::accumulate( begin( this_fid_weight ), end( this_fid_weight ) , 0.0 );
-        double acc = int_total / fid_total;
-
-        boost::regex re{".*\\.([0-9]+).*"};
-        boost::cmatch matches;
-        boost::regex_match( chan.c_str(), matches, re );
-
-        std::string mass = matches[1];
-
-
-        boost::io::ios_flags_saver fs( os );
-        os.setf(std::ios::fixed, std::ios::floatfield);
-        os.precision(4);
-    os 
-        << std::setw(20) << chan
-        << std::setw(12) << mass
-        << std::setw(12) << mean
-        << std::setw(12) << std::sqrt(mean)
-        << std::setw(12) << acc
-        << std::endl;
+        tfout.cd();
+        hlp.write();
     }
 }

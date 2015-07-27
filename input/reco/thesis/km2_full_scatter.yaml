@@ -45,12 +45,12 @@
     init_min_z: -2000.0, init_max_z:  9000.0 ,
     dch_merge_sep: 0.5,
 
-    angle_sigma: 0.00085,
-    angle_frequency: 0.0150,
-    angle_power: 4,
-    mom_sigma: 0.16,
-    mom_frequency: 0.0020,
-    mom_power: 4,
+    angle_sigma: 0.0110,
+    angle_frequency: 0.008,
+    angle_power: 3,
+    mom_sigma: 0.08,
+    mom_frequency: 0.0037,
+    mom_power: 3,
     inputs: { kt: kaon_track} }
 
 
@@ -75,16 +75,16 @@
 - selection:
     name: muon_xy_wgt
     type: MuonTHXYWeight
-    effs_file: input/reco/conditions/muv_xy.root
-    effs_hist: rat_xy
+    effs_file: input/reco/conditions/muv/muv_eff_all.root
+    effs_hist: muv_eff_xy
     inputs:
         ogt: bf_st
 
 - selection:
     name: muon_p_wgt
     type: MuonTHPWeight
-    effs_file: input/reco/conditions/muv/muv_eff_p.root
-    effs_hist: rat_p
+    effs_file: input/reco/conditions/muv/muv_eff_all.root
+    effs_hist: muv_eff_p
     inputs:
         ogt: bf_st
 

@@ -4,6 +4,7 @@
 #include "HistExtractor.hh"
 #include "HistStacker.hh"
 #include "TFile.h"
+#include "TVectorD.h"
 #include "OwningStack.hh"
 #include "Km2Scaling.hh"
 #include "yaml-cpp/exceptions.h"
@@ -165,10 +166,6 @@ int main( int argc, char * argv[] )
         std::cout << std::string( 50, '-' ) << "\n\n";
     }
 
-    for ( const auto& scaling : scaling_info  )
-    {
-        //std::cout << scaling.second.get_km2_fid_weight() << std::endl;
-    }
 
     //**************************************************
     //Build Stack
@@ -189,6 +186,28 @@ int main( int argc, char * argv[] )
         {
             do_the_shuffle( output_node, tfout, scaling_info );
         }
+    }
+
+    //Save scaling info
+    for ( const auto& scaling : scaling_info  )
+    {
+        cd_p( &tfout, scaling.first );
+
+        TVectorD halo_scale(1);
+        halo_scale[0] = scaling.second.get_halo_scale();
+        halo_scale.Write( "halo_scale" );
+
+        TVectorD halo_scale_err(1);
+        halo_scale_err[0] = scaling.second.get_halo_scale_error();
+        halo_scale_err.Write( "halo_scale_err" );
+
+        TVectorD fiducial_flux(1);
+        fiducial_flux[0] = scaling.second.get_fiducial_flux();
+        fiducial_flux.Write( "fiducial_flux" );
+
+        TVectorD fiducial_flux_err(1);
+        fiducial_flux_err[0] = scaling.second.get_fiducial_flux_error();
+        fiducial_flux_err.Write( "fiducial_flux_err" );
     }
 
 #if 0

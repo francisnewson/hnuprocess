@@ -5,88 +5,81 @@
 #include "TGraphAsymmErrors.h"
 #include "THStack.h"
 #include "TLegend.h"
+#include "TriggerApp.hh"
 #include <vector>
 
 
-std::pair<std::unique_ptr<TH1>, std::unique_ptr<THStack>> 
-extract( TFile& tfin, TFile& tfout, std::string folder  )
+std::pair<std::unique_ptr<TH1>, std::unique_ptr<OwningStack>> extract( TFile& tfin, std::vector<std::string> paths)
 {
+    std::vector<std::string> stack_paths;
+    std::vector<std::string> data_paths;
 
-    std::vector<std::string> folders { "up/pos", "up/neg", "dn/pos", "dn/neg" };
-
-   auto res = make_unique<THStack>();
-
-    std::vector<THStack*> stacks;
-    std::vector<TList*> lists;
-
-    std::vector<TH1*> hdatas;
-
-    for( const auto& folder : folders )
+    for( auto fp : paths  )
     {
-        path fp { "signal_muv_plots" };
-        fp /= folder;
-        fp /= "h_m2m";
-        path fstack = fp / "hnu_stack";
-
-        path fdt = fp / "hdata" ;
-        auto * hstack = get_object<THStack>( tfin, fstack.string() );
-        stacks.push_back( hstack );
-        lists.push_back( hstack->GetHists() );
-
-        auto * hdt = get_object<TH1>( tfin, fdt.string() );
-        hdatas.push_back( hdt );
+        stack_paths.push_back( ( path{fp} / "hnu_stack" ).string() );
+        data_paths.push_back( ( path{fp} / "hdata" ).string() );
     }
 
-    int nChan = lists[0]->GetSize();
+    auto stacks = extract_object_list<THStack>( tfin, stack_paths );
+    auto owning_stack_sum =  sum_stacks(begin( stacks ), end( stacks ) );
 
-    for ( int iChan = 0 ; iChan != nChan ; ++ iChan )
-    {
-        for ( auto& list : lists )
-        {
-            TH1D * h = static_cast<TH1D*>( list->At(iChan) );
-            res->Add( h );
-        }
-    }
+    auto data_hists = extract_hist_list<TH1D>( tfin, data_paths );
+    auto data_sum = sum_hists( begin( data_hists), end( data_hists ) );
 
-    cd_p( &tfout, folder );
-    res->Write("hnu_stack");
+    return std::make_pair( std::move( data_sum ),  std::move( owning_stack_sum ) );
+} 
 
-    auto hdata = sum_hists( begin( hdatas ), end( hdatas ) );
-    hdata->Write();
-
-    return std::make_pair( std::move(hdata), std::move(res) );
+void merge( TFile& tfin, TFile& tfout, std::string output_folder, std::vector<std::string> paths  )
+{
+    auto data_stack = extract( tfin, paths );
+    cd_p( &tfout, output_folder );
+    data_stack.first->Write("hdata");
+    data_stack.second->Write("hnu_stack");
 }
 
 std::pair<std::unique_ptr<TH1>, std::unique_ptr<TH1>> get_trigger_efficiency( TFile& tf )
 {
-    TH1 * hup_all_neg = get_object<TH1>( tf, "p5.data.q1.v4.neg/sig_up_trig_eff/h_all" );
-    TH1 * hup_passed_neg = get_object<TH1>( tf, "p5.data.q1.v4.neg/sig_up_trig_eff/h_passed" );
+    std::vector<std::string> sels
+    {
+        "p5.data.q1.v4.neg/sig_up_trig_eff"
+        "p5.data.q1.v4.neg/sig_dn_trig_eff"
+        "p5.data.q1.v4.pos/sig_up_trig_eff"
+        "p5.data.q1.v4.pos/sig_dn_trig_eff"
+    };
 
-    TH1 * hdn_all_neg = get_object<TH1>( tf, "p5.data.q1.v4.neg/sig_dn_trig_eff/h_all" );
-    TH1 * hdn_passed_neg = get_object<TH1>( tf, "p5.data.q1.v4.neg/sig_dn_trig_eff/h_passed" );
+    TriggerApp ta{ tf};
+    ta.set_sels( sels );
+    ta.init();
 
-    TH1 * hup_all_pos = get_object<TH1>( tf, "p5.data.q1.v4.pos/sig_up_trig_eff/h_all" );
-    TH1 * hup_passed_pos = get_object<TH1>( tf, "p5.data.q1.v4.pos/sig_up_trig_eff/h_passed" );
+     auto h_passed = std::unique_ptr<TH1D> ( tclone( ta.get_h_passed()) );
+     auto h_all = std::unique_ptr<TH1D> ( tclone(ta.get_h_all()) );
 
-    TH1 * hdn_all_pos = get_object<TH1>( tf, "p5.data.q1.v4.pos/sig_dn_trig_eff/h_all" );
-    TH1 * hdn_passed_pos = get_object<TH1>( tf, "p5.data.q1.v4.pos/sig_dn_trig_eff/h_passed" );
+    std::cout << h_all->GetNbinsX() << std::endl;
 
-
-    std::vector<TH1*> vall{ hup_all_neg, hdn_all_neg,  hup_all_pos, hdn_all_pos };
-    std::vector<TH1*> vpassed{ hup_passed_neg, hdn_passed_neg,  hup_passed_pos, hdn_passed_pos };
-
-    auto hall = sum_hists( begin( vall), end(vall) );
-    auto hpassed = sum_hists( begin(vpassed), end(vpassed) );
-
-    std::cout << hall->GetNbinsX() << std::endl;
-
-    return std::make_pair( std::move(hall), std::move(hpassed) );
+    return std::make_pair( std::move(h_all), std::move(h_passed) );
 }
 
 int main()
 {
+    TFile tfinnoscat{ "output/km2_noscat.root" };
+    TFile tfinscat{ "output/km2_scat.root" };
+    TFile tfout{ "output/km2_both_scat.root", "RECREATE" };
 
+    std::vector<std::string> regs { "up/pos", "up/neg", "dn/pos", "dn/neg" };
+    std::vector<std::string> paths;
 
+    for( auto reg : regs  )
+    {
+        path fp = path{"signal_muv" } / reg / "h_m2m";
+        paths.push_back( fp.string() );
+    }
+
+    merge( tfinnoscat, tfout, "noscat", paths );
+    merge( tfinscat, tfout, "scat" , paths );
+
+    return 0;
+
+#if 0
     TFile tfinq1{ "output/halo_signal_sub_q1.root" };
     TFile tfinq11t{ "output/halo_signal_sub_q11t.root" };
     TFile tfout{ "output/halo_signal_combo.root", "RECREATE" };
@@ -96,7 +89,7 @@ int main()
     auto q11t_data_bg = extract( tfinq11t, tfout, "q11t" );
 
     //DO eff correction
-    
+
     TFile tfeff { "tdata/halo_control/all.halo_control.root" };
     auto all_passed = get_trigger_efficiency( tfeff );
     all_passed.first->Rebin( 25 );
@@ -126,4 +119,5 @@ int main()
     leg.AddEntry( static_cast<TH1*>( hists->FindObject( "k3pi_neg" ) ), "K_{3#pi}", "f"  );
     leg.AddEntry( static_cast<TH1*>( hists->FindObject( "halo_neg" ) ), "Halo", "f"  );
     leg.Write( "leg" );
+#endif
 }

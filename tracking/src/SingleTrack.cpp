@@ -606,18 +606,19 @@ namespace fn
         ( double cutoff, double frequency, int power)
         {
             angle_function_ = TF1( "f_angle", "tanh( pow(x*[0],[1]+2) )*pow(x,-[1])",
-                    -15*cutoff, 15*cutoff );
+                    0, 15*cutoff );
 
             double xscale = 0;
-            if (power==4) { xscale = 0.965; }
-            else if ( power==2 ){ xscale = 1.021 ; }
+            if (power == 4) { xscale = 0.965; }
+            else if ( power == 3 ){ xscale = 0.983; }
+            else if ( power == 2 ){ xscale = 1.021 ; }
             else
             {
                 throw std::runtime_error{
-                    "TrackPowerScatterer was given power which wasn't 2 or 4"};
+                    "TrackPowerScatterer was given power which wasn't 2,3 or 4"};
             }
             angle_function_.SetParameter( 0 , xscale/cutoff );
-            mom_function_.SetParameter(1, power);
+            angle_function_.SetParameter(1, power);
             angle_function_.SetNpx( 200 );
             angle_frequency_ = frequency;
         }
@@ -627,18 +628,17 @@ namespace fn
         {
             //mom_function_ = TF1( "f_mom", "pow(x,-4)", cutoff, 1 );
             mom_function_ = TF1( "f_mom", "tanh( pow(x*[0],[1]+2) )*pow(x,-[1])",
-                    -1, 1 );
+                    0, 1 );
 
             double xscale = 0;
-            if (power==4) { xscale = 0.965; }
-            else if ( power==2 ){ xscale = 1.021 ; }
+            if (power == 4 ) { xscale = 0.965; }
+            else if ( power == 3 ){ xscale = 0.983; }
+            else if ( power == 2 ){ xscale = 1.021 ; }
             else
             {
                 throw std::runtime_error{
-                    "TrackPowerScatterer was given power which wasn't 2 or 4"};
+                    "TrackPowerScatterer was given power which wasn't 2,3 or 4"};
             }
-
-
             mom_function_.SetParameter(0, xscale/cutoff );
             mom_function_.SetParameter(1, power);
             mom_function_.SetNpx( 200 );

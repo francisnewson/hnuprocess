@@ -6,12 +6,34 @@ def print_plots( pre, sel, post, name, rebin ):
             osp.join( pre, sel, post), name, rebin )
 
 
-sels = ['scatter_s4_85_150_09_15', 'scatter_s4_85_150_16_15',
-        'scatter_s4_85_150_13_20', 'scatter_s4_85_150_13_10' ]
+sels = [
+        '',
+        "s33_0900_120_00_000", 
+        "s33_0110_080_00_000", 
+        "s33_0110_100_00_000", 
+        "s33_0000_000_04_150",
+        "s33_0000_000_08_037", ] 
 
-plots = ['hdm2_pi0']
 
-for sel in sels:
-    for plot in plots:
-        print( print_plots( 'fit_eop_90', sel,  plot, osp.join(plot, 'feop90_' + sel ) , 20 ) )
+plots = [
+        ( 'hdm2_pi0', 'dm2_pi0', 1 ),
+        ('hcda' , 'cda', 10 ), 
+        ('hpt_' , 'dpt', 10 ), 
+        ( 'lkr_dch_cmp/hdpop_' , 'dpop', 1 ),
+        ( 'lkr_dch_cmp/hdpx' , 'dpx', 1 )]
+
+for plot,dest,rebin in plots:
+    for sel in sels:
+
+        if sel:
+            mysel = 'scatter_' + sel
+        else:
+            mysel  = ''
+
+        folder = 'fit_eop_90'
+        if 'cda' in dest :
+            folder = 'fit_eop_90_no_cda'
+
+        print( print_plots( folder , mysel,  plot, osp.join(dest, 'feop90_' + sel ) , rebin ) )
+    print( '' )
 

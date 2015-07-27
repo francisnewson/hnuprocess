@@ -9,6 +9,8 @@
 #include "TLorentzVector.h"
 #include <iosfwd>
 #include <memory>
+#include "stl_help.hh"
+#include "OwningStack.hh"
 
 namespace fn
 {
@@ -20,19 +22,20 @@ namespace fn
     { return std::unique_ptr<T>( static_cast<T*>( u->Clone() ) ); }
 
     template <class IT>
-std::unique_ptr<TH1D> sum_hists( IT begin, IT end )
-{
-    std::unique_ptr<TH1D> result{ static_cast<TH1D*>( (*begin)->Clone() ) };
-    result->Reset();
-    result->SetDirectory(0);
+        //Assumes container of TH1D*
+        std::unique_ptr<TH1D> sum_hists( IT begin, IT end )
+        {
+            std::unique_ptr<TH1D> result{ static_cast<TH1D*>( (*begin)->Clone() ) };
+            result->Reset();
+            result->SetDirectory(0);
 
-    for( auto current = begin; current != end  ; ++current )
-    {
-        result->Add( &*(*current) );
-    }
+            for( auto current = begin; current != end  ; ++current )
+            {
+                result->Add( &*(*current) );
+            }
 
-    return result;
-}
+            return result;
+        }
     //COLORS
     class RootColors
     {
@@ -45,6 +48,36 @@ std::unique_ptr<TH1D> sum_hists( IT begin, IT end )
     };
 
     int root_color( std::string name );
+
+    //SUM STACKS
+    //Assumes container of THStack*
+    template <class IT>
+    std::unique_ptr<OwningStack> sum_stacks( IT begin, IT end )
+    {
+        auto res =  make_unique<OwningStack>();
+
+        std::vector<THStack*> stacks;
+        std::vector<TList*> lists;
+
+        for ( auto hs = begin ; hs !=end ; ++hs )
+        {
+            lists.push_back( (*hs)->GetHists() );
+        }
+
+        int nchan = lists[0]->GetSize();
+
+        for ( int ichan = 0 ; ichan != nchan ; ++ ichan )
+        {
+            for( auto& list: lists )
+            {
+                auto h = std::unique_ptr<TH1>{
+                    static_cast<TH1*>( list->At( ichan )->Clone() ) };
+                res->Add( std::move(h) );
+            }
+        }
+
+        return res;
+    }
 
     //--------------------------------------------------
 
@@ -100,6 +133,36 @@ std::unique_ptr<TH1D> sum_hists( IT begin, IT end )
         ( boost::filesystem::path filename, Option_t* option="" );
 
     //--------------------------------------------------
+
+    template <class T>
+    std::vector<std::unique_ptr<T>> extract_object_list
+    ( TFile& tf , std::vector<std::string> list )
+    {
+        std::vector<std::unique_ptr<T>> res;
+
+        for( auto s : list )
+        {
+            T * o = get_object<T>( tf, s );
+            res.push_back( std::unique_ptr<T>( o ) );
+        }
+
+        return res;
+    }
+
+    template <class T>
+    std::vector<std::unique_ptr<T>> extract_hist_list
+    ( TFile& tf , std::vector<std::string> list )
+    {
+        std::vector<std::unique_ptr<T>> res;
+
+        for( auto s : list )
+        {
+            auto h = extract_hist<T>( tf, s );
+            res.push_back( std::move( h ) );
+        }
+
+        return res;
+    }
 
     //OSTREAM
     std::ostream& operator<<( std::ostream& os, const TVector3& tv );

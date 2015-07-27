@@ -184,8 +184,8 @@ namespace fn
         }
         else
         {
-        mc_strat_.reset( new M2ScaleStrategy{
-                channel_node_, scaling_config["mc"] } );
+            mc_strat_.reset( new M2ScaleStrategy{
+                    channel_node_, scaling_config["mc"] } );
         }
 
         if ( halo_strat_type == "dummy" )
@@ -259,6 +259,11 @@ namespace fn
     double MultiScaling::get_fiducial_flux() const
     {
         return mc_strat_->get_peak_scale() * peak_fid_weight_  / peak_br_;
+    }
+
+    double MultiScaling::get_fiducial_flux_error() const
+    {
+        return get_peak_scale_error() / get_peak_scale() * get_fiducial_flux();
     }
 
     void MultiScaling::scale_hist( TH1& h, const YAML::Node& instruct ) const
