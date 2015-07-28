@@ -23,6 +23,7 @@ build_bham
 *.log
 tags
 *.__afs*
+*.nfs*
 
 #scons
 .sconsign.dblite

@@ -12,7 +12,12 @@ STEPS TO FINAL LIMITS
       Halo is scaled using the upper and lower ctrl regions.
       run `./b/apps/shuffle -m input/shuffle/thesis/halo/halo_signal.sub.q11t.yaml -o tdata/staging/all.mass_plots.root`
 
+- Check output
+    - Add up all the backgrounds and scale by trigger efficiency to look at by eye
+
+
 - Generate trigger efficiency
 
 
 - Get limits
+    run ./

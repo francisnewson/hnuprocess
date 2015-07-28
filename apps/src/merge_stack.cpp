@@ -1,11 +1,13 @@
 #include "easy_app.hh"
 #include "stl_help.hh"
 #include "root_help.hh"
+#include "yaml_help.hh"
 #include "HistStore.hh"
 #include "TGraphAsymmErrors.h"
 #include "THStack.h"
 #include "TLegend.h"
 #include "TriggerApp.hh"
+#include "OSLoader.hh"
 #include <vector>
 
 
@@ -42,28 +44,179 @@ std::pair<std::unique_ptr<TH1>, std::unique_ptr<TH1>> get_trigger_efficiency( TF
     std::vector<std::string> sels
     {
         "p5.data.q1.v4.neg/sig_up_trig_eff"
-        "p5.data.q1.v4.neg/sig_dn_trig_eff"
-        "p5.data.q1.v4.pos/sig_up_trig_eff"
-        "p5.data.q1.v4.pos/sig_dn_trig_eff"
+            "p5.data.q1.v4.neg/sig_dn_trig_eff"
+            "p5.data.q1.v4.pos/sig_up_trig_eff"
+            "p5.data.q1.v4.pos/sig_dn_trig_eff"
     };
 
     TriggerApp ta{ tf};
     ta.set_sels( sels );
     ta.init();
 
-     auto h_passed = std::unique_ptr<TH1D> ( tclone( ta.get_h_passed()) );
-     auto h_all = std::unique_ptr<TH1D> ( tclone(ta.get_h_all()) );
+    auto h_passed = std::unique_ptr<TH1D> ( tclone( ta.get_h_passed()) );
+    auto h_all = std::unique_ptr<TH1D> ( tclone(ta.get_h_all()) );
 
     std::cout << h_all->GetNbinsX() << std::endl;
 
     return std::make_pair( std::move(h_all), std::move(h_passed) );
 }
 
-int main()
+int main( int argc, char * argv[] )
 {
+    //**************************************************
+    //Introduction
+    //**************************************************
+    splash( "input/art/merge_splash.txt", std::cerr );
+    echo_launch ( argc, argv, std::cerr );
+    {
+        std::ofstream sflaunch( "mlaunch.log", std::ofstream::app );
+        write_launch ( argc, argv, sflaunch );
+    }
+
+    //**************************************************
+    //Option logic
+    //**************************************************
+
+    //Set up program options
+    po::options_description general("general");
+
+    general.add_options()
+        ( "help,h", "Display this help message")
+        ( "mission,m", po::value<path>(),  "Specify mission yaml file")
+        ( "output,o", po::value<path>(),  "Specify output root file")
+        ;
+
+    po::options_description desc("Allowed options");
+    desc.add( general );
+
+    //**************************************************
+    //Parse options
+    //**************************************************
+
+    //parse
+    po::variables_map vm;
+    po::store( po::parse_command_line(argc, argv, desc), vm);
+
+    if ( vm.count( "help" ) )
+    {
+        std::cerr << desc << std::endl;
+        std::cerr << "Exiting because help was requested" << std::endl;
+        exit( 1 );
+    }
+
+    path output_filename = "output/merge.root";
+
+    if ( vm.count( "output" ) )
+    {
+        output_filename = vm["output"].as<path>() ;
+    }
+
+    path mission;
+    if ( ! vm.count( "mission" ) )
+    {
+        std::cerr << "**ERROR** Must specify mission file!" << std::endl;
+        return false;
+    }
+    else
+    {
+        mission = vm["mission"].as<path>();
+    }
+
+    TFile tfout { output_filename.string().c_str(), "RECREATE" };
+
+    //--------------------------------------------------
+
+    YAML::Node config_node; 
+
+    std::cerr << "About to parse : " << mission.string() << std::endl;
+    try
+    {
+        config_node = YAML::LoadFile( mission.string() );
+    }
+    catch( YAML::Exception& e )
+    {
+        std::cerr << e.what() << std::endl;
+    }
+
+    std::cerr << "Parsed " << mission.string() << std::endl;
+
+    //--------------------------------------------------
+
+    TFileLoader tfl;
+
+    //**************************************************
+    //Load trigger efficiencies
+    //**************************************************
+
+    std::map<std::string, std::unique_ptr<TriggerApp>> trig_effs;
+
+    const auto trig_nodes = config_node["trig_effs"];
+    if ( ! trig_nodes )
+    {
+        std::cerr << "No trig effs" << std::endl;
+    }
+    else
+    {
+        for( const auto& trig_node :  trig_nodes )
+        {
+            std::string name = get_yaml<std::string>( trig_node , "name" );
+            std::string filename = get_yaml<std::string>( trig_node, "filename" );
+            auto sels = get_yaml<std::vector<std::string>>( trig_node, "selections" );
+
+            auto& tfile = tfl.get_tfile_opt( filename, "" );
+            auto trig_eff = make_unique<TriggerApp>( tfile );
+            trig_eff->set_sels( sels );
+            trig_eff->init();
+
+            trig_effs.insert( std::make_pair( name, std::move( trig_eff ) ) );
+        }
+    }
+
+    //**************************************************
+    //Merge stacks
+    //**************************************************
+
+    const  auto stack_nodes = config_node["stacks"];
+
+    for ( auto& stack_node : stack_nodes )
+    {
+        std::string name = get_yaml<std::string>( stack_node , "name" );
+        std::string filename = get_yaml<std::string>( stack_node, "filename" );
+        std::string destfolder = get_yaml<std::string>( stack_node, "destfolder" );
+        auto& tfin = tfl.get_tfile_opt( filename, "" );
+
+        std::vector<std::string> paths 
+            = get_yaml<std::vector<std::string>>( stack_node, "selections" );
+
+        auto data_stack  = extract( tfin, paths );
+
+        TH1 * hbg = static_cast<TH1*>( data_stack.second->Stack().GetStack()->Last() );
+        hbg->SetLineColor( kBlack );
+        hbg->SetFillStyle( 0 );
+
+
+        cd_p( &tfout, destfolder );
+        data_stack.first->Write("hdata");
+        data_stack.second->Write("hstack");
+        hbg->Write("hbg_raw");
+
+
+        if ( stack_node["trigeff"] )
+        {
+            std::string trig_name = get_yaml<std::string>( stack_node, "trigeff" );
+            const auto& trig_eff = trig_effs.at( trig_name );
+            trig_eff->correct_hist( *hbg );
+            hbg->Write( "hbg_corr" );
+        }
+    }
+
+    return EXIT_SUCCESS;
+
+#if 0
+
     TFile tfinnoscat{ "output/km2_noscat.root" };
     TFile tfinscat{ "output/km2_scat.root" };
-    TFile tfout{ "output/km2_both_scat.root", "RECREATE" };
+    //TFile tfout{ "output/km2_both_scat.root", "RECREATE" };
 
     std::vector<std::string> regs { "up/pos", "up/neg", "dn/pos", "dn/neg" };
     std::vector<std::string> paths;
@@ -77,9 +230,6 @@ int main()
     merge( tfinnoscat, tfout, "noscat", paths );
     merge( tfinscat, tfout, "scat" , paths );
 
-    return 0;
-
-#if 0
     TFile tfinq1{ "output/halo_signal_sub_q1.root" };
     TFile tfinq11t{ "output/halo_signal_sub_q11t.root" };
     TFile tfout{ "output/halo_signal_combo.root", "RECREATE" };

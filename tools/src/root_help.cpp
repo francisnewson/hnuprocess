@@ -64,7 +64,6 @@ namespace fn
         double bmin = a.GetXaxis()->FindBin( min );
         double bmax = a.GetXaxis()->FindBin( max );
         return a.Integral( bmin, bmax );
-
     }
 
     double flux_ratio( const TH1D& a, const TH1D& b ,

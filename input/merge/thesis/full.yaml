@@ -1,0 +1,29 @@
+trig_effs:
+    -  { name: full_q11t_eff,
+    filename: tdata/staging/all.halo_control.root,
+    selections: [
+        "p5.data.q1.v4.neg/sig_up_trig_eff",
+        "p5.data.q1.v4.neg/sig_dn_trig_eff",
+        "p5.data.q1.v4.pos/sig_up_trig_eff",
+        "p5.data.q1.v4.pos/sig_dn_trig_eff" ] }
+
+stacks:
+    - { name: km2_noscat,
+    filename: output/km2_noscat.root,
+    destfolder:  km2_noscat,
+    trigeff: full_q11t_eff,
+    selections: [
+        'signal_muv/up/pos/h_m2m',
+        'signal_muv/up/neg/h_m2m',
+        'signal_muv/dn/pos/h_m2m',
+        'signal_muv/dn/neg/h_m2m' ] }
+
+    - { name: km2_scat,
+    filename: output/km2_scat.root,
+    destfolder:  km2_scat,
+    trigeff: full_q11t_eff,
+    selections: [
+        'signal_muv/up/pos/h_m2m',
+        'signal_muv/up/neg/h_m2m',
+        'signal_muv/dn/pos/h_m2m',
+        'signal_muv/dn/neg/h_m2m' ] }

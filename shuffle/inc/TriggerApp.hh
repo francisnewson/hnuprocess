@@ -34,6 +34,8 @@ namespace fn
             double get_eff( double sigmin, double sigmax );
             double get_err( double sigmin, double sigmax );
 
+            bool correct_hist( TH1& h );
+
         private:
             std::vector<std::string> sels_;
             TFile& tf_;

@@ -68,7 +68,10 @@ namespace fn
 	class TFileLoader
 	{
 		public:
-			TFile& get_tfile(  boost::filesystem::path& target );
+			TFile& get_tfile(  boost::filesystem::path target );
+
+			TFile& get_tfile_opt
+                ( boost::filesystem::path target, std::string opt );
 
 		private:
 			std::map<std::string, std::unique_ptr<TFile> > tfiles_;
