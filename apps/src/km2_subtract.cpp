@@ -11,6 +11,7 @@
 #include "fiducial_functions.hh"
 #include "MultiScaling.hh"
 #include <boost/io/ios_state.hpp>
+#include "Km2Sub.hh"
 
 double km2g_br( double xi, int ni, double mkva )
 {
@@ -28,7 +29,7 @@ int main( int argc, char * argv[] )
     splash( "input/art/halo_subtract.txt", std::cerr );
     echo_launch ( argc, argv, std::cerr );
     {
-        std::ofstream sflaunch( "hslaunch.log", std::ofstream::app );
+        std::ofstream sflaunch( "kslaunch.log", std::ofstream::app );
         write_launch ( argc, argv, sflaunch );
     }
 
@@ -43,7 +44,7 @@ int main( int argc, char * argv[] )
         ( "help,h", "Display this help message")
         ( "mission,m", po::value<path>(),  "Specify mission yaml file")
         ( "output,o", po::value<path>(),  "Specify output root file")
-        ( "full,f", po::value<path>(),  "Specify full root file")
+        ( "log,f", po::value<path>(),  "Specify log root file")
         ;
 
     po::options_description desc("Allowed options");
@@ -76,12 +77,12 @@ int main( int argc, char * argv[] )
 
     path full_filename = "output/km2_full.root";
 
-    if ( vm.count( "full" ) )
+    if ( vm.count( "log" ) )
     {
-        full_filename = vm["full"].as<path>() ;
+        full_filename = vm["log"].as<path>() ;
     }
 
-    TFile tffull( full_filename.string().c_str(), "RECREATE" );
+    TFile tflog( full_filename.string().c_str(), "RECREATE" );
 
     path mission;
     std::string mission_name;
@@ -96,6 +97,11 @@ int main( int argc, char * argv[] )
         mission_name = mission.stem().string();
     }
 
+
+    Km2Sub km2_sub{ tfout, tflog, mission.string() };
+    km2_sub.process_all_plots();
+
+#if 0
     YAML::Node config_node; 
 
     std::cerr << "About to parse : " << mission.string() << std::endl;
@@ -236,4 +242,5 @@ int main( int argc, char * argv[] )
             h_sdm->Write((write_path.filename().string() + "_sdm").c_str() );
         }
     }
+#endif
 }

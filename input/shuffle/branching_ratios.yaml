@@ -6,8 +6,8 @@ km2 : 0.6355
 ke2 : 0.00001581
 ke3 : 0.0507
 km3 : 0.033135
-km2gsdp : 0.0000133
-km2gsdm : 1.38e-6
-km2gintp : 1.44e-5
-km2gintm : 3.83e-5
+km2gsdp : 8.37e-6
+km2gsdm : 1.92e-6
+km2gintp : 1.47e-5
+km2gintm : -4.61e-5
 pim2 : 0.1
