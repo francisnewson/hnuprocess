@@ -70,11 +70,27 @@ namespace fn
 
             if ( method == "BF" )
             {
+                BOOST_LOG_SEV( rf.get_log(), startup)
+                    << "Selecting BFSingleTrack";
                 return new BFSingleTrack{ event, instruct, *kt, do_bf } ;
             }
             else if ( method == "BFScatter" )
             {
-                return new BFScatterSingleTrack{ event, instruct, *kt, do_bf };
+                if ( rf.is_mc() )
+                {
+                    BOOST_LOG_SEV( rf.get_log(), startup)
+                        << "Selecting BFScatterSingleTrack";
+                    return new BFScatterSingleTrack{ event, instruct, *kt, do_bf };
+                }
+                else
+                {
+                    BOOST_LOG_SEV( rf.get_log(), startup)
+                        << "Ignoring scattering request for data";
+
+                        BOOST_LOG_SEV( rf.get_log(), startup)
+                        << "Selecting BFSingleTrack";
+                    return new BFSingleTrack{ event, instruct, *kt, do_bf };
+                }
             }
             else
             {
