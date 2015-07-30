@@ -10,31 +10,6 @@
 # FILE MANAGEMENT
 ###################################################
 
-#Kaon track
-- input:
-    name: kaon_track
-    type: KaonTrack
-    kaon_type: auto
-    beam_mapping: input/reco/beam/beam_mapping.yaml
-
-#weight
-- selection:
-    name: kaon_mom_weights
-    type: KaonMomWeight
-    crude_weights: input/reco/mod/kaon_crude_weights.dat
-    fine_weights: input/reco/mod/kaon_fine_weights.dat
-
-- input:
-    name: cluster_corrector
-    type: ClusterCorrector
-    filename: "/afs/cern.ch/user/f/fnewson/work/hnu/gopher/data/detector/eopCorrfile.dat"
-    enabled: true
-
-
-###################################################
-# OUTPUTS
-###################################################
-
 - output:
     name: tfout
     type: tfile
@@ -50,6 +25,10 @@
     type: ostream
     filename: muv_selection.dat
 
+@include "input/reco/thesis/std/corrections.inc.yaml"
+
+@include "input/reco/thesis/std/data_sample.inc.yaml"
+
 ###################################################
 # CUTS
 ###################################################
@@ -59,72 +38,15 @@
     name: passer
     type : auto_pass
         
-# 1]Bad bursts
-- selection:
-    name: good_phys_burst
-    type: BadBurst
-    burst_list: "input/reco/conditions/bad_phys_burst.dat"
-
-- selection:
-    name: good_dch_burst
-    type: BadBurst
-    burst_list: "input/reco/conditions/bad_dch_burst.dat"
-
-- selection:
-    name: good_muv_burst
-    type: BadBurst
-    burst_list: "input/reco/conditions/bad_muv_burst.90.dat"
-
-- selection:
-    name: good_muv_burst_range
-    type: BadBurstRange
-    burst_range_list: "input/reco/conditions/bad_muv_burst_ranges.dat"
-
-- selection:
-    name: good_bursts
-    type: CompositeSelection
-    children:
-        - good_phys_burst
-        - good_dch_burst
-        - good_muv_burst
-        - good_muv_burst_range
-
-- selection:
-    name: weighted_data_sample
-    type: CompositeSelection
-    children:
-        - kaon_mom_weights
-        - good_bursts
-
-- selection:
-    name: mcz
-    type: MCZCut
-    min_z: -1800
-    max_z:  8000
-
-- selection:
-    name: weighted_mc_sample
-    type: CompositeSelection
-    children:
-        - weighted_data_sample
-        - mcz
-
-- analysis:
-    name: sample_burst_count
-    type: BurstCount
-    tfile: tfout
-    folder: sample_burst_count
-    selection: weighted_mc_sample
-    codename: bursts
-
+###################################################
+# INPUTS
+###################################################
 
 # 2] SingleTrack
 - input:
     name : bf_st
     type : SingleTrack
     method : BF
-
-    #log_level: always_print
 
     init_min_mom: 3.0 
     init_max_mom: 75.0
@@ -139,151 +61,47 @@
     inputs:
         kt: kaon_track
 
-- selection:
-    name: dch_veto
-    type : FoundGoodTrack
+#----------km2 event
+- input: { name: km2_event, type: Km2Event,
+    inputs: { ogt: bf_st, kt: kaon_track } }
 
-    inputs :
-        ogt: bf_st
-
-
-# 3] Track charge
-- selection:
-    name: pos_trk
-    type : TrackCharge
-    charge: +1
-    inputs :
-        ogt: bf_st
-
-# 4] Track quality
-- selection:
-    name: quality_7
-    type: TrackQuality
-    quality: 0.7
-    inputs:
-        ogt: bf_st
-
-# 5] Track momentum
-- selection:
-    name: rk_track_mom
-    type: TrackMomentum
-    min: 3 #GeV
-    max: 65 #GeV
-    inputs:
-        ogt: bf_st
-
-# 6] LKr Veto
-- input:
-    name: rk_km2_clusters
-    type: Km2Clusters
-    noise_energy: 2 #GeV
-    noise_time: 12 #ns
-    brehm_radius: 0 #cm
-    track_cluster_radius: 10 #cm
-    inputs:
-        ClusterCorrector: cluster_corrector
-        ogt: bf_st
-
-- selection:
-    name: rk_lkr_veto
-    type: Km2NoBadCluster
-    inputs:
-        km2clusters: rk_km2_clusters
-
-# 7] Fiducial volume
-- selection:
-    name: rk_pz
-    type: TrackPZ
-    shape: rectangles
-    points:
-        - [ 3, 13, -1000, 9000 ]
-        - [ 13, 20, -1000, 9000 ]
-        - [ 20, 25, -1000, 9000 ]
-        - [ 25, 30,     0, 9000 ]
-        - [ 30, 35,   500, 9000 ]
-        - [ 35, 40,   500, 9000 ] 
-        - [ 40, 45,   500, 9000 ]
-        - [ 45, 50,  1000, 9000 ]
-        - [ 50, 55,  1000, 9000 ]
-        - [ 55, 60,  1500, 9000 ]
-        - [ 60, 65,  1500, 9000 ]
-    inputs:
-        ogt: bf_st
-
-
-# 8] CDA
-- selection:
-    name: rk_cda
-    type: TrackCda
-    max_cda: 3.5 #cm
-    inputs:
-        ogt: bf_st
-
-# 9] LKr acceptance
-- selection:
-    name: rk_lkr_accep
-    type: TrackLkrAcceptance
-    margin_parameter: 8 #cm
-    inputs:
-        ogt: bf_st
-
-# 10] LKr Hot cells
+#---------km2 clusters
+- input: { name: km2_clusters, type: Km2Clusters,
+    noise_energy: 3, noise_time: 12, brehm_radius: 0 ,
+    track_cluster_radius: 40, extra_lkr_check: false,
+    inputs: { ogt: bf_st, ClusterCorrector: cluster_corrector } }
 
 - input:
-    name: km2_event
-    type: Km2Event
-    inputs:
-        ogt: bf_st
-        kt: kaon_track
-
-- selection:
-    name: rk_hot_lkr
-    type: Km2HotLkr
-    hot_cells: [ [ 134, 56 ], [ 134, 57 ] ]
-    inputs:
-        km2event: km2_event
-        km2clusters: rk_km2_clusters
-
-# 13] Track DHC1 ACC
-- selection:
-    name: rk_dch1_acc
-    type: TrackRadialAcceptance
-    track_section: upstream
-    z: 9708.42 #zDCH1
-    inner: 12.0
-    outer: 115.0
+    name: single_muon
+    type: SingleMuon
+    method: auto
+    multiplier: 4
     inputs:
         ogt: bf_st
 
-# 14] Track DHC4 ACC
 - selection:
-    name: rk_dch4_acc
-    type: TrackRadialAcceptance
-    track_section: downstream
-    z: 11888.0 #zDCH1
-    inner: 14.0
-    outer: 115.0
+    name: muon_xy_wgt
+    type: MuonTHXYWeight
+    effs_file: input/reco/conditions/muv/muv_eff_all.root
+    effs_hist: muv_eff_xy
     inputs:
         ogt: bf_st
 
-# 15] Track distance to LKr dead cell
 - selection:
-    name: rk_ddead_cell
-    type: TrackDDeadCell
-    min_ddead_cell: 2.0 #cm
+    name: muon_p_wgt
+    type: MuonTHPWeight
+    effs_file: input/reco/conditions/muv/muv_eff_all.root
+    effs_hist: muv_eff_p
     inputs:
         ogt: bf_st
 
-# 16] Track time
-- selection:
-    name: rk_dcht
-    type : TrackTime
-    max_dt: 20 #ns
-    inputs:
-        ogt: bf_st
+@include "input/reco/thesis/std/selections.inc.yaml"
 
-#Specific cuts for km2
-# S1 ] Trigger - already applied
+@include "input/reco/thesis/std/kine_regions.inc.yaml"
+
+###################################################
+# CUTS
+###################################################
 
 # S3] E/p
 - selection:
@@ -293,7 +111,7 @@
     min_eop: 0.0
     max_eop: 0.85
     inputs:
-        km2clusters: rk_km2_clusters
+        km2clusters: km2_clusters
         ogt: bf_st
 
 - selection:
@@ -303,7 +121,7 @@
     min_eop: 0.0
     max_eop: 0.90
     inputs:
-        km2clusters: rk_km2_clusters
+        km2clusters: km2_clusters
         ogt: bf_st
 
 
@@ -314,103 +132,6 @@
     max_m2:   0.005
     inputs:
         km2event: km2_event
-
-# Track MUV1 Radius
-- selection:
-    name: muv1_radius
-    type: TrackRadialAcceptance
-    track_section: downstream
-    z: 12778.0 #zmuv1
-    inner: 0.0
-    outer: 200
-    inputs:
-        ogt: bf_st
-
-- selection:
-    name: tgt_muv1_radius
-    type: TrackRadialAcceptance
-    track_section: downstream
-    z: 12778.0 #zmuv1
-    inner: 25
-    outer: 70
-    inputs:
-        ogt: bf_st
-
-- selection:
-    name: muv_inner_xy
-    type: TrackMuvXYAcceptance
-    shape: rectangles
-    points:
-        - [ -1000,   -11, -1000, 1000 ]
-        - [    11,  1000, -1000, 1000 ]
-        - [ -1000,  1000, -1000,  -11 ]
-        - [ -1000,  1000,    11, 1000 ]
-    inputs:
-        ogt: bf_st
-
-- selection:
-    name: tgt_muv_xy
-    type: TrackMuvXYAcceptance
-    shape: rectangles
-    points:
-        - [ -30,  30,  80,  90 ]
-        - [ -50,  50,  70,  80 ]
-        - [ -60,  60,  60,  70 ]
-        - [ -70,  70,  50,  60 ]
-        - [ -80,  80,  40,  50 ]
-        - [ -80,  80,  30,  40 ]
-        - [ -90, -20,  20,  30 ]
-        - [  20,  90,  20,  30 ]
-        - [ -90, -30,  10,  20 ]
-        - [  30,  90,  10,  20 ]
-        - [ -90, -30,   0,  10 ]
-        - [  30,  90,   0,  10 ]
-        - [ -90, -30, -10,   0 ]
-        - [  30,  90, -10,   0 ]
-        - [ -90, -30, -20, -10 ]
-        - [  30,  90, -20, -10 ]
-        - [ -90, -20, -30, -20 ]
-        - [  20,  90, -30, -20 ]
-        - [ -80,  80, -40, -30 ]
-        - [ -80,  80, -50, -40 ]
-        - [ -70,  70, -60, -50 ]
-        - [ -60,  60, -70, -60 ]
-        - [ -50,  50, -80, -70 ]
-        - [ -30,  30, -90, -80 ]
-    inputs:
-        ogt: bf_st
-
-# a small region with hopefully constant eff( x, y )
-- selection:
-    name: very_tgt_muv_xy
-    type: TrackMuvXYAcceptance
-    shape: rectangles
-    points:
-        - [ -70,  -50,  -30,  -10 ]
-    inputs:
-        ogt: bf_st
-
-- selection:
-    name: muv_acc
-    type: TrackXYUVAcceptance
-    track_section: ds
-    z: 13012.0 #MUV3
-    min_x: -135.0
-    max_x:  135.0
-    min_y: -135.0
-    max_y:  135.0
-    min_u: -135.0
-    max_u:  135.0
-    min_v: -135.0
-    max_v:  135.0
-    inputs:
-        ogt: bf_st
-#Momentum cuts
-- selection:
-    { name: mom30, type: TrackMomentum, min: 30,  max: 60, inputs: {ogt: bf_st } }
-
-- selection:
-    { name: mom_restp, type: TrackMomentum, min: 8,  max: 62, inputs: {ogt: bf_st } }
 
 ###################################################
 # SELECTIONS
@@ -425,17 +146,16 @@
     children:
         - passer
         - weighted_data_sample
-        - dch_veto
+        - good_trk
         - pos_trk
         - quality_7
-        - rk_track_mom
-        - rk_pz
+        - wide_pz
         - rk_lkr_accep
         - rk_lkr_veto
         - rk_hot_lkr
-        - rk_dch1_acc
-        - rk_dch4_acc
-        - rk_ddead_cell
+        - dch1_acc
+        - dch4_acc
+        - ddead_cell
         - rk_dcht
 
 
@@ -445,51 +165,20 @@
     children:
         - passer
         - weighted_data_sample
-        - dch_veto
+        - good_trk
         - pos_trk
         - quality_7
-        - rk_track_mom
-        - rk_pz
+        - wide_pz
         - rk_lkr_accep
         - rk_lkr_veto
         - rk_hot_lkr
-        - rk_dch1_acc
-        - rk_dch4_acc
-        - rk_ddead_cell
+        - dch1_acc
+        - dch4_acc
+        - ddead_cell
         - rk_dcht
         - km2_peak_m2
         - eop_90
 
-- input:
-    name: single_muon
-    type: SingleMuon
-    method: auto
-    multiplier: 4
-    inputs:
-        ogt: bf_st
-
-
-- selection:
-    name: muon_xy_wgt
-    type: MuonTHXYWeight
-    effs_file: input/reco/conditions/muv_xy.root
-    effs_hist: rat_xy
-    inputs:
-        ogt: bf_st
-
-- selection:
-    name: muon_p_wgt
-    type: MuonTHPWeight
-    effs_file: input/reco/conditions/muv/muv_eff_p.root
-    effs_hist: rat_p
-    inputs:
-        ogt: bf_st
-
-- selection:
-   { name: muon_req_38, type: MuonReq, multiplier: 3.8, inputs: {ogt: bf_st, sm: single_muon } }
-
-- selection:
-    { name: muon_req_38_xyw_pw, type: CompositeSelection, children: [muon_req_38, muon_xy_wgt, muon_p_wgt] }
 
 ###################################################
 # ANALYSES

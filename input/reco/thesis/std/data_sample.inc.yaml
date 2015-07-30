@@ -16,7 +16,12 @@
 - selection:
     name: good_muv_burst
     type: BadBurst
-    burst_list: "input/reco/conditions/bad_muv_burst.91.dat"
+    burst_list: "input/reco/conditions/bad_muv_bursts_95_90.dat"
+
+- selection:
+    name: good_muv_burst_range
+    type: BadBurstRange
+    burst_range_list: "input/reco/conditions/bad_muv_burst_ranges.dat"
 
 - selection:
     name: weighted_data_sample
@@ -26,6 +31,7 @@
         - good_phys_burst
         - good_dch_burst
         - good_muv_burst
+        - good_muv_burst_range
 
 - selection:
     name: mcz

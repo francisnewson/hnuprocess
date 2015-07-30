@@ -109,7 +109,67 @@
     - muv_acc_radial
 
 - selection:
-   { name: muon_req_38, type: MuonReq, multiplier: 3.8, inputs: {ogt: bf_st, sm: single_muon } }
+   { name: muon_req_38, type: MuonReq, multiplier: 3.8,
+   inputs: {ogt: bf_st, sm: single_muon } }
 
 - selection:
-    { name: muon_req, type: CompositeSelection, children: [muon_req_38, muon_xy_wgt, muon_p_wgt] }
+    { name: muon_req_38_xyw_pw, type: CompositeSelection, 
+    children: [muon_req_38, muon_xy_wgt, muon_p_wgt] }
+
+- selection:
+    { name: muon_req, type: CompositeSelection, 
+    children: [muon_req_38_xyw_pw ] }
+
+- selection:
+    name: muv_inner_xy
+    type: TrackMuvXYAcceptance
+    shape: rectangles
+    points:
+        - [ -1000,   -11, -1000, 1000 ]
+        - [    11,  1000, -1000, 1000 ]
+        - [ -1000,  1000, -1000,  -11 ]
+        - [ -1000,  1000,    11, 1000 ]
+    inputs:
+        ogt: bf_st
+
+- selection:
+    name: tgt_muv_xy
+    type: TrackMuvXYAcceptance
+    shape: rectangles
+    points:
+        - [ -30,  30,  80,  90 ]
+        - [ -50,  50,  70,  80 ]
+        - [ -60,  60,  60,  70 ]
+        - [ -70,  70,  50,  60 ]
+        - [ -80,  80,  40,  50 ]
+        - [ -80,  80,  30,  40 ]
+        - [ -90, -20,  20,  30 ]
+        - [  20,  90,  20,  30 ]
+        - [ -90, -30,  10,  20 ]
+        - [  30,  90,  10,  20 ]
+        - [ -90, -30,   0,  10 ]
+        - [  30,  90,   0,  10 ]
+        - [ -90, -30, -10,   0 ]
+        - [  30,  90, -10,   0 ]
+        - [ -90, -30, -20, -10 ]
+        - [  30,  90, -20, -10 ]
+        - [ -90, -20, -30, -20 ]
+        - [  20,  90, -30, -20 ]
+        - [ -80,  80, -40, -30 ]
+        - [ -80,  80, -50, -40 ]
+        - [ -70,  70, -60, -50 ]
+        - [ -60,  60, -70, -60 ]
+        - [ -50,  50, -80, -70 ]
+        - [ -30,  30, -90, -80 ]
+    inputs:
+        ogt: bf_st
+
+# a small region with hopefully constant eff( x, y )
+- selection:
+    name: very_tgt_muv_xy
+    type: TrackMuvXYAcceptance
+    shape: rectangles
+    points:
+        - [ -70,  -50,  -30,  -10 ]
+    inputs:
+        ogt: bf_st

@@ -10,6 +10,7 @@ lenv.AddLibs( [
 'tools', 
 'reco', 
 'tracking',
+'conditions',
 ] )
 lenv.AddEvent( event_dir, 'event' )
 lenv.SetYaml( yaml_dir, machine )
