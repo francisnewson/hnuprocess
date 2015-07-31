@@ -38,7 +38,8 @@ namespace fn
         h_all_->Rebin( r );
     }
 
-    std::pair<double,double> TriggerApp::get_eff_err( double sigmin, double sigmax )
+    std::pair<double,double> 
+        TriggerApp::get_eff_err( double sigmin, double sigmax ) const 
     {
         double intpass = integral( *h_passed_, sigmin, sigmax );
         double intall = integral( *h_all_, sigmin, sigmax );
@@ -52,7 +53,7 @@ namespace fn
     { return get_eff_err( sigmin, sigmax ).second ; }
 
 
-    std::pair<double,double> eff_err( double passed, double all )
+    std::pair<double,double> eff_err( double passed, double all ) 
     {
         double upper = TEfficiency::ClopperPearson( all, passed, 0.6827, true );
         double lower = TEfficiency::ClopperPearson( all, passed, 0.6827, false );

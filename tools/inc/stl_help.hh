@@ -25,6 +25,8 @@ namespace fn
     std::ostream& nullos();
 
 
+    template <typename T> T sq( T n ){ return n * n ; }
+
     //Herb Sutter's make_unique
     template<typename T, typename ...Args>
         std::unique_ptr<T> make_unique( Args&& ...args )

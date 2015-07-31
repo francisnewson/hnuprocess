@@ -98,13 +98,13 @@ namespace fn
             double centre, double half_width );
 
     template <typename T>
-        T * get_object( TFile& tf, std::string name )
+        T * get_object( TFile& tf, boost::filesystem::path name )
         {
             T * h = 0;
-            tf.GetObject( name.c_str(), h );
+            tf.GetObject( name.string().c_str(), h );
             if( !h )
             {
-                throw std::runtime_error( "Can't find " + name );
+                throw std::runtime_error( "Can't find " + name.string() );
             }
             return h;
         }

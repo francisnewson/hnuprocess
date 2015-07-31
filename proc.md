@@ -44,10 +44,11 @@ STEPS TO FINAL LIMITS
       - *job*: k3pi_crosstalk
 
 - ### Subtract halo k3pi crosstalk
-    - run `./b/apps/halo_subtract -m input/halo_sub/hsub.q11t.yaml -o tdata/staging/halo_sub.q11t.root -l tdata/staging/halo_sub_log.q11t.root`
+    - Makes use of `tdata/halo_control/all.halo_control.root` and `tdata/all.k3pi_crosstalk.root`
+    - run `./b/apps/halo_subtract -m input/halo_sub/hsub.q11t.yaml -o tdata/staging/halo_sub.q11t.root -l tdata/staging/log/halo_sub_log.q11t.root`
 
 - ### Subtract km2 interference
-    - run `./b/apps/km2_subtract -m input/km2_sub/halo_control.haml -o tdata/staging/km2_sub.q11t.root -l tdata/staging/km2_sub_log.q11t.root`
+    - run `./b/apps/km2_subtract -m input/km2_sub/halo_control.haml -o tdata/staging/km2_sub.q11t.root -l tdata/staging/log/km2_sub_log.q11t.root`
 
 - ### Merge all plots
     - run `hadd tdata/staging/all.plots.root tdata/halo_control/all.halo_control.root tdata/staging/halo_sub.q11t.root tdata/staging/km2_sub.q11t.root`

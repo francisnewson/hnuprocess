@@ -1,0 +1,19 @@
+-  { cat: data,
+  files: [ { name: "dt_halo_control", filename: "tdata/halo_control/all.halo_control.root",
+            pre:  "", post: "data_burst_count/data_bursts", branch: "weight" },
+
+           { name: "dt_k3pi_crosstalk", filename: "tdata/k3pi_crosstalk/all.k3pi_crosstalk.root",
+            pre:  "", post: "data_burst_count/data_bursts", branch: "weight" }, 
+
+           { name: "dt_km2_scat", filename: "tdata/km2_scat/all.km2_scat.root",
+            pre:  "", post: "data_burst_count/data_bursts", branch: "weight" } ] }
+
+- { cat: mc,
+  files:  [ { name: "mc_k3pi_crosstalk", filename: "tdata/k3pi_crosstalk/all.k3pi_crosstalk.root",
+            pre:  "", post: "sample_burst_count/bursts", branch: "weight" },
+
+          { name: "mc_halo_control", filename: "tdata/halo_control/all.halo_control.root",
+            pre:  "", post: "sample_burst_count/bursts", branch: "weight" },
+
+           { name: "mc_km2_scat", filename: "tdata/km2_scat/all.km2_scat.root",
+            pre:  "", post: "sample_burst_count/bursts", branch: "weight" } ] }

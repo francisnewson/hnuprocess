@@ -118,8 +118,6 @@ namespace fn
                 ( "double_gaus", "[0]*exp( -0.5 * ( ( x - [1]) / [2] )**2 )"
                   " + [3]*exp( -0.5 * ( ( x - [1] ) / [4] ) **2 )", 0, 1 );
 
-
-            //fit_ = make_unique<TF1>( "double_gaus", "gaus(0)", 0.01, 0.2 );
             fit_->SetParameter( 0, h_sig_->GetMaximum() / 2 ) ;
             fit_->SetParameter( 1, h_sig_->GetMean() ) ;
             fit_->SetParameter( 2, 0.9 * h_sig_->GetRMS() ) ;
@@ -179,11 +177,50 @@ namespace fn
         h_sig_->Write( chan_.c_str() );
     }
 
+    //--------------------------------------------------
+
+    ScatterContrib::ScatterContrib( TFile& tf_noscat, TFile& tf_scat )
+        :tf_noscat_( tf_noscat ), tf_scat_( tf_scat )
+    {
+        std::vector<std::string> folders{ "up/pos", "up/neg", "dn/pos", "dn/neg" };
+
+        std::vector<std::unique_ptr<TH1>> vh_noscat;
+        std::vector<std::unique_ptr<TH1>> vh_scat;
+
+        for ( auto& f : folders )
+        {
+            auto p = boost::filesystem::path{ "signal_muv" } / f / "h_m2m" / "hbg" ;
+            vh_noscat.push_back( std::move(extract_hist( tf_noscat, p ) ) );
+            vh_scat.push_back( std::move( extract_hist( tf_scat, p ) ) );
+        }
+
+        h_noscat_ = sum_hists( begin( vh_noscat ), end( vh_noscat ) );
+        h_scat_ = sum_hists( begin( vh_scat ), end( vh_scat ) );
+    }
+
+    double ScatterContrib::get_scatter_err( double sig_min, double sig_max ) const
+    {
+        double noscat = integral( *h_noscat_, sig_min, sig_max );
+        double scat = integral( *h_scat_, sig_min, sig_max );
+        return (scat - noscat) / scat;
+    }
+
+    //--------------------------------------------------
+    Limiter::Limiter( TFile& bg_file,  std::vector<std::string> regions )
+        :bg_file_( bg_file ), pols_{ "pos", "neg" },regions_( regions )
+        {
+            km2_flux_paths_ = std::vector<std::string> { "neg_lower","pos_lower" };
+        }
+
     HnuLimResult Limiter::get_limit( const HnuLimParams& params )
     {
         //Deterimine signal region
         double sig_min = params.get_width_min();
         double sig_max = params.get_width_max();
+
+        //**************************************************
+        //Determine background 
+        //**************************************************
 
         //Determine #background events
         double background = get_background( sig_min, sig_max );
@@ -192,28 +229,63 @@ namespace fn
         auto trig_eff_err = get_trig_eff( sig_min, sig_max );
         double trig_eff = trig_eff_err.first;
         double trig_err = trig_eff_err.second;
-
         background *= trig_eff;
 
+        //**************************************************
         //Determine background error
-        double background_err = trig_err / trig_eff * background;
+        //**************************************************
+        double sqr_background_err  = 0;
 
+        //triggger eff
+        sqr_background_err = fn::sq( trig_err / trig_eff * background );
+
+        //scattering
         if ( scat_contrib_ )
         {
             double scat = (*scat_contrib_)->get_scatter_err( sig_min, sig_max );
             std::cout << "scat: "<< scat  << std::endl;
             double scat_err = background * scat;
-
-            background_err = std::hypot( background_err, scat_err );
+            sqr_background_err +=  fn::sq( scat_err );
         }
 
-        //double background_err = 0.1 * background;
+        //muv_eff
+        double muv_err = 0.01 * background;
+        sqr_background_err += fn::sq( muv_err );
 
-        //Compute limit(s)
+        //km2 flux
+        std::pair<double,double> km2_flux_and_err = get_km2_flux_and_err();
+        double km2_flux = km2_flux_and_err.first;
+        double km2_flux_err = km2_flux_and_err.second;
+        sqr_background_err += fn::sq( km2_flux_err / km2_flux * background );
+
+        //halo
+        double halo_scale_err = compute_halo_scale_err( sig_min, sig_max );
+        sqr_background_err += fn::sq( halo_scale_err );
+
+        //remember to square root
+        double background_err = std::sqrt( sqr_background_err );
+
+        //**************************************************
+        //Compute limits
+        //**************************************************
+
+#if 0
+        //100% signal efficiency for comparison
         TRolke rolke;
         rolke.SetGaussBkgKnownEff( background, background, background_err , 1.0 );
         double ul = rolke.GetUpperLimit();
+#endif
 
+        //Rolke does the heavy lifting
+        TRolke rolke_eff;
+        rolke_eff.SetGaussBkgKnownEff( background, background, background_err , params.get_width_acceptance() );
+        double ul = rolke_eff.GetUpperLimit();
+
+        //Convert for literature
+        double ul_br = ul / km2_flux;
+        double ul_u2 = br_to_mix( ul_br, 0.001 * params.get_mass()  ); //MeV -> GeV
+
+        //Ouput object
         HnuLimResult res{};
         res.trig_eff = trig_eff;
         res.trig_err = trig_err;
@@ -221,32 +293,11 @@ namespace fn
         res.background_err = background_err ;
         res.acc_sig_ul = ul;
         res.orig_sig_ul = ul / params.get_width_acceptance();
-
-        TRolke rolke_eff;
-        rolke_eff.SetGaussBkgKnownEff( background, background, background_err , params.get_width_acceptance() );
-        ul = rolke_eff.GetUpperLimit();
         res.rolke_orig_sig_ul = ul;
-
-        double km2_flux = get_km2_flux();
-
-        double ul_br = ul / km2_flux;
         res.ul_br =  ul_br;
-
-        double ul_u2 = br_to_mix( ul_br, 0.001 * params.get_mass()  );
         res.ul_u2 = ul_u2;
 
         return res;
-    }
-
-    //--------------------------------------------------
-
-    Limiter::Limiter( TFile& bg_file, TFile& trig_file, std::vector<std::string>& regions )
-        :bg_file_( bg_file ), trig_file_( trig_file ), pols_{ "pos", "neg" },regions_( regions )
-        {}
-
-    void Limiter::set_trig_regions( std::vector<std::string> trig_regions )
-    {
-        trig_regions_ = trig_regions;
     }
 
     double Limiter::get_background(double sig_min, double sig_max )
@@ -296,49 +347,63 @@ namespace fn
 
     std::pair<double,double> Limiter::get_trig_eff( double sig_min, double sig_max )
     {
-        double all = 0;
-        double passed = 0;
-
-        std::string data = "p5.data.q1.v4";
-
-        boost::format hp_all{ "%s.%s/%s/h_all" };
-        boost::format hp_passed{ "%s.%s/%s/h_passed" };
-
-        for( auto pol : pols_ )
+        if ( !trig_ )
         {
-            for ( auto reg : trig_regions_ )
-            {
-                auto hall = extract_hist<TH1D>( trig_file_, boost::str( hp_all % data % pol % reg ) );
-                auto hpassed = extract_hist<TH1D>( trig_file_, boost::str( hp_passed % data % pol % reg ) );
-
-                all += integral( *hall, sig_min, sig_max );
-                passed += integral( *hpassed, sig_min, sig_max );
-            }
+            throw std::runtime_error( "No trigger set in Limiter" );
         }
 
-        return eff_err( passed, all );
+        return (*trig_)->get_eff_err( sig_min, sig_max );
     }
 
-    double Limiter::get_km2_flux()
+    std::pair<double,double> Limiter::get_km2_flux_and_err()
     {
         const TVectorD * vd = 0;
 
-        vd = get_object<TVectorD>( bg_file_, "neg_lower/fiducial_flux" );
-        double neg_lower = (*vd)[0];
+        double total_flux = 0;
+        double total_sqerr = 0;
 
-        vd = get_object<TVectorD>( bg_file_, "neg_upper/fiducial_flux" );
-        double neg_upper = (*vd)[0];
+        for ( const auto& flux_path : km2_flux_paths_ )
+        {
+            path p{ flux_path };
+            p /= "fiducial_flux" ;
 
-        vd = get_object<TVectorD>( bg_file_, "pos_lower/fiducial_flux" );
-        double pos_lower = (*vd)[0];
+            vd = get_object<TVectorD>( bg_file_, p / "fiducial_flux" );
+            total_flux += (*vd)[0];
 
-        vd = get_object<TVectorD>( bg_file_, "pos_upper/fiducial_flux" );
-        double pos_upper = (*vd)[0];
+            vd = get_object<TVectorD>( bg_file_, p / "fiducial_flux_err" );
+            total_sqerr += (*vd)[0];
+        }
 
-        assert( neg_lower == neg_upper );
-        assert( pos_lower == pos_upper );
+        double total_err = std::sqrt( total_sqerr );
+        return std::make_pair( total_flux, total_err );
+    }
 
-        return neg_lower + pos_lower;
+    double Limiter::compute_halo_scale_err( double sig_min, double sig_max )
+    {
+        std::vector<std::pair<std::string,std::string>> halo_scale_pairs
+        {
+            { "neg/signal/lower_muv/hnu_stack_hists/halo_neg", "neg_lower" },
+                { "neg/signal/upper_muv/hnu_stack_hists/halo_neg", "neg_upper" },
+                { "pos/signal/lower_muv/hnu_stack_hists/halo_pos", "pos_lower" },
+                { "pos/signal/upper_muv/hnu_stack_hists/halo_pos", "pos_upper" },
+        };
+
+        double total_sqerror = 0;
+
+        for ( auto hp : halo_scale_pairs )
+        {
+            double halo_scale 
+                = retrieve_value( bg_file_, path{hp.second} / "halo_scale" );
+
+            double halo_scale_err 
+                = retrieve_value( bg_file_, path{hp.second} / "halo_scale_err" );
+
+            auto h_halo = extract_hist<TH1D>( bg_file_, hp.first );
+            double halo_contrib = integral( *h_halo, sig_min, sig_max );
+            total_sqerror += fn::sq(  halo_contrib * halo_scale_err / halo_scale );
+        }
+
+        return std::sqrt( total_sqerror );
     }
 
     void Limiter::set_scatter_contrib( const ScatterContrib& sc )
@@ -346,33 +411,13 @@ namespace fn
         scat_contrib_ = &sc;
     }
 
+    void Limiter::set_trigger( const TriggerApp& trig )
+    {
+        trig_ = &trig;
+    }
+
     //--------------------------------------------------
 
-    ScatterContrib::ScatterContrib( TFile& tf_noscat, TFile& tf_scat )
-        :tf_noscat_( tf_noscat ), tf_scat_( tf_scat )
-    {
-        std::vector<std::string> folders{ "up/pos", "up/neg", "dn/pos", "dn/neg" };
-
-        std::vector<std::unique_ptr<TH1>> vh_noscat;
-        std::vector<std::unique_ptr<TH1>> vh_scat;
-
-        for ( auto& f : folders )
-        {
-            auto p = boost::filesystem::path{ "signal_muv" } / f / "h_m2m" / "hbg" ;
-            vh_noscat.push_back( std::move(extract_hist( tf_noscat, p ) ) );
-            vh_scat.push_back( std::move( extract_hist( tf_scat, p ) ) );
-        }
-
-        h_noscat_ = sum_hists( begin( vh_noscat ), end( vh_noscat ) );
-        h_scat_ = sum_hists( begin( vh_scat ), end( vh_scat ) );
-    }
-
-    double ScatterContrib::get_scatter_err( double sig_min, double sig_max ) const
-    {
-        double noscat = integral( *h_noscat_, sig_min, sig_max );
-        double scat = integral( *h_scat_, sig_min, sig_max );
-        return (scat - noscat) / scat;
-    }
 
     double br_to_mix(double BR, double mh)
     {
@@ -388,4 +433,11 @@ namespace fn
         return (BR / brkm2) / f;
     }
 
+    //--------------------------------------------------
+
+    double retrieve_value( TFile& tf , boost::filesystem::path name )
+    {
+        const TVectorD * vd = get_object<TVectorD>( tf, name );
+        return (*vd)[0];
+    }
 }

@@ -19,6 +19,8 @@
 #include "TH1D.h"
 #include "TF1.h"
 #include <boost/optional.hpp>
+#include <boost/filesystem/path.hpp>
+#include "TriggerApp.hh"
 
 namespace fn
 {
@@ -113,15 +115,15 @@ namespace fn
     class Limiter
     {
         public:
-            Limiter ( TFile& bg_file, TFile& trig_file,
-                    std::vector<std::string>& regions );
+            Limiter ( TFile& bg_file, 
+                    std::vector<std::string> regions );
 
             HnuLimResult get_limit( const HnuLimParams& params );
             std::pair<double,double> get_signal_range( TH1D& h );
-            void set_bg_channels( std::vector<std::string> bgchans );
-            void set_trig_regions( std::vector<std::string> trig_regions );
 
+            void set_bg_channels( std::vector<std::string> bgchans );
             void set_scatter_contrib( const ScatterContrib& sc );
+            void set_trigger( const TriggerApp& trig );
 
         private:
             std::unique_ptr<TH1> get_bg_hist
@@ -131,24 +133,28 @@ namespace fn
             std::pair<double,double>
                 get_trig_eff( double sig_min, double sig_max );
 
-            double get_km2_flux();
+            std::pair<double,double> get_km2_flux_and_err();
+
+            double compute_halo_scale_err( double sig_min, double sig_max );
 
             double n_sigma_range_;
 
             TFile& bg_file_;
-            TFile& trig_file_;
 
             std::vector<std::string> bg_channels_;
             std::vector<std::string> pols_;
-            std::vector<std::string> trig_regions_;
-            std::vector<std::string>& regions_;
+            std::vector<std::string> regions_;
+            std::vector<std::string> km2_flux_paths_;
 
             boost::optional<const ScatterContrib*> scat_contrib_;
+            boost::optional<const TriggerApp*> trig_;
     };
 
     //--------------------------------------------------
 
     double br_to_mix(double BR, double mh);
+
+    double retrieve_value( TFile& tf , boost::filesystem::path name );
 
 }
 #endif

@@ -30,7 +30,8 @@ namespace fn
             const TH1D&  get_h_passed(){ return *h_passed_ ; }
             const TH1D&  get_h_all(){ return *h_all_ ; }
 
-            std::pair<double,double> get_eff_err( double sigmin, double sigmax );
+            std::pair<double,double> 
+                get_eff_err( double sigmin, double sigmax ) const;
             double get_eff( double sigmin, double sigmax );
             double get_err( double sigmin, double sigmax );
 

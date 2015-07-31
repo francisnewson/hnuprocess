@@ -10,6 +10,7 @@
 #include <boost/io/ios_state.hpp>
 #include <boost/regex.hpp>
 
+//print individual result to screen (human readable)
 void print_result( std::ostream& os, const HnuLimParams& hlp, const HnuLimResult& hlr )
 {
     boost::io::ios_flags_saver fs( os );
@@ -32,6 +33,7 @@ void print_result( std::ostream& os, const HnuLimParams& hlp, const HnuLimResult
     os << "BR limit: " << hlr.ul_br  << " U2 limit: " << hlr.ul_u2 << "\n";
 }
 
+//headings for writing to file (script readable)
 void print_headings( std::ostream& os )
 {
     os 
@@ -54,6 +56,7 @@ void print_headings( std::ostream& os )
         << std::endl;
 }
 
+//writing to file (script readable)
 void print_flat_result( std::ostream& os, const HnuLimParams& hlp, const HnuLimResult& hlr )
 {
     boost::io::ios_flags_saver fs( os );
@@ -74,7 +77,9 @@ void print_flat_result( std::ostream& os, const HnuLimParams& hlp, const HnuLimR
         << std::setw(15) << hlr.background
         << std::setw(15) << hlr.background_err;
 
-    os.setf(std::ios_base::scientific, std::ios_base::floatfield);
+    os.setf(std::ios_base::scientific,
+            std::ios_base::floatfield);
+
     os
         << std::setw(15) <<  hlr.acc_sig_ul
         << std::setw(15) <<  hlr.orig_sig_ul
@@ -85,57 +90,81 @@ void print_flat_result( std::ostream& os, const HnuLimParams& hlp, const HnuLimR
 
 int main()
 {
-    std::string filename = "tdata/km2_acc/all.km2_acc.root" ;
+    //**************************************************
+    //Signal shapes
+    //**************************************************
 
-    auto fid_weights = extract_fiducial_weights
-        ( filename, "", "sample_burst_count/bursts", "weight"  );
-
-    TFile tf {filename.c_str()};
-
-    TFile tfout{ "output/signal_shapes.root", "RECREATE" };
-
+    //Decide which masses to look at
     std::vector<int> masses;
     for( int m = 250 ; m != 390 ; m += 5 )
     { masses.push_back( m ); }
 
-    std::ostream& os = std::cout;
+    //Load acceptance plots
+    std::string acc_filename = "tdata/km2_acc/all.km2_acc.root" ;
+    auto fid_weights = extract_fiducial_weights
+        ( acc_filename, "", "sample_burst_count/bursts", "weight"  );
 
+    //set up acceptance files
+    TFile tfin_acc {acc_filename.c_str()};
+    TFile tfout_acc{ "output/signal_shapes.root", "RECREATE" };
 
-    std::vector<std::string> regions { "signal_upper_muv", "signal_lower_muv" };
+    //**************************************************
+    //Background estimates
+    //**************************************************
 
-    std::string bg_filename = "tdata/staging/all.mass_plots.root";
-    TFile tfbg{ bg_filename.c_str() };
-
-    std::string trig_filename = "tdata/halo_control/all.halo_control.root" ;
-    TFile tftrig{ trig_filename.c_str() };
-
+    //Decide which backgrounds to consider
     std::vector<std::string> background_channels
     { "halo", "k3pi", "k2pig", "k3pi0", "km3", "km2" };
 
-    TFile tfscat { "tdata/staging/km2_scat.root"};
-    TFile tfnoscat { "tdata/staging/km2_noscat.root"};
+    //Load background file
+    std::string bg_filename = "tdata/staging/all.mass_plots.root";
+    TFile tfin_bg{ bg_filename.c_str() };
+    std::vector<std::string> signal_regions { "signal_upper_muv", "signal_lower_muv" };
 
-    ScatterContrib sc{ tfnoscat, tfscat };
-
-    Limiter lm{ tfbg, tftrig, regions };
+    Limiter lm{ tfin_bg, signal_regions };
     lm.set_bg_channels( background_channels);
-    lm.set_trig_regions( { "sig_up_trig_eff", "sig_dn_trig_eff" } );
+
+    //Trigger corrections
+    std::string trig_filename = "tdata/halo_control/all.halo_control.root" ;
+    TFile tfin_trig{ trig_filename.c_str() };
+
+    TriggerApp trig( tfin_trig );
+    trig.set_sels( { 
+            "p5.data.q1.v4.neg/sig_up_trig_eff",
+            "p5.data.q1.v4.neg/sig_dn_trig_eff",
+            "p5.data.q1.v4.pos/sig_up_trig_eff",
+            "p5.data.q1.v4.pos/sig_dn_trig_eff"
+            } );
+    trig.init();
+
+    lm.set_trigger( trig );
+
+    //Scattering
+    TFile tfin_scat { "tdata/staging/km2_scat.root"};
+    TFile tfin_noscat { "tdata/staging/km2_noscat.root"};
+    ScatterContrib sc{ tfin_noscat, tfin_scat };
+
     lm.set_scatter_contrib( sc );
 
+    //Output streams
     std::ofstream ofs( "output/lim.txt" );
     print_headings( ofs );
-
+    std::ostream& os = std::cout;
 
     for ( const auto& mass : masses )
     {
+        //Set up signal parameters
+        HnuLimParams hlp( tfin_acc, fid_weights, signal_regions, mass );
 
-        HnuLimParams hlp( tf, fid_weights, regions, mass );
+        //write acceptance plots
+        tfout_acc.cd();
+        hlp.write();
 
+        //Get limits
         auto limres = lm.get_limit( hlp );
+
+        //Print limit results
         print_result( os, hlp, limres );
         print_flat_result( ofs, hlp, limres );
-
-        tfout.cd();
-        hlp.write();
     }
 }
