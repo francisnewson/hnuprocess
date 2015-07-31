@@ -406,11 +406,19 @@ int main( int argc, char * argv[] )
         std::cerr << "DUPLICATE SELECTION: " << e.what() << std::endl;
         return EXIT_FAILURE;
     }
+    catch ( fn::Xcept<fn::UnknownSubscriber>& e )
+    {
+        std::cerr << "UKNOWN SUBSCRIBER: " << e.what() << std::endl;
+        return EXIT_FAILURE;
+    }
+    catch ( fn::Xcept<fn::MissingNode>& e )
+    {
+        std::cerr << "MISSING NODE: " << e.what() << std::endl;
+        return EXIT_FAILURE;
+    }
     catch ( std::exception& e )
     {
         std::cerr << "UNHANDLED EXCEPTION: " << e.what() << std::endl;
         std::cerr << "Type:    " << typeid(e).name() << "\n";
-        return EXIT_FAILURE;
-
     }
 }

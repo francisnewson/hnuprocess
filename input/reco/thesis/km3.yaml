@@ -1,7 +1,4 @@
-#Apply scattering to full selectionon
-#so we can compare with km2_full.yaml
-#inputs:
-#km2event: km2_event
+#Km3 selection to see if we can use it to study MUV
 ---
 #-------------------------------------------------- 
 #
@@ -12,7 +9,7 @@
 - output:
     name: tfout
     type: tfile
-    filename: km2_plots.root
+    filename: km3_plots.root
 
 - output:
     name: text_out
@@ -22,12 +19,7 @@
 - output:
     name: stats_out
     type: ostream
-    filename: km2_stats.dat
-
-- output:
-    name: debug_out
-    type: ostream
-    filename: km2_debug.dat
+    filename: km3_stats.dat
 
 
 @include "input/reco/thesis/std/corrections.inc.yaml"
@@ -39,20 +31,12 @@
 
 #SingleTrack
 - input: { name : bf_st,
-    type : SingleTrack, method : BFScatter,
+    type : SingleTrack, method : BF,
     init_min_mom: 3.0 ,
     init_max_mom: 75.0, init_max_cda: 15.0,
     init_min_z: -2000.0, init_max_z:  9000.0 ,
     dch_merge_sep: 0.5,
-
-    angle_sigma: 0.0110,
-    angle_frequency: 0.008,
-    angle_power: 3,
-    mom_sigma: 0.08,
-    mom_frequency: 0.0037,
-    mom_power: 3,
     inputs: { kt: kaon_track} }
-
 
 #----------km2 event
 - input: { name: km2_event, type: Km2Event,
@@ -91,6 +75,79 @@
 @include "input/reco/thesis/std/selections.inc.yaml"
 @include "input/reco/thesis/std/kine_regions.inc.yaml"
 
+- input:
+    name: k2pi_clusters
+    type: K2piClusters
+    method: LooseTrack
+
+    max_track_cluster_time: 12
+    min_cluster_energy: 10
+    max_track_cluster_distance: 40
+
+    inputs:
+        ogt: bf_st
+        ClusterCorrector: cluster_corrector
+
+- input: 
+    name: km3_reco
+    type: Km3Reco
+    inputs:
+        ogt: bf_st
+        k2pic: k2pi_clusters
+        kt: kaon_track
+
+###################################################
+# CUTS
+###################################################
+
+- selection:
+    name: km3_m2m
+    type: Km3M2Miss
+    min_m2: -0.01
+    max_m2:  0.01
+    inputs:
+         km3reco: km3_reco
+
+- selection:
+    name: km3_pt
+    type: Km3PtMiss
+    min_pt: 0.02
+    max_pt: 0.15
+    inputs:
+         km3reco: km3_reco
+
+- selection:
+    name: km3_mom
+    type: Km3MomMiss
+    min_mom: 4
+    max_mom: 60
+    inputs:
+         km3reco: km3_reco
+
+- selection:
+    name: km3_eop
+    type: Km3eop
+    min_eop: -1
+    max_eop: 0.95
+    inputs:
+         km3reco: km3_reco
+
+- selection:
+    name: km3_dv
+    type: Km3DV
+    min_dv: -200
+    max_dv: +200
+    inputs:
+         km3reco: km3_reco
+
+- selection:
+    name: km3_cda
+    type: Km3cda
+    min_cda: 0
+    max_cda: 3
+    inputs:
+         km3reco: km3_reco
+
 ###################################################
 # SELECTIONS
 ###################################################
@@ -113,61 +170,68 @@
         - dch1_acc
         - dch4_acc
         - muv_acc
-        - rk_lkr_veto
-        - rk_hot_lkr
-        - rk_lkr_accep
-        - rk_dcht
-        - ddead_cell
 
-- selection: { name: signal_upper_muv, type : CompositeSelection,
-    children:  [ pre_selection, signal_upper_sel, muon_req ]  }
+- selection:
+    name : tgt_km3_sel
+    type: CompositeSelection
+    children:
+        - km3_pt
+        - km3_mom
+        - km3_dv
+        - km3_eop
+        - km3_cda
 
-- selection: { name: signal_lower_muv, type : CompositeSelection, 
-    children:  [ pre_selection, signal_lower_sel, muon_req ]  }
+- selection:
+    name : km3_full
+    type: CompositeSelection
+    children:
+        - pre_selection
+        - tgt_km3_sel
 
-- analysis : 
-     name : up_summary
-     type: Summary
-     base : passer
-     source : signal_upper_muv 
-     ostream: text_out
-
-- analysis : 
-     name : dn_summary
-     type: Summary
-     base : passer
-     source : signal_lower_muv 
-     ostream: text_out
 
 - analysis : 
-     name : up_summary_file
+     name : summary_file
      type: Summary
      base : passer
-     source : signal_upper_muv 
+     source : pre_selection 
      ostream: stats_out
 
 - analysis : 
-     name : dn_summary_file
+     name : summary_cout
      type: Summary
      base : passer
-     source : signal_lower_muv 
+     source : pre_selection 
+     ostream: text_out
+
+- analysis : 
+     name : summary_file_full
+     type: Summary
+     base : passer
+     source : km3_full 
      ostream: stats_out
 
+- analysis : 
+     name : summary_cout_full
+     type: Summary
+     base : passer
+     source : km3_full 
+     ostream: text_out
 
 - analysis :
-     type: Km2Plotter
-     name: km2_up_plots
-     folder: signal_upper_muv
+     type: Km3Plotter
+     name: km3_plots
+     folder: km3_plots
      tfile: tfout
-     selection: signal_upper_muv
+     selection: pre_selection
      inputs:
-         km2event: km2_event
+         km3reco: km3_reco
 
 - analysis :
-     type: Km2Plotter
-     name: km2_dn_plots
-     folder: signal_lower_muv
+     type: Km3Plotter
+     name: km3_full_plotter
+     folder: km3_full
      tfile: tfout
-     selection: signal_lower_muv
+     selection: km3_full
      inputs:
-         km2event: km2_event
+         km3reco: km3_reco
+

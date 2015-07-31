@@ -16,6 +16,7 @@ lenv.AddLibs( [
             'clusters',
             'kinfo',
             'km2',
+            'km3',
             'dch',
             'muons',
             'akl',

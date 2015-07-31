@@ -29,7 +29,7 @@ std::unique_ptr<TH1D> hist_variation( TH1& h )
 {
     Int_t nBins = h.GetNbinsX() * h.GetNbinsY() * h.GetNbinsZ();
 
-    auto result = make_unique<TH1D>( "hvar", "variation", 100, 0.8, 1.2 );
+    auto result = make_unique<TH1D>( "hvar", "variation", 1000, 0.8, 1.2 );
 
     for ( Int_t gBin = 1; gBin != nBins + 1 ; ++gBin )
     {

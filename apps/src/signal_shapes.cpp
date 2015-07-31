@@ -56,9 +56,9 @@ void print_headings( std::ostream& os )
 
 void print_flat_result( std::ostream& os, const HnuLimParams& hlp, const HnuLimResult& hlr )
 {
-        boost::io::ios_flags_saver fs( os );
-        os.setf(std::ios::fixed, std::ios::floatfield);
-        os.precision(5);
+    boost::io::ios_flags_saver fs( os );
+    os.setf(std::ios::fixed, std::ios::floatfield);
+    os.precision(5);
 
     os 
         << std::setw(20) << hlp.get_chan()
@@ -69,10 +69,10 @@ void print_flat_result( std::ostream& os, const HnuLimParams& hlp, const HnuLimR
         << std::setw(15) << hlp.get_width()
         << std::setw(15) << hlp.get_width_acceptance()
         << std::setw(15) << hlp.get_width_acceptance_err()
-        << std::setw(15) <<  hlr.trig_eff
-        << std::setw(15) <<  hlr.trig_err
-        << std::setw(15) <<  hlr.background
-        << std::setw(15) <<  hlr.background_err;
+        << std::setw(15) << hlr.trig_eff
+        << std::setw(15) << hlr.trig_err
+        << std::setw(15) << hlr.background
+        << std::setw(15) << hlr.background_err;
 
     os.setf(std::ios_base::scientific, std::ios_base::floatfield);
     os

@@ -1,4 +1,4 @@
-#Explore k3pi cross talk
+#Both K+ and K- selections to look at k3pi cross talk
 #-------------------------------------------------- 
 
 ###################################################
@@ -70,17 +70,6 @@
         ogt: bf_st
         ClusterCorrector: cluster_corrector
 
-#Km2Clusters
-- input:
-    name: rk_km2clusters
-    type: Km2Clusters
-    noise_energy: 2 #GeV
-    noise_time: 12 #ns
-    brehm_radius: 6 #cm
-    track_cluster_radius: 8 #cm
-    inputs:
-        ogt: bf_st
-        ClusterCorrector: cluster_corrector
 
 - input:
     name: single_muon
@@ -94,7 +83,7 @@
     name: muon_xy_wgt
     type: MuonTHXYWeight
     effs_file: input/reco/conditions/muv_xy.root
-    effs_hist: rat_xy
+    effs_hist: muv_eff_xy
     inputs:
         ogt: bf_st
 
@@ -102,7 +91,7 @@
     name: muon_p_wgt
     type: MuonTHPWeight
     effs_file: input/reco/conditions/muv/muv_eff_p.root
-    effs_hist: rat_p
+    effs_hist: muv_eff_p
     inputs:
         ogt: bf_st
 

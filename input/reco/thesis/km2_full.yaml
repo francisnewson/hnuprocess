@@ -1,4 +1,5 @@
-#Loose selection for looking at halo
+#Full km2 selection for looking at hnu acceptance
+#and control for comparing to scattered
 #inputs:
 #km2event: km2_event
 ---
@@ -30,7 +31,6 @@
 
 
 @include "input/reco/thesis/std/corrections.inc.yaml"
-
 @include "input/reco/thesis/std/data_sample.inc.yaml"
 
 ###################################################
@@ -81,7 +81,6 @@
         ogt: bf_st
 
 @include "input/reco/thesis/std/selections.inc.yaml"
-
 @include "input/reco/thesis/std/kine_regions.inc.yaml"
 
 ###################################################

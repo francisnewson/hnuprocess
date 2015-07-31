@@ -1,0 +1,156 @@
+scaling:
+    - scaling_method:
+        strategy: m2
+        name: mc_pos
+        peakname: km3
+
+        channels:
+            halo_channels: [ p6.data.kless.q11t.v2.pos  ]
+            data_channels: [ p5.data.q1.v4.pos ]
+            peak_channels: [ p5.km3.v2.pos ]
+
+
+        halo: { strategy: dummy }
+
+        mc:  { strategy: dummy }
+
+    - scaling_method:
+        strategy: m2
+        name: mc_neg
+        peakname: km3
+
+        channels:
+            halo_channels: [ p6.data.kless.q11t.v2.pos  ]
+            data_channels: [ p5.data.q1.v4.pos ]
+            peak_channels: [ p5.km3.v2.pos ]
+
+        halo: { strategy: dummy }
+
+        mc: { strategy: dummy }
+
+
+weights:
+    fid_file: use_root
+    root_file: "tdata/km3/all.km3.root"
+    pre : ""
+    post: "sample_burst_count/bursts"
+    branch:  "weight"
+
+output:
+    input_file: tdata/km3/all.km3.root
+
+    plots:
+        - { path: km3_plots/h_m2m, name: raw_hm2m, rebin: 1 }
+        - { path: km3_plots/h_dv_, name: raw_dv, rebin: 1 }
+        - { path: km3_plots/h_ptm_, name: raw_ptm, rebin: 1 }
+        - { path: km3_plots/h_pm_, name: raw_pm, rebin: 1 }
+        - { path: km3_full/h_m2m, name: full_hm2m, rebin: 1 }
+        - { path: km3_plots/h_m2_vs_p_m_, name: raw_pm2pm, rebin: 1 }
+        - { path: km3_full/h_dv_, name: full_dv, rebin: 1 }
+
+    data_plot:
+        channels:
+            - p5.data.q1.v4.pos
+            - p5.data.q1.v4.neg
+
+    blinding: {do_blind: false}
+    stack:
+
+        - item:
+            name: k3pi0_pos
+            scaling: mc_pos
+            fid_weight: p5.k3pi0.v2.pos
+            type: k3pi0
+            channels:
+                - p5.k3pi0.v2.pos
+
+        - item:
+            name: k3pi0_neg
+            scaling: mc_neg
+            fid_weight: p5.k3pi0.v2.neg
+            type: k3pi0
+            channels:
+                - p5.k3pi0.v2.neg
+
+        - item:
+            name: ke3_pos
+            scaling: mc_pos
+            type: ke3
+            fid_weight: p5.ke3.v2.pos
+            channels:
+                - p5.ke3.v2.pos
+
+        - item:
+            name: ke3_neg
+            scaling: mc_neg
+            type: ke3
+            fid_weight: p5.ke3.v2.neg
+            channels:
+                - p5.ke3.v2.neg
+
+
+        - item:
+            name: k3pi_pos
+            scaling: mc_pos
+            fid_weight: p5.k3pi.v2.pos
+            type: k3pi
+            channels:
+                - p5.k3pi.v2.pos
+
+        - item:
+            name: k3pi_neg
+            scaling: mc_neg
+            fid_weight: p5.k3pi.v2.neg
+            type: k3pi
+            channels:
+                - p5.k3pi.v2.neg
+
+
+        - item:
+            name: km2_pos
+            scaling: mc_pos
+            fid_weight: p5.km2.v2.pos
+            type: km2
+            channels:
+                - p5.km2.v2.pos
+
+        - item:
+            name: km2_neg
+            scaling: mc_neg
+            fid_weight: p5.km2.v2.neg
+            type: km2
+            channels:
+                - p5.km2.v2.neg
+
+        - item:
+            name: k2pig_pos
+            scaling: mc_pos
+            type: k2pi
+            fid_weight: p5.k2pig.v2.pos
+            channels:
+                - p5.k2pig.v2.pos
+
+        - item:
+            name: k2pig_neg
+            scaling: mc_neg
+            type: k2pi
+            fid_weight: p5.k2pig.v2.neg
+            channels:
+                - p5.k2pig.v2.neg
+
+        - item:
+            name: km3_pos
+            scaling: mc_pos
+            type: km3
+            fid_weight: p5.km3.v2.pos
+            channels:
+                - p5.km3.v2.pos
+
+        - item:
+            name: km3_neg
+            scaling: mc_neg
+            type: km3
+            fid_weight: p5.km3.v2.neg
+            channels:
+                - p5.km3.v2.neg
+
