@@ -6,6 +6,9 @@
             pre:  "", post: "data_burst_count/data_bursts", branch: "weight" }, 
 
            { name: "dt_km2_scat", filename: "tdata/km2_scat/all.km2_scat.root",
+            pre:  "", post: "data_burst_count/data_bursts", branch: "weight" },
+
+           { name: "dt_km2_noscat", filename: "tdata/km2_noscat/all.km2_noscat.root",
             pre:  "", post: "data_burst_count/data_bursts", branch: "weight" } ] }
 
 - { cat: mc,
@@ -16,4 +19,7 @@
             pre:  "", post: "sample_burst_count/bursts", branch: "weight" },
 
            { name: "mc_km2_scat", filename: "tdata/km2_scat/all.km2_scat.root",
+            pre:  "", post: "sample_burst_count/bursts", branch: "weight" },
+
+           { name: "mc_km2_noscat", filename: "tdata/km2_noscat/all.km2_noscat.root",
             pre:  "", post: "sample_burst_count/bursts", branch: "weight" } ] }

@@ -31,11 +31,34 @@ namespace fn
 
         for ( const auto& plot_name:  plots )
         {       
+            std::cerr << "Processing " << plot_name << std::endl;
             for ( const auto& pol : std::vector<std::string>{ "pos", "neg" } )
             {
                 process_plot( plot_name, pol );
             }
         }
+
+        for ( const auto& pol : std::vector<std::string>{ "pos", "neg" } )
+        {
+            copy_fids( names_.at( "ib"), pol, names_.at("full"), config_node_["fid"] );
+        }
+    }
+
+    void Km2Sub::copy_fids( std::string src, std::string pol, std::string dest,
+            const YAML::Node& fid_conf )
+    {
+        std::string pre = get_yaml<std::string>( fid_conf, "pre" );
+        std::string post = get_yaml<std::string>( fid_conf, "post" );
+        std::string root_file = get_yaml<std::string>( fid_conf, "root_file" );
+        auto old_tree_path = boost::filesystem::path{ pre } / (src + "." + pol) / post;
+        auto new_tree_path = boost::filesystem::path{ pre } / (dest + "." + pol) / post;
+
+        auto tfile = get_tfile( root_file );
+        auto old_tree = get_object<TTree>( *tfile, old_tree_path );
+
+        cd_p( &tfout_, new_tree_path.parent_path() );
+        TTree * new_tree = old_tree->CloneTree();
+        new_tree->Write();
     }
 
     void Km2Sub::process_plot( std::string plot_name, std::string pol )

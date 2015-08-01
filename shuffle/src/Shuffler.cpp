@@ -5,7 +5,6 @@
 #include "HistStacker.hh"
 #include "TFile.h"
 #include "OwningStack.hh"
-#include "Km2Scaling.hh"
 #include "yaml-cpp/exceptions.h"
 #include "RatioCanvas.hh"
 #include "fiducial_functions.hh"
@@ -19,7 +18,8 @@ namespace fn
 
     void do_the_shuffle(const YAML::Node& output_node,
             TFile& output_file,
-            std::map<std::string, MultiScaling>& scaling_info)
+           scaling_map& scaling_info
+           )
     {
         //Setup input
         path stack_input_file = get_yaml<std::string>( output_node, "input_file" );

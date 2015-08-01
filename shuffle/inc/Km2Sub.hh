@@ -31,6 +31,9 @@ namespace fn
             std::unique_ptr<TH1> get_sum( std::string chan, std::string pol );
             void scale_hist( TH1& h, std::string chan, std::string pol );
 
+            void copy_fids( std::string src, std::string pol, std::string dest,
+                    const YAML::Node& fid_conf );
+
             YAML::Node config_node_;
 
             TFile &tfout_;
@@ -43,9 +46,6 @@ namespace fn
             std::map<std::string, std::string> names_;
             std::map<std::string, double> brs_;
             std::map<std::string, double> fid_weights_;
-
-
-
     };
 }
 #endif

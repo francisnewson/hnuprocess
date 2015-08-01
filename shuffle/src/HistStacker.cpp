@@ -6,34 +6,6 @@
 
 namespace fn
 {
-#if 0
-    RootColors::RootColors()
-        :colors_{ 
-            {"kWhite", kWhite}, {"kBlack", kBlack},
-                {"kGray", kGray}, {"kRed", kRed},
-                {"kGreen", kGreen}, {"kBlue", kBlue},
-                {"kYellow", kYellow}, {"kMagenta", kMagenta},
-                {"kCyan", kCyan}, {"kOrange", kOrange},
-                {"kSpring", kSpring}, {"kTeal", kTeal},
-                {"kAzure", kAzure}, {"kViolet", kViolet},
-                {"kPink", kPink}
-        } {}
-
-    int RootColors::operator()( std::string name ) const
-    { 
-        int kcolor = 0;
-        try {kcolor = colors_.at( name); } 
-        catch ( std::out_of_range& e )
-        { throw std::out_of_range( "Unkown ROOT color " + name );}
-        return kcolor;
-    }
-
-    int root_color( std::string name )
-    {
-        static const RootColors rc;
-        return rc( name );
-    }
-#endif
 
     HistFormatter::HistFormatter( std::string filename )
     {
@@ -89,7 +61,7 @@ namespace fn
     //--------------------------------------------------
 
     HistStacker::HistStacker( const YAML::Node& stack_instructions, FNTFile& tfin,
-            std::map<std::string, MultiScaling>& scaling_info, const HistFormatter& formatter)
+            scaling_map& scaling_info, const HistFormatter& formatter)
         :stack_instructions_( stack_instructions), tfin_( tfin ),
         scaling_info_( scaling_info ), formatter_( formatter )
     { }
@@ -98,6 +70,11 @@ namespace fn
     {
         const YAML::Node & stack_node = stack_instructions_["stack"];
         assert(stack_node.IsSequence());
+
+        if ( stack_instructions_["stack_scaling"] )
+        {
+            default_scaling_ = get_yaml<std::string>( stack_instructions_, "stack_scaling" );
+        }
 
         for ( auto  item : stack_node )
         {
@@ -125,13 +102,27 @@ namespace fn
     {
         using std::string;
 
-        auto scaling_name = get_yaml<string>( instruct, "scaling" );
+        string name = get_yaml<string>( instruct, "name" );
+
+        string scaling_name = "";
+
+        if ( instruct["scaling"] )
+        {
+            scaling_name = get_yaml<string>( instruct, "scaling" );
+        }
+        else if ( default_scaling_ )
+        {
+            scaling_name = *default_scaling_;
+        }
+        else
+        {
+            throw std::runtime_error( "No scalign info for " + name );
+        }
 
         try
         {
-            const auto& scaling =
-                scaling_info_.at( scaling_name);
-            scaling.scale_hist( h, instruct );
+            const auto& scaling = scaling_info_.at( scaling_name);
+            scaling->scale_hist( h, instruct );
         }
         catch( std::exception& e )
         {

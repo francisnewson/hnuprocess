@@ -56,6 +56,11 @@ namespace fn
 
     REG_DEF_SUB( BadBurstRange);
 
+    void BadBurstRange::new_burst()
+    {
+        //print_ = true;
+    }
+
     bool BadBurstRange::do_check() const
     {
         auto this_burst = BurstId
@@ -63,7 +68,15 @@ namespace fn
 
         bool burst_in_list = burst_ranges_.in_any_range( this_burst );
 
-        BOOST_LOG_SEV( get_log(), log_level() )
+        auto level = log_level();
+
+        if ( print_ )
+        {
+            level = always_print;
+            print_ = false;
+        }
+
+        BOOST_LOG_SEV( get_log(), level )
             << "Burst: " << this_burst 
             << burst_in_list;
 

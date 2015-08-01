@@ -75,7 +75,7 @@ namespace fn
                 BadBurstRange( InputIterator start,
                         InputIterator finish,
                         const fne::Event* e )
-                :event_( e )
+                :event_( e ), print_( false )
                 {
                     burst_ranges_.load_info( start, finish );
 
@@ -83,11 +83,13 @@ namespace fn
                         << "Loaded ranges" ;
                 }
 
+            void new_burst();
+
         private: 
             bool do_check() const;
             const fne::Event* event_;
             OrderedRanges<BurstId> burst_ranges_;
-
+            mutable bool print_;
 
             REG_DEC_SUB( BadBurstRange );
     };

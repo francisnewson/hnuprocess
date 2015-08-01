@@ -90,6 +90,9 @@ namespace fn
 
                 bool in_any_range( const K& key ) const
                 {
+                    //if we are already past all the ranges then return false
+                        if ( current_range_ == ranges_.end() ){ return false; }
+
                     //catch up until upper limit is >= key
                     while ( current_range_->second < key )
                     {

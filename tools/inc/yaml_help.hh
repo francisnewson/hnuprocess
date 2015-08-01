@@ -18,6 +18,7 @@ namespace fn
             {
                 std::cerr << "Extracting " <<  s << "\n";
                 std::cerr << c.what() << std::endl;
+                std::cerr << node << std::endl;
                 throw Xcept<MissingInfo>( s );
             }
 

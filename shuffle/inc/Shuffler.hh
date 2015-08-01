@@ -2,6 +2,8 @@
 #define SHUFFLER_HH
 #include <map>
 #include <string>
+#include "Km2Scaling.hh"
+#include "MultiScaling.hh"
 #if 0
 /*
  *  ____  _            __  __ _
@@ -22,11 +24,10 @@ class TFile;
 
 namespace fn
 {
-    class MultiScaling;
 
     void do_the_shuffle( const YAML::Node& output_node,
             TFile& output_file,
-            std::map<std::string, MultiScaling>& scaling_info
+           scaling_map& scaling_info
             );
 }
 #endif

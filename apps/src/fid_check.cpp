@@ -70,6 +70,7 @@ void process_class( const YAML::Node& node )
         ss << std::setw(40) << chan;
 
         bool bad_flag = false;
+        bool very_bad_flag = false;
         double val = -1.0;
 
         for ( auto& fid_map : fid_maps )
@@ -81,9 +82,15 @@ void process_class( const YAML::Node& node )
 
                 //check for match
                 if ( val < 0 ) {  val = this_val; }
-                if (  val != this_val ) { bad_flag = true; }
+                if (  val != this_val ) {
+                    bad_flag = true;
+                    if ( fabs( val - this_val ) > 5 )
+                    {
+                        very_bad_flag = true;
+                    }
+                }
 
-                ss << std::setw(30) << this_val;
+                ss << std::setw(30) << std::setprecision(8) <<  this_val;
             }
             else
             {
@@ -91,12 +98,13 @@ void process_class( const YAML::Node& node )
             }
         }
 
-        if ( bad_flag ) { os << "\033[31;m***"; }
+        if ( very_bad_flag ) { os << "\033[31;m***"; }
+        else if ( bad_flag ) { os << "\033[33;m---"; }
         else { os <<  "   "; } 
 
         os << ss.str() ;
 
-        if ( bad_flag ) { os << "\033[0;m"; }
+        if ( bad_flag || very_bad_flag ) { os << "\033[0;m"; }
         os << "\n";
     }
 
@@ -104,13 +112,23 @@ void process_class( const YAML::Node& node )
 
 }
 
-int main()
+int main(int argc , char * argv[] )
 {
-    YAML::Node config = YAML::LoadFile( "input/fidcheck/all.yaml" );
+
+    if ( argc != 2 )
+    {
+        std::cout << "Need yaml file!" << std::endl;
+        return EXIT_FAILURE;
+    }
+
+    std::string yaml_file( argv[1] );
+
+    YAML::Node config = YAML::LoadFile( yaml_file );
 
     for ( const auto& class_node : config )
     {
         process_class( class_node );
     }
 
+    return EXIT_SUCCESS;
 }

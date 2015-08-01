@@ -5,6 +5,7 @@
 #include <memory>
 #include "yaml-cpp/yaml.h"
 #include <boost/filesystem/path.hpp>
+#include <boost/optional.hpp>
 #include "OwningStack.hh"
 #include "HistExtractor.hh"
 #include "MultiScaling.hh"
@@ -22,20 +23,6 @@
 #endif
 namespace fn
 {
-#if 0
-    class RootColors
-    {
-        public:
-            RootColors();
-            int operator()( std::string name ) const;
-
-        private:
-            std::map<std::string, int> colors_;
-    };
-
-    int root_color( std::string name );
-#endif
-
     class HistFormatter
     {
         public:
@@ -57,7 +44,7 @@ namespace fn
             typedef OwningStack::size_type size_type;
 
             HistStacker( const YAML::Node& stack_instructions, FNTFile& tfin, 
-                    std::map<std::string, MultiScaling>& scaling_info,
+                    scaling_map& scaling_info,
                     const HistFormatter& formatter );
 
             std::unique_ptr<TH1> load_hist( const YAML::Node& instruct );
@@ -81,8 +68,9 @@ namespace fn
             const YAML::Node stack_instructions_;
             FNTFile& tfin_;
             OwningStack stack_;
-            std::map<std::string, MultiScaling>& scaling_info_;
+            scaling_map& scaling_info_;
             const HistFormatter& formatter_;
+            boost::optional<std::string> default_scaling_;
     };
 
     void de_zero_hist( TH1& h );

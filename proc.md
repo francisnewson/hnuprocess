@@ -43,12 +43,16 @@ STEPS TO FINAL LIMITS
       - run `/b/apps/hnureco -m input/reco/thesis/k3pi_crosstalk.yaml`
       - *job*: k3pi_crosstalk
 
+- ### Check fiducial fluxes
+    - check we have run over the right number of events
+    - run `./b/apps/fid_check input/fidcheck/all.yaml`
+
 - ### Subtract halo k3pi crosstalk
     - Makes use of `tdata/halo_control/all.halo_control.root` and `tdata/all.k3pi_crosstalk.root`
     - run `./b/apps/halo_subtract -m input/halo_sub/hsub.q11t.yaml -o tdata/staging/halo_sub.q11t.root -l tdata/staging/log/halo_sub_log.q11t.root`
 
 - ### Subtract km2 interference
-    - run `./b/apps/km2_subtract -m input/km2_sub/halo_control.haml -o tdata/staging/km2_sub.q11t.root -l tdata/staging/log/km2_sub_log.q11t.root`
+    - run `./b/apps/km2_subtract -m input/km2_sub/halo_control.yaml -o tdata/staging/km2_sub.q11t.root -l tdata/staging/log/km2_sub_log.q11t.root`
 
 - ### Merge all plots
     - run `hadd tdata/staging/all.plots.root tdata/halo_control/all.halo_control.root tdata/staging/halo_sub.q11t.root tdata/staging/km2_sub.q11t.root`
@@ -58,7 +62,7 @@ STEPS TO FINAL LIMITS
       - Data are taken from tdata/staging/all.plots.root
       - MC are scaled to Km2 flux using the RK selection.
       - Halo is scaled using the upper and lower ctrl regions.
-      - run `./b/apps/shuffle -m input/shuffle/thesis/halo/halo_signal.sub.q11t.yaml -o tdata/staging/all.mass_plots.root`
+      - run `./b/apps/shuffle -m input/shuffle/thesis/full/full.sub.q11t.yaml -o tdata/staging/all.mass_plots.root`
 
 - ### Check output
     - Add up all the backgrounds and scale by trigger efficiency to look at by eye

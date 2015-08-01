@@ -92,7 +92,24 @@ namespace fn
 
     //--------------------------------------------------
 
-    class MultiScaling
+    class SampleScaler
+    {
+        public:
+            virtual void scale_hist( TH1& h, const YAML::Node& instruct ) const = 0;
+            virtual void compute_scaling()  = 0;
+
+            virtual double get_halo_scale() const = 0;
+            virtual double get_halo_scale_error() const = 0;
+
+            virtual double get_peak_scale() const = 0;
+            virtual double get_peak_scale_error() const = 0;
+
+            virtual double get_fiducial_flux() const = 0;
+            virtual double get_fiducial_flux_error() const = 0;
+    };
+
+
+    class MultiScaling : public SampleScaler
     {
         public:
             MultiScaling( 
@@ -126,5 +143,7 @@ namespace fn
             double peak_br_;
             std::string peak_name_;
     };
+
+    typedef std::map<std::string, std::unique_ptr< SampleScaler> > scaling_map;
 }
 #endif

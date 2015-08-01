@@ -17,3 +17,5 @@ plots:
     - rk_like_selection_plots/h_m2m_kmu
     - signal_upper_plots/h_m2m_kmu
     - signal_lower_plots/h_m2m_kmu
+    - signal_upper_muv_plots/h_m2m_kmu
+    - signal_lower_muv_plots/h_m2m_kmu

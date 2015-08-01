@@ -162,6 +162,7 @@ namespace fn
 
     //--------------------------------------------------
 
+
     MultiScaling::MultiScaling( 
             const YAML::Node& scaling_config, 
             const std::map<std::string, double>& fiducial_weights,
