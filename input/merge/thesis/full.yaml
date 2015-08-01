@@ -1,6 +1,6 @@
 trig_effs:
     -  { name: full_q11t_eff,
-    filename: tdata/staging/all.halo_control.root,
+    filename: tdata/staging/all.plots.root,
     selections: [
         "p5.data.q1.v4.neg/sig_up_trig_eff",
         "p5.data.q1.v4.neg/sig_dn_trig_eff",
@@ -27,3 +27,13 @@ stacks:
         'signal_muv/up/neg/h_m2m',
         'signal_muv/dn/pos/h_m2m',
         'signal_muv/dn/neg/h_m2m' ] }
+
+    - { name: km2_full,
+    filename: tdata/staging/all.mass_plots.root,
+    destfolder: km2_full,
+    trigeff: full_q11t_eff,
+    selections: [
+        'pos/signal_upper_muv/h_m2m_kmu_vis',
+        'neg/signal_upper_muv/h_m2m_kmu_vis',
+        'pos/signal_lower_muv/h_m2m_kmu_vis',
+        'neg/signal_lower_muv/h_m2m_kmu_vis' ] }

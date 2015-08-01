@@ -198,6 +198,7 @@ int main( int argc, char * argv[] )
         cd_p( &tfout, destfolder );
         data_stack.first->Write("hdata");
         data_stack.second->Write("hstack");
+        hbg->SetLineColor( kOrange + 2 );
         hbg->Write("hbg_raw");
 
 
@@ -206,6 +207,7 @@ int main( int argc, char * argv[] )
             std::string trig_name = get_yaml<std::string>( stack_node, "trigeff" );
             const auto& trig_eff = trig_effs.at( trig_name );
             trig_eff->correct_hist( *hbg );
+            hbg->SetLineColor( kViolet +2 );
             hbg->Write( "hbg_corr" );
         }
     }
