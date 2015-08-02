@@ -13,7 +13,7 @@ sums:
     peakrksum:  &peakrksum {
             file: tdata/staging/all.plots.root,
             pre: "", post: rk_like_selection_plots/h_m2m_kmu,
-            min: -0.01, max: +0.01 } 
+            min: -0.020, max: +0.020 } 
 
     ctrllowersum:  &ctrllowersum {
         file: tdata/staging/all.plots.root,
@@ -137,7 +137,8 @@ output_list:
     
         plots:  [
             { path: signal_upper_muv_plots/h_m2m_kmu, name: pos/signal_upper_muv/h_m2m_kmu, rebin: 1} ,
-            { path: signal_upper_muv_plots/h_m2m_kmu, name: pos/signal_upper_muv/h_m2m_kmu_vis, rebin: 25}
+            { path: signal_upper_muv_plots/h_m2m_kmu, name: pos/signal_upper_muv/h_m2m_kmu_vis, rebin: 25},
+            { path: signal_upper_muv_plots/h_m2m_kmu, name: pos/signal_upper_muv/h_m2m_kmu_mvis, rebin: 5}
             ],
             data_plot: { channels: [ *posdata ] }, blinding: *doblind, stack_scaling: pos_upper, stack: *posstack 
         }
@@ -147,7 +148,8 @@ output_list:
     
         plots:  [
             { path: signal_upper_muv_plots/h_m2m_kmu, name: neg/signal_upper_muv/h_m2m_kmu, rebin: 1} ,
-            { path: signal_upper_muv_plots/h_m2m_kmu, name: neg/signal_upper_muv/h_m2m_kmu_vis, rebin: 25}
+            { path: signal_upper_muv_plots/h_m2m_kmu, name: neg/signal_upper_muv/h_m2m_kmu_vis, rebin: 25},
+            { path: signal_upper_muv_plots/h_m2m_kmu, name: neg/signal_upper_muv/h_m2m_kmu_mvis, rebin: 5}
             ],
 
             data_plot: { channels: [ *negdata ] }, blinding: *doblind, stack_scaling: neg_upper, stack: *negstack
@@ -158,7 +160,8 @@ output_list:
     
         plots:  [
             { path: signal_lower_muv_plots/h_m2m_kmu, name: pos/signal_lower_muv/h_m2m_kmu, rebin: 1} ,
-            { path: signal_lower_muv_plots/h_m2m_kmu, name: pos/signal_lower_muv/h_m2m_kmu_vis, rebin: 25}
+            { path: signal_lower_muv_plots/h_m2m_kmu, name: pos/signal_lower_muv/h_m2m_kmu_vis, rebin: 25},
+            { path: signal_lower_muv_plots/h_m2m_kmu, name: pos/signal_lower_muv/h_m2m_kmu_mvis, rebin: 5}
             ],
 
             data_plot: { channels: [ *posdata ] }, blinding: *doblind, stack_scaling: pos_lower, stack: *posstack 
@@ -169,7 +172,8 @@ output_list:
     
         plots:  [
             { path: signal_lower_muv_plots/h_m2m_kmu, name: neg/signal_lower_muv/h_m2m_kmu, rebin: 1} ,
-            { path: signal_lower_muv_plots/h_m2m_kmu, name: neg/signal_lower_muv/h_m2m_kmu_vis, rebin: 25}
+            { path: signal_lower_muv_plots/h_m2m_kmu, name: neg/signal_lower_muv/h_m2m_kmu_vis, rebin: 25},
+            { path: signal_lower_muv_plots/h_m2m_kmu, name: neg/signal_lower_muv/h_m2m_kmu_mvis, rebin: 5}
             ],
 
             data_plot: { channels: [ *negdata ] }, blinding: *doblind, stack_scaling: neg_lower, stack: *negstack

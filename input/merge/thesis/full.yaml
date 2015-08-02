@@ -28,12 +28,23 @@ stacks:
         'signal_muv/dn/pos/h_m2m',
         'signal_muv/dn/neg/h_m2m' ] }
 
-    - { name: km2_full,
+    - { name: km2_full_vis,
     filename: tdata/staging/all.mass_plots.root,
-    destfolder: km2_full,
+    destfolder: km2_full_vis,
     trigeff: full_q11t_eff,
     selections: [
         'pos/signal_upper_muv/h_m2m_kmu_vis',
         'neg/signal_upper_muv/h_m2m_kmu_vis',
         'pos/signal_lower_muv/h_m2m_kmu_vis',
         'neg/signal_lower_muv/h_m2m_kmu_vis' ] }
+
+    - { name: km2_full_mvis,
+    filename: tdata/staging/all.mass_plots.root,
+    destfolder: km2_full_mvis,
+    trigeff: full_q11t_eff,
+    cumulative_check: 0,
+    selections: [
+        'pos/signal_upper_muv/h_m2m_kmu_mvis',
+        'neg/signal_upper_muv/h_m2m_kmu_mvis',
+        'pos/signal_lower_muv/h_m2m_kmu_mvis',
+        'neg/signal_lower_muv/h_m2m_kmu_mvis' ] }

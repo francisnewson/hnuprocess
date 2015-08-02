@@ -61,6 +61,52 @@ std::pair<std::unique_ptr<TH1>, std::unique_ptr<TH1>> get_trigger_efficiency( TF
     return std::make_pair( std::move(h_all), std::move(h_passed) );
 }
 
+std::unique_ptr<TH1D> get_cumulative_hist( TH1& h, double centre )
+{
+    TAxis * ax = h.GetXaxis();
+    int nbins  = h.GetNbinsX();
+    int centre_bin = ax->FindBin( centre );
+    double bin_centre = ax->GetBinCenter( centre_bin );
+
+    int centre_up;
+    int centre_down;
+
+    if ( bin_centre > centre )
+    {
+        centre_up = centre_bin;
+        centre_down = centre_bin - 1 ;
+    }
+    else
+    {
+        centre_down = centre_bin;
+        centre_up = centre_bin + 1;
+    }
+
+    int upper_dist = nbins - centre_up;
+    int lower_dist = centre_down;
+
+    int half_nbins = std::min( upper_dist, lower_dist ) - 1;
+    int min_bin = centre_down  -  ( half_nbins - 1 );
+    int max_bin = centre_up +  ( half_nbins - 1 );
+
+    auto result = makeTH1D( "h_cum", "Cumulative", ( max_bin - min_bin + 1 ) / 2,
+            h.GetXaxis()->GetBinLowEdge( centre_up ),
+            h.GetXaxis()->GetBinUpEdge( max_bin ), h.GetXaxis()->GetTitle() );
+
+    int my_min_bin = centre_down;
+    int my_max_bin = centre_up;
+    while( my_max_bin - centre_down < half_nbins )
+    {
+        double val = h.Integral( my_min_bin, my_max_bin );
+        double fill_point = ax->GetBinCenter( my_max_bin ) - ax->GetBinLowEdge( centre_up );
+        result->SetBinContent( result->GetXaxis()->FindBin( fill_point ), val );
+        ++my_max_bin;
+        --my_min_bin;
+    }
+
+    return result;
+}
+
 int main( int argc, char * argv[] )
 {
     //**************************************************
@@ -209,6 +255,17 @@ int main( int argc, char * argv[] )
             trig_eff->correct_hist( *hbg );
             hbg->SetLineColor( kViolet +2 );
             hbg->Write( "hbg_corr" );
+
+            if ( stack_node["cumulative_check" ] )
+            {
+                double cum_centre = get_yaml<double>( stack_node, "cumulative_check" );
+                auto h_cum_data = get_cumulative_hist( *data_stack.first, cum_centre );
+                auto h_cum_mc = get_cumulative_hist( *hbg, cum_centre );
+                h_cum_mc->Write( "hbg_cum" );
+                h_cum_data->Write( "h_cum" );
+                h_cum_data->Divide( h_cum_mc.get() );
+                h_cum_data->Write( "h_cum_rat" );
+            }
         }
     }
 

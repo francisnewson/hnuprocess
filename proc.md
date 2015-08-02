@@ -62,11 +62,11 @@ STEPS TO FINAL LIMITS
       - Data are taken from tdata/staging/all.plots.root
       - MC are scaled to Km2 flux using the RK selection.
       - Halo is scaled using the upper and lower ctrl regions.
-      - run `./b/apps/shuffle -m input/shuffle/thesis/full/full.sub.q11t.yaml -o tdata/staging/all.mass_plots.root`
+      - run `./b/apps/shuffle -m input/shuffle/thesis/full/full.q11t.yaml -o tdata/staging/all.mass_plots.root`
 
 - ### Check output
     - Add up all the backgrounds and scale by trigger efficiency to look at by eye
-      - run `./b/apps/merge_stack -m input/merge/thesis/full.yaml -o output/test_merge.root`
+      - run `./b/apps/merge_stack -m input/merge/thesis/full.yaml -o tdata/staging/log/merge_all.root`
 
 - ### Get limits
     run `./b/apps/signal_shapes`
