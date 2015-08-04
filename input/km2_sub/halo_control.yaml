@@ -19,3 +19,5 @@ plots:
     - signal_lower_plots/h_m2m_kmu
     - signal_upper_muv_plots/h_m2m_kmu
     - signal_lower_muv_plots/h_m2m_kmu
+    - ctrl_upper_muv_plots/h_z
+    - ctrl_lower_full_m2m_plots/h_m2m_kmu

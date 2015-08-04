@@ -103,6 +103,20 @@ namespace fn
 
     //--------------------------------------------------
 
+    void store_value( std::string name, double value )
+    {
+        TVectorD val(1);
+        val[0] =  value;
+        val.Write( name.c_str() );
+    }
+
+    double retrieve_value( TFile& tf, boost::filesystem::path p )
+    {
+        const TVectorD * vd = get_object<TVectorD>( tf, p );
+        return (*vd)[0];
+    }
+
+    //--------------------------------------------------
     std::ostream& operator<<( std::ostream& os, const TVector3 &tv )
     {
         auto prec = os.precision( 5 );
@@ -130,5 +144,7 @@ namespace fn
             os.precision( prec );
             return os;
         }
+
+    //--------------------------------------------------
 
 }

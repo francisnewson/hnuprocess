@@ -139,9 +139,19 @@ int main( int argc, char * argv[] )
         }
     }
 
+    //Do halo subtraction
     HaloSub hs{ tfout, tflog, mission.string() };
     hs.find_correction();
     hs.save_log_plots();
     hs.do_subtractions();
 
+    //Do fiducial copying
+    if ( config_node["copyfid" ] )
+    {
+        for ( const auto& copy_node : config_node["copyfid" ] )
+        {
+            copy_fids( tfout, copy_node );
+        }
+
+    }
 }

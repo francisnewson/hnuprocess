@@ -1,6 +1,7 @@
 #include "Limiter.hh"
 #include <boost/format.hpp>
 #include <boost/filesystem/path.hpp>
+#include <iomanip>
 #include "root_help.hh"
 #include "stl_help.hh"
 #include "HistExtractor.hh"
@@ -198,11 +199,12 @@ namespace fn
         h_scat_ = sum_hists( begin( vh_scat ), end( vh_scat ) );
     }
 
-    double ScatterContrib::get_scatter_err( double sig_min, double sig_max ) const
+    double ScatterContrib::get_rel_scatter_err( double sig_min, double sig_max ) const
     {
         double noscat = integral( *h_noscat_, sig_min, sig_max );
         double scat = integral( *h_scat_, sig_min, sig_max );
-        return (scat - noscat) / scat;
+        std::cerr <<  scat << " "  << noscat << std::endl;
+        return fabs(scat - noscat) / scat;
     }
 
     //--------------------------------------------------
@@ -212,11 +214,19 @@ namespace fn
             km2_flux_paths_ = std::vector<std::string> { "neg_lower","pos_lower" };
         }
 
+    void Limiter::set_halo_log_file( TFile& tf )
+    {
+        halo_log_file_ = &tf;
+    }
+
     HnuLimResult Limiter::get_limit( const HnuLimParams& params )
     {
         //Deterimine signal region
         double sig_min = params.get_width_min();
         double sig_max = params.get_width_max();
+
+        //Ouput object
+        HnuLimResult res{};
 
         //**************************************************
         //Determine background 
@@ -237,30 +247,43 @@ namespace fn
         double sqr_background_err  = 0;
 
         //triggger eff
-        sqr_background_err = fn::sq( trig_err / trig_eff * background );
+        double sq_trig_eff_contrib = fn::sq( trig_err / trig_eff * background );
+        sqr_background_err += sq_trig_eff_contrib;
+        res.error_budget["err_trig"] = sq_trig_eff_contrib;
 
         //scattering
+        double sq_scat_contrib =  0;
         if ( scat_contrib_ )
         {
-            double scat = (*scat_contrib_)->get_scatter_err( sig_min, sig_max );
-            std::cout << "scat: "<< scat  << std::endl;
-            double scat_err = background * scat;
-            sqr_background_err +=  fn::sq( scat_err );
+            std::cerr << "DOING SCAT" << std::endl;
+            double scat = (*scat_contrib_)->get_rel_scatter_err( sig_min, sig_max );
+            sq_scat_contrib = fn::sq(background * scat );
         }
+        sqr_background_err +=  sq_scat_contrib;
+        res.error_budget["err_scat"] = sq_scat_contrib;
 
         //muv_eff
-        double muv_err = 0.01 * background;
-        sqr_background_err += fn::sq( muv_err );
+        double sq_muv_err = fn::sq( 0.01 * background );
+        sqr_background_err +=  sq_muv_err ;
+        res.error_budget["err_muv"] = sq_muv_err;
 
         //km2 flux
         std::pair<double,double> km2_flux_and_err = get_km2_flux_and_err();
         double km2_flux = km2_flux_and_err.first;
         double km2_flux_err = km2_flux_and_err.second;
-        sqr_background_err += fn::sq( km2_flux_err / km2_flux * background );
+        double sq_km2_flux_err_contrib = fn::sq( km2_flux_err / km2_flux * background );
+        sqr_background_err += sq_km2_flux_err_contrib;
+        res.error_budget["err_flux"] = sq_km2_flux_err_contrib;
 
-        //halo
-        double halo_scale_err = compute_halo_scale_err( sig_min, sig_max );
-        sqr_background_err += fn::sq( halo_scale_err );
+        //halo scale
+        double sq_halo_scale_err = fn::sq( compute_halo_scale_err( sig_min, sig_max ) );
+        sqr_background_err +=  sq_halo_scale_err ;
+        res.error_budget["err_hscale"] = sq_halo_scale_err;
+
+        //halo measurement
+        double sq_halo_val_err = fn::sq( compute_halo_val_err( sig_min, sig_max ) );
+        sqr_background_err +=  sq_halo_val_err;
+        res.error_budget["err_hval"] = sq_halo_val_err;
 
         //remember to square root
         double background_err = std::sqrt( sqr_background_err );
@@ -285,8 +308,6 @@ namespace fn
         double ul_br = ul / km2_flux;
         double ul_u2 = br_to_mix( ul_br, 0.001 * params.get_mass()  ); //MeV -> GeV
 
-        //Ouput object
-        HnuLimResult res{};
         res.trig_eff = trig_eff;
         res.trig_err = trig_err;
         res.background = background;
@@ -296,6 +317,7 @@ namespace fn
         res.rolke_orig_sig_ul = ul;
         res.ul_br =  ul_br;
         res.ul_u2 = ul_u2;
+
 
         return res;
     }
@@ -357,22 +379,20 @@ namespace fn
 
     std::pair<double,double> Limiter::get_km2_flux_and_err()
     {
-        const TVectorD * vd = 0;
-
         double total_flux = 0;
         double total_sqerr = 0;
 
         for ( const auto& flux_path : km2_flux_paths_ )
         {
             path p{ flux_path };
-            p /= "fiducial_flux" ;
 
-            vd = get_object<TVectorD>( bg_file_, p / "fiducial_flux" );
-            total_flux += (*vd)[0];
+            total_flux += retrieve_value( bg_file_ , p / "fiducial_flux" );
 
-            vd = get_object<TVectorD>( bg_file_, p / "fiducial_flux_err" );
-            total_sqerr += (*vd)[0];
+            total_sqerr += fn::sq( retrieve_value( bg_file_ , p / "fiducial_flux_err" ) );
         }
+
+        //Add a systematic error of 0.5%
+        total_sqerr +=  fn::sq(0.005 * total_flux);
 
         double total_err = std::sqrt( total_sqerr );
         return std::make_pair( total_flux, total_err );
@@ -382,10 +402,10 @@ namespace fn
     {
         std::vector<std::pair<std::string,std::string>> halo_scale_pairs
         {
-            { "neg/signal/lower_muv/hnu_stack_hists/halo_neg", "neg_lower" },
-                { "neg/signal/upper_muv/hnu_stack_hists/halo_neg", "neg_upper" },
-                { "pos/signal/lower_muv/hnu_stack_hists/halo_pos", "pos_lower" },
-                { "pos/signal/upper_muv/hnu_stack_hists/halo_pos", "pos_upper" },
+            { "neg/signal_lower_muv/h_m2m_kmu/hnu_stack_hists/halo_neg", "neg_lower" },
+                { "neg/signal_upper_muv/h_m2m_kmu/hnu_stack_hists/halo_neg", "neg_upper" },
+                { "pos/signal_lower_muv/h_m2m_kmu/hnu_stack_hists/halo_pos", "pos_lower" },
+                { "pos/signal_upper_muv/h_m2m_kmu/hnu_stack_hists/halo_pos", "pos_upper" },
         };
 
         double total_sqerror = 0;
@@ -401,9 +421,97 @@ namespace fn
             auto h_halo = extract_hist<TH1D>( bg_file_, hp.first );
             double halo_contrib = integral( *h_halo, sig_min, sig_max );
             total_sqerror += fn::sq(  halo_contrib * halo_scale_err / halo_scale );
+            total_sqerror += fn::sq( 0.1 * halo_contrib );
         }
 
+
         return std::sqrt( total_sqerror );
+    }
+
+    double Limiter::compute_halo_val_err( double sig_min, double sig_max )
+    {
+        struct halo_info {
+            std::string bg_path;
+            std::string scale_path;
+            std::string halo_log_path;
+        };
+
+        std::vector<halo_info> halo_info_sets;
+        halo_info_sets.push_back( halo_info
+                { "neg/signal_lower_muv/h_m2m_kmu/hnu_stack_hists/halo_neg", "neg_lower",
+                "p6.halo.q11t.neg/signal_lower_muv_plots/h_m2m_kmu" } );
+
+        halo_info_sets.push_back( halo_info
+                { "pos/signal_lower_muv/h_m2m_kmu/hnu_stack_hists/halo_pos", "pos_lower",
+                "p6.halo.q11t.pos/signal_lower_muv_plots/h_m2m_kmu" } ) ;
+
+        halo_info_sets.push_back( halo_info
+                { "neg/signal_upper_muv/h_m2m_kmu/hnu_stack_hists/halo_neg", "neg_upper",
+                "p6.halo.q11t.neg/signal_upper_muv_plots/h_m2m_kmu" } );
+
+        halo_info_sets.push_back( halo_info
+                { "pos/signal_upper_muv/h_m2m_kmu/hnu_stack_hists/halo_pos", "pos_upper",
+                "p6.halo.q11t.pos/signal_upper_muv_plots/h_m2m_kmu" } );
+
+        double total_sqerror = 0;
+
+        for ( auto hp : halo_info_sets )
+        {
+            double halo_scale 
+                = retrieve_value( bg_file_, path{hp.scale_path} / "halo_scale" );
+
+            double k3pi_scale 
+                = retrieve_value( *halo_log_file_, path{hp.halo_log_path} / "k3pi_scale_factor" );
+
+            boost::filesystem::path log_folder = hp.halo_log_path;
+
+            //redo the calculation from halo_sub
+            auto h_raw   = get_object<TH1D>( *halo_log_file_, log_folder / "hraw" );
+            auto h_corr  = get_object<TH1D>( *halo_log_file_, log_folder / "hcorr" );
+            auto h_peak  = get_object<TH1D>( *halo_log_file_, log_folder / "hpeak" );
+
+            double n_raw   = integral( *h_raw, sig_min, sig_max );
+            double n_corr  = integral( *h_corr, sig_min, sig_max );
+            //peak was already scaled by k3pi_scale
+            double n_peak  = integral( *h_peak, sig_min, sig_max ) / k3pi_scale;
+
+            double n_check  = halo_scale * ( n_raw - k3pi_scale * n_peak );
+
+            //compare with what is stored in the computed bg file
+            auto h_final = get_object<TH1D>( bg_file_, hp.bg_path );
+            double n_final = integral( *h_final, sig_min, sig_max );
+
+            //If there is a mismatch print everything 
+            double prec = 0.00001;
+            if ( fabs(n_check - n_final) > prec * fabs( n_check + n_final) ) 
+            {
+                std::cout 
+                    << "range: " << sig_min << " " << sig_max << "\n"
+                    << "halo_scale: " << halo_scale  << "\n"
+                    << "n_raw: " << n_raw  << "\n"
+                    << "n_corr: " << n_corr << "\n"
+                    << "n_peak: " << n_peak << "\n"
+                    << "k3pi_scale: " << k3pi_scale << "\n"
+                    << "n_check: " << std::setprecision(10) << n_check << "\n"
+                    << "n_final: " << std::setprecision(10) << n_final << "\n"
+                    << std::endl;
+
+                uint64_t u_check;
+                uint64_t u_final;
+                memcpy(&u_check, &n_check, sizeof(n_check));
+                memcpy(&u_final, &n_final, sizeof(n_final));
+                std::cout << std::hex << u_check << "\n" << u_final << std::endl;
+
+                throw std::runtime_error( "halo_scale mismatch" );
+            }
+
+            double k3pi_scale_rel_err = 0.03;
+
+            //now do the actual error calculation
+            total_sqerror = n_raw  + fn::sq(k3pi_scale) * n_peak * ( n_peak * k3pi_scale_rel_err + 1.0 );
+        }
+
+        return std::sqrt(total_sqerror);
     }
 
     void Limiter::set_scatter_contrib( const ScatterContrib& sc )
@@ -435,9 +543,4 @@ namespace fn
 
     //--------------------------------------------------
 
-    double retrieve_value( TFile& tf , boost::filesystem::path name )
-    {
-        const TVectorD * vd = get_object<TVectorD>( tf, name );
-        return (*vd)[0];
-    }
 }

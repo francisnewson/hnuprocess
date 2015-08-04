@@ -16,21 +16,21 @@ var:
 
     down_strat: &dwnstrat {
         strategy: m2,
-        input_file: tdata/staging/all.halo_control.root,
+        input_file: tdata/staging/all.plots.root,
         plot_path: ctrl_lower_full_m2m_plots/h_m2m_kmu,
         min_mass_halo: -0.2, max_mass_halo: -0.05,
         min_mass_peak: -0.01, max_mass_peak:  0.01 }
 
     up_strat: &upstrat {
         strategy: m2,
-        input_file: tdata/staging/all.halo_control.root,
+        input_file: tdata/staging/all.plots.root,
         plot_path: ctrl_upper_muv_plots/h_z,
         min_mass_halo: 2500, max_mass_halo: 5500,
         min_mass_peak: 2000, max_mass_peak: 3000 }
 
     mc_strat: &mcstrat {
         strategy: m2,
-        input_file: tdata/staging/all.halo_control.root,
+        input_file: tdata/staging/all.plots.root,
         plot_path: rk_like_selection_plots/h_m2m_kmu,
         min_mass_halo: -0.2, max_mass_halo: -0.05,
         min_mass_peak: -0.01, max_mass_peak:  0.01 }
@@ -75,7 +75,7 @@ scaling:
 
 weights:
     fid_file: use_root
-    root_file: "tdata/staging/all.halo_control.root"
+    root_file: "tdata/staging/all.plots.root"
     pre : ""
     post: "sample_burst_count/bursts"
     branch:  "weight"

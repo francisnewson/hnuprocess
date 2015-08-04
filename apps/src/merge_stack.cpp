@@ -247,6 +247,16 @@ int main( int argc, char * argv[] )
         hbg->SetLineColor( kOrange + 2 );
         hbg->Write("hbg_raw");
 
+        if ( stack_node["cumulative_check" ] && ! stack_node["trigeff"] )
+        {
+                double cum_centre = get_yaml<double>( stack_node, "cumulative_check" );
+                auto h_cum_data = get_cumulative_hist( *data_stack.first, cum_centre );
+                auto h_cum_mc = get_cumulative_hist( *hbg, cum_centre );
+                h_cum_mc->Write( "hbg_cum" );
+                h_cum_data->Write( "h_cum" );
+                h_cum_data->Divide( h_cum_mc.get() );
+                h_cum_data->Write( "h_cum_rat" );
+        }
 
         if ( stack_node["trigeff"] )
         {

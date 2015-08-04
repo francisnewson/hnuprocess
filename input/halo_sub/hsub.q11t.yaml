@@ -27,6 +27,14 @@ var:
         - ctrl_lower_muv_plots/h_z
         - rk_like_selection_plots/h_m2m_kmu
 
+copyfid:
+    - { root_file: "tdata/k3pi_crosstalk/all.k3pi_crosstalk.root",
+        pre: "", post: "sample_burst_count/bursts", branch: "weight",
+        channels: [ 
+        { source: *p6_km_neg, dest: *p6_halo_neg },
+        { source: *p6_km_pos, dest: *p6_halo_pos } ]
+    }
+
 fidcheck:
     - name: mc
       trees:

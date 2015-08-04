@@ -4,6 +4,7 @@
 #include  "yaml_help.hh"
 #include "fiducial_functions.hh"
 #include <cstddef>
+#include <iomanip>
 
 namespace YAML
 {
@@ -68,6 +69,8 @@ namespace fn
 
     void MonoHaloScale::compute_scaling()
     {
+        bool print = false;
+
         double halo_integral = get_chan_integral( halo_chan_, halo_sumdef_ );
         double data_integral = get_chan_integral( data_chan_, data_sumdef_ );
 
@@ -75,8 +78,11 @@ namespace fn
         halo_scale_error_ = halo_scale_ * 
             ( 1.0 / std::sqrt( halo_integral )  + 1.0 / std::sqrt( data_integral ) );
 
-        std::cerr << "MonoHaloScale: " << data_integral << " / " << halo_integral
-            << " = " << halo_scale_ << " ± " << halo_scale_error_ << std::endl;
+        if ( print )
+        {
+            std::cerr << "MonoHaloScale: " << data_integral << " / " << halo_integral
+                << " = " << halo_scale_ << " ± " << halo_scale_error_ << std::endl;
+        }
     }
     double  MonoHaloScale::get_halo_scale(){ return halo_scale_; }
     double  MonoHaloScale::get_halo_scale_error(){ return halo_scale_error_; }
@@ -116,6 +122,8 @@ namespace fn
 
     void StackPeakFlux::compute_scaling()
     {
+        bool print = false;
+
         //do data integral
         double data_integral = get_chan_integral( data_chan_, data_sumdef_ );
         double data_integral_sqerr = data_integral;
@@ -160,15 +168,21 @@ namespace fn
             double sub = ( data_integral - halo_integral );
             double sub_sqerr = data_integral_sqerr + halo_integral_sqerr;
 
-            std::cerr << "sub: " << data_integral <<  " - " << halo_integral 
-                << " = " << sub << std::endl;
+            if ( print )
+            {
+                std::cerr << "sub: " << data_integral <<  " - " << halo_integral 
+                    << " = " << sub << std::endl;
+            }
 
             double stack_scale = sub / stack_integral ;
             double stack_scale_error = stack_scale *
                 ( std::sqrt( sub_sqerr) / sub  + std::sqrt( stack_integral_sqerr) / stack_integral );
 
-            std::cerr << "stack_scale " << sub <<  " / " << stack_integral 
-                << " = " << stack_scale << std::endl;
+            if ( print )
+            {
+                std::cerr << "stack_scale " << sub <<  " / " << stack_integral 
+                    << " = " << stack_scale << std::endl;
+            }
 
             k_flux_ = norm_fid * stack_scale / norm_br;
             k_flux_error_ = norm_fid * stack_scale_error / norm_br;
@@ -180,8 +194,11 @@ namespace fn
                 ( std::sqrt( data_integral_sqerr ) / data_integral 
                   + std::sqrt( stack_integral_sqerr) / stack_integral );
 
-            std::cerr << "stack_scale " << data_integral <<  " / " << stack_integral 
-                << " = " << stack_scale << std::endl;
+            if ( print )
+            {
+                std::cerr << "stack_scale " << data_integral <<  " / " << stack_integral 
+                    << " = " << stack_scale << std::endl;
+            }
 
             k_flux_ = norm_fid * stack_scale / norm_br;
             k_flux_error_ = norm_fid * stack_scale_error / norm_br;
@@ -259,18 +276,22 @@ namespace fn
 
     void FlexiScaling::scale_hist( TH1& h, const YAML::Node& instruct ) const
     {
+        bool print = false;
+
         double scale_factor = 1.0;
         std::string type = get_yaml<std::string>( instruct, "type"  );
 
         if ( type == "halo" )
         {
             scale_factor = halo_scale_->get_halo_scale();
-            std::cout << type << " " << scale_factor << std::endl;
+            if (print )
+            {std::cout << std::setw(8) << type << " " << std::setw(12) << scale_factor << std::endl;}
         }
         else if ( type == "data" )
         {
             scale_factor = 1.0;
-            std::cout << type << " " << scale_factor << std::endl;
+            if ( print )
+            {std::cout << std::setw(8) << type << " " << std::setw(12) << scale_factor << std::endl;}
         }
         else
         {
@@ -287,8 +308,15 @@ namespace fn
             double br = brs_.at( type );
             scale_factor = get_fiducial_flux() * br / fid_weight;
 
-            std::cout << type << " " <<  get_fiducial_flux()  << " * " << br
-                << " / " << fid_weight << " = " << scale_factor << std::endl;
+            if ( print )
+            {
+                std::cout 
+                    << std::setw(8) << type << " " 
+                    << std::setw(12) <<  get_fiducial_flux()  << " * " 
+                    << std::setw(10) << br << " / "
+                    << std::setw(12) << fid_weight << " = " 
+                    << std::setw(12) << scale_factor << std::endl;
+            }
         }
         h.Scale( scale_factor );
     }

@@ -7,6 +7,7 @@
 #include "Limiter.hh"
 #include <cmath>
 #include <numeric>
+#include <algorithm>
 #include <boost/io/ios_state.hpp>
 #include <boost/regex.hpp>
 
@@ -27,10 +28,32 @@ void print_result( std::ostream& os, const HnuLimParams& hlp, const HnuLimResult
     os << "-------------------------------------------\n";
     os << "Trig eff: " << hlr.trig_eff << " ± " << hlr.trig_err << "\n";
     os << "Background: " << hlr.background << " ± " << hlr.background_err << "\n" ;
+    os << "sqrt(Background): " << std::sqrt(hlr.background ) << "\n" ;
     os << "Acc Sig limit: " << hlr.acc_sig_ul << "\n";
     os << "Orig Sig limit: " << hlr.orig_sig_ul << " " << hlr.rolke_orig_sig_ul << "\n";
     os.setf(std::ios_base::scientific, std::ios_base::floatfield);
     os << "BR limit: " << hlr.ul_br  << " U2 limit: " << hlr.ul_u2 << "\n";
+
+    //Determine longest errname
+    std::vector<std::string> names;
+    std::vector<double> lengths;
+    std::vector<double> values;
+    const auto& err_budget = hlr.error_budget;
+    for ( const auto& p : err_budget )
+    {
+        names.push_back( p.first );
+        lengths.push_back( p.first.size() );
+        values.push_back( p.second );
+    }
+    double max_length = *std::max_element( begin( lengths ), end( lengths ) );
+    for ( const auto & name : names )
+    { os << std::setw( max_length + 2 ) << name ; }
+    os << "\n";
+
+    for ( const auto & val : values )
+    { os << std::setw( max_length + 2 ) << std::sqrt(val) ; }
+
+    os << "\n";
 }
 
 //headings for writing to file (script readable)
@@ -53,6 +76,12 @@ void print_headings( std::ostream& os )
         << std::setw(15) << "ul_orig_sig"
         << std::setw(15) << "ul_br"
         << std::setw(15) << "ul_u2"
+        << std::setw(15) << "err_scat"
+        << std::setw(15) << "err_trig"
+        << std::setw(15) << "err_muv"
+        << std::setw(15) << "err_flux"
+        << std::setw(15) << "err_hscale"
+        << std::setw(15) << "err_hval"
         << std::endl;
 }
 
@@ -85,6 +114,12 @@ void print_flat_result( std::ostream& os, const HnuLimParams& hlp, const HnuLimR
         << std::setw(15) <<  hlr.orig_sig_ul
         << std::setw(15) <<  hlr.ul_br
         << std::setw(15) <<  hlr.ul_u2
+        << std::setw(15) <<  hlr.error_budget.at("err_scat")
+        << std::setw(15) <<  hlr.error_budget.at("err_trig")
+        << std::setw(15) <<  hlr.error_budget.at("err_muv")
+        << std::setw(15) <<  hlr.error_budget.at("err_flux")
+        << std::setw(15) <<  hlr.error_budget.at("err_hscale")
+        << std::setw(15) <<  hlr.error_budget.at("err_hval")
         << std::endl;
 }
 
@@ -114,7 +149,7 @@ int main()
 
     //Decide which backgrounds to consider
     std::vector<std::string> background_channels
-    { "halo", "k3pi", "k2pig", "k3pi0", "km3", "km2" };
+    { "halo", "k3pi", "k2pi", "k3pi0", "km3", "km2" };
 
     //Load background file
     std::string bg_filename = "tdata/staging/all.mass_plots.root";
@@ -145,6 +180,10 @@ int main()
     ScatterContrib sc{ tfin_noscat, tfin_scat };
 
     lm.set_scatter_contrib( sc );
+
+    //halo corrections
+    TFile tf_halo_log{  "tdata/staging/log/halo_sub_log.q11t.root"  };
+    lm.set_halo_log_file( tf_halo_log );
 
     //Output streams
     std::ofstream ofs( "output/lim.txt" );

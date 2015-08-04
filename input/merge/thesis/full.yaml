@@ -48,3 +48,12 @@ stacks:
         'neg/signal_upper_muv/h_m2m_kmu_mvis',
         'pos/signal_lower_muv/h_m2m_kmu_mvis',
         'neg/signal_lower_muv/h_m2m_kmu_mvis' ] }
+
+    - { name: km2_rk_mvis,
+    filename: tdata/staging/all.mass_plots.root,
+    destfolder: km2_rk_mvis,
+    cumulative_check: 0,
+    selections: [
+        'pos/rk/h_m2m_kmu_mvis',
+        'neg/rk/h_m2m_kmu_mvis',
+        ] }

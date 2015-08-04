@@ -93,6 +93,8 @@ namespace fn
             double rolke_orig_sig_ul;
             double ul_br;
             double ul_u2;
+
+            std::map<std::string, double> error_budget;
     };
 
     //--------------------------------------------------
@@ -101,7 +103,7 @@ namespace fn
     {
         public:
             ScatterContrib( TFile& tf_noscat, TFile& tf_scat );
-            double get_scatter_err( double sig_min, double sig_max ) const;
+            double get_rel_scatter_err( double sig_min, double sig_max ) const;
 
         private:
             TFile& tf_noscat_;
@@ -125,6 +127,8 @@ namespace fn
             void set_scatter_contrib( const ScatterContrib& sc );
             void set_trigger( const TriggerApp& trig );
 
+            void set_halo_log_file( TFile& tf );
+
         private:
             std::unique_ptr<TH1> get_bg_hist
                 ( std::string chan, std::string pol,  std::string region );
@@ -136,6 +140,7 @@ namespace fn
             std::pair<double,double> get_km2_flux_and_err();
 
             double compute_halo_scale_err( double sig_min, double sig_max );
+            double compute_halo_val_err( double sig_min, double sig_max );
 
             double n_sigma_range_;
 
@@ -148,13 +153,14 @@ namespace fn
 
             boost::optional<const ScatterContrib*> scat_contrib_;
             boost::optional<const TriggerApp*> trig_;
+
+            TFile * halo_log_file_;
     };
 
     //--------------------------------------------------
 
     double br_to_mix(double BR, double mh);
 
-    double retrieve_value( TFile& tf , boost::filesystem::path name );
 
 }
 #endif

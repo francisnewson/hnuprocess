@@ -44,5 +44,7 @@ namespace fn
             TFile& tfout_;
             TFile& tflog_;
     };
+
+    void copy_fids( TFile& tfout, const YAML::Node& instruct );
 }
 #endif

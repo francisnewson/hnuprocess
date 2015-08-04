@@ -18,7 +18,7 @@ namespace fn
         fin_.GetObject( p.string().c_str(), h );
         if ( !h )
         {
-            throw std::runtime_error( "Can't find " + p.string() );
+            throw std::runtime_error( "Can't find " + p.string() + " in "  + fin_.GetName() );
         }
         h->SetDirectory(0);
         return std::unique_ptr<TH1>( h );

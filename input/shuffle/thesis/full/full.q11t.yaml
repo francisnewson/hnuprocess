@@ -8,7 +8,7 @@ sums:
     halorksum:  &halorksum {
         file: tdata/staging/all.plots.root,
         pre: "", post: rk_like_selection_plots/h_m2m_kmu,
-        min: -0.3, max: -0.025 }
+        min: -0.3, max: -0.03 }
 
     peakrksum:  &peakrksum {
             file: tdata/staging/all.plots.root,
@@ -18,12 +18,12 @@ sums:
     ctrllowersum:  &ctrllowersum {
         file: tdata/staging/all.plots.root,
         pre: "", post: ctrl_lower_full_m2m_plots/h_m2m_kmu,
-        min: -0.2, max: -0.05 } 
+        min: -0.15, max: -0.05 } 
 
     ctrluppersum:  &ctrluppersum {
         file: tdata/staging/all.plots.root,
         pre: "", post: ctrl_upper_muv_plots/h_z,
-        min: 2500, max: 5500 } 
+        min: 3000, max: 5500 } 
 
     fids: &fids { fid_file: use_root, root_file: 'tdata/staging/all.plots.root',
         pre: "", post : "sample_burst_count/bursts", branch: "weight" }
@@ -42,7 +42,7 @@ scaling:
 
         mc: &mcpos
             strat: combo
-            halo:
+            halo: &posrkhalo
                 strat: mono
                 data: { chan: *posdata  , sum: *halorksum }
                 halo: { chan: *poshalo  , sum: *halorksum }
@@ -69,7 +69,7 @@ scaling:
 
         mc: &mcneg
             strat: combo
-            halo:
+            halo: &negrkhalo
                 strat: mono
                 halo: { chan:  *neghalo  , sum: *halorksum }
                 data: { chan:  *negdata  , sum: *halorksum }
@@ -110,6 +110,14 @@ scaling:
 
         mc: *mcneg
 
+    - scaling_method: {
+        name: pos_rk, strategy : flexi, peak: km2, fids: *fids,
+        halo: *posrkhalo , mc: *mcpos }
+
+    - scaling_method: {
+        name: neg_rk, strategy : flexi, peak: km2, fids: *fids,
+        halo: *negrkhalo , mc: *mcneg }
+
 weights: *fids
 
 stacks:
@@ -132,6 +140,7 @@ stacks:
     doblind: &doblind { do_blind: true,  min_blind: 0.09, max_blind: 0.14 }
 
 output_list:
+    #UP POS
     - {
         input_file: tdata/staging/all.plots.root,
     
@@ -143,6 +152,7 @@ output_list:
             data_plot: { channels: [ *posdata ] }, blinding: *doblind, stack_scaling: pos_upper, stack: *posstack 
         }
 
+    #UP NEG
     - {
         input_file: tdata/staging/all.plots.root,
     
@@ -155,6 +165,7 @@ output_list:
             data_plot: { channels: [ *negdata ] }, blinding: *doblind, stack_scaling: neg_upper, stack: *negstack
         }
 
+    #DWN POS
     - {
         input_file: tdata/staging/all.plots.root,
     
@@ -167,6 +178,7 @@ output_list:
             data_plot: { channels: [ *posdata ] }, blinding: *doblind, stack_scaling: pos_lower, stack: *posstack 
         }
 
+        #DWN  NEG
     - {
         input_file: tdata/staging/all.plots.root,
     
@@ -174,6 +186,76 @@ output_list:
             { path: signal_lower_muv_plots/h_m2m_kmu, name: neg/signal_lower_muv/h_m2m_kmu, rebin: 1} ,
             { path: signal_lower_muv_plots/h_m2m_kmu, name: neg/signal_lower_muv/h_m2m_kmu_vis, rebin: 25},
             { path: signal_lower_muv_plots/h_m2m_kmu, name: neg/signal_lower_muv/h_m2m_kmu_mvis, rebin: 5}
+            ],
+
+            data_plot: { channels: [ *negdata ] }, blinding: *doblind, stack_scaling: neg_lower, stack: *negstack
+        }
+
+        #RK POS
+    - {
+        input_file: tdata/staging/all.plots.root,
+    
+        plots:  [
+            { path: rk_like_selection_plots/h_m2m_kmu,, name: neg/rk/h_m2m_kmu, rebin: 1 } ,
+            { path: rk_like_selection_plots/h_m2m_kmu,, name: neg/rk/h_m2m_kmu_mvis, rebin: 5 } ,
+            { path: rk_like_selection_plots/h_m2m_kmu,, name: neg/rk/h_m2m_kmu_vis, rebin: 25 } 
+            ],
+
+            data_plot: { channels: [ *negdata ] }, blinding: *doblind, stack_scaling: neg_rk, stack: *negstack
+        }
+
+        #RK NEG
+    - {
+        input_file: tdata/staging/all.plots.root,
+    
+        plots:  [
+            { path: rk_like_selection_plots/h_m2m_kmu,, name: pos/rk/h_m2m_kmu, rebin: 1 } ,
+            { path: rk_like_selection_plots/h_m2m_kmu,, name: pos/rk/h_m2m_kmu_mvis, rebin: 5 } ,
+            { path: rk_like_selection_plots/h_m2m_kmu,, name: pos/rk/h_m2m_kmu_vis, rebin: 25 } 
+            ],
+
+            data_plot: { channels: [ *posdata ] }, blinding: *doblind, stack_scaling: pos_rk, stack: *posstack
+        }
+
+        #CTRL UP POS
+    - {
+        input_file: tdata/staging/all.plots.root,
+    
+        plots:  [
+            { path: ctrl_upper_muv_plots/h_z, name: ctrl/pos/upper/h_z, rebin: 1 } ,
+            ],
+
+            data_plot: { channels: [ *posdata ] }, blinding: *doblind, stack_scaling: pos_upper, stack: *posstack
+        }
+
+        #CTRL UP NEG
+    - {
+        input_file: tdata/staging/all.plots.root,
+    
+        plots:  [
+            { path: ctrl_upper_muv_plots/h_z, name: ctrl/neg/upper/h_z, rebin: 1 } ,
+            ],
+
+            data_plot: { channels: [ *negdata ] }, blinding: *doblind, stack_scaling: neg_upper, stack: *negstack
+        }
+
+        #CTRL DN POS
+    - {
+        input_file: tdata/staging/all.plots.root,
+    
+        plots:  [
+            { path: ctrl_lower_full_m2m_plots/h_m2m_kmu, name: ctrl/pos/lower/h_m2m, rebin: 25 } ,
+            ],
+
+            data_plot: { channels: [ *posdata ] }, blinding: *doblind, stack_scaling: pos_lower, stack: *posstack
+        }
+
+        #CTRL DN NEG
+    - {
+        input_file: tdata/staging/all.plots.root,
+    
+        plots:  [
+            { path: ctrl_lower_full_m2m_plots/h_m2m_kmu, name: ctrl/neg/lower/h_m2m, rebin: 25 } ,
             ],
 
             data_plot: { channels: [ *negdata ] }, blinding: *doblind, stack_scaling: neg_lower, stack: *negstack

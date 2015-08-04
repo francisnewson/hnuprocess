@@ -31,12 +31,6 @@ STEPS TO FINAL LIMITS
       - run `/b/apps/hnureco -m input/reco/thesis/halo_control/yaml`
       - *job*: `halo_control`
 
-- ### Determine scattering contribution
-    - Run over km2 MC
-      - run `/b/apps/hnureco -m input/reco/thesis/km2_full.yaml`
-      - run `/b/apps/hnureco -m input/reco/thesis/km2_full_scatter.yaml`
-      - *job*: km2_noscat
-      - *job*: km2_scat
 
 - ### Determine k3pi crosstalk
     - Run over P6 K- data
@@ -56,6 +50,17 @@ STEPS TO FINAL LIMITS
 
 - ### Merge all plots
     - run `hadd tdata/staging/all.plots.root tdata/halo_control/all.halo_control.root tdata/staging/halo_sub.q11t.root tdata/staging/km2_sub.q11t.root`
+
+- ### Determine scattering contribution
+    - Run over km2 MC
+      - run `/b/apps/hnureco -m input/reco/thesis/km2_full.yaml`
+      - run `/b/apps/hnureco -m input/reco/thesis/km2_full_scatter.yaml`
+      - *job*: km2_noscat
+      - *job*: km2_scat
+
+    - Then locally
+      - run `/build_bham/apps/shuffle -m input/shuffle/thesis/km2_scatter/km2_noscat.yaml -o tdata/staging/km2_noscat.root`
+      - run `/build_bham/apps/shuffle -m input/shuffle/thesis/km2_scatter/km2_scat.yaml -o tdata/staging/km2_scat.root`
 
 - ### Generate bacgkround estimate
     - Generate the shuffled file 

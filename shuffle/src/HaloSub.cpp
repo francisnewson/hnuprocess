@@ -191,6 +191,13 @@ namespace fn
             std::string haloname = get_yaml<std::string>( sub_node["plotting"], "haloname");
             std::string peakfid = get_yaml<std::string>( sub_node["plotting"], "peakfid");
 
+            //use corrected flux
+            double br = brs_.at( peakname);
+            double fid_weight = at( sub_fid_weights, peakfid, "Missing sub_fid_weight: " + peakfid );
+            double scale_factor = corrected_flux  * br / fid_weight;
+
+            std::cout << "scale_factor: " << scale_factor << std::endl;
+
             for ( auto& plot_name : plot_names )
             {
                 //Load raw plots
@@ -201,22 +208,55 @@ namespace fn
                 std::unique_ptr<TH1> hhalo = get_summed_histogram(
                         ce, begin( halo_channels ), end( halo_channels));
 
-                //use corrected flux
-                double br = brs_.at( peakname);
-                double fid_weight = at( sub_fid_weights, peakfid, "Missing sub_fid_weight: " + peakfid );
-                double scale_factor = corrected_flux  * br / fid_weight;
                 hpeak->Scale( scale_factor );
+
+                //Save log plots
+                path write_path = path{haloname}/plot_name;
+                cd_p( &tflog_, write_path );
+                hpeak->Write( "hpeak" );
+                hhalo->Write( "hraw" );
+                store_value( "k3pi_scale_factor" , scale_factor );
 
                 //So subtraction!
                 hhalo->Add( hpeak.get() , -1 );
+                hhalo->Write( "hcorr" );
 
-                //save plots
-                path write_path = path{haloname}/plot_name;
+                //save output plots
                 cd_p( &tfout_, write_path.parent_path()  );
                 hhalo->Write( write_path.filename().string().c_str() );
             }
         }
     }
 
+    void copy_fids( TFile& tfout, const YAML::Node& instruct )
+    {
+        std::string pre = get_yaml<std::string> ( instruct, "pre" );
+        std::string post = get_yaml<std::string> ( instruct, "post" );
+        std::string root_file = get_yaml<std::string> ( instruct, "root_file" );
+
+        for ( const auto& node : instruct["channels"] )
+        {
+            auto sources = get_yaml<std::vector<std::string>> ( node, "source" );
+
+            if ( sources.size() != 1 )
+            { 
+                throw std::runtime_error
+                    ( "copy_fids can't handle more than one source" );
+            }
+
+            std::string source = sources[0];
+            std::string dest = get_yaml<std::string> ( node, "dest" );
+
+            auto old_tree_path = boost::filesystem::path{pre} / source / post;
+            auto new_tree_path = boost::filesystem::path{pre} / dest / post;
+
+            auto tfile = get_tfile( root_file );
+            auto old_tree = get_object<TTree>( *tfile, old_tree_path );
+
+            cd_p( &tfout, new_tree_path.parent_path() );
+            TTree * new_tree = old_tree->CloneTree();
+            new_tree->Write();
+        }
+    }
 }
 
