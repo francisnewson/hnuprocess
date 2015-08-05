@@ -237,6 +237,25 @@
         ogt: bf_st
 
 - selection:
+    name: rkish_pz
+    type: TrackPZ
+    shape: rectangles
+    points:
+        - [ 11, 13, -1000, 9000 ]
+        - [ 13, 20, -1000, 9000 ]
+        - [ 20, 25, -1000, 9000 ]
+        - [ 25, 30,     0, 9000 ]
+        - [ 30, 35,   500, 9000 ]
+        - [ 35, 40,   500, 9000 ] 
+        - [ 40, 45,   500, 9000 ]
+        - [ 45, 50,  1000, 9000 ]
+        - [ 50, 55,  1000, 9000 ]
+        - [ 55, 60,  1500, 9000 ]
+        - [ 60, 65,  1500, 9000 ]
+    inputs:
+        ogt: bf_st
+
+- selection:
     name: wide_pz
     type: TrackPZ
     shape: rectangles

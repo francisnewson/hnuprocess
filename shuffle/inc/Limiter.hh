@@ -74,6 +74,8 @@ namespace fn
 
             double mean_;
             double width_;
+            double width_low_edge_;
+            double width_up_edge_;
 
             double width_total_;
             double width_acc_;
@@ -112,6 +114,35 @@ namespace fn
             std::unique_ptr<TH1> h_scat_;
     };
 
+    class HaloErrors
+    {
+        public:
+            struct halo_info
+            {
+                std::string bg_path;
+                std::string scale_path;
+                std::string halo_log_path;
+            };
+
+            HaloErrors( TFile& tfbg, TFile& tfhalolog );
+            void set_halo_info( std::vector<halo_info> info );
+            double compute_halo_val_err( double sig_min, double sig_max ) const;
+            double compute_halo_scale_err( double sig_min, double sig_max ) const;
+
+            void print_mismatch( std::ostream & os ,
+                    double sig_min, double sig_max,
+                    double halo_scale, double n_raw,
+                    double n_corr, double n_peak,
+                    double k3pi_scale, double n_check,
+                    double n_final ) const;
+
+
+        private:
+            TFile& tfbg_;
+            TFile& tfhalolog_;
+            std::vector<halo_info> halo_info_sets_;
+    };
+
     //--------------------------------------------------
 
     class Limiter
@@ -126,8 +157,7 @@ namespace fn
             void set_bg_channels( std::vector<std::string> bgchans );
             void set_scatter_contrib( const ScatterContrib& sc );
             void set_trigger( const TriggerApp& trig );
-
-            void set_halo_log_file( TFile& tf );
+            void set_halo_errors( const HaloErrors& he );
 
         private:
             std::unique_ptr<TH1> get_bg_hist
@@ -153,8 +183,7 @@ namespace fn
 
             boost::optional<const ScatterContrib*> scat_contrib_;
             boost::optional<const TriggerApp*> trig_;
-
-            TFile * halo_log_file_;
+            boost::optional<const HaloErrors*> halo_errors_;
     };
 
     //--------------------------------------------------

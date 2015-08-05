@@ -63,6 +63,39 @@ namespace fn
     {
         double bmin = a.GetXaxis()->FindBin( min );
         double bmax = a.GetXaxis()->FindBin( max );
+
+        //have we chosen the right bins?
+
+        //min check
+        double min_low = a.GetBinLowEdge( bmin );
+        double min_up = a.GetBinLowEdge( bmin + 1 );
+
+        if ( (min_up - min) < (min - min_low ) )
+        {
+            ++bmin;
+        }
+
+        double min_dist_prev_low = fabs( min - a.GetBinLowEdge( bmin - 1 ) );
+        double min_dist_low = fabs( min - a.GetBinLowEdge( bmin ) );
+        double min_dist_up  = fabs( min - a.GetBinLowEdge( bmin + 1 ) );
+
+        assert( (min_dist_low < min_dist_prev_low) && ( min_dist_low < min_dist_up ) );
+
+        //max check
+        double max_low = a.GetBinLowEdge( bmax );
+        double max_up  = a.GetBinLowEdge( bmax + 1 );
+
+        if ( ( max - max_low ) < ( max_up - max ) )
+        {
+            --bmax;
+        }
+
+        double max_dist_low = fabs( max - a.GetBinLowEdge( bmax ) );
+        double max_dist_up  = fabs( max - a.GetBinLowEdge( bmax + 1 ) );
+        double max_next_up  = fabs( max - a.GetBinLowEdge( bmax + 2 ) );
+
+        assert( ( max_dist_up < max_dist_low ) && ( max_dist_up < max_next_up ) );
+
         return a.Integral( bmin, bmax );
     }
 

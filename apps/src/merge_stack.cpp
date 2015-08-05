@@ -8,104 +8,8 @@
 #include "TLegend.h"
 #include "TriggerApp.hh"
 #include "OSLoader.hh"
+#include "merging.hh"
 #include <vector>
-
-
-std::pair<std::unique_ptr<TH1>, std::unique_ptr<OwningStack>> extract( TFile& tfin, std::vector<std::string> paths)
-{
-    std::vector<std::string> stack_paths;
-    std::vector<std::string> data_paths;
-
-    for( auto fp : paths  )
-    {
-        stack_paths.push_back( ( path{fp} / "hnu_stack" ).string() );
-        data_paths.push_back( ( path{fp} / "hdata" ).string() );
-    }
-
-    auto stacks = extract_object_list<THStack>( tfin, stack_paths );
-    auto owning_stack_sum =  sum_stacks(begin( stacks ), end( stacks ) );
-
-    auto data_hists = extract_hist_list<TH1D>( tfin, data_paths );
-    auto data_sum = sum_hists( begin( data_hists), end( data_hists ) );
-
-    return std::make_pair( std::move( data_sum ),  std::move( owning_stack_sum ) );
-} 
-
-void merge( TFile& tfin, TFile& tfout, std::string output_folder, std::vector<std::string> paths  )
-{
-    auto data_stack = extract( tfin, paths );
-    cd_p( &tfout, output_folder );
-    data_stack.first->Write("hdata");
-    data_stack.second->Write("hnu_stack");
-}
-
-std::pair<std::unique_ptr<TH1>, std::unique_ptr<TH1>> get_trigger_efficiency( TFile& tf )
-{
-    std::vector<std::string> sels
-    {
-        "p5.data.q1.v4.neg/sig_up_trig_eff"
-            "p5.data.q1.v4.neg/sig_dn_trig_eff"
-            "p5.data.q1.v4.pos/sig_up_trig_eff"
-            "p5.data.q1.v4.pos/sig_dn_trig_eff"
-    };
-
-    TriggerApp ta{ tf};
-    ta.set_sels( sels );
-    ta.init();
-
-    auto h_passed = std::unique_ptr<TH1D> ( tclone( ta.get_h_passed()) );
-    auto h_all = std::unique_ptr<TH1D> ( tclone(ta.get_h_all()) );
-
-    std::cout << h_all->GetNbinsX() << std::endl;
-
-    return std::make_pair( std::move(h_all), std::move(h_passed) );
-}
-
-std::unique_ptr<TH1D> get_cumulative_hist( TH1& h, double centre )
-{
-    TAxis * ax = h.GetXaxis();
-    int nbins  = h.GetNbinsX();
-    int centre_bin = ax->FindBin( centre );
-    double bin_centre = ax->GetBinCenter( centre_bin );
-
-    int centre_up;
-    int centre_down;
-
-    if ( bin_centre > centre )
-    {
-        centre_up = centre_bin;
-        centre_down = centre_bin - 1 ;
-    }
-    else
-    {
-        centre_down = centre_bin;
-        centre_up = centre_bin + 1;
-    }
-
-    int upper_dist = nbins - centre_up;
-    int lower_dist = centre_down;
-
-    int half_nbins = std::min( upper_dist, lower_dist ) - 1;
-    int min_bin = centre_down  -  ( half_nbins - 1 );
-    int max_bin = centre_up +  ( half_nbins - 1 );
-
-    auto result = makeTH1D( "h_cum", "Cumulative", ( max_bin - min_bin + 1 ) / 2,
-            h.GetXaxis()->GetBinLowEdge( centre_up ),
-            h.GetXaxis()->GetBinUpEdge( max_bin ), h.GetXaxis()->GetTitle() );
-
-    int my_min_bin = centre_down;
-    int my_max_bin = centre_up;
-    while( my_max_bin - centre_down < half_nbins )
-    {
-        double val = h.Integral( my_min_bin, my_max_bin );
-        double fill_point = ax->GetBinCenter( my_max_bin ) - ax->GetBinLowEdge( centre_up );
-        result->SetBinContent( result->GetXaxis()->FindBin( fill_point ), val );
-        ++my_max_bin;
-        --my_min_bin;
-    }
-
-    return result;
-}
 
 int main( int argc, char * argv[] )
 {
@@ -218,6 +122,40 @@ int main( int argc, char * argv[] )
         }
     }
 
+
+    //**************************************************
+    //Error
+    //**************************************************
+
+    //for now just hardcode the final case
+    
+    //halo errors
+    TFile tf_halo_log{  "tdata/staging/log/halo_sub_log.q11t.root"  };
+
+    std::string bg_filename = "tdata/staging/all.mass_plots.root";
+    TFile tfin_bg{ bg_filename.c_str() };
+
+    HaloErrors he{ tfin_bg, tf_halo_log };
+    he.set_halo_info( {
+            { "neg/signal_lower_muv/h_m2m_kmu/hnu_stack_hists/halo_neg", 
+            "neg_lower", "p6.halo.q11t.neg/signal_lower_muv_plots/h_m2m_kmu" },
+            { "pos/signal_lower_muv/h_m2m_kmu/hnu_stack_hists/halo_pos", 
+            "pos_lower", "p6.halo.q11t.pos/signal_lower_muv_plots/h_m2m_kmu" } ,
+            { "neg/signal_upper_muv/h_m2m_kmu/hnu_stack_hists/halo_neg", 
+            "neg_upper", "p6.halo.q11t.neg/signal_upper_muv_plots/h_m2m_kmu" },
+            { "pos/signal_upper_muv/h_m2m_kmu/hnu_stack_hists/halo_pos", 
+            "pos_upper", "p6.halo.q11t.pos/signal_upper_muv_plots/h_m2m_kmu" } } );
+
+    //Scattering
+    TFile tfin_scat { "tdata/staging/km2_scat.root"};
+    TFile tfin_noscat { "tdata/staging/km2_noscat.root"};
+    ScatterContrib sc{ tfin_noscat, tfin_scat };
+
+    HistErrors hist_errors{};
+    hist_errors.set_trigger( *trig_effs["full_q11t_eff"] ); 
+    hist_errors.set_scatter_contrib( sc );
+    hist_errors.set_halo_errors( he );
+
     //**************************************************
     //Merge stacks
     //**************************************************
@@ -234,7 +172,7 @@ int main( int argc, char * argv[] )
         std::vector<std::string> paths 
             = get_yaml<std::vector<std::string>>( stack_node, "selections" );
 
-        auto data_stack  = extract( tfin, paths );
+        auto data_stack  = extract_data_stack( tfin, paths );
 
         TH1 * hbg = static_cast<TH1*>( data_stack.second->Stack().GetStack()->Last() );
         hbg->SetLineColor( kBlack );
@@ -249,13 +187,13 @@ int main( int argc, char * argv[] )
 
         if ( stack_node["cumulative_check" ] && ! stack_node["trigeff"] )
         {
-                double cum_centre = get_yaml<double>( stack_node, "cumulative_check" );
-                auto h_cum_data = get_cumulative_hist( *data_stack.first, cum_centre );
-                auto h_cum_mc = get_cumulative_hist( *hbg, cum_centre );
-                h_cum_mc->Write( "hbg_cum" );
-                h_cum_data->Write( "h_cum" );
-                h_cum_data->Divide( h_cum_mc.get() );
-                h_cum_data->Write( "h_cum_rat" );
+            double cum_centre = get_yaml<double>( stack_node, "cumulative_check" );
+            auto h_cum_data = get_cumulative_hist( *data_stack.first, cum_centre );
+            auto h_cum_mc = get_cumulative_hist( *hbg, cum_centre );
+            h_cum_mc->Write( "hbg_cum" );
+            h_cum_data->Write( "h_cum" );
+            h_cum_data->Divide( h_cum_mc.get() );
+            h_cum_data->Write( "h_cum_rat" );
         }
 
         if ( stack_node["trigeff"] )
@@ -276,6 +214,12 @@ int main( int argc, char * argv[] )
                 h_cum_data->Divide( h_cum_mc.get() );
                 h_cum_data->Write( "h_cum_rat" );
             }
+        }
+
+        if ( stack_node["errors"] && stack_node["errors"].as<bool>() )
+        {
+            auto h_errors = hist_errors.compute_errors( *static_cast<TH1D*>( hbg ) );
+            h_errors->Write( "hbg_err" );
         }
     }
 

@@ -71,12 +71,12 @@ namespace fn
 
     double HnuLimParams::get_width_min() const
     {
-        return get_mean() - 0.5 * get_width();
+        return width_low_edge_;
     }
 
     double HnuLimParams::get_width_max() const
     {
-        return get_mean() + 0.5 * get_width();
+        return width_up_edge_;
     }
 
 
@@ -164,8 +164,10 @@ namespace fn
             cum_sum = h_sig_->Integral( min_bin, max_bin );
         }
 
-        width_ = h_sig_->GetXaxis()->GetBinUpEdge( max_bin )
-            - h_sig_->GetXaxis()->GetBinLowEdge( min_bin );
+        double width_low_edge_ = h_sig_->GetXaxis()->GetBinLowEdge( min_bin );
+        double width_up_edge_ = h_sig_->GetXaxis()->GetBinUpEdge( min_bin );
+
+        width_ = width_up_edge_ - width_low_edge_;
 
         width_total_ = cum_sum;
         auto width_acc_err = eff_err( width_total_ , fid_total_) ;
@@ -203,7 +205,14 @@ namespace fn
     {
         double noscat = integral( *h_noscat_, sig_min, sig_max );
         double scat = integral( *h_scat_, sig_min, sig_max );
-        std::cerr <<  scat << " "  << noscat << std::endl;
+        if ( noscat == 0 )
+        {
+            return 0;
+        }
+        if ( scat == 0 )
+        {
+            return 1.0;
+        }
         return fabs(scat - noscat) / scat;
     }
 
@@ -213,11 +222,6 @@ namespace fn
         {
             km2_flux_paths_ = std::vector<std::string> { "neg_lower","pos_lower" };
         }
-
-    void Limiter::set_halo_log_file( TFile& tf )
-    {
-        halo_log_file_ = &tf;
-    }
 
     HnuLimResult Limiter::get_limit( const HnuLimParams& params )
     {
@@ -397,78 +401,57 @@ namespace fn
         double total_err = std::sqrt( total_sqerr );
         return std::make_pair( total_flux, total_err );
     }
+    //--------------------------------------------------
 
-    double Limiter::compute_halo_scale_err( double sig_min, double sig_max )
+    HaloErrors::HaloErrors( TFile& tfbg, TFile& tfhalolog )
+        :tfbg_( tfbg ), tfhalolog_( tfhalolog )
+    {}
+
+    void HaloErrors::set_halo_info( std::vector<halo_info> info )
     {
-        std::vector<std::pair<std::string,std::string>> halo_scale_pairs
-        {
-            { "neg/signal_lower_muv/h_m2m_kmu/hnu_stack_hists/halo_neg", "neg_lower" },
-                { "neg/signal_upper_muv/h_m2m_kmu/hnu_stack_hists/halo_neg", "neg_upper" },
-                { "pos/signal_lower_muv/h_m2m_kmu/hnu_stack_hists/halo_pos", "pos_lower" },
-                { "pos/signal_upper_muv/h_m2m_kmu/hnu_stack_hists/halo_pos", "pos_upper" },
-        };
-
-        double total_sqerror = 0;
-
-        for ( auto hp : halo_scale_pairs )
-        {
-            double halo_scale 
-                = retrieve_value( bg_file_, path{hp.second} / "halo_scale" );
-
-            double halo_scale_err 
-                = retrieve_value( bg_file_, path{hp.second} / "halo_scale_err" );
-
-            auto h_halo = extract_hist<TH1D>( bg_file_, hp.first );
-            double halo_contrib = integral( *h_halo, sig_min, sig_max );
-            total_sqerror += fn::sq(  halo_contrib * halo_scale_err / halo_scale );
-            total_sqerror += fn::sq( 0.1 * halo_contrib );
-        }
-
-
-        return std::sqrt( total_sqerror );
+        halo_info_sets_ = info;
     }
 
-    double Limiter::compute_halo_val_err( double sig_min, double sig_max )
+
+    double HaloErrors::compute_halo_scale_err( double sig_min, double sig_max ) const
     {
-        struct halo_info {
-            std::string bg_path;
-            std::string scale_path;
-            std::string halo_log_path;
-        };
+        double total_sqerr = 0;
 
-        std::vector<halo_info> halo_info_sets;
-        halo_info_sets.push_back( halo_info
-                { "neg/signal_lower_muv/h_m2m_kmu/hnu_stack_hists/halo_neg", "neg_lower",
-                "p6.halo.q11t.neg/signal_lower_muv_plots/h_m2m_kmu" } );
-
-        halo_info_sets.push_back( halo_info
-                { "pos/signal_lower_muv/h_m2m_kmu/hnu_stack_hists/halo_pos", "pos_lower",
-                "p6.halo.q11t.pos/signal_lower_muv_plots/h_m2m_kmu" } ) ;
-
-        halo_info_sets.push_back( halo_info
-                { "neg/signal_upper_muv/h_m2m_kmu/hnu_stack_hists/halo_neg", "neg_upper",
-                "p6.halo.q11t.neg/signal_upper_muv_plots/h_m2m_kmu" } );
-
-        halo_info_sets.push_back( halo_info
-                { "pos/signal_upper_muv/h_m2m_kmu/hnu_stack_hists/halo_pos", "pos_upper",
-                "p6.halo.q11t.pos/signal_upper_muv_plots/h_m2m_kmu" } );
-
-        double total_sqerror = 0;
-
-        for ( auto hp : halo_info_sets )
+        for ( const auto & info : halo_info_sets_ )
         {
-            double halo_scale 
-                = retrieve_value( bg_file_, path{hp.scale_path} / "halo_scale" );
+            double halo_scale = 
+                retrieve_value( tfbg_, path{ info.scale_path } / "halo_scale" ) ;
+
+            double halo_scale_err = 
+                retrieve_value( tfbg_, path{ info.scale_path } / "halo_scale_err" ) ;
+
+            auto h_halo = extract_hist<TH1D>( tfbg_, info.bg_path );
+            double halo_contrib = integral( *h_halo, sig_min, sig_max );
+            total_sqerr += fn::sq( halo_contrib * halo_scale_err / halo_scale );
+            total_sqerr += fn::sq( 0.1 * halo_contrib );
+        }
+
+        return std::sqrt( total_sqerr );
+    }
+
+    double HaloErrors::compute_halo_val_err( double sig_min, double sig_max ) const
+    {
+        double total_sqerr = 0;
+
+        for ( const auto& info : halo_info_sets_ )
+        {
+            double halo_scale = 
+                retrieve_value( tfbg_, path{ info.scale_path } / "halo_scale" ) ;
 
             double k3pi_scale 
-                = retrieve_value( *halo_log_file_, path{hp.halo_log_path} / "k3pi_scale_factor" );
+                = retrieve_value( tfhalolog_, path{info.halo_log_path} / "k3pi_scale_factor" );
 
-            boost::filesystem::path log_folder = hp.halo_log_path;
+            path log_folder = info.halo_log_path;
 
-            //redo the calculation from halo_sub
-            auto h_raw   = get_object<TH1D>( *halo_log_file_, log_folder / "hraw" );
-            auto h_corr  = get_object<TH1D>( *halo_log_file_, log_folder / "hcorr" );
-            auto h_peak  = get_object<TH1D>( *halo_log_file_, log_folder / "hpeak" );
+            //redo calculation from halo_sub
+            auto h_raw   = get_object<TH1D>( tfhalolog_, log_folder / "hraw" );
+            auto h_corr  = get_object<TH1D>( tfhalolog_, log_folder / "hcorr" );
+            auto h_peak  = get_object<TH1D>( tfhalolog_, log_folder / "hpeak" );
 
             double n_raw   = integral( *h_raw, sig_min, sig_max );
             double n_corr  = integral( *h_corr, sig_min, sig_max );
@@ -478,40 +461,79 @@ namespace fn
             double n_check  = halo_scale * ( n_raw - k3pi_scale * n_peak );
 
             //compare with what is stored in the computed bg file
-            auto h_final = get_object<TH1D>( bg_file_, hp.bg_path );
+            auto h_final = get_object<TH1D>( tfbg_, info.bg_path );
             double n_final = integral( *h_final, sig_min, sig_max );
 
             //If there is a mismatch print everything 
             double prec = 0.00001;
             if ( fabs(n_check - n_final) > prec * fabs( n_check + n_final) ) 
             {
-                std::cout 
-                    << "range: " << sig_min << " " << sig_max << "\n"
-                    << "halo_scale: " << halo_scale  << "\n"
-                    << "n_raw: " << n_raw  << "\n"
-                    << "n_corr: " << n_corr << "\n"
-                    << "n_peak: " << n_peak << "\n"
-                    << "k3pi_scale: " << k3pi_scale << "\n"
-                    << "n_check: " << std::setprecision(10) << n_check << "\n"
-                    << "n_final: " << std::setprecision(10) << n_final << "\n"
-                    << std::endl;
-
-                uint64_t u_check;
-                uint64_t u_final;
-                memcpy(&u_check, &n_check, sizeof(n_check));
-                memcpy(&u_final, &n_final, sizeof(n_final));
-                std::cout << std::hex << u_check << "\n" << u_final << std::endl;
-
-                throw std::runtime_error( "halo_scale mismatch" );
+                throw std::runtime_error( "Mismatch redoing halo calculation" );
+                print_mismatch( std::cerr, sig_min, sig_max, halo_scale,
+                        n_raw, n_corr, n_peak, k3pi_scale, n_check, n_final );
             }
 
             double k3pi_scale_rel_err = 0.03;
 
             //now do the actual error calculation
-            total_sqerror = n_raw  + fn::sq(k3pi_scale) * n_peak * ( n_peak * k3pi_scale_rel_err + 1.0 );
+            total_sqerr = n_raw  + fn::sq(k3pi_scale) * n_peak * ( n_peak * k3pi_scale_rel_err + 1.0 );
         }
 
-        return std::sqrt(total_sqerror);
+        return std::sqrt(total_sqerr);
+    }
+    void HaloErrors::print_mismatch( std::ostream & os ,
+            double sig_min, double sig_max,
+            double halo_scale, double n_raw,
+            double n_corr, double n_peak,
+            double k3pi_scale, double n_check,
+            double n_final ) const
+    {
+        os
+            << "range: " << sig_min << " " << sig_max << "\n"
+            << "halo_scale: " << halo_scale  << "\n"
+            << "n_raw: " << n_raw  << "\n"
+            << "n_corr: " << n_corr << "\n"
+            << "n_peak: " << n_peak << "\n"
+            << "k3pi_scale: " << k3pi_scale << "\n"
+            << "n_check: " << std::setprecision(10) << n_check << "\n"
+            << "n_final: " << std::setprecision(10) << n_final << "\n"
+            << std::endl;
+
+        uint64_t u_check;
+        uint64_t u_final;
+        memcpy(&u_check, &n_check, sizeof(n_check));
+        memcpy(&u_final, &n_final, sizeof(n_final));
+        os << std::hex << u_check << "\n" << u_final << std::endl;
+    }
+
+    //--------------------------------------------------
+    double Limiter::compute_halo_scale_err( double sig_min, double sig_max )
+    {
+        if ( halo_errors_ )
+        {
+            return (*halo_errors_)->compute_halo_scale_err( sig_min, sig_max );
+        }
+        else
+        {
+            return 0;
+        }
+    }
+
+    double Limiter::compute_halo_val_err( double sig_min, double sig_max )
+    {
+        if ( halo_errors_ )
+        {
+            return (*halo_errors_)->compute_halo_val_err( sig_min, sig_max );
+        }
+        else
+        {
+            return 0;
+        }
+    }
+
+    void Limiter::set_halo_errors( const HaloErrors& he )
+    {
+        halo_errors_ = &he;
     }
 
     void Limiter::set_scatter_contrib( const ScatterContrib& sc )

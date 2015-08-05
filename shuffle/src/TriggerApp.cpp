@@ -58,6 +58,8 @@ namespace fn
         double upper = TEfficiency::ClopperPearson( all, passed, 0.6827, true );
         double lower = TEfficiency::ClopperPearson( all, passed, 0.6827, false );
 
+        if ( all == 0) { return std::make_pair( 0 , 0 ); }
+
         double eff = passed / all;
         return std::make_pair( eff , (upper - lower)/2 );
     }

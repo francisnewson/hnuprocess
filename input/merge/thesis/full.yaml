@@ -32,6 +32,7 @@ stacks:
     filename: tdata/staging/all.mass_plots.root,
     destfolder: km2_full_vis,
     trigeff: full_q11t_eff,
+    errors: true,
     selections: [
         'pos/signal_upper_muv/h_m2m_kmu_vis',
         'neg/signal_upper_muv/h_m2m_kmu_vis',
@@ -43,6 +44,7 @@ stacks:
     destfolder: km2_full_mvis,
     trigeff: full_q11t_eff,
     cumulative_check: 0,
+    errors: true,
     selections: [
         'pos/signal_upper_muv/h_m2m_kmu_mvis',
         'neg/signal_upper_muv/h_m2m_kmu_mvis',

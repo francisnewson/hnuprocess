@@ -13,7 +13,7 @@
 - output:
     name: tfout
     type: tfile
-    filename: muv_3d.root
+    filename: muv_check.root
 
 - output:
     name: oscout
@@ -138,10 +138,8 @@
 ###################################################
 
 
-#full RK selection
-
 - selection:
-    name: km2_selection
+    name: scale_selection
     type: CompositeSelection
     children:
         - passer
@@ -149,7 +147,7 @@
         - good_trk
         - pos_trk
         - quality_7
-        - wide_pz
+        - rkish_pz
         - cda_35mm
         - rk_lkr_accep
         - rk_lkr_veto
@@ -158,42 +156,34 @@
         - dch4_acc
         - ddead_cell
         - rk_dcht
-
+        - muv_acc
 
 - selection:
     name: muon_selection
     type: CompositeSelection
     children:
-        - km2_selection
-        - km2_peak_m2
+        - scale_selection
         - eop_90
+        - km2_peak_m2
 
 
 ###################################################
 # ANALYSES
 ###################################################
 
-
 - analysis:
-    { name: muv_eff_raw, type: Muon3DEfficiency,
-    muv_selection: muon_req_38, 
-    selection: muon_selection,
-    folder: muv_eff_raw,
-    tfile: tfout, inputs: {ogt: bf_st} }
-
-- analysis:
-    { name: muv_eff_corr, type: Muon3DEfficiency,
+    { name: muv_eff_corr, type: MuonCheck,
     muv_selection: muon_req_38_xyw_pw, 
     selection: muon_selection,
-    folder: muv_eff_corr,
-    tfile: tfout, inputs: {ogt: bf_st} }
+    folder: muv_eff_check,
+    tfile: tfout, inputs: {ogt: bf_st, kt: kaon_track, km2event: km2_event } }
 
 - analysis:
     type: Km2Plotter
     name: km2_plots
     folder: km2_plots
     tfile: tfout
-    selection: km2_selection
+    selection: scale_selection
     inputs:
         km2event: km2_event
 

@@ -105,7 +105,8 @@ namespace fn
             tf.GetObject( name.string().c_str(), h );
             if( !h )
             {
-                throw std::runtime_error( "Can't find " + name.string() + " in " + tf.GetName() );
+                throw std::runtime_error
+                    ( "Can't find " + name.string() + " in " + tf.GetName() );
             }
             return h;
         }
@@ -118,7 +119,8 @@ namespace fn
             tf.GetObject( root_file_string( p ) , h );
             if ( !h )
             { 
-                throw std::runtime_error( "Could not find " + p.string() + " in "  + tf.GetName() );
+                throw std::runtime_error
+                    ( "Could not find " + p.string() + " in "  + tf.GetName() );
             }
             auto result = std::unique_ptr<T>( 
                     static_cast<T*>( h->Clone() ) );

@@ -181,9 +181,17 @@ int main()
 
     lm.set_scatter_contrib( sc );
 
-    //halo corrections
+    //halo errors
     TFile tf_halo_log{  "tdata/staging/log/halo_sub_log.q11t.root"  };
-    lm.set_halo_log_file( tf_halo_log );
+
+    HaloErrors he{ tfin_bg, tf_halo_log };
+    he.set_halo_info( {
+                { "neg/signal_lower_muv/h_m2m_kmu/hnu_stack_hists/halo_neg", "neg_lower", "p6.halo.q11t.neg/signal_lower_muv_plots/h_m2m_kmu" },
+                { "pos/signal_lower_muv/h_m2m_kmu/hnu_stack_hists/halo_pos", "pos_lower", "p6.halo.q11t.pos/signal_lower_muv_plots/h_m2m_kmu" } ,
+                { "neg/signal_upper_muv/h_m2m_kmu/hnu_stack_hists/halo_neg", "neg_upper", "p6.halo.q11t.neg/signal_upper_muv_plots/h_m2m_kmu" },
+                { "pos/signal_upper_muv/h_m2m_kmu/hnu_stack_hists/halo_pos", "pos_upper", "p6.halo.q11t.pos/signal_upper_muv_plots/h_m2m_kmu" } } );
+
+    lm.set_halo_errors( he );
 
     //Output streams
     std::ofstream ofs( "output/lim.txt" );

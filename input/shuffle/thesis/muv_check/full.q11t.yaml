@@ -1,0 +1,123 @@
+var:
+    pos_halo: &poshalo p6.data.km.q11t.v2.pos
+    pos_data: &posdata p5.data.q11t.v3.pos
+    neg_halo: &neghalo p6.data.km.q11t.v2.neg
+    neg_data: &negdata p5.data.q11t.v3.neg
+
+sums:
+    halorksum:  &halorksum {
+        file: tdata/muv_check/all.muv_check.root,
+        pre: "", post: km2_plots/h_m2m_kmu,
+        min: -0.3, max: -0.03 }
+
+    peakrksum:  &peakrksum {
+            file: tdata/muv_check/all.muv_check.root,
+            pre: "", post: km2_plots/h_m2m_kmu,
+            min: -0.015, max: +0.015 } 
+
+    fids: &fids { fid_file: use_root, root_file: 'tdata/muv_check/all.muv_check.root',
+        pre: "", post : "sample_burst_count/bursts", branch: "weight" }
+
+scaling:
+    - scaling_method:
+        name: pos
+        strategy: flexi
+        peak: km2
+        fids: *fids
+
+        halo: &poshalostrat
+            strat: mono
+            halo: { chan: *poshalo , sum: *halorksum }
+            data: { chan: *posdata , sum: *halorksum }
+
+        mc: &mcpos
+            strat: combo
+            halo: *poshalostrat
+            peak:
+                fids:  *fids
+                halo:  { chan:  *poshalo  , sum:  *peakrksum }
+                data:  { chan:  *posdata  , sum:  *peakrksum }
+                stack: { sum: *peakrksum ,  normchan: km2_pos,
+                        channels: [
+                            { chan: km2_pos , type: km2, fidname: p5.km2.v2.pos },
+                            ] }
+   
+    - scaling_method:
+        name: neg
+        strategy: flexi
+        peak: km2
+        fids: *fids
+
+        halo: &neghalostrat
+            strat: mono
+            halo: { chan:  *neghalo  , sum: *halorksum }
+            data: { chan:  *negdata  , sum: *halorksum }
+
+        mc: &mcneg
+            strat: combo
+            halo: *neghalostrat
+
+            peak:
+                fids:  *fids
+                halo: { chan: *neghalo  , sum: *peakrksum }
+                data: { chan: *negdata  , sum: *peakrksum }
+                stack: {  sum: *peakrksum , normchan: km2_neg,
+                        channels: [
+                            { chan: km2_neg , type: km2, fidname: p5.km2.v2.neg },
+                            ] }
+
+weights: *fids
+
+stacks:
+    stack: &posstack [
+        item: { name: halo_pos,  type: halo,  channels: [ *poshalo ] },
+        item: { name: km2_pos,   type: km2,   fid_weight: p5.km2.v2.pos, channels: [ p5.km2.v2.pos ] } ]
+
+    stack: &negstack [
+        item: { name: halo_neg,  type: halo,  channels: [ *neghalo ] },
+        item: { name: km2_neg,   type: km2,   fid_weight: p5.km2.v2.neg, channels: [ p5.km2.v2.neg ] } ]
+
+    doblind: &doblind { do_blind: false,  min_blind: 0.09, max_blind: 0.14 }
+
+output_list:
+    #POS
+    - {
+        input_file: tdata/muv_check/all.muv_check.root,
+    
+        plots: [
+            { path: muv_eff_check/pass/h_m2m , name: pos/muv_eff_check/pass/h_m2m , rebin: 1},
+            { path: muv_eff_check/all/h_m2m  , name: pos/muv_eff_check/all/h_m2m  , rebin: 1},
+            { path: muv_eff_check/pass/h_p   , name: pos/muv_eff_check/pass/h_p   , rebin: 1},
+            { path: muv_eff_check/all/h_p    , name: pos/muv_eff_check/all/h_p    , rebin: 1},
+            { path: muv_eff_check/pass/h_t   , name: pos/muv_eff_check/pass/h_t   , rebin: 1},
+            { path: muv_eff_check/all/h_t    , name: pos/muv_eff_check/all/h_t    , rebin: 1},
+            { path: muv_eff_check/pass/h_z   , name: pos/muv_eff_check/pass/h_z   , rebin: 10},
+            { path: muv_eff_check/all/h_z    , name: pos/muv_eff_check/all/h_z    , rebin: 10},
+            { path: muv_eff_check/pass/h_rmuv, name: pos/muv_eff_check/pass/h_rmuv, rebin: 1},
+            { path: muv_eff_check/all/h_rmuv , name: pos/muv_eff_check/all/h_rmuv , rebin: 1},
+            { path: muv_eff_check/pass/h_phi , name: pos/muv_eff_check/pass/h_phi , rebin: 1},
+            { path: muv_eff_check/all/h_phi  , name: pos/muv_eff_check/all/h_phi  , rebin: 1}
+            ],
+            data_plot: { channels: [ *posdata ] }, blinding: *doblind, stack_scaling: pos , stack: *posstack 
+        }
+
+    #NEG
+    - {
+        input_file: tdata/muv_check/all.muv_check.root,
+    
+        plots: [
+            { path: muv_eff_check/pass/h_m2m , name: neg/muv_eff_check/pass/h_m2m , rebin: 1},
+            { path: muv_eff_check/all/h_m2m  , name: neg/muv_eff_check/all/h_m2m  , rebin: 1},
+            { path: muv_eff_check/pass/h_p   , name: neg/muv_eff_check/pass/h_p   , rebin: 1},
+            { path: muv_eff_check/all/h_p    , name: neg/muv_eff_check/all/h_p    , rebin: 1},
+            { path: muv_eff_check/pass/h_t   , name: neg/muv_eff_check/pass/h_t   , rebin: 10},
+            { path: muv_eff_check/all/h_t    , name: neg/muv_eff_check/all/h_t    , rebin: 10},
+            { path: muv_eff_check/pass/h_z   , name: neg/muv_eff_check/pass/h_z   , rebin: 1},
+            { path: muv_eff_check/all/h_z    , name: neg/muv_eff_check/all/h_z    , rebin: 1},
+            { path: muv_eff_check/pass/h_rmuv, name: neg/muv_eff_check/pass/h_rmuv, rebin: 1},
+            { path: muv_eff_check/all/h_rmuv , name: neg/muv_eff_check/all/h_rmuv , rebin: 1},
+            { path: muv_eff_check/pass/h_phi , name: neg/muv_eff_check/pass/h_phi , rebin: 1},
+            { path: muv_eff_check/all/h_phi  , name: neg/muv_eff_check/all/h_phi  , rebin: 1}
+            ],
+        data_plot: { channels: [ *negdata ] }, blinding: *doblind, stack_scaling: neg , stack: *negstack
+        }
