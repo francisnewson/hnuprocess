@@ -128,7 +128,7 @@ int main( int argc, char * argv[] )
     //**************************************************
 
     //for now just hardcode the final case
-    
+
     //halo errors
     TFile tf_halo_log{  "tdata/staging/log/halo_sub_log.q11t.root"  };
 
@@ -169,6 +169,8 @@ int main( int argc, char * argv[] )
         std::string destfolder = get_yaml<std::string>( stack_node, "destfolder" );
         auto& tfin = tfl.get_tfile_opt( filename, "" );
 
+        std::cerr << "\nProcessing " << name << std::endl;
+
         std::vector<std::string> paths 
             = get_yaml<std::vector<std::string>>( stack_node, "selections" );
 
@@ -188,6 +190,7 @@ int main( int argc, char * argv[] )
         if ( stack_node["cumulative_check" ] && ! stack_node["trigeff"] )
         {
             double cum_centre = get_yaml<double>( stack_node, "cumulative_check" );
+            std::cerr << "Cumulative check ...  " << std::endl;
             auto h_cum_data = get_cumulative_hist( *data_stack.first, cum_centre );
             auto h_cum_mc = get_cumulative_hist( *hbg, cum_centre );
             h_cum_mc->Write( "hbg_cum" );
@@ -200,25 +203,32 @@ int main( int argc, char * argv[] )
         {
             std::string trig_name = get_yaml<std::string>( stack_node, "trigeff" );
             const auto& trig_eff = trig_effs.at( trig_name );
+            std::cerr << "Trigger correction ...  " << std::endl;
             trig_eff->correct_hist( *hbg );
+            std::cerr << "Done!" << std::endl;
             hbg->SetLineColor( kViolet +2 );
             hbg->Write( "hbg_corr" );
 
             if ( stack_node["cumulative_check" ] )
             {
                 double cum_centre = get_yaml<double>( stack_node, "cumulative_check" );
+                std::cerr << "Cumulative check ...  "  << std::endl;
                 auto h_cum_data = get_cumulative_hist( *data_stack.first, cum_centre );
                 auto h_cum_mc = get_cumulative_hist( *hbg, cum_centre );
+                std::cerr << "Writing cum histograms ...  "  << std::endl;
                 h_cum_mc->Write( "hbg_cum" );
                 h_cum_data->Write( "h_cum" );
                 h_cum_data->Divide( h_cum_mc.get() );
                 h_cum_data->Write( "h_cum_rat" );
+                std::cerr << "Done"  << std::endl;
             }
         }
 
         if ( stack_node["errors"] && stack_node["errors"].as<bool>() )
         {
+            std::cerr << "Error computation ...  " << std::endl;
             auto h_errors = hist_errors.compute_errors( *static_cast<TH1D*>( hbg ) );
+            std::cerr << "Done!" << std::endl;
             h_errors->Write( "hbg_err" );
         }
     }

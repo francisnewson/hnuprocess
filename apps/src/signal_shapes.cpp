@@ -27,12 +27,15 @@ void print_result( std::ostream& os, const HnuLimParams& hlp, const HnuLimResult
         << hlp.get_width_acceptance() << " ± " << hlp.get_width_acceptance_err() << "\n";
     os << "-------------------------------------------\n";
     os << "Trig eff: " << hlr.trig_eff << " ± " << hlr.trig_err << "\n";
+    os << "Sig range: " << hlr.sig_min << " - " << hlr.sig_max << "\n";
     os << "Background: " << hlr.background << " ± " << hlr.background_err << "\n" ;
     os << "sqrt(Background): " << std::sqrt(hlr.background ) << "\n" ;
+    os << "Data observed: " << hlr.dt_obs << "\n";
     os << "Acc Sig limit: " << hlr.acc_sig_ul << "\n";
     os << "Orig Sig limit: " << hlr.orig_sig_ul << " " << hlr.rolke_orig_sig_ul << "\n";
     os.setf(std::ios_base::scientific, std::ios_base::floatfield);
     os << "BR limit: " << hlr.ul_br  << " U2 limit: " << hlr.ul_u2 << "\n";
+    os << "Dt BR limit: " <<  hlr.dt_ul_br << " Dt U2 limit: " << hlr.dt_ul_u2 <<  "\n";
 
     //Determine longest errname
     std::vector<std::string> names;
@@ -72,10 +75,21 @@ void print_headings( std::ostream& os )
         << std::setw(15) << "trig_err"
         << std::setw(15) << "bg"
         << std::setw(15) << "bg_err"
+        << std::setw(15) << "dt_obs"
         << std::setw(15) << "ul_acc_sig"
         << std::setw(15) << "ul_orig_sig"
         << std::setw(15) << "ul_br"
         << std::setw(15) << "ul_u2"
+        << std::setw(15) << "high1_ul_br"
+        << std::setw(15) << "high1_ul_u2"
+        << std::setw(15) << "low1_ul_br"
+        << std::setw(15) << "low1_ul_u2"
+        << std::setw(15) << "high2_ul_br"
+        << std::setw(15) << "high2_ul_u2"
+        << std::setw(15) << "low2_ul_br"
+        << std::setw(15) << "low2_ul_u2"
+        << std::setw(15) << "dt_ul_br"
+        << std::setw(15) << "dt_ul_u2"
         << std::setw(15) << "err_scat"
         << std::setw(15) << "err_trig"
         << std::setw(15) << "err_muv"
@@ -104,7 +118,8 @@ void print_flat_result( std::ostream& os, const HnuLimParams& hlp, const HnuLimR
         << std::setw(15) << hlr.trig_eff
         << std::setw(15) << hlr.trig_err
         << std::setw(15) << hlr.background
-        << std::setw(15) << hlr.background_err;
+        << std::setw(15) << hlr.background_err
+        << std::setw(15) << hlr.dt_obs;
 
     os.setf(std::ios_base::scientific,
             std::ios_base::floatfield);
@@ -114,6 +129,16 @@ void print_flat_result( std::ostream& os, const HnuLimParams& hlp, const HnuLimR
         << std::setw(15) <<  hlr.orig_sig_ul
         << std::setw(15) <<  hlr.ul_br
         << std::setw(15) <<  hlr.ul_u2
+        << std::setw(15) <<  hlr.high1_ul_br
+        << std::setw(15) <<  hlr.high1_ul_u2
+        << std::setw(15) <<  hlr.low1_ul_br
+        << std::setw(15) <<  hlr.low1_ul_u2
+        << std::setw(15) <<  hlr.high2_ul_br
+        << std::setw(15) <<  hlr.high2_ul_u2
+        << std::setw(15) <<  hlr.low2_ul_br
+        << std::setw(15) <<  hlr.low2_ul_u2
+        << std::setw(15) <<  hlr.dt_ul_br
+        << std::setw(15) <<  hlr.dt_ul_u2
         << std::setw(15) <<  hlr.error_budget.at("err_scat")
         << std::setw(15) <<  hlr.error_budget.at("err_trig")
         << std::setw(15) <<  hlr.error_budget.at("err_muv")
@@ -131,7 +156,7 @@ int main()
 
     //Decide which masses to look at
     std::vector<int> masses;
-    for( int m = 250 ; m != 390 ; m += 5 )
+    for( int m = 250 ; m != 380 ; m += 1 )
     { masses.push_back( m ); }
 
     //Load acceptance plots
@@ -186,10 +211,10 @@ int main()
 
     HaloErrors he{ tfin_bg, tf_halo_log };
     he.set_halo_info( {
-                { "neg/signal_lower_muv/h_m2m_kmu/hnu_stack_hists/halo_neg", "neg_lower", "p6.halo.q11t.neg/signal_lower_muv_plots/h_m2m_kmu" },
-                { "pos/signal_lower_muv/h_m2m_kmu/hnu_stack_hists/halo_pos", "pos_lower", "p6.halo.q11t.pos/signal_lower_muv_plots/h_m2m_kmu" } ,
-                { "neg/signal_upper_muv/h_m2m_kmu/hnu_stack_hists/halo_neg", "neg_upper", "p6.halo.q11t.neg/signal_upper_muv_plots/h_m2m_kmu" },
-                { "pos/signal_upper_muv/h_m2m_kmu/hnu_stack_hists/halo_pos", "pos_upper", "p6.halo.q11t.pos/signal_upper_muv_plots/h_m2m_kmu" } } );
+            { "neg/signal_lower_muv/h_m2m_kmu/hnu_stack_hists/halo_neg", "neg_lower", "p6.halo.q11t.neg/signal_lower_muv_plots/h_m2m_kmu" },
+            { "pos/signal_lower_muv/h_m2m_kmu/hnu_stack_hists/halo_pos", "pos_lower", "p6.halo.q11t.pos/signal_lower_muv_plots/h_m2m_kmu" } ,
+            { "neg/signal_upper_muv/h_m2m_kmu/hnu_stack_hists/halo_neg", "neg_upper", "p6.halo.q11t.neg/signal_upper_muv_plots/h_m2m_kmu" },
+            { "pos/signal_upper_muv/h_m2m_kmu/hnu_stack_hists/halo_pos", "pos_upper", "p6.halo.q11t.pos/signal_upper_muv_plots/h_m2m_kmu" } } );
 
     lm.set_halo_errors( he );
 
@@ -200,18 +225,26 @@ int main()
 
     for ( const auto& mass : masses )
     {
-        //Set up signal parameters
-        HnuLimParams hlp( tfin_acc, fid_weights, signal_regions, mass );
+        try
+        {
+            //Set up signal parameters
+            HnuLimParams hlp( tfin_acc, fid_weights, signal_regions, mass );
 
-        //write acceptance plots
-        tfout_acc.cd();
-        hlp.write();
+            //write acceptance plots
+            tfout_acc.cd();
+            hlp.write();
 
-        //Get limits
-        auto limres = lm.get_limit( hlp );
+            //Get limits
+            auto limres = lm.get_limit( hlp );
 
-        //Print limit results
-        print_result( os, hlp, limres );
-        print_flat_result( ofs, hlp, limres );
+            //Print limit results
+            print_result( os, hlp, limres );
+            print_flat_result( ofs, hlp, limres );
+        }
+        catch (std::exception & e)
+        {
+            std::cerr << "Problem with " << mass << e.what() << std::endl;
+            continue;
+        }
     }
 }

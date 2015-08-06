@@ -267,7 +267,7 @@ namespace fn
         return get_peak_scale_error() / get_peak_scale() * get_fiducial_flux();
     }
 
-    void MultiScaling::scale_hist( TH1& h, const YAML::Node& instruct ) const
+    double MultiScaling::scale_hist( TH1& h, const YAML::Node& instruct ) const
     {
         double scale_factor = 1;
         std::string type = get_yaml<std::string>( instruct, "type" );
@@ -288,5 +288,7 @@ namespace fn
             scale_factor = get_fiducial_flux() * br  / fid_weight;
         }
         h.Scale( scale_factor );
+
+        return scale_factor;
     }
 }

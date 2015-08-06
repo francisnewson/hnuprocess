@@ -164,8 +164,8 @@ namespace fn
             cum_sum = h_sig_->Integral( min_bin, max_bin );
         }
 
-        double width_low_edge_ = h_sig_->GetXaxis()->GetBinLowEdge( min_bin );
-        double width_up_edge_ = h_sig_->GetXaxis()->GetBinUpEdge( min_bin );
+        width_low_edge_ = h_sig_->GetXaxis()->GetBinLowEdge( min_bin );
+        width_up_edge_ = h_sig_->GetXaxis()->GetBinUpEdge( max_bin );
 
         width_ = width_up_edge_ - width_low_edge_;
 
@@ -238,6 +238,9 @@ namespace fn
 
         //Determine #background events
         double background = get_background( sig_min, sig_max );
+        double data = get_data( sig_min, sig_max );
+        res.sig_min = sig_min;
+        res.sig_max = sig_max;
 
         //apply trigger efficiency
         auto trig_eff_err = get_trig_eff( sig_min, sig_max );
@@ -305,23 +308,77 @@ namespace fn
 
         //Rolke does the heavy lifting
         TRolke rolke_eff;
+        rolke_eff.SetCL( 0.9 );
         rolke_eff.SetGaussBkgKnownEff( background, background, background_err , params.get_width_acceptance() );
         double ul = rolke_eff.GetUpperLimit();
+
+        //do brazil
+        double high1_background = background + std::sqrt( background );
+        rolke_eff.SetGaussBkgKnownEff( high1_background, background, background_err , params.get_width_acceptance() );
+        double high1_ul = rolke_eff.GetUpperLimit();
+
+        double low1_background = background - std::sqrt( background );
+        rolke_eff.SetGaussBkgKnownEff( low1_background, background, background_err , params.get_width_acceptance() );
+        double low1_ul = rolke_eff.GetUpperLimit();
+
+        double high2_background = background + 2 *  std::sqrt( background );
+        rolke_eff.SetGaussBkgKnownEff( high2_background, background, background_err , params.get_width_acceptance() );
+        double high2_ul = rolke_eff.GetUpperLimit();
+
+        double low2_background = background - 2 * std::sqrt( background );
+        rolke_eff.SetGaussBkgKnownEff( low2_background, background, background_err , params.get_width_acceptance() );
+        double low2_ul = rolke_eff.GetUpperLimit();
+
+        //do data
+        rolke_eff.SetGaussBkgKnownEff( data, background, background_err , params.get_width_acceptance() );
+        double dt_ul =  rolke_eff.GetUpperLimit();
 
         //Convert for literature
         double ul_br = ul / km2_flux;
         double ul_u2 = br_to_mix( ul_br, 0.001 * params.get_mass()  ); //MeV -> GeV
 
+        double high1_ul_br = high1_ul / km2_flux;
+        double high1_ul_u2 = br_to_mix( high1_ul_br, 0.001 * params.get_mass()  ); //MeV -> GeV
+
+        double low1_ul_br = low1_ul / km2_flux;
+        double low1_ul_u2 = br_to_mix( low1_ul_br, 0.001 * params.get_mass()  ); //MeV -> GeV
+
+        double high2_ul_br = high2_ul / km2_flux;
+        double high2_ul_u2 = br_to_mix( high2_ul_br, 0.001 * params.get_mass()  ); //MeV -> GeV
+
+        double low2_ul_br = low2_ul / km2_flux;
+        double low2_ul_u2 = br_to_mix( low2_ul_br, 0.001 * params.get_mass()  ); //MeV -> GeV
+
+
+        double dt_ul_br = dt_ul / km2_flux;
+        double dt_ul_u2 = br_to_mix( dt_ul_br, 0.001 * params.get_mass()  ); //MeV -> GeV
+
         res.trig_eff = trig_eff;
         res.trig_err = trig_err;
         res.background = background;
         res.background_err = background_err ;
+        res.dt_obs = data;
         res.acc_sig_ul = ul;
         res.orig_sig_ul = ul / params.get_width_acceptance();
         res.rolke_orig_sig_ul = ul;
+
         res.ul_br =  ul_br;
         res.ul_u2 = ul_u2;
 
+        res.high1_ul_br =  high1_ul_br;
+        res.high1_ul_u2 = high1_ul_u2;
+
+        res.low1_ul_br =  low1_ul_br;
+        res.low1_ul_u2 = low1_ul_u2;
+
+        res.high2_ul_br =  high2_ul_br;
+        res.high2_ul_u2 = high2_ul_u2;
+
+        res.low2_ul_br =  low2_ul_br;
+        res.low2_ul_u2 = low2_ul_u2;
+
+        res.dt_ul_br =  dt_ul_br;
+        res.dt_ul_u2 = dt_ul_u2;
 
         return res;
     }
@@ -355,7 +412,24 @@ namespace fn
 
             total_background += chan_background;
         }
+
         return total_background;
+    }
+
+    double Limiter::get_data(double sig_min, double sig_max )
+    {
+        double total_data = 0;
+
+        for ( auto& pol : pols_ )
+        {
+            for ( auto& region : regions_ )
+            {
+                auto h = get_dt_hist(  pol, region);
+                total_data += integral( *h, sig_min, sig_max );
+
+            }
+        }
+        return total_data;
     }
 
     void Limiter::set_bg_channels( std::vector<std::string> bgchans )
@@ -367,6 +441,14 @@ namespace fn
         ( std::string chan, std::string pol, std::string region )
         {
             auto p = boost::filesystem::path{ pol} /region / "h_m2m_kmu/hnu_stack_hists" / ( chan + "_" + pol ); 
+            auto h = extract_hist( bg_file_, p );
+            return h;
+        }
+
+    std::unique_ptr<TH1> Limiter::get_dt_hist
+        ( std::string pol,  std::string region )
+        {
+            auto p = boost::filesystem::path{ pol} /region / "h_m2m_kmu/hdata" ;
             auto h = extract_hist( bg_file_, p );
             return h;
         }
@@ -410,6 +492,43 @@ namespace fn
     void HaloErrors::set_halo_info( std::vector<halo_info> info )
     {
         halo_info_sets_ = info;
+        halo_resources_.clear();
+
+        for ( const auto& info : halo_info_sets_ )
+        {
+            double halo_scale = 
+                retrieve_value( tfbg_, path{ info.scale_path } / "halo_scale" ) ;
+
+            double k3pi_scale 
+                = retrieve_value( tfhalolog_, path{info.halo_log_path} / "k3pi_scale_factor" );
+
+            path log_folder = info.halo_log_path;
+
+            auto h_raw   = extract_hist<TH1D>( tfhalolog_, log_folder / "hraw" );
+            auto h_corr  = extract_hist<TH1D>( tfhalolog_, log_folder / "hcorr" );
+            auto h_peak  = extract_hist<TH1D>( tfhalolog_, log_folder / "hpeak" );
+            auto h_final = extract_hist<TH1D>( tfbg_, info.bg_path );
+
+            halo_resource hr;
+            hr.bg_path = info.bg_path;
+            hr.scale_path = info.scale_path;
+            hr.halo_log_path = info.halo_log_path;
+
+            hr.halo_scale = halo_scale;
+            hr.k3pi_scale = k3pi_scale;
+
+            hr.h_raw = h_raw.get();
+            hr.h_corr = h_corr.get();
+            hr.h_peak = h_peak.get();
+            hr.h_final = h_final.get();
+
+            hstore_.push_back( std::move( h_raw ) );
+            hstore_.push_back( std::move( h_corr ) );
+            hstore_.push_back( std::move( h_peak ) );
+            hstore_.push_back( std::move( h_final ) );
+
+            halo_resources_.push_back( hr );
+        }
     }
 
 
@@ -429,6 +548,7 @@ namespace fn
             double halo_contrib = integral( *h_halo, sig_min, sig_max );
             total_sqerr += fn::sq( halo_contrib * halo_scale_err / halo_scale );
             total_sqerr += fn::sq( 0.1 * halo_contrib );
+
         }
 
         return std::sqrt( total_sqerr );
@@ -438,20 +558,23 @@ namespace fn
     {
         double total_sqerr = 0;
 
-        for ( const auto& info : halo_info_sets_ )
+        for ( const auto& hr : halo_resources_ )
         {
-            double halo_scale = 
-                retrieve_value( tfbg_, path{ info.scale_path } / "halo_scale" ) ;
+            //double halo_scale = retrieve_value( tfbg_, path{ info.scale_path } / "halo_scale" ) ;
+            double halo_scale = hr.halo_scale;
 
-            double k3pi_scale 
-                = retrieve_value( tfhalolog_, path{info.halo_log_path} / "k3pi_scale_factor" );
+           // double k3pi_scale = retrieve_value( tfhalolog_, path{info.halo_log_path} / "k3pi_scale_factor" );
+            double k3pi_scale = hr.k3pi_scale;
 
-            path log_folder = info.halo_log_path;
+            path log_folder = hr.halo_log_path;
 
             //redo calculation from halo_sub
-            auto h_raw   = get_object<TH1D>( tfhalolog_, log_folder / "hraw" );
-            auto h_corr  = get_object<TH1D>( tfhalolog_, log_folder / "hcorr" );
-            auto h_peak  = get_object<TH1D>( tfhalolog_, log_folder / "hpeak" );
+            //auto h_raw   = get_object<TH1D>( tfhalolog_, log_folder / "hraw" );
+            //auto h_corr  = get_object<TH1D>( tfhalolog_, log_folder / "hcorr" );
+            //auto h_peak  = get_object<TH1D>( tfhalolog_, log_folder / "hpeak" );
+            auto h_raw = hr.h_raw;
+            auto h_corr = hr.h_corr;
+            auto h_peak = hr.h_peak;
 
             double n_raw   = integral( *h_raw, sig_min, sig_max );
             double n_corr  = integral( *h_corr, sig_min, sig_max );
@@ -461,7 +584,8 @@ namespace fn
             double n_check  = halo_scale * ( n_raw - k3pi_scale * n_peak );
 
             //compare with what is stored in the computed bg file
-            auto h_final = get_object<TH1D>( tfbg_, info.bg_path );
+            //auto h_final = get_object<TH1D>( tfbg_, info.bg_path );
+            auto h_final = hr.h_final;
             double n_final = integral( *h_final, sig_min, sig_max );
 
             //If there is a mismatch print everything 
@@ -476,7 +600,8 @@ namespace fn
             double k3pi_scale_rel_err = 0.03;
 
             //now do the actual error calculation
-            total_sqerr = n_raw  + fn::sq(k3pi_scale) * n_peak * ( n_peak * k3pi_scale_rel_err + 1.0 );
+            total_sqerr += fn::sq(halo_scale) * 
+                ( n_raw  + fn::sq(k3pi_scale) * n_peak * ( n_peak * k3pi_scale_rel_err + 1.0 ) );
         }
 
         return std::sqrt(total_sqerr);

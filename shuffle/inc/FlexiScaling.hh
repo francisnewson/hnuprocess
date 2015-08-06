@@ -155,7 +155,7 @@ namespace fn
             FlexiScaling( const YAML::Node& instruct );
 
             void compute_scaling();
-            void scale_hist( TH1& h, const YAML::Node& instruct ) const;
+            double scale_hist( TH1& h, const YAML::Node& instruct ) const;
 
             double get_halo_scale() const;
             double get_halo_scale_error() const;

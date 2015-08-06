@@ -2,6 +2,7 @@
 #include <boost/filesystem/path.hpp>
 #include "root_help.hh"
 #include "HistStore.hh"
+#include "ezETAProgressBar.hh"
 
 using boost::filesystem::path;
 namespace fn
@@ -63,8 +64,11 @@ namespace fn
 
         int my_min_bin = centre_down;
         int my_max_bin = centre_up;
+        ez::ezETAProgressBar prog( half_nbins );
+        prog.start();
         while( my_max_bin - centre_down < half_nbins )
         {
+            ++prog;
             double val = h.Integral( my_min_bin, my_max_bin );
             double fill_point =
                 ax->GetBinCenter( my_max_bin ) - ax->GetBinLowEdge( centre_up );
@@ -85,8 +89,12 @@ namespace fn
 
         int nBins = result->GetNbinsX();
 
+        ez::ezETAProgressBar prog( nBins );
+        prog.start();
+
         for ( int ibin = 1 ; ibin != nBins + 1 ; ++ibin )
         {
+            ++prog;
             double low_edge = result->GetBinLowEdge( ibin );
             double up_edge = result->GetBinLowEdge( ibin + 1 );
             double err = get_err( h, low_edge, up_edge );
@@ -103,13 +111,16 @@ namespace fn
 
         //std::cerr << sig_min << std::endl;
 
-        if ( trig_ )
+        if ( trig_ && background < 10000 )
         {
             auto trig_eff_err = (*trig_ )->get_eff_err( sig_min, sig_max ); 
             if( trig_eff_err.first != 0 )
             {
-                if (  std::isnan( trig_eff_err.first ) || std::isnan( trig_eff_err.second ) || trig_eff_err.second <= 0 || trig_eff_err.first <= 0   )
-                    std::cerr << "trig:" << trig_eff_err.second * background << " "  <<  trig_eff_err.first << std::endl;
+                if (  std::isnan( trig_eff_err.first ) || std::isnan( trig_eff_err.second ) 
+                        || trig_eff_err.second <= 0 || trig_eff_err.first <= 0   )
+                    {std::cerr << "trig:" << trig_eff_err.second * background 
+                        << " "  <<  trig_eff_err.first << std::endl;}
+
                 sqerr += fn::sq(trig_eff_err.second / trig_eff_err.first * background );
             }
         }
@@ -140,7 +151,7 @@ namespace fn
 
         if ( std::isnan( sqerr ) ) std::cerr << "NAN 4" << std::endl;
 
-        if ( halo_errors_ )
+        if ( halo_errors_  )
         {
             double sq_halo_scale_err = fn::sq( (*halo_errors_)->compute_halo_scale_err( sig_min, sig_max ) );
             if (  std::isnan(sq_halo_scale_err) ||  sq_halo_scale_err < 0   )

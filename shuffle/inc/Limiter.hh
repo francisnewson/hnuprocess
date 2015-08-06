@@ -90,11 +90,30 @@ namespace fn
             double trig_err;
             double background;
             double background_err;
+            double dt_obs;;
             double acc_sig_ul;
             double orig_sig_ul;
             double rolke_orig_sig_ul;
             double ul_br;
             double ul_u2;
+
+            double sig_min;
+            double sig_max;
+
+            double high1_ul_br;
+            double high1_ul_u2;
+
+            double low1_ul_br;
+            double low1_ul_u2;
+
+            double high2_ul_br;
+            double high2_ul_u2;
+
+            double low2_ul_br;
+            double low2_ul_u2;
+
+            double dt_ul_br;
+            double dt_ul_u2;
 
             std::map<std::string, double> error_budget;
     };
@@ -124,6 +143,19 @@ namespace fn
                 std::string halo_log_path;
             };
 
+            struct halo_resource
+            {
+                std::string bg_path;
+                std::string scale_path;
+                std::string halo_log_path;
+                double halo_scale;
+                double k3pi_scale;
+                TH1D * h_raw;
+                TH1D * h_corr;
+                TH1D * h_peak;
+                TH1D * h_final;
+            };
+
             HaloErrors( TFile& tfbg, TFile& tfhalolog );
             void set_halo_info( std::vector<halo_info> info );
             double compute_halo_val_err( double sig_min, double sig_max ) const;
@@ -141,6 +173,8 @@ namespace fn
             TFile& tfbg_;
             TFile& tfhalolog_;
             std::vector<halo_info> halo_info_sets_;
+            std::vector<halo_resource> halo_resources_;
+            std::vector<std::unique_ptr<TH1D>> hstore_;
     };
 
     //--------------------------------------------------
@@ -163,7 +197,11 @@ namespace fn
             std::unique_ptr<TH1> get_bg_hist
                 ( std::string chan, std::string pol,  std::string region );
 
+            std::unique_ptr<TH1> get_dt_hist
+                ( std::string pol,  std::string region );
+
             double get_background( double sig_min, double sig_max );
+            double get_data( double sig_min, double sig_max );
             std::pair<double,double>
                 get_trig_eff( double sig_min, double sig_max );
 

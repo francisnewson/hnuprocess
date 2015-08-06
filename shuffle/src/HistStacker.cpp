@@ -122,7 +122,8 @@ namespace fn
         try
         {
             const auto& scaling = scaling_info_.at( scaling_name);
-            scaling->scale_hist( h, instruct );
+            double scale_factor = scaling->scale_hist( h, instruct );
+            scale_factors.push_back( std::make_pair( name, scale_factor ) );
         }
         catch( std::exception& e )
         {
@@ -144,6 +145,10 @@ namespace fn
     void HistStacker::write( std::string name)
     {
         stack_.Write( name );
+        for( const auto& sf : scale_factors )
+        {
+            store_value( sf.first, sf.second );
+        }
     }
 
     void HistStacker::write_total( std::string name)

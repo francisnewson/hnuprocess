@@ -137,7 +137,7 @@ stacks:
         item: { name: km3_neg,   type: km3,   fid_weight: p5.km3.v2.neg,      channels: [ p5.km3.v2.neg ] },
         item: { name: km2_neg,   type: km2,   fid_weight: p5.km2.full.neg, channels: [ p5.km2.full.neg ] } ]
 
-    doblind: &doblind { do_blind: true,  min_blind: 0.09, max_blind: 0.14 }
+    doblind: &doblind { do_blind: false,  min_blind: 0.09, max_blind: 0.14 }
 
 output_list:
     #UP POS

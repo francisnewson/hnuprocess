@@ -274,7 +274,7 @@ namespace fn
     double FlexiScaling::get_fiducial_flux_error() const
     { return kaon_flux_->get_fiducial_flux_error(); }
 
-    void FlexiScaling::scale_hist( TH1& h, const YAML::Node& instruct ) const
+    double FlexiScaling::scale_hist( TH1& h, const YAML::Node& instruct ) const
     {
         bool print = false;
 
@@ -319,6 +319,8 @@ namespace fn
             }
         }
         h.Scale( scale_factor );
+
+        return scale_factor;
     }
 
     //--------------------------------------------------

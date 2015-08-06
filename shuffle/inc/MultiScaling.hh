@@ -95,7 +95,7 @@ namespace fn
     class SampleScaler
     {
         public:
-            virtual void scale_hist( TH1& h, const YAML::Node& instruct ) const = 0;
+            virtual double scale_hist( TH1& h, const YAML::Node& instruct ) const = 0;
             virtual void compute_scaling()  = 0;
 
             virtual double get_halo_scale() const = 0;
@@ -117,7 +117,7 @@ namespace fn
                     const std::map<std::string, double>& fiducial_weights,
                     const std::map<std::string, double>& brs);
 
-            void scale_hist( TH1& h, const YAML::Node& instruct ) const;
+            double scale_hist( TH1& h, const YAML::Node& instruct ) const;
             void compute_scaling() ;
 
             double get_halo_scale() const;

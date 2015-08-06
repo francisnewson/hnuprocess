@@ -71,6 +71,8 @@ namespace fn
             scaling_map& scaling_info_;
             const HistFormatter& formatter_;
             boost::optional<std::string> default_scaling_;
+            
+            std::vector<std::pair<std::string, double>> scale_factors;
     };
 
     void de_zero_hist( TH1& h );
