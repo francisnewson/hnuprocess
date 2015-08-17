@@ -308,6 +308,7 @@ namespace fn
 
         //Rolke does the heavy lifting
         TRolke rolke_eff;
+        rolke_eff.SetBounding(true);
         rolke_eff.SetCL( 0.9 );
         rolke_eff.SetGaussBkgKnownEff( background, background, background_err , params.get_width_acceptance() );
         double ul = rolke_eff.GetUpperLimit();
@@ -332,6 +333,7 @@ namespace fn
         //do data
         rolke_eff.SetGaussBkgKnownEff( data, background, background_err , params.get_width_acceptance() );
         double dt_ul =  rolke_eff.GetUpperLimit();
+        double dt_ll =  rolke_eff.GetLowerLimit();
 
         //Convert for literature
         double ul_br = ul / km2_flux;
@@ -349,9 +351,11 @@ namespace fn
         double low2_ul_br = low2_ul / km2_flux;
         double low2_ul_u2 = br_to_mix( low2_ul_br, 0.001 * params.get_mass()  ); //MeV -> GeV
 
-
         double dt_ul_br = dt_ul / km2_flux;
         double dt_ul_u2 = br_to_mix( dt_ul_br, 0.001 * params.get_mass()  ); //MeV -> GeV
+
+        double dt_ll_br = dt_ll / km2_flux;
+        double dt_ll_u2 = br_to_mix( dt_ll_br, 0.001 * params.get_mass()  ); //MeV -> GeV
 
         res.trig_eff = trig_eff;
         res.trig_err = trig_err;
@@ -379,6 +383,9 @@ namespace fn
 
         res.dt_ul_br =  dt_ul_br;
         res.dt_ul_u2 = dt_ul_u2;
+
+        res.dt_ll_br =  dt_ll_br;
+        res.dt_ll_u2 = dt_ll_u2;
 
         return res;
     }

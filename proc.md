@@ -75,3 +75,11 @@ STEPS TO FINAL LIMITS
 
 - ### Get limits
     run `./b/apps/signal_shapes`
+
+- ### Look at MUV systematics
+    run `./b/apps/hnureco -m input/reco/thesis/muv_check.yaml`
+    - *job*: muv_check
+    - merge: 
+        - run `/build_bham/apps/shuffle -m input/shuffle/thesis/muv_check/full.q11t.yaml -o tdata/staging/muv_check.root`
+    - Look at results:
+        - run `./b/apps/src/check_muv`

@@ -115,6 +115,9 @@ namespace fn
             double dt_ul_br;
             double dt_ul_u2;
 
+            double dt_ll_br;
+            double dt_ll_u2;
+
             std::map<std::string, double> error_budget;
     };
 

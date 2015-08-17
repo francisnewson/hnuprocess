@@ -90,6 +90,7 @@ void print_headings( std::ostream& os )
         << std::setw(15) << "low2_ul_u2"
         << std::setw(15) << "dt_ul_br"
         << std::setw(15) << "dt_ul_u2"
+        << std::setw(15) << "dt_ll_u2"
         << std::setw(15) << "err_scat"
         << std::setw(15) << "err_trig"
         << std::setw(15) << "err_muv"
@@ -139,6 +140,7 @@ void print_flat_result( std::ostream& os, const HnuLimParams& hlp, const HnuLimR
         << std::setw(15) <<  hlr.low2_ul_u2
         << std::setw(15) <<  hlr.dt_ul_br
         << std::setw(15) <<  hlr.dt_ul_u2
+        << std::setw(15) <<  hlr.dt_ll_u2
         << std::setw(15) <<  hlr.error_budget.at("err_scat")
         << std::setw(15) <<  hlr.error_budget.at("err_trig")
         << std::setw(15) <<  hlr.error_budget.at("err_muv")
