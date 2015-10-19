@@ -1,0 +1,505 @@
+var:
+    p6kless: &p6_kless_pos [ p6.data.kless.q11t.v2.pos]
+    p6_km_pos: &p6_km_pos [ p6.data.km.q11t.v2.pos]
+    p5_kp_pos: &p5_kp_pos  [ p5.data.q11t.v3.pos]
+    p6_km2_pos: &p6_km2_pos  [ p6.km2.v2.pos]
+    p5_km2_pos: &p5_km2_pos  [ p5.km2.v2.pos]
+    p6_k3pi_pos: &p6_k3pi_pos [ p6.k3pi.v2.pos]
+    p5_k3pi_pos: &p5_k3pi_pos [ p5.k3pi.v2.pos]
+    halo_pos: &p6_halo_pos p6.halo.q11t.pos
+
+    p6kless: &p6_kless_neg [ p6.data.kless.q11t.v2.neg]
+    p6_km_neg: &p6_km_neg [ p6.data.km.q11t.v2.neg]
+    p5_kp_neg: &p5_kp_neg  [ p5.data.q11t.v3.neg]
+    p6_km2_neg: &p6_km2_neg  [ p6.km2.v2.neg]
+    p5_km2_neg: &p5_km2_neg  [ p5.km2.v2.neg]
+    p6_k3pi_neg: &p6_k3pi_neg [ p6.k3pi.v2.neg]
+    p5_k3pi_neg: &p5_k3pi_neg [ p5.k3pi.v2.neg]
+    halo_neg: &p6_halo_neg p6.halo.q11t.neg
+
+    #Period 6 data, reconstructed using K+ momentum
+    #( to simulate the halo expected in P5 )
+    p6klesskp: &p6klesskp  p6.data.kless.q11t.v2.pos
+    p6kmkp: &p6kmkp  p6.data.km.q11t.v2.pos
+    p6kmkptrignum: &p6kmkptrgnum  p6.data.km.q1.v2.pos
+    p6kmkptrigdenom: &p6kmkptrgdenom  p6.data.km.q1.v2.trigrun.pos
+    p6k3pikp: &p6k3pikp  p6.k3pi.v2.pos
+
+    #Period 6 data, reconstructed using K- momentum
+    #( to determine the K- flux in P6 )
+    p6kmkm: &p6kmkm  p6.data.km.q11t.km.v2.pos
+    p6km2km: &p6km2km   p6.km2.v2.pos
+
+    #Period 5 data, reconstructed using K- momentum
+    #( to simulate the halo expected in P6 )
+    p6klesskm: &p6klesskm  p6.data.kless.q11t.km.v2.pos
+    p5k3pikm: &p5k3pikm  p5.k3pi.km.v2.pos
+    p5kpkm: &p5kpkm   p5.data.q11t.km.v3.pos
+    p5kpkmtrignum: &p5kpkmtrgnum   p5.data.q1.km.v4.trigrun.pos
+    p5kpkmtrigdenom: &p5kpkmtrgdenom   p5.data.q1.km.v4.pos
+
+    #Period 5 data, reconstructed using K+ momentum
+    #( to determine the K+ flux in P5 )
+    p5kpkp: &p5kpkp   p5.data.q11t.v3.pos
+    p5km2kp: &p5km2kp   p5.km2.v2.pos
+
+    #Period 6 data, reconstructed using K+ momentum
+    #( to simulate the halo expected in P5 )
+    p6klesskpneg: &p6klesskpneg  p6.data.kless.q11t.v2.pos
+    p6kmkpneg: &p6kmkpneg  p6.data.km.q11t.v2.neg
+    p6kmkptrignumneg: &p6kmkptrgnumneg  p6.data.km.q1.v2.neg
+    p6kmkptrigdenomneg: &p6kmkptrgdenomneg  p6.data.km.q1.v2.trigrun.neg
+    p6k3pikpneg: &p6k3pikpneg  p6.k3pi.v2.neg
+
+    #Period 6 data, reconstructed using K- momentum
+    #( to determine the K- flux in P6 )
+    p6kmkmneg: &p6kmkmneg  p6.data.km.q11t.km.v2.neg
+    p6km2kmneg: &p6km2kmneg   p6.km2.v2.neg
+
+    #Period 5 data, reconstructed using K- momentum
+    #( to simulate the halo expected in P6 )
+    p6klesskmneg: &p6klesskmneg  p6.data.kless.q11t.km.v2.pos
+    p5k3pikmneg: &p5k3pikmneg  p5.k3pi.km.v2.neg
+    p5kpkmneg: &p5kpkmneg   p5.data.q11t.km.v3.neg
+    p5kpkmtrignumneg: &p5kpkmtrgnumneg   p5.data.q1.km.v4.trigrun.neg
+    p5kpkmtrigdenomneg: &p5kpkmtrgdenomneg   p5.data.q1.km.v4.neg
+
+    #Period 5 data, reconstructed using K+ momentum
+    #( to determine the K+ flux in P5 )
+    p5kpkpneg: &p5kpkpneg   p5.data.q11t.v3.neg
+    p5km2kpneg: &p5km2kpneg   p5.km2.v2.neg
+
+    ctrlplots: &ctrlplots
+        - signal_upper_plots/h_m2m_kmu
+        - signal_upper_plots/h_p
+        - signal_upper_plots/h_z
+        - signal_upper_plots/h_t
+        - signal_upper_plots/h_cda
+
+        - signal_lower_plots/h_m2m_kmu
+        - signal_lower_plots/h_p
+        - signal_lower_plots/h_z
+        - signal_lower_plots/h_t
+        - signal_lower_plots/h_cda
+
+        - signal_upper_loose_plots/h_m2m_kmu
+        - signal_upper_loose_plots/h_p
+        - signal_upper_loose_plots/h_z
+        - signal_upper_loose_plots/h_t
+        - signal_upper_loose_plots/h_cda
+
+        - signal_lower_loose_plots/h_m2m_kmu
+        - signal_lower_loose_plots/h_p
+        - signal_lower_loose_plots/h_z
+        - signal_lower_loose_plots/h_t
+        - signal_lower_loose_plots/h_cda
+
+        - signal_upper_hm2m_plots/h_m2m_kmu
+        - signal_upper_hm2m_plots/h_p
+        - signal_upper_hm2m_plots/h_z
+        - signal_upper_hm2m_plots/h_t
+        - signal_upper_hm2m_plots/h_cda
+
+        - signal_lower_hm2m_plots/h_m2m_kmu
+        - signal_lower_hm2m_plots/h_p
+        - signal_lower_hm2m_plots/h_z
+        - signal_lower_hm2m_plots/h_t
+        - signal_lower_hm2m_plots/h_cda
+
+        - scaling_upper_plots/h_m2m_kmu
+        - scaling_upper_plots/h_p
+        - scaling_upper_plots/h_z
+        - scaling_upper_plots/h_t
+        - scaling_upper_plots/h_cda
+
+        - scaling_lower_plots/h_m2m_kmu
+        - scaling_lower_plots/h_p
+        - scaling_lower_plots/h_z
+        - scaling_lower_plots/h_t
+        - scaling_lower_plots/h_cda
+
+        - scaling_upper_negm2m_plots/h_m2m_kmu
+        - scaling_upper_negm2m_plots/h_p
+        - scaling_upper_negm2m_plots/h_z
+        - scaling_upper_negm2m_plots/h_t
+        - scaling_upper_negm2m_plots/h_cda
+
+        - scaling_lower_negm2m_plots/h_m2m_kmu
+        - scaling_lower_negm2m_plots/h_p
+        - scaling_lower_negm2m_plots/h_z
+        - scaling_lower_negm2m_plots/h_t
+        - scaling_lower_negm2m_plots/h_cda
+
+        - signal_upper_check_plots/h_m2m_kmu
+        - signal_upper_check_plots/h_p
+        - signal_upper_check_plots/h_z
+        - signal_upper_check_plots/h_t
+        - signal_upper_check_plots/h_cda
+
+        - signal_lower_check_plots/h_m2m_kmu
+        - signal_lower_check_plots/h_p
+        - signal_lower_check_plots/h_z
+        - signal_lower_check_plots/h_t
+        - signal_lower_check_plots/h_cda
+
+        - signal_upper_check_hm2m_plots/h_m2m_kmu
+        - signal_upper_check_hm2m_plots/h_p
+        - signal_upper_check_hm2m_plots/h_z
+        - signal_upper_check_hm2m_plots/h_t
+        - signal_upper_check_hm2m_plots/h_cda
+
+        - signal_lower_check_hm2m_plots/h_m2m_kmu
+        - signal_lower_check_hm2m_plots/h_p
+        - signal_lower_check_hm2m_plots/h_z
+        - signal_lower_check_hm2m_plots/h_t
+        - signal_lower_check_hm2m_plots/h_cda
+
+        - rk_like_plots/h_m2m_kmu
+        - rk_like_plots/h_p
+        - rk_like_plots/h_z
+        - rk_like_plots/h_t
+        - rk_like_plots/h_cda
+
+        - rk_like_hm2m_plots/h_m2m_kmu
+        - rk_like_hm2m_plots/h_p
+        - rk_like_hm2m_plots/h_z
+        - rk_like_hm2m_plots/h_t
+        - rk_like_hm2m_plots/h_cda
+
+sums:
+    fids: &fids {  
+        fid_file: use_root ,
+        root_file: "tdata/k3pi_crosstalk/all.k3pi_crosstalk.root", pre: "", 
+        post: sample_burst_count/bursts, branch: "weight"  }
+
+    #HALO SCALING
+    halorknegsum: &halorknegsum {
+        file: "tdata/k3pi_crosstalk/all.k3pi_crosstalk.root",
+        pre: "", post: rk/neg/rk_plots/h_m2m_kmu,
+        min: -0.3, max : -0.075 }
+
+    halorknegsum: &halorkpossum {
+        file: "tdata/k3pi_crosstalk/all.k3pi_crosstalk.root",
+        pre: "", post: rk/pos/rk_plots/h_m2m_kmu,
+        min: -0.3, max : -0.075 }
+
+    k3pihalonegsum: &k3pihalonegsum {
+        file: "tdata/k3pi_crosstalk/all.k3pi_crosstalk.root",
+        pre: "", post: km2/neg/signal_loose_upper_nocda_plots/h_cda,
+        min: 5, max : 9 }
+
+    k3pihalopossum: &k3pihalopossum {
+        file: "tdata/k3pi_crosstalk/all.k3pi_crosstalk.root",
+        pre: "", post: km2/pos/signal_loose_upper_nocda_plots/h_cda,
+        min: 5, max : 9 }
+
+    #PEAK SCALING
+    rkpeakpossum: &rkpeakpossum {
+        file: "tdata/k3pi_crosstalk/all.k3pi_crosstalk.root",
+        pre: "", post: rk/pos/rk_plots/h_m2m_kmu,
+        min: -0.015, max : 0.015 }
+
+    rkpeaknegsum: &rkpeaknegsum {
+        file: "tdata/k3pi_crosstalk/all.k3pi_crosstalk.root",
+        pre: "", post: rk/neg/rk_plots/h_m2m_kmu,
+        min: -0.015, max : 0.015 }
+
+    k3pipeakpossum: &k3pipeakpossum {
+        file: "tdata/k3pi_crosstalk/all.k3pi_crosstalk.root",
+        pre: "", post: km2/pos/signal_loose_upper_plots/h_m2m_kmu,
+        min: 0.11, max : 0.14 }
+
+    k3pipeaknegsum: &k3pipeaknegsum {
+        file: "tdata/k3pi_crosstalk/all.k3pi_crosstalk.root",
+        pre: "", post: km2/neg/signal_loose_upper_plots/h_m2m_kmu,
+        min: 0.11, max : 0.14 }
+
+    finalpeakpossum: &finalpeakpossum {
+        file: "tdata/k3pi_crosstalk/all.k3pi_crosstalk.root",
+        pre: "", post: km2/pos/signal_upper_plots/h_m2m_kmu,
+        min: 0.11, max : 0.14 }
+
+    finalpeaknegsum: &finalpeaknegsum {
+        file: "tdata/k3pi_crosstalk/all.k3pi_crosstalk.root",
+        pre: "", post: km2/neg/signal_upper_plots/h_m2m_kmu,
+        min: 0.11, max : 0.14 }
+
+    #--------------------------------------------------
+
+    #P6 with K+ reco: using K- Km2 to estimate K- flux
+scalingmethod:
+    - scaling_method: &p6km2scalingpos
+        strategy: flexi
+        name: rk_minus_p6_pos
+        fids: *fids
+        #peak: k3pi
+
+        halo: &k3piposhalo
+            strat: mono
+            halo: { chan: *p6klesskp, sum: *k3pihalopossum }
+            data: { chan: *p6kmkp,    sum: *k3pihalopossum }
+
+        mc:
+            strat: combo
+            halo: 
+                strat: mono
+                halo: { chan: *p6klesskm, sum: *halorknegsum }
+                data: { chan: *p6kmkm,    sum: *halorknegsum }
+            peak:
+                fids: *fids
+                halo: { chan: *p6klesskm, sum: *rkpeaknegsum }
+                data: { chan: *p6kmkm,    sum: *rkpeaknegsum }
+                stack: { sum: *rkpeaknegsum, normchan: km2_neg,
+                    channels: [ { chan: km2_neg, type: km2, fidname: *p6km2km } ] }
+
+    - scaling_method: &p6km2scalingneg
+        strategy: flexi
+        name: rk_minus_p6_neg
+        fids: *fids
+        #peak: k3pi
+
+        halo: 
+            strat: mono
+            halo: { chan: *p6klesskpneg, sum: *k3pihalopossum }
+            data: { chan: *p6kmkpneg,    sum: *k3pihalopossum }
+
+        mc:
+            strat: combo
+            halo: 
+                strat: mono
+                halo: { chan: *p6klesskmneg, sum: *halorknegsum }
+                data: { chan: *p6kmkmneg,    sum: *halorknegsum }
+            peak:
+                fids: *fids
+                halo: { chan: *p6klesskmneg, sum: *rkpeaknegsum }
+                data: { chan: *p6kmkmneg,    sum: *rkpeaknegsum }
+                stack: { sum: *rkpeaknegsum, normchan: km2_neg,
+                    channels: [ { chan: km2_neg, type: km2, fidname: *p6km2kmneg } ] }
+
+copyfid:
+    - { root_file: "tdata/k3pi_crosstalk/all.k3pi_crosstalk.root",
+        pre: "", post: "sample_burst_count/bursts", branch: "weight",
+        channels: [ 
+        { source: *p6_km_neg, dest: *p6_halo_neg },
+        { source: *p6_km_pos, dest: *p6_halo_pos } ]
+    }
+
+fidcheck:
+    - name: mc
+      trees:
+        - { root_file: "tdata/k3pi_crosstalk/all.k3pi_crosstalk.root",
+            pre: "", post: "sample_burst_count/bursts", branch: "weight" }
+
+        - { root_file: "tdata/full/all.full.root",
+            pre: "", post: "sample_burst_count/bursts", branch: "weight" }
+
+    - name: data
+      trees:
+        - { root_file: "tdata/k3pi_crosstalk/all.k3pi_crosstalk.root",
+            pre: "", post: "data_burst_count/data_bursts", branch: "weight" }
+
+        - { root_file: "tdata/full/all.full.root",
+            pre: "", post: "data_burst_count/data_bursts", branch: "weight" }
+
+calibration:
+    fid:  {
+        root_file: "tdata/k3pi_crosstalk/all.k3pi_crosstalk.root",
+        pre: "", post: "sample_burst_count/bursts", branch: "weight" }
+
+    km2_method:
+        strategy: flexi
+        name: rk_plus_p5
+        fids: *fids
+        #peak: k3pi
+
+        halo: &k3pineghalo
+            strat: mono
+            halo: { chan: *p6klesskm, sum: *k3pihalonegsum }
+            data: { chan: *p5kpkm,    sum: *k3pihalonegsum }
+
+        mc:
+            strat: combo
+            halo:  
+                strat: mono
+                halo: { chan: *p6klesskp, sum: *halorkpossum }
+                data: { chan: *p5kpkp,    sum: *halorkpossum }
+            peak:
+                fids: *fids
+                halo: { chan: *p6klesskp, sum: *rkpeakpossum }
+                data: { chan: *p5kpkp,    sum: *rkpeakpossum }
+                stack: { sum: *rkpeakpossum, normchan: km2_pos,
+                    channels: [ { chan: km2_pos, type: km2, fidname: *p5km2kp } ] }
+
+    k3pi_method:
+        strategy: flexi
+        name: halo_p5_k3pi
+        fids: *fids
+        #peak: k3pi
+
+        halo: &k3pineghalo
+            strat: mono
+            halo: { chan: *p6klesskm, sum: *k3pihalonegsum }
+            data: { chan: *p5kpkm,    sum: *k3pihalonegsum }
+
+        mc:
+            strat: combo
+            halo: *k3pineghalo
+            peak:
+                fids: *fids
+                halo: { chan: *p6klesskm, sum: *k3pipeaknegsum }
+                data: { chan: *p5kpkm,    sum: *k3pipeaknegsum }
+                stack: { sum: *k3pipeaknegsum, normchan: k3pi_neg,
+                    channels: [ { chan: k3pi_neg, type: k3pi, fidname: *p5k3pikm } ] }
+
+
+##################################################
+
+subtractions:
+    - name: pos_pol_halo_control
+      fid:  {
+           root_file: "tdata/full/all.full.root",
+           pre: "", post: "sample_burst_count/bursts", branch: "weight" }
+
+      scaling: *p6km2scalingpos
+
+      plotting:
+         input_file: "tdata/full/all.full.root"
+         peakname: k3pi
+         peakfid: p6.k3pi.v2.pos
+         haloname: *p6_halo_pos 
+
+         channels:
+             halo_channels : *p6_km_pos
+             peak_channels: *p6_k3pi_pos
+
+         plots: *ctrlplots
+
+    - name: neg_pol_halo_control
+      fid:  {
+           root_file: "tdata/full/all.full.root",
+           pre: "", post: "sample_burst_count/bursts", branch: "weight" }
+
+      scaling: *p6km2scalingneg
+
+      plotting:
+         input_file: "tdata/full/all.full.root"
+         peakname: k3pi
+         peakfid: p6.k3pi.v2.neg
+         haloname: *p6_halo_neg 
+
+         channels:
+             halo_channels : *p6_km_neg
+             peak_channels: *p6_k3pi_neg
+
+         plots: *ctrlplots
+
+#    - name: pos_pol
+#      fid:  {
+#          root_file: "tdata/k3pi_crosstalk/all.k3pi_crosstalk.root",
+#          pre: "", post: "sample_burst_count/bursts", branch: "weight" }
+#
+#      scaling:
+#      &km2scalingpos
+#        name: km2_method
+#        peakname: km2
+#
+#        channels: { halo_channels : *p6_kless_pos, 
+#        data_channels: *p6_km_pos, peak_channels: *p6_km2_pos }
+#
+#        halo: &km2posstrat { 
+#            strategy: m2, input_file: "tdata/k3pi_crosstalk/all.k3pi_crosstalk.root",
+#            plot_path: km2_neg/h_m2m_kmu,
+#            min_mass_halo: -0.3, max_mass_halo: -0.075,
+#            min_mass_peak: -0.01, max_mass_peak:  0.01 }
+#
+#        mc: *km2posstrat
+#
+#      plotting:
+#        input_file: "tdata/k3pi_crosstalk/all.k3pi_crosstalk.root"
+#        peakname: k3pi
+#        peakfid: p6.k3pi.v2.pos
+#        haloname: *p6_halo_pos 
+#
+#        channels:
+#            halo_channels : *p6_km_pos
+#            peak_channels: *p6_k3pi_pos
+#
+#        plots:
+#            - km2_pos_k3pi/h_m2m_kmu
+#
+####################
+#
+#    - name: pos_pol_halo_control
+#      fid:  {
+#          root_file: "tdata/full/all.full.root",
+#          pre: "", post: "sample_burst_count/bursts", branch: "weight" }
+#
+#      scaling: *km2scalingpos
+#
+#      plotting:
+#        input_file: "tdata/full/all.full.root"
+#        peakname: k3pi
+#        peakfid: p6.k3pi.v2.pos
+#        haloname: *p6_halo_pos 
+#
+#        channels:
+#            halo_channels : *p6_km_pos
+#            peak_channels: *p6_k3pi_pos
+#
+#        plots: *ctrlplots
+#
+####################
+#
+#    - name: neg_pol
+#      fid:  {
+#          root_file: "tdata/k3pi_crosstalk/all.k3pi_crosstalk.root",
+#          pre: "", post: "sample_burst_count/bursts", branch: "weight" }
+#
+#      scaling: &km2scalingneg
+#        name: km2_method
+#        peakname: km2
+#
+#        channels: { halo_channels : *p6_kless_pos,
+#        data_channels: *p6_km_neg, peak_channels: *p6_km2_neg }
+#
+#        halo: &km2negstrat { 
+#            strategy: m2, input_file: "tdata/k3pi_crosstalk/all.k3pi_crosstalk.root",
+#            plot_path: km2_neg/h_m2m_kmu,
+#            min_mass_halo: -0.3, max_mass_halo: -0.075,
+#            min_mass_peak: -0.01, max_mass_peak:  0.01 }
+#
+#        mc: *km2negstrat
+#
+#      plotting:
+#        input_file: "tdata/k3pi_crosstalk/all.k3pi_crosstalk.root"
+#        peakname: k3pi
+#        peakfid: p6.k3pi.v2.neg
+#        haloname: *p6_halo_neg 
+#
+#        channels:
+#            halo_channels : *p6_km_neg
+#            peak_channels: *p6_k3pi_neg
+#
+#        plots:
+#            - km2_pos_k3pi/h_m2m_kmu
+#
+####################
+#
+#    - name: neg_pol_halo_control
+#      fid:  {
+#          root_file: "tdata/full/all.full.root",
+#          pre: "", post: "sample_burst_count/bursts", branch: "weight" }
+#
+#      scaling: *km2scalingneg
+#
+#      plotting:
+#        input_file: "tdata/full/all.full.root"
+#        peakname: k3pi
+#        peakfid: p6.k3pi.v2.neg
+#        haloname: *p6_halo_neg 
+#
+#        channels:
+#            halo_channels : *p6_km_neg
+#            peak_channels: *p6_k3pi_neg
+#
+#        plots: *ctrlplots

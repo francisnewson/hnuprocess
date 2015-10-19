@@ -25,12 +25,58 @@
     type: ostream
     filename: km2_k3pi_debug.dat
 
-@include "input/reco/thesis/std/corrections.inc.yaml"
+#@include "input/reco/thesis/std/corrections.inc.yaml"
+#automatically load the correct kind of kaon track
+#(including 1 + beta corrections)
+- input:
+    name: kaon_track
+    type: KaonTrack
+    kaon_type: auto
+    beam_mapping: input/reco/beam/cross_talk_mapping.yaml
+
+#kaon weights
+- selection:
+    name: kaon_mom_weights
+    type: KaonMomWeight
+    crude_weights: "input/reco/mod/kaon_crude_weights.dat"
+    fine_weights: "input/reco/mod/kaon_fine_weights.dat"
+
+#standard cluster corretions
+- input:
+    name: cluster_corrector
+    type: ClusterCorrector
+    filename: "/afs/cern.ch/user/f/fnewson/work/hnu/gopher/data/detector/eopCorrfile.dat"
+    enabled: true
+
 @include "input/reco/thesis/std/data_sample.inc.yaml"
 
 ###################################################
 # INPUTS
 ###################################################
+
+- input:
+    name: kt_plus
+    type: KaonTrack
+    kaon_type: rawkp
+
+- input:
+    name: kt_minus
+    type: KaonTrack
+    kaon_type: rawkm
+
+- input:
+    name: kt_weighted_kp
+    type: KaonTrack
+    kaon_type: weightedK
+    pos_pol_file: 'input/reco/beam/p5.q11t.kp_prop_pos.dat'
+    neg_pol_file: 'input/reco/beam/p5.q11t.kp_prop_neg.dat'
+
+- input:
+    name: kt_weighted_km
+    type: KaonTrack
+    kaon_type: weightedK
+    pos_pol_file: 'input/reco/beam/p6.q11t.km_prop_pos.dat'
+    neg_pol_file: 'input/reco/beam/p6.q11t.km_prop_neg.dat'
 
 #SingleTrack
 - input:
@@ -43,8 +89,8 @@
 
     init_max_cda: 10.0
 
-    init_min_z: -2000.0
-    init_max_z:  9000.0
+    init_min_z: -5000.0
+    init_max_z: 10000.0
 
     dch_merge_sep: 0.5
 
@@ -70,18 +116,17 @@
         ogt: bf_st
         ClusterCorrector: cluster_corrector
 
-
 - input:
     name: single_muon
     type: SingleMuon
-    method: auto
+    method: forcepass
     multiplier: 4
     inputs:
         ogt: bf_st
 
 - selection:
     name: muon_xy_wgt
-    type: MuonTHXYWeight
+    type: auto_pass
     effs_file: input/reco/conditions/muv/muv_eff_all.root
     effs_hist: muv_eff_xy
     inputs:
@@ -89,7 +134,7 @@
 
 - selection:
     name: muon_p_wgt
-    type: MuonTHPWeight
+    type: auto_pass
     effs_file: input/reco/conditions/muv/muv_eff_all.root
     effs_hist: muv_eff_p
     inputs:
@@ -101,98 +146,370 @@
     type : auto_pass
 
 @include "input/reco/thesis/std/selections.inc.yaml"
-@include "input/reco/thesis/std/kine_regions.inc.yaml"
+@include "input/reco/thesis/std/full_kine_regions.inc.yaml"
+
+- selection: { type : Q11TTrigger, name : q11t_auto, ignore_unless: [trigrun] }
 
 ###################################################
 # SELECTIONS
 ###################################################
 
 - selection:
-    name: km2_k3pi_pos_sel
+    name: pos_pre_selection
     type: CompositeSelection
     children:
         - weighted_data_sample
+        - q11t_auto
         - good_trk
         - pos_trk
-        - rk_dcht
         - quality_7
+        - fiducial_pz
+        - dch1_acc
+        - dch4_acc
+        - muv_acc
         - rk_lkr_accep
         - rk_hot_lkr
         - rk_lkr_veto
-        - rk_pz
-        - cda_35mm
-        - dch1_acc
-        - dch4_acc
-        - ddead_cell
-        - k3pi_zt
-
-- selection:
-    name: km2_pos_sel
-    type: CompositeSelection
-    children:
-        - weighted_data_sample
-        - good_trk
-        - pos_trk
         - rk_dcht
-        - quality_7
-        - rk_lkr_accep
-        - rk_hot_lkr
-        - rk_lkr_veto
-        - rk_pz
-        - cda_35mm
-        - dch1_acc
-        - dch4_acc
         - ddead_cell
 
 - selection:
-    name: km2_k3pi_neg_sel
+    name: neg_pre_selection
     type: CompositeSelection
     children:
         - weighted_data_sample
         - good_trk
         - neg_trk
         - rk_dcht
+        - fiducial_pz
         - quality_7
         - rk_lkr_accep
         - rk_hot_lkr
         - rk_lkr_veto
-        - rk_pz
-        - cda_35mm
         - dch1_acc
         - dch4_acc
-        - ddead_cell
-        - k3pi_zt
-
-- selection:
-    name: km2_neg_sel
-    type: CompositeSelection
-    children:
-        - weighted_data_sample
-        - good_trk
-        - neg_trk
-        - rk_dcht
-        - quality_7
-        - rk_lkr_accep
-        - rk_hot_lkr
-        - rk_lkr_veto
-        - rk_pz
-        - cda_35mm
-        - dch1_acc
-        - dch4_acc
+        - muv_acc
         - ddead_cell
 
-- analysis : { type: Km2Plotter, name: km2_pos_k3pi, folder: km2_pos_k3pi,
-    tfile: tfout, selection: km2_k3pi_pos_sel, inputs: { km2event : km2_event } }
+#------
 
-- analysis : { type: Km2Plotter, name: km2_neg_k3pi, folder: km2_neg_k3pi,
-    tfile: tfout, selection: km2_k3pi_neg_sel, inputs: { km2event : km2_event } }
 
-- analysis : { type: Km2Plotter, name: km2_pos, folder: km2_pos,
-    tfile: tfout, selection: km2_pos_sel, inputs: { km2event : km2_event } }
+ #Signal selections
+- selection: { name: pos_signal_upper,            type : CompositeSelection,  children:  [ pos_pre_selection, signal_upper_sel ]  }
+- selection: { name: pos_signal_lower,            type : CompositeSelection,  children:  [ pos_pre_selection, signal_lower_sel ]  }
 
-- analysis : { type: Km2Plotter, name: km2_neg, folder: km2_neg,
-    tfile: tfout, selection: km2_neg_sel, inputs: { km2event : km2_event } }
+- selection: { name: pos_signal_loose_upper,      type : CompositeSelection,  children:  [ pos_pre_selection, signal_upper_loose_sel ]  }
+- selection: { name: pos_signal_loose_lower,      type : CompositeSelection,  children:  [ pos_pre_selection, signal_lower_loose_sel ]  }
 
-- analysis : { type: Summary, name: km2_pos_k3pi_sum, ostream: stats_out, base: passer, source: km2_k3pi_pos_sel }
+- selection: { name: pos_signal_upper_nocda,        type : CompositeSelection, 
+    children:  [ pos_pre_selection, zt_up, zt_up_signal, tphi_up_signal, pz_up_signal, track_mom_10_65, muon_req ]  }
 
-- analysis : { type: Summary, name: km2_neg_k3pi_sum, ostream: stats_out, base: passer, source: km2_k3pi_neg_sel }
+- selection: { name: pos_signal_lower_nocda,        type : CompositeSelection,  
+    children:  [ pos_pre_selection, zt_dn, zt_dn_signal, pt_dn_signal, track_mom_10_65, muon_req ]  }
+
+- selection: { name: pos_signal_loose_upper_nocda,  type : CompositeSelection,  
+    children:  [ pos_pre_selection, zt_up, zt_up_signal, tphi_up_signal, track_mom_10_65, muon_req ]  }
+
+- selection: { name: pos_signal_loose_lower_nocda,  type : CompositeSelection,  
+    children:  [ pos_pre_selection, zt_dn, zt_dn_signal, pt_dn_signal, track_mom_10_65, muon_req ]  }
+
+- selection: { name: pos_rk_like, type: CompositeSelection, children: [ pos_pre_selection, rk_specific_sel ] }
+
+###################################################
+# ANALYSES
+###################################################
+
+- analysis : { type: Km2Plotter, name: pos_signal_upper_plots, folder: km2/pos/signal_upper_plots, mini: &mymini true,
+    tfile: tfout, selection: pos_signal_upper, inputs: { km2event : km2_event } }
+
+- analysis : { type: Km2Plotter, name: pos_signal_lower_plots, folder: km2/pos/signal_lower_plots, mini: *mymini,
+    tfile: tfout, selection: pos_signal_lower, inputs: { km2event : km2_event } }
+
+- analysis : { type: Km2Plotter, name: pos_signal_loose_upper_plots, folder: km2/pos/signal_loose_upper_plots, mini: *mymini,
+    tfile: tfout, selection: pos_signal_loose_upper, inputs: { km2event : km2_event } }
+
+- analysis : { type: Km2Plotter, name: pos_signal_loose_lower_plots, folder: km2/pos/signal_loose_lower_plots, mini: *mymini,
+    tfile: tfout, selection: pos_signal_loose_lower, inputs: { km2event : km2_event } }
+
+- analysis : { type: Km2Plotter, name: pos_signal_upper_nocda_plots, folder: km2/pos/signal_upper_nocda_plots, mini: *mymini,
+    tfile: tfout, selection: pos_signal_upper_nocda, inputs: { km2event : km2_event } }
+
+- analysis : { type: Km2Plotter, name: pos_signal_lower_nocda_plots, folder: km2/pos/signal_lower_nocda_plots, mini: *mymini,
+    tfile: tfout, selection: pos_signal_lower_nocda, inputs: { km2event : km2_event } }
+
+- analysis : { type: Km2Plotter, name: pos_signal_loose_upper_nocda_plots, folder: km2/pos/signal_loose_upper_nocda_plots, mini: *mymini,
+    tfile: tfout, selection: pos_signal_loose_upper_nocda, inputs: { km2event : km2_event } }
+
+- analysis : { type: Km2Plotter, name: pos_signal_loose_lower_nocda_plots, folder: km2/pos/signal_loose_lower_nocda_plots, mini: *mymini,
+    tfile: tfout, selection: pos_signal_loose_lower_nocda, inputs: { km2event : km2_event } }
+
+#---------------------------------------------------------
+
+- analysis : { type: CdaComp, name: pos_comp_signal_upper_plots, tfile: tfout, folder: comp/pos/signal_upper_plots,
+    selection: pos_signal_upper, inputs: { ogt: bf_st},
+    kaon_tracks: { ktplus : kt_plus, ktminus : kt_minus, ktwp: kt_weighted_kp, ktwm: kt_weighted_km, ktauto: kaon_track } }
+
+- analysis : { type: CdaComp, name: pos_comp_signal_lower_plots, tfile: tfout, folder: comp/pos/signal_lower_plots,
+    selection: pos_signal_lower, inputs: { ogt: bf_st},
+    kaon_tracks: { ktplus : kt_plus, ktminus : kt_minus, ktwp: kt_weighted_kp, ktwm: kt_weighted_km, ktauto: kaon_track } }
+
+- analysis : { type: CdaComp, name: pos_comp_signal_loose_upper_plots, tfile: tfout, folder: comp/pos/signal_loose_upper_plots,
+    selection: pos_signal_loose_upper, inputs: { ogt: bf_st},
+    kaon_tracks: { ktplus : kt_plus, ktminus : kt_minus, ktwp: kt_weighted_kp, ktwm: kt_weighted_km, ktauto: kaon_track } }
+
+- analysis : { type: CdaComp, name: pos_comp_signal_loose_lower_plots, tfile: tfout, folder: comp/pos/signal_loose_lower_plots,
+    selection: pos_signal_loose_lower, inputs: { ogt: bf_st},
+    kaon_tracks: { ktplus : kt_plus, ktminus : kt_minus, ktwp: kt_weighted_kp, ktwm: kt_weighted_km, ktauto: kaon_track } }
+
+- analysis : { type: CdaComp, name: pos_comp_signal_upper_nocda_plots, tfile: tfout, folder: comp/pos/signal_upper_nocda_plots,
+    selection: pos_signal_upper_nocda, inputs: { ogt: bf_st},
+    kaon_tracks: { ktplus : kt_plus, ktminus : kt_minus, ktwp: kt_weighted_kp, ktwm: kt_weighted_km, ktauto: kaon_track } }
+
+- analysis : { type: CdaComp, name: pos_comp_signal_lower_nocda_plots, tfile: tfout, folder: comp/pos/signal_lower_nocda_plots,
+    selection: pos_signal_lower_nocda, inputs: { ogt: bf_st},
+    kaon_tracks: { ktplus : kt_plus, ktminus : kt_minus, ktwp: kt_weighted_kp, ktwm: kt_weighted_km, ktauto: kaon_track } }
+
+- analysis : { type: CdaComp, name: pos_comp_signal_loose_upper_nocda_plots, tfile: tfout, folder: comp/pos/signal_loose_upper_nocda_plots,
+    selection: pos_signal_loose_upper_nocda, inputs: { ogt: bf_st},
+    kaon_tracks: { ktplus : kt_plus, ktminus : kt_minus, ktwp: kt_weighted_kp, ktwm: kt_weighted_km, ktauto: kaon_track } }
+
+- analysis : { type: CdaComp, name: pos_comp_signal_loose_lower_nocda_plots, tfile: tfout, folder: comp/pos/signal_loose_lower_nocda_plots,
+    selection: pos_signal_loose_lower_nocda, inputs: { ogt: bf_st},
+    kaon_tracks: { ktplus : kt_plus, ktminus : kt_minus, ktwp: kt_weighted_kp, ktwm: kt_weighted_km, ktauto: kaon_track } }
+
+#---------------------------------------------------------
+
+- analysis: { type: Km2Plotter, name: pos_rk_like_plots, folder: rk/pos/rk_plots,
+    tfile: tfout, selection: pos_rk_like, inputs: { km2event : km2_event } } 
+
+#---------------------------------------------------------
+
+ #Signal selections
+- selection: { name: neg_signal_upper,            type : CompositeSelection,  children:  [ neg_pre_selection, signal_upper_sel ]  }
+- selection: { name: neg_signal_lower,            type : CompositeSelection,  children:  [ neg_pre_selection, signal_lower_sel ]  }
+
+- selection: { name: neg_signal_loose_upper,      type : CompositeSelection,  children:  [ neg_pre_selection, signal_upper_loose_sel ]  }
+- selection: { name: neg_signal_loose_lower,      type : CompositeSelection,  children:  [ neg_pre_selection, signal_lower_loose_sel ]  }
+
+- selection: { name: neg_signal_upper_nocda,        type : CompositeSelection, 
+    children:  [ neg_pre_selection, zt_up, zt_up_signal, tphi_up_signal, pz_up_signal, track_mom_10_65, muon_req ]  }
+
+- selection: { name: neg_signal_lower_nocda,        type : CompositeSelection,  
+    children:  [ neg_pre_selection, zt_dn, zt_dn_signal, pt_dn_signal, track_mom_10_65, muon_req ]  }
+
+- selection: { name: neg_signal_loose_upper_nocda,  type : CompositeSelection,  
+    children:  [ neg_pre_selection, zt_up, zt_up_signal, tphi_up_signal, track_mom_10_65, muon_req ]  }
+
+- selection: { name: neg_signal_loose_lower_nocda,  type : CompositeSelection,  
+    children:  [ neg_pre_selection, zt_dn, zt_dn_signal, pt_dn_signal, track_mom_10_65, muon_req ]  }
+
+- selection: { name: neg_rk_like, type: CompositeSelection, children: [ neg_pre_selection, rk_specific_sel ] }
+
+###################################################
+# ANALYSES
+###################################################
+
+- analysis : { type: Km2Plotter, name: neg_signal_upper_plots, folder: km2/neg/signal_upper_plots, mini: *mymini,
+    tfile: tfout, selection: neg_signal_upper, inputs: { km2event : km2_event } }
+
+- analysis : { type: Km2Plotter, name: neg_signal_lower_plots, folder: km2/neg/signal_lower_plots, mini: *mymini,
+    tfile: tfout, selection: neg_signal_lower, inputs: { km2event : km2_event } }
+
+- analysis : { type: Km2Plotter, name: neg_signal_loose_upper_plots, folder: km2/neg/signal_loose_upper_plots, mini: *mymini,
+    tfile: tfout, selection: neg_signal_loose_upper, inputs: { km2event : km2_event } }
+
+- analysis : { type: Km2Plotter, name: neg_signal_loose_lower_plots, folder: km2/neg/signal_loose_lower_plots, mini: *mymini,
+    tfile: tfout, selection: neg_signal_loose_lower, inputs: { km2event : km2_event } }
+
+- analysis : { type: Km2Plotter, name: neg_signal_upper_nocda_plots, folder: km2/neg/signal_upper_nocda_plots, mini: *mymini,
+    tfile: tfout, selection: neg_signal_upper_nocda, inputs: { km2event : km2_event } }
+
+- analysis : { type: Km2Plotter, name: neg_signal_lower_nocda_plots, folder: km2/neg/signal_lower_nocda_plots, mini: *mymini,
+    tfile: tfout, selection: neg_signal_lower_nocda, inputs: { km2event : km2_event } }
+
+- analysis : { type: Km2Plotter, name: neg_signal_loose_upper_nocda_plots, folder: km2/neg/signal_loose_upper_nocda_plots, mini: *mymini,
+    tfile: tfout, selection: neg_signal_loose_upper_nocda, inputs: { km2event : km2_event } }
+
+- analysis : { type: Km2Plotter, name: neg_signal_loose_lower_nocda_plots, folder: km2/neg/signal_loose_lower_nocda_plots, mini: *mymini,
+    tfile: tfout, selection: neg_signal_loose_lower_nocda, inputs: { km2event : km2_event } }
+
+#---------------------------------------------------------
+
+- analysis : { type: CdaComp, name: neg_comp_signal_upper_plots, tfile: tfout, folder: comp/neg/signal_upper_plots,
+    selection: neg_signal_upper, inputs: { ogt: bf_st},
+    kaon_tracks: { ktplus : kt_plus, ktminus : kt_minus, ktwp: kt_weighted_kp, ktwm: kt_weighted_km, ktauto: kaon_track } }
+
+- analysis : { type: CdaComp, name: neg_comp_signal_lower_plots, tfile: tfout, folder: comp/neg/signal_lower_plots,
+    selection: neg_signal_lower, inputs: { ogt: bf_st},
+    kaon_tracks: { ktplus : kt_plus, ktminus : kt_minus, ktwp: kt_weighted_kp, ktwm: kt_weighted_km, ktauto: kaon_track } }
+
+- analysis : { type: CdaComp, name: neg_comp_signal_loose_upper_plots, tfile: tfout, folder: comp/neg/signal_loose_upper_plots,
+    selection: neg_signal_loose_upper, inputs: { ogt: bf_st},
+    kaon_tracks: { ktplus : kt_plus, ktminus : kt_minus, ktwp: kt_weighted_kp, ktwm: kt_weighted_km, ktauto: kaon_track } }
+
+- analysis : { type: CdaComp, name: neg_comp_signal_loose_lower_plots, tfile: tfout, folder: comp/neg/signal_loose_lower_plots,
+    selection: neg_signal_loose_lower, inputs: { ogt: bf_st},
+    kaon_tracks: { ktplus : kt_plus, ktminus : kt_minus, ktwp: kt_weighted_kp, ktwm: kt_weighted_km, ktauto: kaon_track } }
+
+- analysis : { type: CdaComp, name: neg_comp_signal_upper_nocda_plots, tfile: tfout, folder: comp/neg/signal_upper_nocda_plots,
+    selection: neg_signal_upper_nocda, inputs: { ogt: bf_st},
+    kaon_tracks: { ktplus : kt_plus, ktminus : kt_minus, ktwp: kt_weighted_kp, ktwm: kt_weighted_km, ktauto: kaon_track } }
+
+- analysis : { type: CdaComp, name: neg_comp_signal_lower_nocda_plots, tfile: tfout, folder: comp/neg/signal_lower_nocda_plots,
+    selection: neg_signal_lower_nocda, inputs: { ogt: bf_st},
+    kaon_tracks: { ktplus : kt_plus, ktminus : kt_minus, ktwp: kt_weighted_kp, ktwm: kt_weighted_km, ktauto: kaon_track } }
+
+- analysis : { type: CdaComp, name: neg_comp_signal_loose_upper_nocda_plots, tfile: tfout, folder: comp/neg/signal_loose_upper_nocda_plots,
+    selection: neg_signal_loose_upper_nocda, inputs: { ogt: bf_st},
+    kaon_tracks: { ktplus : kt_plus, ktminus : kt_minus, ktwp: kt_weighted_kp, ktwm: kt_weighted_km, ktauto: kaon_track } }
+
+- analysis : { type: CdaComp, name: neg_comp_signal_loose_lower_nocda_plots, tfile: tfout, folder: comp/neg/signal_loose_lower_nocda_plots,
+    selection: neg_signal_loose_lower_nocda, inputs: { ogt: bf_st},
+    kaon_tracks: { ktplus : kt_plus, ktminus : kt_minus, ktwp: kt_weighted_kp, ktwm: kt_weighted_km, ktauto: kaon_track } }
+
+#---------------------------------------------------------
+
+- analysis: { type: Km2Plotter, name: neg_rk_like_plots, folder: rk/neg/rk_plots,
+    tfile: tfout, selection: neg_rk_like, inputs: { km2event : km2_event } } 
+
+#---------------------------------------------------------
+
+- analysis : { type: Summary, name: data_sample_summary, ostream: stats_out, base: passer, source: weighted_data_sample }
+- analysis : { type: Summary, name: pos_summary, ostream: stats_out, base: passer, source: pos_signal_loose_lower_nocda }
+- analysis : { type: Summary, name: neg_summary, ostream: stats_out, base: passer, source: neg_signal_loose_lower_nocda }
+
+#---------------------------------------------------------
+#- selection:
+#    name: km2_k3pi_pos_sel_nocda
+#    type: CompositeSelection
+#    children:
+#        - pos_pre_selection
+#        - rk_pz
+#        - k3pi_zt
+#
+#- selection:
+#    name: km2_k3pi_pos_sel
+#    type: CompositeSelection
+#    children:
+#        - km2_k3pi_pos_sel_nocda
+#        - cda_35mm
+#
+#- selection:
+#    name: km2_pos_sel_nocda
+#    type: CompositeSelection
+#    children:
+#        - pos_pre_selection
+#        - rk_pz
+#
+#- selection:
+#    name: km2_pos_sel
+#    type: CompositeSelection
+#    children:
+#        - km2_pos_sel_nocda
+#        - cda_35mm
+#
+#- selection:
+#    name: final_pos_sel
+#    type: CompositeSelection
+#    children:
+#        - pos_pre_selection
+#        - signal_upper_sel
+#
+##------
+#
+#- selection:
+#    name: km2_k3pi_neg_sel_nocda
+#    type: CompositeSelection
+#    children:
+#        - neg_pre_selection
+#        - rk_pz
+#        - k3pi_zt
+#
+#- selection:
+#    name: km2_k3pi_neg_sel
+#    type: CompositeSelection
+#    children:
+#        - km2_k3pi_neg_sel_nocda
+#        - cda_35mm
+#
+#- selection:
+#    name: km2_neg_sel_nocda
+#    type: CompositeSelection
+#    children:
+#        - neg_pre_selection
+#        - rk_pz
+#
+#- selection:
+#    name: km2_neg_sel
+#    type: CompositeSelection
+#    children:
+#        - km2_neg_sel_nocda
+#        - cda_35mm
+#
+#- selection:
+#    name: final_neg_sel
+#    type: CompositeSelection
+#    children:
+#        - neg_pre_selection
+#        - signal_upper_sel
+#        
+#
+#- analysis : { type: Km2Plotter, name: km2_pos_k3pi, folder: km2_pos_k3pi,
+#    tfile: tfout, selection: km2_k3pi_pos_sel, inputs: { km2event : km2_event } }
+#
+#- analysis : { type: Km2Plotter, name: km2_neg_k3pi, folder: km2_neg_k3pi,
+#    tfile: tfout, selection: km2_k3pi_neg_sel, inputs: { km2event : km2_event } }
+#
+#- analysis : { type: Km2Plotter, name: km2_pos_final, folder: km2_pos_final,
+#    tfile: tfout, selection: final_pos_sel, inputs: { km2event : km2_event } }
+#
+#- analysis : { type: Km2Plotter, name: km2_neg_final, folder: km2_neg_final,
+#    tfile: tfout, selection: final_neg_sel, inputs: { km2event : km2_event } }
+#
+#- analysis : { type: Km2Plotter, name: km2_pos, folder: km2_pos,
+#    tfile: tfout, selection: km2_pos_sel, inputs: { km2event : km2_event } }
+#
+#- analysis : { type: Km2Plotter, name: km2_neg, folder: km2_neg,
+#    tfile: tfout, selection: km2_neg_sel, inputs: { km2event : km2_event } }
+#
+#- analysis : { type: Summary, name: km2_pos_k3pi_sum, ostream: stats_out, base: passer, source: km2_k3pi_pos_sel }
+#
+#- analysis : { type: Summary, name: km2_neg_k3pi_sum, ostream: stats_out, base: passer, source: km2_k3pi_neg_sel }
+#
+#
+########-------
+#
+#
+#- analysis : { type: CdaComp, name: k3pi_cda_pos_nocda, tfile: tfout, folder: k3pi/k3pi_cda_pos_nocda,
+#    selection: km2_k3pi_pos_sel_nocda, inputs: { ogt: bf_st},
+#    kaon_tracks: { ktplus : kt_plus, ktminus : kt_minus, ktwp: kt_weighted_kp, ktwm: kt_weighted_km, ktauto: kaon_track } }
+#
+#- analysis : { type: CdaComp, name: k3pi_cda_pos, tfile: tfout, folder: k3pi/k3pi_cda_pos,
+#    selection: km2_k3pi_pos_sel, inputs: { ogt: bf_st},
+#    kaon_tracks: { ktplus : kt_plus, ktminus : kt_minus, ktwp: kt_weighted_kp, ktwm: kt_weighted_km, ktauto: kaon_track } }
+#
+#- analysis : { type: CdaComp, name: k3pi_cda_neg_nocda, tfile: tfout, folder: k3pi/k3pi_cda_neg_nocda,
+#    selection: km2_k3pi_neg_sel_nocda, inputs: { ogt: bf_st},
+#    kaon_tracks: { ktplus : kt_plus, ktminus : kt_minus, ktwp: kt_weighted_kp, ktwm: kt_weighted_km, ktauto: kaon_track } }
+#
+#- analysis : { type: CdaComp, name: k3pi_cda_neg, tfile: tfout, folder: k3pi/k3pi_cda_neg,
+#    selection: km2_k3pi_neg_sel, inputs: { ogt: bf_st},
+#    kaon_tracks: { ktplus : kt_plus, ktminus : kt_minus, ktwp: kt_weighted_kp, ktwm: kt_weighted_km, ktauto: kaon_track } }
+#
+########-------
+#
+#- analysis : { type: CdaComp, name: km2_cda_pos_nocda, tfile: tfout, folder: km2/km2_cda_pos_nocda,
+#    selection: km2_pos_sel_nocda, inputs: { ogt: bf_st},
+#    kaon_tracks: { ktplus : kt_plus, ktminus : kt_minus, ktwp: kt_weighted_kp, ktwm: kt_weighted_km, ktauto: kaon_track } }
+#
+#- analysis : { type: CdaComp, name: km2_cda_pos, tfile: tfout, folder: km2/km2_cda_pos,
+#    selection: km2_pos_sel, inputs: { ogt: bf_st},
+#    kaon_tracks: { ktplus : kt_plus, ktminus : kt_minus, ktwp: kt_weighted_kp, ktwm: kt_weighted_km, ktauto: kaon_track } }
+#
+#- analysis : { type: CdaComp, name: km2_cda_neg_nocda, tfile: tfout, folder: km2/km2_cda_neg_nocda,
+#    selection: km2_neg_sel_nocda, inputs: { ogt: bf_st},
+#    kaon_tracks: { ktplus : kt_plus, ktminus : kt_minus, ktwp: kt_weighted_kp, ktwm: kt_weighted_km, ktauto: kaon_track } }
+#
+#- analysis : { type: CdaComp, name: km2_cda_neg, tfile: tfout, folder: km2/km2_cda_neg,
+#    selection: km2_neg_sel, inputs: { ogt: bf_st},
+#    kaon_tracks: { ktplus : kt_plus, ktminus : kt_minus, ktwp: kt_weighted_kp, ktwm: kt_weighted_km, ktauto: kaon_track } }

@@ -47,6 +47,7 @@ namespace fn
             //raw upstream
             virtual TVector3 extrapolate_us( double z) const  ;
             virtual TVector3 get_us_mom() const ;
+            virtual Track get_bz_track() const;
 
             //BF track
             virtual TVector3 extrapolate_bf( double z) const  ;

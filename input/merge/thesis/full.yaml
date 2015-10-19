@@ -1,72 +1,356 @@
 trig_effs:
     -  { name: full_q11t_eff,
-    filename: tdata/staging/all.plots.root,
+    filename: tdata/staging/full/all.shuffle_plots.root,
+    numname: htrig_num,
+    denomname: htrig_denom,
     selections: [
-        "p5.data.q1.v4.neg/sig_up_trig_eff",
-        "p5.data.q1.v4.neg/sig_dn_trig_eff",
-        "p5.data.q1.v4.pos/sig_up_trig_eff",
-        "p5.data.q1.v4.pos/sig_dn_trig_eff" ] }
+        'signal/lower/neg/h_m2m_kmu',
+        'signal/lower/pos/h_m2m_kmu',
+        'signal/upper/neg/h_m2m_kmu',
+        'signal/upper/pos/h_m2m_kmu'
+    ] }
+
+    -  { name: full_loose_q11t_eff,
+    filename: tdata/staging/full/all.shuffle_plots.root,
+    numname: htrig_num,
+    denomname: htrig_denom,
+    selections: [
+        'signal_loose/lower/neg/h_m2m_kmu',
+        'signal_loose/lower/pos/h_m2m_kmu',
+        'signal_loose/upper/neg/h_m2m_kmu',
+        'signal_loose/upper/pos/h_m2m_kmu'
+    ] }
+
+    -  { name: rk_q11t_eff,
+    filename: tdata/staging/full/all.shuffle_plots.root,
+    numname: htrig_num,
+    denomname: htrig_denom,
+    selections: [
+        'rk/neg/h_m2m_kmu',
+        'rk/pos/h_m2m_kmu',
+    ] }
+
 
 stacks:
-    - { name: km2_noscat,
-    filename: output/km2_noscat.root,
-    destfolder:  km2_noscat,
-    trigeff: full_q11t_eff,
-    selections: [
-        'signal_muv/up/pos/h_m2m',
-        'signal_muv/up/neg/h_m2m',
-        'signal_muv/dn/pos/h_m2m',
-        'signal_muv/dn/neg/h_m2m' ] }
 
-    - { name: km2_scat,
-    filename: output/km2_scat.root,
-    destfolder:  km2_scat,
-    trigeff: full_q11t_eff,
+    - { name: km2_full_mvis_upper_hc,
+    filename: tdata/staging/full/all.shuffle_plots.root,
+    destfolder: final_hc/full_mvis_upper, trigeff: full_q11t_eff,
+    haloshapeerr: 0.15, 
+    halolog: &km2halolog tdata/staging/full/log_halo_sub.root,
+    haloinfo: [
+         { bgpath: "signal_hc/upper_loose/neg/h_m2m_kmu/hnu_stack_hists/halo_neg",
+            scalepath: "scalefactors/neg_ext_upper", 
+            logpath: "p6.halo.q11t.neg/signal_upper_loose_plots/h_m2m_kmu" },
+         { bgpath: "signal_hc/upper_loose/pos/h_m2m_kmu/hnu_stack_hists/halo_pos",
+            scalepath: "scalefactors/pos_ext_upper", 
+            logpath: "p6.halo.q11t.pos/signal_upper_loose_plots/h_m2m_kmu" }
+         ],
+    scattererr: true, errors: true, 
     selections: [
-        'signal_muv/up/pos/h_m2m',
-        'signal_muv/up/neg/h_m2m',
-        'signal_muv/dn/pos/h_m2m',
-        'signal_muv/dn/neg/h_m2m' ] }
-
-    - { name: km2_full,
-    filename: tdata/staging/all.mass_plots.root,
-    destfolder: km2_full,
-    trigeff: full_q11t_eff,
-    errors: true,
-    selections: [
-        'pos/signal_upper_muv/h_m2m_kmu',
-        'neg/signal_upper_muv/h_m2m_kmu',
-        'pos/signal_lower_muv/h_m2m_kmu',
-        'neg/signal_lower_muv/h_m2m_kmu' ] }
-
-    - { name: km2_full_vis,
-    filename: tdata/staging/all.mass_plots.root,
-    destfolder: km2_full_vis,
-    trigeff: full_q11t_eff,
-    errors: true,
-    selections: [
-        'pos/signal_upper_muv/h_m2m_kmu_vis',
-        'neg/signal_upper_muv/h_m2m_kmu_vis',
-        'pos/signal_lower_muv/h_m2m_kmu_vis',
-        'neg/signal_lower_muv/h_m2m_kmu_vis' ] }
-
-    - { name: km2_full_mvis,
-    filename: tdata/staging/all.mass_plots.root,
-    destfolder: km2_full_mvis,
-    trigeff: full_q11t_eff,
-    cumulative_check: 0,
-    errors: true,
-    selections: [
-        'pos/signal_upper_muv/h_m2m_kmu_mvis',
-        'neg/signal_upper_muv/h_m2m_kmu_mvis',
-        'pos/signal_lower_muv/h_m2m_kmu_mvis',
-        'neg/signal_lower_muv/h_m2m_kmu_mvis' ] }
-
-    - { name: km2_rk_mvis,
-    filename: tdata/staging/all.mass_plots.root,
-    destfolder: km2_rk_mvis,
-    cumulative_check: 0,
-    selections: [
-        'pos/rk/h_m2m_kmu_mvis',
-        'neg/rk/h_m2m_kmu_mvis',
+        'signal_hc/upper_loose/neg/h_m2m_kmu_mvis', 'signal_hc/upper_loose/pos/h_m2m_kmu_mvis'
         ] }
+
+    - { name: km2_full_mvis_lower_hc,
+    filename: tdata/staging/full/all.shuffle_plots.root,
+    destfolder: final_hc/full_mvis_lower, trigeff: full_q11t_eff,
+    haloshapeerr: 0.15, halolog: *km2halolog ,
+    haloinfo: [
+         { bgpath: "signal_hc/lower_loose/neg/h_m2m_kmu/hnu_stack_hists/halo_neg",
+            scalepath: "scalefactors/neg_ext_lower", 
+            logpath: "p6.halo.q11t.neg/signal_lower_loose_plots/h_m2m_kmu" },
+         { bgpath: "signal_hc/lower_loose/pos/h_m2m_kmu/hnu_stack_hists/halo_pos",
+            scalepath: "scalefactors/pos_ext_lower", 
+            logpath: "p6.halo.q11t.pos/signal_lower_loose_plots/h_m2m_kmu" }
+         ],
+    scattererr: true, errors: true,
+    selections: [
+        'signal_hc/lower_loose/neg/h_m2m_kmu_mvis', 'signal_hc/lower_loose/pos/h_m2m_kmu_mvis'
+        ] }
+
+    - { name: km2_full_mvis_hc,
+    filename: tdata/staging/full/all.shuffle_plots.root,
+    destfolder: final_hc/full_mvis, trigeff: full_q11t_eff,
+    haloshapeerr: 0.15, halolog: *km2halolog , 
+    scattererr: true, errors: true, 
+    haloinfo: [
+         { bgpath: "signal_hc/upper_loose/neg/h_m2m_kmu/hnu_stack_hists/halo_neg",
+            scalepath: "scalefactors/neg_ext_upper", 
+            logpath: "p6.halo.q11t.neg/signal_upper_loose_plots/h_m2m_kmu" },
+         { bgpath: "signal_hc/upper_loose/pos/h_m2m_kmu/hnu_stack_hists/halo_pos",
+            scalepath: "scalefactors/pos_ext_upper", 
+            logpath: "p6.halo.q11t.pos/signal_upper_loose_plots/h_m2m_kmu" },
+         { bgpath: "signal_hc/lower_loose/neg/h_m2m_kmu/hnu_stack_hists/halo_neg",
+            scalepath: "scalefactors/neg_ext_lower", 
+            logpath: "p6.halo.q11t.neg/signal_lower_loose_plots/h_m2m_kmu" },
+         { bgpath: "signal_hc/lower_loose/pos/h_m2m_kmu/hnu_stack_hists/halo_pos",
+            scalepath: "scalefactors/pos_ext_lower", 
+            logpath: "p6.halo.q11t.pos/signal_lower_loose_plots/h_m2m_kmu" }
+         ],
+    selections: [
+        'signal_hc/lower_loose/neg/h_m2m_kmu_mvis', 'signal_hc/lower_loose/pos/h_m2m_kmu_mvis',
+        'signal_hc/upper_loose/neg/h_m2m_kmu_mvis', 'signal_hc/upper_loose/pos/h_m2m_kmu_mvis'
+        ] }
+
+        #--------------------------------------------------
+
+    - { name: km2_full_mvis_upper_hc_tgt,
+    filename: tdata/staging/full/all.shuffle_plots.root,
+    destfolder: final_hc_tgt/full_mvis_upper, trigeff: full_q11t_eff,
+    haloshapeerr: 0.15, 
+    halolog: &km2halolog tdata/staging/full/log_halo_sub.root,
+    haloinfo: [
+         { bgpath: "signal_hc/upper/neg/h_m2m_kmu/hnu_stack_hists/halo_neg",
+            scalepath: "scalefactors/neg_ext_upper", 
+            logpath: "p6.halo.q11t.neg/signal_upper_plots/h_m2m_kmu" },
+         { bgpath: "signal_hc/upper/pos/h_m2m_kmu/hnu_stack_hists/halo_pos",
+            scalepath: "scalefactors/pos_ext_upper", 
+            logpath: "p6.halo.q11t.pos/signal_upper_plots/h_m2m_kmu" }
+         ],
+    scattererr: true, errors: true, 
+    selections: [
+        'signal_hc/upper/neg/h_m2m_kmu_mvis', 'signal_hc/upper/pos/h_m2m_kmu_mvis'
+        ] }
+
+    - { name: km2_full_mvis_lower_hc_tgt,
+    filename: tdata/staging/full/all.shuffle_plots.root,
+    destfolder: final_hc_tgt/full_mvis_lower, trigeff: full_q11t_eff,
+    haloshapeerr: 0.15, halolog: *km2halolog ,
+    haloinfo: [
+         { bgpath: "signal_hc/lower/neg/h_m2m_kmu/hnu_stack_hists/halo_neg",
+            scalepath: "scalefactors/neg_ext_lower", 
+            logpath: "p6.halo.q11t.neg/signal_lower_plots/h_m2m_kmu" },
+         { bgpath: "signal_hc/lower/pos/h_m2m_kmu/hnu_stack_hists/halo_pos",
+            scalepath: "scalefactors/pos_ext_lower", 
+            logpath: "p6.halo.q11t.pos/signal_lower_plots/h_m2m_kmu" }
+         ],
+    scattererr: true, errors: true,
+    selections: [
+        'signal_hc/lower/neg/h_m2m_kmu_mvis', 'signal_hc/lower/pos/h_m2m_kmu_mvis'
+        ] }
+
+    - { name: km2_full_mvis_hc_tgt,
+    filename: tdata/staging/full/all.shuffle_plots.root,
+    destfolder: final_hc_tgt/full_mvis, trigeff: full_q11t_eff,
+    haloshapeerr: 0.15, halolog: *km2halolog , 
+    scattererr: true, errors: true, 
+    haloinfo: [
+         { bgpath: "signal_hc/upper/neg/h_m2m_kmu/hnu_stack_hists/halo_neg",
+            scalepath: "scalefactors/neg_ext_upper", 
+            logpath: "p6.halo.q11t.neg/signal_upper_plots/h_m2m_kmu" },
+         { bgpath: "signal_hc/upper/pos/h_m2m_kmu/hnu_stack_hists/halo_pos",
+            scalepath: "scalefactors/pos_ext_upper", 
+            logpath: "p6.halo.q11t.pos/signal_upper_plots/h_m2m_kmu" },
+         { bgpath: "signal_hc/lower/neg/h_m2m_kmu/hnu_stack_hists/halo_neg",
+            scalepath: "scalefactors/neg_ext_lower", 
+            logpath: "p6.halo.q11t.neg/signal_lower_plots/h_m2m_kmu" },
+         { bgpath: "signal_hc/lower/pos/h_m2m_kmu/hnu_stack_hists/halo_pos",
+            scalepath: "scalefactors/pos_ext_lower", 
+            logpath: "p6.halo.q11t.pos/signal_lower_plots/h_m2m_kmu" }
+         ],
+    selections: [
+        'signal_hc/lower/neg/h_m2m_kmu_mvis', 'signal_hc/lower/pos/h_m2m_kmu_mvis',
+        'signal_hc/upper/neg/h_m2m_kmu_mvis', 'signal_hc/upper/pos/h_m2m_kmu_mvis'
+        ] }
+
+    - { name: km2_full_hc_tgt,
+    filename: tdata/staging/full/all.shuffle_plots.root,
+    destfolder: final_hc_tgt/full, trigeff: full_q11t_eff,
+    haloshapeerr: 0.15, halolog: *km2halolog , 
+    scattererr: true, errors: true, 
+    haloinfo: [
+         { bgpath: "signal_hc/upper/neg/h_m2m_kmu/hnu_stack_hists/halo_neg",
+            scalepath: "scalefactors/neg_ext_upper", 
+            logpath: "p6.halo.q11t.neg/signal_upper_plots/h_m2m_kmu" },
+         { bgpath: "signal_hc/upper/pos/h_m2m_kmu/hnu_stack_hists/halo_pos",
+            scalepath: "scalefactors/pos_ext_upper", 
+            logpath: "p6.halo.q11t.pos/signal_upper_plots/h_m2m_kmu" },
+         { bgpath: "signal_hc/lower/neg/h_m2m_kmu/hnu_stack_hists/halo_neg",
+            scalepath: "scalefactors/neg_ext_lower", 
+            logpath: "p6.halo.q11t.neg/signal_lower_plots/h_m2m_kmu" },
+         { bgpath: "signal_hc/lower/pos/h_m2m_kmu/hnu_stack_hists/halo_pos",
+            scalepath: "scalefactors/pos_ext_lower", 
+            logpath: "p6.halo.q11t.pos/signal_lower_plots/h_m2m_kmu" }
+         ],
+    selections: [
+        'signal_hc/lower/neg/h_m2m_kmu', 'signal_hc/lower/pos/h_m2m_kmu',
+        'signal_hc/upper/neg/h_m2m_kmu', 'signal_hc/upper/pos/h_m2m_kmu'
+        ] }
+
+    #--------------------------------------------------
+    #KM2 FULL
+    #--------------------------------------------------
+    #- { name: km2_full, destfolder: final/km2_full/full,
+    #filename: tdata/staging/full/all.shuffle_plots.root,
+    #trigeff: full_q11t_eff, scattererr: true, errors: true, haloshapeerr: 0.3, cumulative_check: 0,
+    #halolog: &km2halolog tdata/staging/full/log_halo_sub.root,
+    #haloinfo: &km2haloinfo [
+    #     { bgpath: "signal/lower/neg/h_m2m_kmu/hnu_stack_hists/halo_neg",
+    #        scalepath: "scalefactors/neg_rk", logpath: "p6.halo.q11t.neg/signal_lower_plots/h_m2m_kmu" },
+    #     { bgpath: "signal/lower/pos/h_m2m_kmu/hnu_stack_hists/halo_pos",
+    #        scalepath: "scalefactors/pos_rk", logpath: "p6.halo.q11t.pos/signal_lower_plots/h_m2m_kmu" },
+    #     { bgpath: "signal/lower/neg/h_m2m_kmu/hnu_stack_hists/halo_neg",
+    #        scalepath: "scalefactors/neg_rk", logpath: "p6.halo.q11t.neg/signal_lower_plots/h_m2m_kmu" },
+    #     { bgpath: "signal/lower/pos/h_m2m_kmu/hnu_stack_hists/halo_pos",
+    #        scalepath: "scalefactors/pos_rk", logpath: "p6.halo.q11t.pos/signal_lower_plots/h_m2m_kmu" }
+    #     ],
+    #selections: [
+    #    'signal/lower/neg/h_m2m_kmu', 'signal/lower/pos/h_m2m_kmu', 
+    #    'signal/upper/neg/h_m2m_kmu', 'signal/upper/pos/h_m2m_kmu'
+    #    ] }
+
+    #- { name: km2_full_loose_mvis, destfolder: final_loose/km2_full_mvis/full_loose,
+    #filename: tdata/staging/full/all.shuffle_plots.root,
+    #trigeff: full_loose_q11t_eff, scattererr: true, errors: true, haloshapeerr: 0.3, cumulative_check: 0,
+    #halolog: &km2halolog tdata/staging/full/log_halo_sub.root,
+    #haloinfo: &km2haloinfo [
+    #     { bgpath: "signal_loose/lower/neg/h_m2m_kmu/hnu_stack_hists/halo_neg",
+    #        scalepath: "scalefactors/neg_rk", logpath: "p6.halo.q11t.neg/signal_lower_loose_plots/h_m2m_kmu" },
+    #     { bgpath: "signal_loose/lower/pos/h_m2m_kmu/hnu_stack_hists/halo_pos",
+    #        scalepath: "scalefactors/pos_rk", logpath: "p6.halo.q11t.pos/signal_lower_loose_plots/h_m2m_kmu" },
+    #     { bgpath: "signal_loose/lower/neg/h_m2m_kmu/hnu_stack_hists/halo_neg",
+    #        scalepath: "scalefactors/neg_rk", logpath: "p6.halo.q11t.neg/signal_lower_loose_plots/h_m2m_kmu" },
+    #     { bgpath: "signal_loose/lower/pos/h_m2m_kmu/hnu_stack_hists/halo_pos",
+    #        scalepath: "scalefactors/pos_rk", logpath: "p6.halo.q11t.pos/signal_lower_loose_plots/h_m2m_kmu" }
+    #     ],
+    #selections: [
+    #    'signal_loose/lower/neg/h_m2m_kmu_mvis', 'signal_loose/lower/pos/h_m2m_kmu_mvis', 
+    #    'signal_loose/upper/neg/h_m2m_kmu_mvis', 'signal_loose/upper/pos/h_m2m_kmu_mvis'
+    #    ] }
+
+    #- { name: km2_full_pos, destfolder: final/km2_full/pos,
+    #filename: tdata/staging/full/all.shuffle_plots.root,
+    #trigeff: full_q11t_eff, scattererr: true, errors: true, haloshapeerr: 0.3, cumulative_check: 0,
+    #halolog: &km2halolog tdata/staging/full/log_halo_sub.root,
+    #haloinfo: &km2haloinfo [
+    #     { bgpath: "signal/lower/pos/h_m2m_kmu/hnu_stack_hists/halo_pos",
+    #        scalepath: "scalefactors/pos_rk", logpath: "p6.halo.q11t.pos/signal_lower_plots/h_m2m_kmu" },
+    #     { bgpath: "signal/lower/pos/h_m2m_kmu/hnu_stack_hists/halo_pos",
+    #        scalepath: "scalefactors/pos_rk", logpath: "p6.halo.q11t.pos/signal_lower_plots/h_m2m_kmu" }
+    #     ],
+    #selections: [ 'signal/lower/pos/h_m2m_kmu', 'signal/upper/pos/h_m2m_kmu' ]
+    #    }
+
+    #- { name: km2_full_neg, destfolder: final/km2_full/neg,
+    #filename: tdata/staging/full/all.shuffle_plots.root,
+    #trigeff: full_q11t_eff, scattererr: true, errors: true, haloshapeerr: 0.3, cumulative_check: 0,
+    #halolog: &km2halolog tdata/staging/full/log_halo_sub.root,
+    #haloinfo: &km2haloinfo [
+    #     { bgpath: "signal/lower/neg/h_m2m_kmu/hnu_stack_hists/halo_neg",
+    #        scalepath: "scalefactors/neg_rk", logpath: "p6.halo.q11t.neg/signal_lower_plots/h_m2m_kmu" },
+    #     { bgpath: "signal/lower/neg/h_m2m_kmu/hnu_stack_hists/halo_neg",
+    #        scalepath: "scalefactors/neg_rk", logpath: "p6.halo.q11t.neg/signal_lower_plots/h_m2m_kmu" }
+    #     ],
+    #selections: [ 'signal/lower/neg/h_m2m_kmu', 'signal/upper/neg/h_m2m_kmu' ]
+    #    }
+
+    #--------------------------------------------------
+    #RK
+    #--------------------------------------------------
+
+    #- { name: km2_rk_mvis, destfolder: final/rk/full_mvis,
+    #filename: tdata/staging/full/all.shuffle_plots.root,
+    #scattererr: false, errors: true, haloshapeerr: 0.01, 
+    #halolog: &km2halolog tdata/staging/full/log_halo_sub.root,
+    #haloinfo: &km2haloinfo [
+    #     { bgpath: "rk/neg/h_m2m_kmu_mvis/hnu_stack_hists/halo_neg",
+    #        scalepath: "scalefactors/neg_rk", logpath: "p6.halo.q11t.neg/rk_like_plots/h_m2m_kmu" },
+    #     { bgpath: "rk/pos/h_m2m_kmu_mvis/hnu_stack_hists/halo_pos",
+    #        scalepath: "scalefactors/pos_rk", logpath: "p6.halo.q11t.pos/rk_like_plots/h_m2m_kmu" },
+    #     ],
+    #selections: [ 'rk/neg/h_m2m_kmu_mvis', 'rk/pos/h_m2m_kmu_mvis', 
+    #    ] }
+
+    #- { name: km2_rk_neg, destfolder: final/rk/neg,
+    #filename: tdata/staging/full/all.shuffle_plots.root,
+    ##trigeff: rk_q11t_eff,
+    #scattererr: true, errors: true, haloshapeerr: 0.3, cumulative_check: 0,
+    #halolog: &km2halolog tdata/staging/full/log_halo_sub.root,
+    #haloinfo: &km2haloinfo [
+    #     { bgpath: "rk/neg/h_m2m_kmu/hnu_stack_hists/halo_neg",
+    #        scalepath: "scalefactors/neg_rk", logpath: "p6.halo.q11t.neg/rk_like_plots/h_m2m_kmu" },
+    #     ],
+    #selections: [ 'rk/neg/h_m2m_kmu', 'rk/pos/h_m2m_kmu', 
+    #    ] }
+
+    #- { name: km2_rk_pos, destfolder: final/rk/pos,
+    #filename: tdata/staging/full/all.shuffle_plots.root,
+    ##trigeff: rk_q11t_eff,
+    #scattererr: true, errors: true, haloshapeerr: 0.3, cumulative_check: 0,
+    #halolog: &km2halolog tdata/staging/full/log_halo_sub.root,
+    #haloinfo: &km2haloinfo [
+    #     { bgpath: "rk/pos/h_m2m_kmu/hnu_stack_hists/halo_pos",
+    #        scalepath: "scalefactors/pos_rk", logpath: "p6.halo.q11t.pos/rk_like_plots/h_m2m_kmu" },
+    #     ],
+    #selections: [ 'rk/pos/h_m2m_kmu', 'rk/pos/h_m2m_kmu', 
+    #    ] }
+
+    # #--------------------------------------------------
+
+    #- { name: km2_full_vis,
+    #filename: tdata/staging/full/all.shuffle_plots.root,
+    #destfolder: final/km2_full_vis,
+    #trigeff: full_q11t_eff,
+    #scattererr: true,
+    #haloshapeerr: 0.3,
+    #halolog: *km2halolog,
+    #haloinfo: *km2haloinfo,
+    #errors: true,
+    #selections: [
+    #    'signal/lower/neg/h_m2m_kmu_vis', 'signal/lower/pos/h_m2m_kmu_vis', 
+    #    'signal/upper/neg/h_m2m_kmu_vis', 'signal/upper/pos/h_m2m_kmu_vis'
+    #    ] }
+
+    #- { name: km2_full_vis_noherr,
+    #filename: tdata/staging/full/all.shuffle_plots.root,
+    #destfolder: final/km2_full_vis_noherr,
+    #trigeff: full_q11t_eff,
+    #scattererr: true,
+    #errors: true,
+    #selections: [
+    #    'signal/lower/neg/h_m2m_kmu_vis', 'signal/lower/pos/h_m2m_kmu_vis', 
+    #    'signal/upper/neg/h_m2m_kmu_vis', 'signal/upper/pos/h_m2m_kmu_vis'
+    #    ] }
+
+    #- { name: km2_full_mvis,
+    #filename: tdata/staging/full/all.shuffle_plots.root,
+    #destfolder: final/km2_full_mvis, trigeff: full_q11t_eff,
+    #haloshapeerr: 0.3, halolog: *km2halolog , haloinfo: *km2haloinfo ,
+    #scattererr: true, errors: true, cumulative_check: 0,
+    #selections: [
+    #    'signal/lower/neg/h_m2m_kmu_mvis', 'signal/lower/pos/h_m2m_kmu_mvis', 
+    #    'signal/upper/neg/h_m2m_kmu_mvis', 'signal/upper/pos/h_m2m_kmu_mvis'
+    #    ] }
+
+    #- { name: km2_full_mvis,
+    #filename: tdata/staging/full/all.shuffle_plots.root,
+    #destfolder: final/full_mvis_upper, trigeff: full_q11t_eff,
+    #haloshapeerr: 0.3, halolog: *km2halolog , haloinfo: *km2haloinfo ,
+    #scattererr: true, errors: true, cumulative_check: 0,
+    #selections: [
+    #    'signal/upper/neg/h_m2m_kmu_mvis', 'signal/upper/pos/h_m2m_kmu_mvis'
+    #    ] }
+
+    #- { name: km2_full_mvis,
+    #filename: tdata/staging/full/all.shuffle_plots.root,
+    #destfolder: final/full_mvis_lower, trigeff: full_q11t_eff,
+    #haloshapeerr: 0.3, halolog: *km2halolog , haloinfo: *km2haloinfo ,
+    #scattererr: true, errors: true, cumulative_check: 0,
+    #selections: [
+    #    'signal/lower/neg/h_m2m_kmu_mvis', 'signal/lower/pos/h_m2m_kmu_mvis'
+    #    ] }
+
+    #- { name: km2_full_mvis_noherr,
+    #filename: tdata/staging/full/all.shuffle_plots.root,
+    #destfolder: final/km2_full_mvis_noherr,
+    #trigeff: full_q11t_eff,
+    #cumulative_check: 0,
+    #scattererr: true,
+    #errors: true,
+    #selections: [
+    #    'signal/lower/neg/h_m2m_kmu_mvis', 'signal/lower/pos/h_m2m_kmu_mvis', 
+    #    'signal/upper/neg/h_m2m_kmu_mvis', 'signal/upper/pos/h_m2m_kmu_mvis'
+    #    ] }
+
+    #    #--------------------------------------------------
+

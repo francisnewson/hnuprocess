@@ -398,6 +398,11 @@ namespace fn
         :st_( st), area_cut_( recs )
     {}
 
+    TrackPZ::TrackPZ( const SingleTrack& st,
+            std::vector<polygon_type> polys )
+        :st_( st), area_cut_( polys )
+    {}
+
     bool TrackPZ::do_check() const
     {
         const SingleRecoTrack& srt = st_.get_single_track();
@@ -420,6 +425,13 @@ namespace fn
 
                 return new TrackPZ( *st, recs );
             }
+            else if ( shape == "polygon" )
+            {
+                std::vector<polygon_type> recs=
+                { get_yaml<polygon_type>( instruct, "points" ) };
+
+                return new TrackPZ( *st, recs );
+            }
             else
             {
                 throw std::runtime_error(
@@ -427,10 +439,10 @@ namespace fn
             }
         }
     //--------------------------------------------------
-    
+
 
     REG_DEF_SUB( TrackMuvXYAcceptance );
-    
+
     TrackMuvXYAcceptance::TrackMuvXYAcceptance( const SingleTrack& st,
             std::vector<rectangle> recs )
         :st_( st ), area_cut_( recs )

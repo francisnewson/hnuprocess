@@ -1,0 +1,158 @@
+#ALL THE PLOTS
+---
+#Autopass
+- selection:
+    name: passer
+    type : auto_pass
+
+###################################################
+# FILE MANAGEMENT
+###################################################
+
+- output:
+    name: os_cerr
+    type: ostream
+    filename: cerr
+
+- output:
+    name: os_stats
+    type: ostream
+    filename: km2_filter_stats.dat
+
+- output:
+    name: tfout
+    type: tfile
+    filename: km2_filter.root
+
+@include "input/reco/thesis/std/corrections.inc.yaml"
+@include "input/reco/thesis/std/data_sample.inc.yaml"
+
+###################################################
+# INPUTS
+###################################################
+
+#----------Single Track
+- input: { name : bf_st, type : SingleTrack,  method : BF,
+    init_min_mom: 3.0 , init_max_mom: 75,
+    init_max_cda: 15.0, init_min_z: -5000.0, init_max_z:  10000.0,
+    dch_merge_sep: 0.5,
+    inputs: { kt: kaon_track } }
+
+#----------km2 event
+- input: { name: km2_event, type: Km2Event,
+    inputs: { ogt: bf_st, kt: kaon_track } }
+
+#---------km2 clusters
+- input: { name: km2_clusters, type: Km2Clusters,
+    noise_energy: 3, noise_time: 12, brehm_radius: 0 ,
+    track_cluster_radius: 40, extra_lkr_check: false,
+    inputs: { ogt: bf_st, ClusterCorrector: cluster_corrector } }
+
+- input:
+    name: single_muon
+    type: SingleMuon
+    method: auto
+    multiplier: 4
+    inputs:
+        ogt: bf_st
+
+- selection:
+    name: muon_xy_wgt
+    type: MuonTHXYWeight
+    effs_file: input/reco/conditions/muv/muv_eff_all.root
+    effs_hist: muv_eff_xy
+    inputs:
+        ogt: bf_st
+
+- selection:
+    name: muon_p_wgt
+    type: MuonTHPWeight
+    effs_file: input/reco/conditions/muv/muv_eff_all.root
+    effs_hist: muv_eff_p
+    inputs:
+        ogt: bf_st
+
+@include "input/reco/thesis/std/selections.inc.yaml"
+@include "input/reco/thesis/std/full_kine_regions.inc.yaml"
+
+- selection : { type : Q11TTrigger, name : q11t }
+
+- selection : { type : Q11TTrigger, name : q11t_auto, ignore_unless: [trigrun]  }
+
+###################################################
+# SELECTIONS
+###################################################
+
+- selection:
+    name: pre_selection
+    type: CompositeSelection
+    children:
+        - weighted_data_sample
+        - q11t_auto
+        - good_trk
+        - pos_trk
+        - quality_7
+        - fiducial_pz
+        - dch1_acc
+        - dch4_acc
+        - muv_acc
+        - rk_lkr_accep
+        - rk_hot_lkr
+        - rk_lkr_veto
+        - rk_dcht
+        - ddead_cell
+
+  #Preselection
+- selection:
+    name: lower_neg_m2m_selection
+    type: CompositeSelection
+    children:
+        - pre_selection
+        - zt_dn
+        - negm2m
+        - muon_req
+
+- selection:
+    name: upper_neg_m2m_selection
+    type: CompositeSelection
+    children:
+        - pre_selection
+        - zt_up
+        - negm2m
+        - muon_req
+
+##################################################
+#
+# ANALYSES
+#
+##################################################
+
+- analysis : {
+    type: Km2Filter, 
+    name: km2_filter_lower,
+    folder: km2_trees, 
+    tfile: tfout, 
+    selection: lower_neg_m2m_selection,
+    muv_sel: muon_req,
+    tree_name: km2_lower,
+    inputs: &inp { km2event : km2_event } }
+
+- analysis : {
+    type: Km2Filter, 
+    name: km2_filter_upper,
+    folder: km2_trees, 
+    tfile: tfout, 
+    selection: upper_neg_m2m_selection,
+    muv_sel: muon_req,
+    tree_name: km2_upper,
+    inputs: *inp }
+
+#############
+
+- analysis : 
+    name : pre_summary
+    type: Summary
+    base : passer
+    source : pre_selection 
+    ostream: os_stats
+

@@ -75,7 +75,7 @@ namespace fn
 
         //Kinematic shape
         h_cda_ = hs_.MakeTH1D( "h_cda", "CDA (cm)",
-                100, -10, 10, "CDA (cm)" );
+                100, -2, 18, "CDA (cm)" );
 
         h_t_ = hs_.MakeTH1D( "h_t", "Opening angle (rad)",
                 250, 0, 25e-3, "#Theta (rad)" );
@@ -156,6 +156,9 @@ namespace fn
         h_z_rcoll_ =  hs_.MakeTH2D( "h_z_rcoll", "R(coll) vs Z ",
                 130, -3000, 10000, "z(cm)", 
                 200, 0, 200, "rcoll(cm)" );
+
+        h_z_shift_ =  hs_.MakeTH1D( "h_z_shift", "BF Z shift",
+                100, -100, 100, "dz(cm)" );
 
         //----------
 
@@ -241,6 +244,7 @@ namespace fn
         double u = 2 * ( na62const::zDch4 - z ) * std::tan( t ) / 10;
         double v = std::pow( (na62const::zDch4 - z ) / ( 2 * 10 ) , 2 ) - std::pow( std::tan( t ), 2 );
 
+
         h_u_v_->Fill( u, v , wgt );
 
         h_txty_->Fill( km2re.get_tx(), km2re.get_ty(), wgt );
@@ -255,6 +259,12 @@ namespace fn
         TVector3 mom_kick = ds_mom - us_mom;
 
         h_kick_->Fill( mom_kick.X(), wgt );
+
+        //compute zshift
+        Track raw_track  = srt->get_bz_track();
+        const KaonTrack * kt = km2re.get_kaon_track();
+        Vertex raw_zvertex = compute_cda( raw_track, kt->get_kaon_track() );
+        h_z_shift_->Fill( z - raw_zvertex.point.Z() , wgt );
 
 
         //Slices
@@ -292,11 +302,28 @@ namespace fn
         h_m2m_kmu_ = hs_.MakeTH1D( "h_m2m_kmu", "K_{#mu2} missing mass",
                 10000, -0.7, 0.3, "m^{2}_{miss} ( GeV^{2}/ c^{4} )", "#events" ); 
 
-        h_m2m_kpi_ = hs_.MakeTH1D( "h_m2m_kpi", "K_{2#pi} missing mass",
-                10000, -0.7, 0.3, "m^{2}_{miss} ( GeV^{2}/ c^{4} )", "#events" ); 
-
         h_p_ = hs_.MakeTH1D( "h_p", "Momentum (GeV)",
                 100, 0, 100, "p (GeV)" );
+
+        //Kinematic shape
+        h_cda_ = hs_.MakeTH1D( "h_cda", "CDA (cm)",
+                100, -2, 18, "CDA (cm)" );
+
+        h_t_ = hs_.MakeTH1D( "h_t", "Opening angle (rad)",
+                250, 0, 25e-3, "#Theta (rad)" );
+
+        h_z_ = hs_.MakeTH1D( "h_z", "Z Decay Vertex (cm)", 120, -2000, 10000, "Z (cm)" );
+
+        h_z_t_ = hs_.MakeTH2D( "h_z_t", "Z vs T " ,
+                150, -5000, 10000, "Z( cm) ",
+                250, 0, 25e-3, "t( rad) ");
+
+        h_p_m2m_kmu_ = hs_.MakeTH2D( "h_p_m2m_kmu", "Momentum vs K_{#mu2} missing mass",
+                1000, -0.7, 0.3, "m^{2}_{miss} ( GeV^{2}/ c^{4} )",
+                100, 0, 100, "p (GeV/c)" );
+
+        h_m2m_kpi_ = hs_.MakeTH1D( "h_m2m_kpi", "K_{2#pi} missing mass",
+                10000, -0.7, 0.3, "m^{2}_{miss} ( GeV^{2}/ c^{4} )", "#events" ); 
 
         h_pnu_ = hs_.MakeTH1D( "h_pnu", "Neutrino Momentum (GeV)",
                 100, 0, 100, "p (GeV)" );
@@ -304,12 +331,17 @@ namespace fn
 
     void Km2MiniPlots::Fill( const Km2RecoEvent& km2re, double wgt )
     {
-        h_m2m_kmu_->Fill( km2re.get_m2m_kmu(), wgt );
-        h_m2m_kpi_->Fill( km2re.get_m2m_kpi(), wgt );
-        h_p_->Fill( km2re.get_muon_mom(), wgt );
-
         TLorentzVector p4_nu = km2re.get_p4_miss_kmu();
+        h_m2m_kmu_->Fill( km2re.get_m2m_kmu(), wgt );
+        h_p_->Fill( km2re.get_muon_mom(), wgt );
+        h_t_->Fill( km2re.get_opening_angle() , wgt );
+        h_z_->Fill( km2re.get_zvertex(), wgt );
+        h_cda_->Fill( km2re.get_cda(), wgt );
         h_pnu_->Fill( p4_nu.P() );
+        h_m2m_kpi_->Fill( km2re.get_m2m_kpi(), wgt );
+        h_p_m2m_kmu_->Fill( km2re.get_m2m_kmu(), km2re.get_muon_mom() , wgt );
+        h_z_t_->Fill( km2re.get_zvertex(), km2re.get_opening_angle(), wgt );
+
     }
 
     void Km2MiniPlots::Write()

@@ -52,6 +52,7 @@ namespace fn
     //raw upstream
     TVector3 K2piSingleRecoTrack::extrapolate_us( double z) const{ return us_track_.extrapolate( z ); }
     TVector3 K2piSingleRecoTrack::get_us_mom() const { return mom_ * us_track_.get_direction().Unit() ; }
+    Track K2piSingleRecoTrack::get_bz_track() const { return Track{}; }
 
     //BF track
     TVector3 K2piSingleRecoTrack::extrapolate_bf( double z) const { return us_track_.extrapolate( z ); }
@@ -62,7 +63,7 @@ namespace fn
     //--------------------------------------------------
 
     K2piSingleTrack:: K2piSingleTrack(const K2piDchData & dch_data, 
-                    const K2piLkrData& lkr_data)
+            const K2piLkrData& lkr_data)
         :dch_data_( dch_data ), lkr_data_( lkr_data )
     {
         set_reco_track( &single_reco_track_);

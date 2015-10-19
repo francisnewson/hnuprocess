@@ -92,10 +92,19 @@ namespace fn
         using std::vector;
         using std::string;
 
+        try
+        {
         auto channels = get_yaml<vector<string>>( instruct, "channels");
         auto hsummed = get_summed_histogram( tfin_, std::begin( channels), std::end( channels ) );
         hsummed->SetName( get_yaml<string>( instruct, "name" ).c_str() );
         return hsummed;
+        }
+        catch(...)
+        {
+            std::cerr << "Probelms in HistStacker::load_hist: " << std::endl;
+            std::cerr << instruct << std::endl;
+            throw;
+        }
     }
 
     void HistStacker::scale_hist(  TH1& h, const YAML::Node& instruct )
@@ -165,16 +174,5 @@ namespace fn
         return result;
     }
 
-    void de_zero_hist( TH1& h )
-    {
-        int nBins = h.GetNbinsX();
-
-        for ( int ibin = 0 ; ibin != nBins +1 ; ++ ibin )
-        {
-            double value = h.GetBinContent( ibin );
-            if ( value < 0 ){ h.SetBinContent( ibin, 0 );
-            }
-        }
-    }
 
 }

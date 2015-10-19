@@ -142,7 +142,7 @@ int main( int argc, char * argv[] )
     //Do halo subtraction
     HaloSub hs{ tfout, tflog, mission.string() };
     hs.find_correction();
-    hs.save_log_plots();
+    //hs.save_log_plots();
     hs.do_subtractions();
 
     //Do fiducial copying

@@ -1,0 +1,634 @@
+var:
+    pos_halo: &poshalo p6.halo.q11t.pos
+    pos_data: &posdata p5.data.q11t.v3.pos
+    pos_trig_num: &postrignum p5.data.q1.v4.trigrun.pos
+    pos_trig_denom: &postrigdenom p5.data.q1.v4.pos
+    neg_halo: &neghalo p6.halo.q11t.neg
+    neg_data: &negdata p5.data.q11t.v3.neg
+    neg_trig_num: &negtrignum p5.data.q1.v4.trigrun.neg
+    neg_trig_denom: &negtrigdenom p5.data.q1.v4.neg
+    srcfile: &srcfile tdata/staging/full/all.plots.root
+
+sums:
+    #RK
+    halorksum:  &halorksum {
+        file: *srcfile,
+        pre: "", post: rk_like_plots/h_m2m_kmu,
+        min: -0.3, max: -0.03 }
+
+    peakrksum:  &peakrksum {
+            file: *srcfile,
+            pre: "", post: rk_like_plots/h_m2m_kmu,
+            min: -0.015, max: +0.015 } 
+
+    #SCALING
+    scalelowersum:  &scalelowersum {
+        file: *srcfile,
+        pre: "", post: scaling_lower_plots/h_m2m_kmu,
+        min: -0.15, max: -0.05 } 
+
+    #scaleuppersum:  &scaleuppersum {
+    #file: *srcfile,
+    #pre: "", post: scaling_upper_negm2m_plots/h_z,
+    #min: 3000, max: 5500 } 
+    
+    scaleuppersum:  &scaleuppersum {
+    file: *srcfile,
+    pre: "", post: scaling_upper_plots/h_m2m_kmu,
+    min: -0.15, max: -0.05 } 
+
+    #CHECK
+    checkuppersum: &checkuppersum {
+        file: *srcfile,
+        pre: "", post: signal_upper_check_hm2m_plots/h_m2m_kmu,
+        min: 0, max: 1 } 
+        #pre: "", post: signal_upper_check_hm2m_plots/h_cda,
+        #min: 5, max: 8 } 
+
+    checklowersum: &checklowersum {
+        file: *srcfile,
+        pre: "", post: signal_lower_check_hm2m_plots/h_m2m_kmu,
+        min: 0, max: 1 } 
+        #pre: "", post: signal_lower_check_hm2m_plots/h_cda,
+        #min: 4, max: 6 } 
+
+    fids: &fids { fid_file: use_root, root_file: *srcfile,
+        pre: "", post : "sample_burst_count/bursts", branch: "weight" }
+
+scaling:
+    #--------------------------------------------------
+    #OFFICIAL SCALING
+    #--------------------------------------------------
+
+    #-----POS LOWER-----
+    - scaling_method:
+        name: pos_lower
+        strategy: flexi
+        peak: km2
+        fids: *fids
+
+        halo:
+            strat: mono
+            halo: { chan: *poshalo , sum: *scalelowersum }
+            data: { chan: *posdata , sum: *scalelowersum }
+
+        mc: &mcpos
+            strat: combo
+            halo: &posrkhalo
+                strat: mono
+                data: { chan: *posdata  , sum: *halorksum }
+                halo: { chan: *poshalo  , sum: *halorksum }
+            peak:
+                fids:  *fids
+                halo:  { chan:  *poshalo  , sum:  *peakrksum }
+                data:  { chan:  *posdata  , sum:  *peakrksum }
+                stack: { sum: *peakrksum ,  normchan: km2_pos,
+                        channels: [
+                            { chan: km2_pos , type: km2, fidname: p5.km2.full.pos },
+                            { chan: k2pig_pos , type: k2pi, fidname: p5.k2pig.v2.pos }
+                            ] }
+   
+    #-----NEG LOWER-----
+    - scaling_method:
+        name: neg_lower
+        strategy: flexi
+        peak: km2
+        fids: *fids
+
+        halo:
+            strat: mono
+            halo: { chan:  *neghalo  , sum: *scalelowersum }
+            data: { chan:  *negdata  , sum: *scalelowersum }
+
+        mc: &mcneg
+            strat: combo
+            halo: &negrkhalo
+                strat: mono
+                halo: { chan:  *neghalo  , sum: *halorksum }
+                data: { chan:  *negdata  , sum: *halorksum }
+
+            peak:
+                fids:  *fids
+                halo: { chan: *neghalo  , sum: *peakrksum }
+                data: { chan: *negdata  , sum: *peakrksum }
+                stack: {  sum: *peakrksum , normchan: km2_neg,
+                        channels: [
+                            { chan: km2_neg , type: km2, fidname: p5.km2.full.neg },
+                            { chan: k2pig_neg , type: k2pi, fidname: p5.k2pig.v2.neg }
+                            ] }
+
+    #-----POS UPPER-----
+    - scaling_method:
+        name: pos_upper
+        strategy: flexi
+        peak: km2
+        fids: *fids
+
+        halo:
+            strat: mono
+            halo: { chan:  *poshalo , sum: *scaleuppersum }
+            data: { chan:  *posdata , sum: *scaleuppersum }
+
+        mc: *mcpos
+
+    #-----NEG UPPER-----
+    - scaling_method:
+        name: neg_upper
+        strategy: flexi
+        peak: km2
+        fids: *fids
+
+        halo:
+            strat: mono
+            halo: { chan:  *neghalo , sum: *scaleuppersum }
+            data: { chan:  *negdata , sum: *scaleuppersum }
+
+        mc: *mcneg
+
+    #--------------------------------------------------
+    #CHECK SCALING
+    #--------------------------------------------------
+
+    #-----POS UPPPER (check)-----
+    - scaling_method:
+        name: pos_check_upper
+        strategy: flexi
+        peak: km2
+        fids: *fids
+
+        halo:
+            strat: monofit
+            halo: { chan:  *poshalo , sum: *checkuppersum }
+            data: { chan:  *posdata , sum: *checkuppersum }
+
+        mc: *mcpos
+
+    #-----NEG UPPPER (check)-----
+    - scaling_method:
+        name: neg_check_upper
+        strategy: flexi
+        peak: km2
+        fids: *fids
+
+        halo:
+            strat: monofit
+            halo: { chan:  *neghalo , sum: *checkuppersum }
+            data: { chan:  *negdata , sum: *checkuppersum }
+
+        mc: *mcneg
+
+    #-----POS LOWER (check)-----
+    - scaling_method:
+        name: pos_check_lower
+        strategy: flexi
+        peak: km2
+        fids: *fids
+
+        halo:
+            strat: monofit
+            halo: { chan:  *poshalo , sum: *checklowersum }
+            data: { chan:  *posdata , sum: *checklowersum }
+
+        mc: *mcpos
+
+    #-----NEG LOWER (check)-----
+    - scaling_method:
+        name: neg_check_lower
+        strategy: flexi
+        peak: km2
+        fids: *fids
+
+        halo:
+            strat: monofit
+            halo: { chan:  *neghalo , sum: *checklowersum }
+            data: { chan:  *negdata , sum: *checklowersum }
+
+        mc: *mcneg
+
+    #--------------------------------------------------
+    # RK SCALING
+    #--------------------------------------------------
+
+    #-----POS-----
+    - scaling_method: {
+        name: pos_rk, strategy : flexi, peak: km2, fids: *fids,
+        halo: *posrkhalo , mc: *mcpos }
+
+    #-----NEG-----
+    - scaling_method: {
+        name: neg_rk, strategy : flexi, peak: km2, fids: *fids,
+        halo: *negrkhalo , mc: *mcneg }
+
+    #--------------------------------------------------
+    # EXTERNAL SCALING
+    #--------------------------------------------------
+    - scaling_method:
+        { name: neg_ext_lower, strategy: hardcode, fids: *fids,
+        fiducial_flux: 2.34724e+07, fiducial_flux_err: 0.0,
+        halo_scale: 4.044,  halo_scale_err: 1.2 }
+        #halo_scale: 4.044,  halo_scale_err: 1.8 }
+
+    - scaling_method:
+        { name: pos_ext_lower, strategy: hardcode, fids: *fids,
+        fiducial_flux: 3.63014e+07, fiducial_flux_err: 0.0,
+        halo_scale: 5.57,  halo_scale_err: 0.86 }
+        #halo_scale: 5.57,  halo_scale_err: 0.129 }
+
+    - scaling_method:
+        { name: neg_ext_upper, strategy: hardcode, fids: *fids,
+        fiducial_flux: 2.34724e+07, fiducial_flux_err: 0.0,
+        halo_scale: 2.22,  halo_scale_err: 0.59 }
+        #halo_scale: 2.22,  halo_scale_err: 0.88 }
+
+    - scaling_method:
+        { name: pos_ext_upper, strategy: hardcode, fids: *fids,
+        fiducial_flux: 3.63014e+07, fiducial_flux_err: 0.0,
+        halo_scale: 3.25,  halo_scale_err: 0.50 }
+        #halo_scale: 3.25,  halo_scale_err: 0.75 }
+
+weights: *fids
+
+    #--------------------------------------------------
+    #STACKS
+    #--------------------------------------------------
+stacks:
+    stack: &posstack [
+        item: { name: halo_pos,  type: halo,  channels: [ *poshalo ] },
+        item: { name: k3pi_pos,  type: k3pi,  fid_weight: p5.k3pi.v2.pos,     channels: [ p5.k3pi.v2.pos ] },
+        item: { name: k2pi_pos,  type: k2pi,  fid_weight: p5.k2pig.v2.pos,    channels: [ p5.k2pig.v2.pos ] },
+        item: { name: k3pi0_pos, type: k3pi0, fid_weight: p5.k3pi0.v2.pos,    channels: [ p5.k3pi0.v2.pos ] },
+        item: { name: km3_pos,   type: km3,   fid_weight: p5.km3.v2.pos,      channels: [ p5.km3.v2.pos ] },
+        item: { name: ke3_pos,   type: ke3,   fid_weight: p5.ke3.v2.pos,      channels: [ p5.ke3.v2.pos ] },
+        item: { name: km2_pos,   type: km2,   fid_weight: p5.km2.full.pos, channels: [ p5.km2.full.pos ] } ]
+
+    stack: &negstack [
+        item: { name: halo_neg,  type: halo,  channels: [ *neghalo ] },
+        item: { name: k3pi_neg,  type: k3pi,  fid_weight: p5.k3pi.v2.neg,     channels: [ p5.k3pi.v2.neg ] },
+        item: { name: k2pi_neg,  type: k2pi,  fid_weight: p5.k2pig.v2.neg,    channels: [ p5.k2pig.v2.neg ] },
+        item: { name: k3pi0_neg, type: k3pi0, fid_weight: p5.k3pi0.v2.neg,    channels: [ p5.k3pi0.v2.neg ] },
+        item: { name: km3_neg,   type: km3,   fid_weight: p5.km3.v2.neg,      channels: [ p5.km3.v2.neg ] },
+        item: { name: ke3_neg,   type: ke3,   fid_weight: p5.ke3.v2.neg,      channels: [ p5.ke3.v2.neg ] },
+        item: { name: km2_neg,   type: km2,   fid_weight: p5.km2.full.neg, channels: [ p5.km2.full.neg ] } ]
+
+    doblind: &doblind { do_blind: false,  min_blind: 0.09, max_blind: 0.14 }
+
+output_list:
+    #--------------------------------------------------
+    #FINAL MASS PLOTS
+    #--------------------------------------------------
+    #UPPER POS
+    - {
+        input_file: *srcfile,
+    
+        plots:  [
+            { path: signal_upper_plots/h_m2m_kmu, name: signal/upper/pos/h_m2m_kmu,      rebin: 1} ,
+            { path: signal_upper_plots/h_m2m_kmu, name: signal/upper/pos/h_m2m_kmu_mvis, rebin: 5} ,
+            { path: signal_upper_plots/h_m2m_kmu, name: signal/upper/pos/h_m2m_kmu_vis,  rebin: 25} ,
+            { path: signal_upper_loose_plots/h_m2m_kmu, name: signal_loose/upper/pos/h_m2m_kmu,      rebin: 1} ,
+            { path: signal_upper_loose_plots/h_m2m_kmu, name: signal_loose/upper/pos/h_m2m_kmu_mvis, rebin: 5} ,
+            { path: signal_upper_loose_plots/h_m2m_kmu, name: signal_loose/upper/pos/h_m2m_kmu_vis,  rebin: 25} ,
+            ],
+            trig_plot: { numchannels: [ *postrignum ], denomchannels : [*postrigdenom] },
+            data_plot: { channels: [ *posdata ] }, blinding: *doblind, stack_scaling: pos_rk, stack: *posstack 
+        }
+
+    #UPPER POS HARDCODE
+    - {
+        input_file: *srcfile,
+    
+        plots:  [
+            { path: signal_upper_plots/h_m2m_kmu, name: signal_hc/upper/pos/h_m2m_kmu,      rebin: 1} ,
+            { path: signal_upper_plots/h_m2m_kmu, name: signal_hc/upper/pos/h_m2m_kmu_mvis, rebin: 5} ,
+            { path: signal_upper_plots/h_m2m_kmu, name: signal_hc/upper/pos/h_m2m_kmu_vis,  rebin: 25} ,
+            { path: signal_upper_loose_plots/h_m2m_kmu, name: signal_hc/upper_loose/pos/h_m2m_kmu,      rebin: 1} ,
+            { path: signal_upper_loose_plots/h_m2m_kmu, name: signal_hc/upper_loose/pos/h_m2m_kmu_mvis, rebin: 5} ,
+            { path: signal_upper_loose_plots/h_m2m_kmu, name: signal_hc/upper_loose/pos/h_m2m_kmu_vis,  rebin: 25} ,
+
+            { path: signal_upper_loose_plots/h_m2m_kmu, name: pos/signal_upper_loose_plots/h_m2m_kmu,   rebin: 1} ,
+            { path: signal_upper_plots/h_m2m_kmu, name: pos/signal_upper_plots/h_m2m_kmu,   rebin: 1} ,
+            ],
+            trig_plot: { numchannels: [ *postrignum ], denomchannels : [*postrigdenom] },
+            data_plot: { channels: [ *posdata ] }, blinding: *doblind, stack_scaling: pos_ext_upper, stack: *posstack 
+        }
+
+    #UPPER NEG
+    - {
+        input_file: *srcfile,
+    
+        plots:  [
+            { path: signal_upper_plots/h_m2m_kmu, name: signal/upper/neg/h_m2m_kmu,      rebin: 1} ,
+            { path: signal_upper_plots/h_m2m_kmu, name: signal/upper/neg/h_m2m_kmu_mvis, rebin: 5} ,
+            { path: signal_upper_plots/h_m2m_kmu, name: signal/upper/neg/h_m2m_kmu_vis,  rebin: 25} ,
+            { path: signal_upper_loose_plots/h_m2m_kmu, name: signal_loose/upper/neg/h_m2m_kmu,      rebin: 1} ,
+            { path: signal_upper_loose_plots/h_m2m_kmu, name: signal_loose/upper/neg/h_m2m_kmu_mvis, rebin: 5} ,
+            { path: signal_upper_loose_plots/h_m2m_kmu, name: signal_loose/upper/neg/h_m2m_kmu_vis,  rebin: 25} ,
+
+            ],
+
+            trig_plot: { numchannels: [ *negtrignum ], denomchannels : [*negtrigdenom] },
+            data_plot: { channels: [ *negdata ] }, blinding: *doblind, stack_scaling: neg_rk, stack: *negstack
+        }
+
+    #UPPER NEG HARDCODE
+    - {
+        input_file: *srcfile,
+    
+        plots:  [
+            { path: signal_upper_plots/h_m2m_kmu, name: signal_hc/upper/neg/h_m2m_kmu,      rebin: 1} ,
+            { path: signal_upper_plots/h_m2m_kmu, name: signal_hc/upper/neg/h_m2m_kmu_mvis, rebin: 5} ,
+            { path: signal_upper_plots/h_m2m_kmu, name: signal_hc/upper/neg/h_m2m_kmu_vis,  rebin: 25} ,
+            { path: signal_upper_loose_plots/h_m2m_kmu, name: signal_hc/upper_loose/neg/h_m2m_kmu,      rebin: 1} ,
+            { path: signal_upper_loose_plots/h_m2m_kmu, name: signal_hc/upper_loose/neg/h_m2m_kmu_mvis, rebin: 5} ,
+            { path: signal_upper_loose_plots/h_m2m_kmu, name: signal_hc/upper_loose/neg/h_m2m_kmu_vis,  rebin: 25} ,
+
+            { path: signal_upper_loose_plots/h_m2m_kmu, name: neg/signal_upper_loose_plots/h_m2m_kmu,   rebin: 1} ,
+            { path: signal_upper_plots/h_m2m_kmu, name: neg/signal_upper_plots/h_m2m_kmu,   rebin: 1} ,
+            ],
+
+            trig_plot: { numchannels: [ *negtrignum ], denomchannels : [*negtrigdenom] },
+            data_plot: { channels: [ *negdata ] }, blinding: *doblind, stack_scaling: neg_ext_upper, stack: *negstack
+        }
+
+    #LOWER POS
+    - {
+        input_file: *srcfile,
+    
+        plots:  [
+            { path: signal_lower_plots/h_m2m_kmu, name: signal/lower/pos/h_m2m_kmu,      rebin: 1} ,
+            { path: signal_lower_plots/h_m2m_kmu, name: signal/lower/pos/h_m2m_kmu_mvis, rebin: 5} ,
+            { path: signal_lower_plots/h_m2m_kmu, name: signal/lower/pos/h_m2m_kmu_vis,  rebin: 25} ,
+            { path: signal_lower_loose_plots/h_m2m_kmu, name: signal_loose/lower/pos/h_m2m_kmu,      rebin: 1} ,
+            { path: signal_lower_loose_plots/h_m2m_kmu, name: signal_loose/lower/pos/h_m2m_kmu_mvis, rebin: 5} ,
+            { path: signal_lower_loose_plots/h_m2m_kmu, name: signal_loose/lower/pos/h_m2m_kmu_vis,  rebin: 25} ,
+            ],
+            trig_plot: { numchannels: [ *postrignum ], denomchannels : [*postrigdenom] },
+            data_plot: { channels: [ *posdata ] }, blinding: *doblind, stack_scaling: pos_rk, stack: *posstack 
+        }
+
+    #LOWER POS HARDCODE
+    - {
+        input_file: *srcfile,
+    
+        plots:  [
+            { path: signal_lower_plots/h_m2m_kmu, name: signal_hc/lower/pos/h_m2m_kmu,      rebin: 1} ,
+            { path: signal_lower_plots/h_m2m_kmu, name: signal_hc/lower/pos/h_m2m_kmu_mvis, rebin: 5} ,
+            { path: signal_lower_plots/h_m2m_kmu, name: signal_hc/lower/pos/h_m2m_kmu_vis,  rebin: 25} ,
+            { path: signal_lower_loose_plots/h_m2m_kmu, name: signal_hc/lower_loose/pos/h_m2m_kmu,      rebin: 1} ,
+            { path: signal_lower_loose_plots/h_m2m_kmu, name: signal_hc/lower_loose/pos/h_m2m_kmu_mvis, rebin: 5} ,
+            { path: signal_lower_loose_plots/h_m2m_kmu, name: signal_hc/lower_loose/pos/h_m2m_kmu_vis,  rebin: 25} ,
+
+            { path: signal_lower_loose_plots/h_m2m_kmu, name: pos/signal_lower_loose_plots/h_m2m_kmu,   rebin: 1} ,
+            { path: signal_lower_plots/h_m2m_kmu, name: pos/signal_lower_plots/h_m2m_kmu,   rebin: 1} ,
+            ],
+            trig_plot: { numchannels: [ *postrignum ], denomchannels : [*postrigdenom] },
+            data_plot: { channels: [ *posdata ] }, blinding: *doblind, stack_scaling: pos_ext_lower, stack: *posstack 
+        }
+
+    #LOWER NEG
+    - {
+        input_file: *srcfile,
+    
+        plots:  [
+            { path: signal_lower_plots/h_m2m_kmu, name: signal/lower/neg/h_m2m_kmu,      rebin: 1} ,
+            { path: signal_lower_plots/h_m2m_kmu, name: signal/lower/neg/h_m2m_kmu_mvis, rebin: 5} ,
+            { path: signal_lower_plots/h_m2m_kmu, name: signal/lower/neg/h_m2m_kmu_vis,  rebin: 25} ,
+            { path: signal_lower_loose_plots/h_m2m_kmu, name: signal_loose/lower/neg/h_m2m_kmu,      rebin: 1} ,
+            { path: signal_lower_loose_plots/h_m2m_kmu, name: signal_loose/lower/neg/h_m2m_kmu_mvis, rebin: 5} ,
+            { path: signal_lower_loose_plots/h_m2m_kmu, name: signal_loose/lower/neg/h_m2m_kmu_vis,  rebin: 25} ,
+
+            ],
+
+            trig_plot: { numchannels: [ *negtrignum ], denomchannels : [*negtrigdenom] },
+            data_plot: { channels: [ *negdata ] }, blinding: *doblind, stack_scaling: neg_rk, stack: *negstack
+        }
+
+    #LOWER NEG HARDCODE
+    - {
+        input_file: *srcfile,
+    
+        plots:  [
+            { path: signal_lower_plots/h_m2m_kmu, name: signal_hc/lower/neg/h_m2m_kmu,      rebin: 1} ,
+            { path: signal_lower_plots/h_m2m_kmu, name: signal_hc/lower/neg/h_m2m_kmu_mvis, rebin: 5} ,
+            { path: signal_lower_plots/h_m2m_kmu, name: signal_hc/lower/neg/h_m2m_kmu_vis,  rebin: 25} ,
+            { path: signal_lower_loose_plots/h_m2m_kmu, name: signal_hc/lower_loose/neg/h_m2m_kmu,      rebin: 1} ,
+            { path: signal_lower_loose_plots/h_m2m_kmu, name: signal_hc/lower_loose/neg/h_m2m_kmu_mvis, rebin: 5} ,
+            { path: signal_lower_loose_plots/h_m2m_kmu, name: signal_hc/lower_loose/neg/h_m2m_kmu_vis,  rebin: 25} ,
+
+            { path: signal_lower_loose_plots/h_m2m_kmu, name: neg/signal_lower_loose_plots/h_m2m_kmu,   rebin: 1} ,
+            { path: signal_lower_plots/h_m2m_kmu, name: neg/signal_lower_plots/h_m2m_kmu,   rebin: 1} ,
+            ],
+
+            trig_plot: { numchannels: [ *negtrignum ], denomchannels : [*negtrigdenom] },
+            data_plot: { channels: [ *negdata ] }, blinding: *doblind, stack_scaling: neg_ext_lower, stack: *negstack
+        }
+
+    #--------------------------------------------------
+    #CHECK PLOTS
+    #--------------------------------------------------
+    #UPPER POS
+    - {
+        input_file: *srcfile,
+    
+        plots:  [
+            { path: signal_upper_check_plots/h_m2m_kmu, name: check/upper/pos/h_m2m_kmu,      rebin: 1} ,
+            { path: signal_upper_check_plots/h_m2m_kmu, name: check/upper/pos/h_m2m_kmu_mvis, rebin: 5} ,
+            { path: signal_upper_check_plots/h_m2m_kmu, name: check/upper/pos/h_m2m_kmu_vis,  rebin: 25} ,
+            { path: signal_upper_check_plots/h_cda, name: check/upper/pos/h_cda,  rebin: 2},
+            { path: signal_upper_check_plots/h_z, name: check/upper/pos/h_z,  rebin: 5},
+            { path: signal_upper_check_plots/h_p, name: check/upper/pos/h_p,  rebin: 2},
+            { path: signal_upper_check_plots/h_t, name: check/upper/pos/h_t,  rebin: 5},
+            { path: signal_upper_check_hm2m_plots/h_m2m_kmu, name: check/upper_hm2m/pos/h_m2m_kmu,  rebin: 50},
+            { path: signal_upper_check_hm2m_plots/h_cda, name: check/upper_hm2m/pos/h_cda,  rebin: 2},
+            { path: signal_upper_check_hm2m_plots/h_z, name: check/upper_hm2m/pos/h_z,  rebin: 5},
+            { path: signal_upper_check_hm2m_plots/h_p, name: check/upper_hm2m/pos/h_p,  rebin: 2},
+            { path: signal_upper_check_hm2m_plots/h_t, name: check/upper_hm2m/pos/h_t,  rebin: 5}
+            ],
+            trig_plot: { numchannels: [ *postrignum ], denomchannels : [*postrigdenom] },
+            data_plot: { channels: [ *posdata ] }, blinding: *doblind, stack_scaling: pos_check_upper, stack: *posstack 
+        }
+
+    #UPPER NEG
+    - {
+        input_file: *srcfile,
+    
+        plots:  [
+            { path: signal_upper_check_plots/h_m2m_kmu, name: check/upper/neg/h_m2m_kmu,      rebin: 1} ,
+            { path: signal_upper_check_plots/h_m2m_kmu, name: check/upper/neg/h_m2m_kmu_mvis, rebin: 5} ,
+            { path: signal_upper_check_plots/h_m2m_kmu, name: check/upper/neg/h_m2m_kmu_vis,  rebin: 25} ,
+            { path: signal_upper_check_plots/h_cda, name: check/upper/neg/h_cda,  rebin: 2},
+            { path: signal_upper_check_plots/h_z, name: check/upper/neg/h_z,  rebin: 5},
+            { path: signal_upper_check_plots/h_p, name: check/upper/neg/h_p,  rebin: 2},
+            { path: signal_upper_check_plots/h_t, name: check/upper/neg/h_t,  rebin: 5},
+            { path: signal_upper_check_hm2m_plots/h_m2m_kmu, name: check/upper_hm2m/neg/h_m2m_kmu,  rebin: 50},
+            { path: signal_upper_check_hm2m_plots/h_cda, name: check/upper_hm2m/neg/h_cda,  rebin: 2},
+            { path: signal_upper_check_hm2m_plots/h_z, name: check/upper_hm2m/neg/h_z,  rebin: 5},
+            { path: signal_upper_check_hm2m_plots/h_p, name: check/upper_hm2m/neg/h_p,  rebin: 2},
+            { path: signal_upper_check_hm2m_plots/h_t, name: check/upper_hm2m/neg/h_t,  rebin: 5}
+            ],
+            trig_plot: { numchannels: [ *negtrignum ], denomchannels : [*negtrigdenom] },
+            data_plot: { channels: [ *negdata ] }, blinding: *doblind, stack_scaling: neg_check_upper, stack: *negstack 
+        }
+
+    #LOWER POS
+    - {
+        input_file: *srcfile,
+    
+        plots:  [
+            { path: signal_lower_check_plots/h_m2m_kmu, name: check/lower/pos/h_m2m_kmu,      rebin: 1} ,
+            { path: signal_lower_check_plots/h_m2m_kmu, name: check/lower/pos/h_m2m_kmu_mvis, rebin: 5} ,
+            { path: signal_lower_check_plots/h_m2m_kmu, name: check/lower/pos/h_m2m_kmu_vis,  rebin: 25} ,
+            { path: signal_lower_check_plots/h_cda, name: check/lower/pos/h_cda,  rebin: 2},
+            { path: signal_lower_check_plots/h_z, name: check/lower/pos/h_z,  rebin: 5},
+            { path: signal_lower_check_plots/h_p, name: check/lower/pos/h_p,  rebin: 2},
+            { path: signal_lower_check_plots/h_t, name: check/lower/pos/h_t,  rebin: 5},
+            { path: signal_lower_check_hm2m_plots/h_m2m_kmu, name: check/lower_hm2m/pos/h_m2m_kmu,  rebin: 50},
+            { path: signal_lower_check_hm2m_plots/h_cda, name: check/lower_hm2m/pos/h_cda,  rebin: 2},
+            { path: signal_lower_check_hm2m_plots/h_z, name: check/lower_hm2m/pos/h_z,  rebin: 5},
+            { path: signal_lower_check_hm2m_plots/h_p, name: check/lower_hm2m/pos/h_p,  rebin: 2},
+            { path: signal_lower_check_hm2m_plots/h_t, name: check/lower_hm2m/pos/h_t,  rebin: 5}
+            ],
+            trig_plot: { numchannels: [ *postrignum ], denomchannels : [*postrigdenom] },
+            data_plot: { channels: [ *posdata ] }, blinding: *doblind, stack_scaling: pos_check_lower, stack: *posstack 
+        }
+
+    #LOWER NEG
+    - {
+        input_file: *srcfile,
+    
+        plots:  [
+            { path: signal_lower_check_plots/h_m2m_kmu, name: check/lower/neg/h_m2m_kmu,      rebin: 1} ,
+            { path: signal_lower_check_plots/h_m2m_kmu, name: check/lower/neg/h_m2m_kmu_mvis, rebin: 5} ,
+            { path: signal_lower_check_plots/h_m2m_kmu, name: check/lower/neg/h_m2m_kmu_vis,  rebin: 25} ,
+            { path: signal_lower_check_plots/h_cda, name: check/lower/neg/h_cda,  rebin: 2},
+            { path: signal_lower_check_plots/h_z, name: check/lower/neg/h_z,  rebin: 5},
+            { path: signal_lower_check_plots/h_p, name: check/lower/neg/h_p,  rebin: 2},
+            { path: signal_lower_check_plots/h_t, name: check/lower/neg/h_t,  rebin: 5},
+            { path: signal_lower_check_hm2m_plots/h_m2m_kmu, name: check/lower_hm2m/neg/h_m2m_kmu,  rebin: 50},
+            { path: signal_lower_check_hm2m_plots/h_cda, name: check/lower_hm2m/neg/h_cda,  rebin: 2},
+            { path: signal_lower_check_hm2m_plots/h_z, name: check/lower_hm2m/neg/h_z,  rebin: 5},
+            { path: signal_lower_check_hm2m_plots/h_p, name: check/lower_hm2m/neg/h_p,  rebin: 2},
+            { path: signal_lower_check_hm2m_plots/h_t, name: check/lower_hm2m/neg/h_t,  rebin: 5}
+            ],
+            trig_plot: { numchannels: [ *negtrignum ], denomchannels : [*negtrigdenom] },
+            data_plot: { channels: [ *negdata ] }, blinding: *doblind, stack_scaling: neg_check_lower, stack: *negstack 
+        }
+
+    #--------------------------------------------------
+    #SCALING PLOTS
+    #--------------------------------------------------
+    
+    #LOWER POS
+    - {
+        input_file: *srcfile,
+    
+        plots:  [
+            { path: scaling_lower_plots/h_m2m_kmu, name: scaling/lower/pos/h_m2m_kmu,      rebin: 1} ,
+            { path: scaling_lower_plots/h_m2m_kmu, name: scaling/lower/pos/h_m2m_kmu_mvis, rebin: 5} ,
+            { path: scaling_lower_plots/h_m2m_kmu, name: scaling/lower/pos/h_m2m_kmu_vis,  rebin: 50} ,
+            { path: scaling_lower_plots/h_cda, name: scaling/lower/pos/h_cda,  rebin: 2},
+            { path: scaling_lower_plots/h_z, name: scaling/lower/pos/h_z,  rebin: 2},
+            { path: scaling_lower_plots/h_p, name: scaling/lower/pos/h_p,  rebin: 2},
+            { path: scaling_lower_plots/h_t, name: scaling/lower/pos/h_t,  rebin: 2},
+            { path: scaling_lower_negm2m_plots/h_m2m_kmu, name: scaling/lower_negm2m/pos/h_m2m_kmu,  rebin: 50},
+            { path: scaling_lower_negm2m_plots/h_cda, name: scaling/lower_negm2m/pos/h_cda,  rebin: 2},
+            { path: scaling_lower_negm2m_plots/h_z, name: scaling/lower_negm2m/pos/h_z,  rebin: 2},
+            { path: scaling_lower_negm2m_plots/h_p, name: scaling/lower_negm2m/pos/h_p,  rebin: 2},
+            { path: scaling_lower_negm2m_plots/h_t, name: scaling/lower_negm2m/pos/h_t,  rebin: 2}
+            ],
+            trig_plot: { numchannels: [ *postrignum ], denomchannels : [*postrigdenom] },
+            data_plot: { channels: [ *posdata ] }, blinding: *doblind, stack_scaling: pos_lower, stack: *posstack 
+        }
+
+    #LOWER NEG
+    - {
+        input_file: *srcfile,
+    
+        plots:  [
+            { path: scaling_lower_plots/h_m2m_kmu, name: scaling/lower/neg/h_m2m_kmu,      rebin: 1} ,
+            { path: scaling_lower_plots/h_m2m_kmu, name: scaling/lower/neg/h_m2m_kmu_mvis, rebin: 5} ,
+            { path: scaling_lower_plots/h_m2m_kmu, name: scaling/lower/neg/h_m2m_kmu_vis,  rebin: 50} ,
+            { path: scaling_lower_plots/h_cda, name: scaling/lower/neg/h_cda,  rebin: 2},
+            { path: scaling_lower_plots/h_z, name: scaling/lower/neg/h_z,  rebin: 2},
+            { path: scaling_lower_plots/h_p, name: scaling/lower/neg/h_p,  rebin: 2},
+            { path: scaling_lower_plots/h_t, name: scaling/lower/neg/h_t,  rebin: 2},
+            { path: scaling_lower_negm2m_plots/h_m2m_kmu, name: scaling/lower_negm2m/neg/h_m2m_kmu,  rebin: 50},
+            { path: scaling_lower_negm2m_plots/h_cda, name: scaling/lower_negm2m/neg/h_cda,  rebin: 2},
+            { path: scaling_lower_negm2m_plots/h_z, name: scaling/lower_negm2m/neg/h_z,  rebin: 2},
+            { path: scaling_lower_negm2m_plots/h_p, name: scaling/lower_negm2m/neg/h_p,  rebin: 2},
+            { path: scaling_lower_negm2m_plots/h_t, name: scaling/lower_negm2m/neg/h_t,  rebin: 2}
+            ],
+            trig_plot: { numchannels: [ *negtrignum ], denomchannels : [*negtrigdenom] },
+            data_plot: { channels: [ *negdata ] }, blinding: *doblind, stack_scaling: neg_lower, stack: *negstack 
+        }
+
+    #UPPER POS
+    - {
+        input_file: *srcfile,
+    
+        plots:  [
+            { path: scaling_upper_plots/h_m2m_kmu, name: scaling/upper/pos/h_m2m_kmu,      rebin: 1} ,
+            { path: scaling_upper_plots/h_m2m_kmu, name: scaling/upper/pos/h_m2m_kmu_mvis, rebin: 5} ,
+            { path: scaling_upper_plots/h_m2m_kmu, name: scaling/upper/pos/h_m2m_kmu_vis,  rebin: 50} ,
+            { path: scaling_upper_plots/h_cda, name: scaling/upper/pos/h_cda,  rebin: 2},
+            { path: scaling_upper_plots/h_z, name: scaling/upper/pos/h_z,  rebin: 2},
+            { path: scaling_upper_plots/h_p, name: scaling/upper/pos/h_p,  rebin: 2},
+            { path: scaling_upper_plots/h_t, name: scaling/upper/pos/h_t,  rebin: 2},
+            { path: scaling_upper_negm2m_plots/h_m2m_kmu, name: scaling/upper_negm2m/pos/h_m2m_kmu,  rebin: 50},
+            { path: scaling_upper_negm2m_plots/h_cda, name: scaling/upper_negm2m/pos/h_cda,  rebin: 2},
+            { path: scaling_upper_negm2m_plots/h_z, name: scaling/upper_negm2m/pos/h_z,  rebin: 2},
+            { path: scaling_upper_negm2m_plots/h_p, name: scaling/upper_negm2m/pos/h_p,  rebin: 2},
+            { path: scaling_upper_negm2m_plots/h_t, name: scaling/upper_negm2m/pos/h_t,  rebin: 2}
+            ],
+            trig_plot: { numchannels: [ *postrignum ], denomchannels : [*postrigdenom] },
+            data_plot: { channels: [ *posdata ] }, blinding: *doblind, stack_scaling: pos_upper, stack: *posstack 
+        }
+
+    #UPPER NEG
+    - {
+        input_file: *srcfile,
+    
+        plots:  [
+            { path: scaling_upper_plots/h_m2m_kmu, name: scaling/upper/neg/h_m2m_kmu,      rebin: 1} ,
+            { path: scaling_upper_plots/h_m2m_kmu, name: scaling/upper/neg/h_m2m_kmu_mvis, rebin: 5} ,
+            { path: scaling_upper_plots/h_m2m_kmu, name: scaling/upper/neg/h_m2m_kmu_vis,  rebin: 50} ,
+            { path: scaling_upper_plots/h_cda, name: scaling/upper/neg/h_cda,  rebin: 2},
+            { path: scaling_upper_plots/h_z, name: scaling/upper/neg/h_z,  rebin: 2},
+            { path: scaling_upper_plots/h_p, name: scaling/upper/neg/h_p,  rebin: 2},
+            { path: scaling_upper_plots/h_t, name: scaling/upper/neg/h_t,  rebin: 2},
+            { path: scaling_upper_negm2m_plots/h_m2m_kmu, name: scaling/upper_negm2m/neg/h_m2m_kmu,  rebin: 50},
+            { path: scaling_upper_negm2m_plots/h_cda, name: scaling/upper_negm2m/neg/h_cda,  rebin: 2},
+            { path: scaling_upper_negm2m_plots/h_z, name: scaling/upper_negm2m/neg/h_z,  rebin: 2},
+            { path: scaling_upper_negm2m_plots/h_p, name: scaling/upper_negm2m/neg/h_p,  rebin: 2},
+            { path: scaling_upper_negm2m_plots/h_t, name: scaling/upper_negm2m/neg/h_t,  rebin: 2}
+            ],
+            trig_plot: { numchannels: [ *negtrignum ], denomchannels : [*negtrigdenom] },
+            data_plot: { channels: [ *negdata ] }, blinding: *doblind, stack_scaling: neg_upper, stack: *negstack 
+        }
+
+    #--------------------------------------------------
+    #RK PLOTS
+    #--------------------------------------------------
+    #POS
+    - {
+        input_file: *srcfile,
+    
+        plots:  [
+            { path: rk_like_plots/h_m2m_kmu, name: rk/pos/h_m2m_kmu,      rebin: 1} ,
+            { path: rk_like_plots/h_m2m_kmu, name: rk/pos/h_m2m_kmu_mvis, rebin: 5} ,
+            { path: rk_like_plots/h_m2m_kmu, name: rk/pos/h_m2m_kmu_vis,  rebin: 25} ,
+            ],
+            trig_plot: { numchannels: [ *postrignum ], denomchannels : [*postrigdenom] },
+            data_plot: { channels: [ *posdata ] }, blinding: *doblind, stack_scaling: pos_rk, stack: *posstack 
+        }
+
+    - {
+        input_file: *srcfile,
+    
+        plots:  [
+            { path: rk_like_plots/h_m2m_kmu, name: rk/neg/h_m2m_kmu,      rebin: 1} ,
+            { path: rk_like_plots/h_m2m_kmu, name: rk/neg/h_m2m_kmu_mvis, rebin: 5} ,
+            { path: rk_like_plots/h_m2m_kmu, name: rk/neg/h_m2m_kmu_vis,  rebin: 25} ,
+            ],
+            trig_plot: { numchannels: [ *negtrignum ], denomchannels : [*negtrigdenom] },
+            data_plot: { channels: [ *negdata ] }, blinding: *doblind, stack_scaling: neg_rk, stack: *negstack 
+        }

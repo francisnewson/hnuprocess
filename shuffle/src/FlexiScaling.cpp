@@ -3,6 +3,7 @@
 #include  "root_help.hh"
 #include  "yaml_help.hh"
 #include "fiducial_functions.hh"
+#include "TF1.h"
 #include <cstddef>
 #include <iomanip>
 
@@ -56,6 +57,18 @@ namespace fn
         return integral( *hsum, sum.min, sum.max );
     }
 
+    std::unique_ptr<TH1> get_chan_hist( std::string chan, const sumdef& sum )
+    {
+        auto tf = get_tfile( sum.filename );
+        RootTFileWrapper rtfw{ *tf };
+        ChannelHistExtractor ce{ rtfw };
+        ce.set_post_path( sum.post );
+        std::vector<std::string> c{ {chan }};
+        auto result =  get_summed_histogram( ce, c.begin(), c.end() );
+        std::cout << result->Integral() << std::endl;
+        return result;
+    }
+
     //--------------------------------------------------
 
     MonoHaloScale::MonoHaloScale( const YAML::Node instruct )
@@ -86,6 +99,57 @@ namespace fn
     }
     double  MonoHaloScale::get_halo_scale(){ return halo_scale_; }
     double  MonoHaloScale::get_halo_scale_error(){ return halo_scale_error_; }
+
+    //--------------------------------------------------
+
+    MonoHaloFit::MonoHaloFit( const YAML::Node instruct )
+    {
+        halo_chan_ = get_yaml<std::string>( instruct["halo"], "chan" );
+        halo_sumdef_ = get_yaml<sumdef>( instruct["halo"], "sum" );
+
+        data_chan_ = get_yaml<std::string>( instruct["data"], "chan" );
+        data_sumdef_ = get_yaml<sumdef>( instruct["data"], "sum" );
+    }
+
+    void MonoHaloFit::compute_scaling()
+    {
+        bool print = false;
+        auto h_halo= get_chan_hist( halo_chan_, halo_sumdef_ );
+        auto h_data= get_chan_hist( data_chan_, data_sumdef_ );
+
+        h_halo->Rebin(25);
+        h_data->Rebin(25);
+
+
+        double guess_ratio = 
+            integral( *h_data, 0.05, 0.11 ) / integral( *h_halo, 0.05, 0.11 );
+
+        std::cerr 
+            << integral( *h_halo, 0.05, 0.11 ) << " " 
+            << integral( *h_data, 0.05, 0.11 ) << std::endl;
+
+
+        auto h_ratio = uclone( h_data );
+        h_ratio->Sumw2();
+        h_halo->Sumw2();
+        h_ratio->Divide( h_halo.get() );
+
+        h_ratio->Print();
+        {
+            TFile tfout( "output/test.root", "UPDATE" );
+            h_ratio->Write( "fred" );
+        }
+
+        TF1 fit( "myfit", "pol0" , 0.05, 0.11);
+        fit.SetParameter( 0, guess_ratio );
+        h_ratio->Fit( "myfit" );
+        fit.Print();
+        halo_scale_ = fit.GetParameter(0);
+        halo_scale_error_ = 0;
+    }
+
+    double  MonoHaloFit::get_halo_scale(){ return halo_scale_; }
+    double  MonoHaloFit::get_halo_scale_error(){ return halo_scale_error_; }
 
     //--------------------------------------------------
 
@@ -122,7 +186,7 @@ namespace fn
 
     void StackPeakFlux::compute_scaling()
     {
-        bool print = false;
+        bool print = true;
 
         //do data integral
         double data_integral = get_chan_integral( data_chan_, data_sumdef_ );
@@ -136,7 +200,8 @@ namespace fn
         if ( norm_def  == end( stack_chans_ ) )
         { throw std::runtime_error( "normchan not in stack" ); }
 
-        double norm_fid = fid_weights_.at( norm_def->fidname );
+        //double norm_fid = fid_weights_.at( norm_def->fidname );
+        double norm_fid = at( fid_weights_, norm_def->fidname, "Missing fid_weight for " + norm_def->fidname );
         double norm_br = brs_.at( norm_def->type );
 
         //Sum up stack
@@ -214,7 +279,20 @@ namespace fn
     {
         if ( instruct["halo"] )
         {
-            halo_scale_ = make_unique<MonoHaloScale>( instruct["halo"] );
+            auto halo_strat = get_yaml<std::string>( instruct["halo"], "strat" );
+            if ( halo_strat == "mono" )
+            {
+                halo_scale_ = make_unique<MonoHaloScale>( instruct["halo"] );
+            }
+            else if ( halo_strat == "monofit" )
+            {
+                halo_scale_ = make_unique<MonoHaloFit>( instruct["halo"] );
+            }
+            else
+            {
+                throw std::runtime_error( "Unknown halo strategy: "  + halo_strat );
+            }
+
             peak_flux_ = make_unique<StackPeakFlux>
                 ( instruct["peak"], true, halo_scale_.get() );
         }
@@ -247,7 +325,20 @@ namespace fn
 
     FlexiScaling::FlexiScaling( const YAML::Node& instruct )
     {
-        halo_scale_ = make_unique<MonoHaloScale>( instruct["halo"] );
+        auto halo_strat = get_yaml<std::string>( instruct["halo"], "strat" );
+        if ( halo_strat == "mono" )
+        {
+            halo_scale_ = make_unique<MonoHaloScale>( instruct["halo"] );
+        }
+        else if ( halo_strat == "monofit" )
+        {
+            halo_scale_ = make_unique<MonoHaloFit>( instruct["halo"] );
+        }
+        else
+        {
+            throw std::runtime_error( "Unknown halo strategy: "  + halo_strat );
+        }
+        //halo_scale_ = make_unique<MonoHaloScale>( instruct["halo"] );
         kaon_flux_ = make_unique<ComboKaonFlux>( instruct["mc"] );
 
         fid_weights_ = extract_root_fiducial_weights ( instruct["fids"] );
@@ -324,4 +415,58 @@ namespace fn
     }
 
     //--------------------------------------------------
+
+    HardcodeScaling::HardcodeScaling( const YAML::Node& instruct )
+    {
+        fiducial_flux_ = get_yaml<double>( instruct, "fiducial_flux" );
+        fiducial_flux_err_ = get_yaml<double>( instruct, "fiducial_flux_err" );
+
+        halo_scale_ = get_yaml<double>( instruct, "halo_scale" );
+        halo_scale_err_ = get_yaml<double>( instruct, "halo_scale_err" );
+
+        fid_weights_ = extract_root_fiducial_weights ( instruct["fids"] );
+        brs_ = YAML::LoadFile( "input/shuffle/branching_ratios.yaml" )
+            .as<std::map<std::string, double>>();
+    }
+
+    double HardcodeScaling::scale_hist( TH1& h, const YAML::Node& instruct ) const 
+    {
+        double scale_factor = 1.0;
+        std::string type = get_yaml<std::string>( instruct, "type"  );
+
+        if ( type == "halo" )
+        {
+            scale_factor = halo_scale_; 
+        }
+        else if ( type == "data" )
+        {
+            scale_factor = 1.0;
+        }
+        else
+        {
+            std::string fid_weight_key;
+            try {
+                fid_weight_key = get_yaml<std::string>( instruct, "fid_weight" );
+            }
+            catch( std::exception& e )
+            {
+                std::cerr << "Can't extract fid_weight_key from\n" << instruct << std::endl;
+            }
+
+            double fid_weight = at( fid_weights_, fid_weight_key, "Missing fid weight " + fid_weight_key );
+            double br = brs_.at( type );
+            scale_factor = get_fiducial_flux() * br / fid_weight;
+        }
+
+        h.Scale( scale_factor );
+        return scale_factor;
+    }
+
+    void HardcodeScaling::compute_scaling(){}
+
+    double HardcodeScaling::get_halo_scale() const{ return halo_scale_; }
+    double HardcodeScaling::get_halo_scale_error() const{ return halo_scale_err_; }
+
+    double HardcodeScaling::get_fiducial_flux() const { return fiducial_flux_; }
+    double HardcodeScaling::get_fiducial_flux_error() const { return fiducial_flux_err_; }
 }

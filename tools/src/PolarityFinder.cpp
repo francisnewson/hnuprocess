@@ -21,7 +21,8 @@ namespace fn
 	int PolarityFinder::get_polarity( int run ) const
 	{
 		try{
-			return ranger_.get_value( run );
+			int pol =  ranger_.get_value( run );
+            return pol;
 		}
 		catch( std::runtime_error& e )
 		{

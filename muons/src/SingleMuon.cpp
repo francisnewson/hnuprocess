@@ -40,6 +40,10 @@ namespace fn
                 double multiplier = get_yaml<double>( instruct, "multiplier" );
                 return new DataMuRec( event, *st, multiplier );
             }
+            else if ( method == "forcepass" )
+            {
+                return new PassMuon{ *st };
+            }
             else if ( method == "auto" )
             {
 
@@ -85,6 +89,20 @@ namespace fn
 
     //--------------------------------------------------
 
+    PassMuon::PassMuon( const SingleTrack& st)
+        :st_( st ) { }
+
+    void PassMuon::new_event()
+    {
+        if ( st_.found_single_track() )
+        {
+            const auto & srt = st_.get_single_track();
+            x_ = srt.extrapolate_ds( na62const::zMuv2 ).X();
+            y_ = srt.extrapolate_ds( na62const::zMuv1 ).Y();
+        }
+    }
+
+    //--------------------------------------------------
     RawSingleMuon::RawSingleMuon( const fne::Event * e, const SingleTrack& st)
         :e_( e ), st_( st )
     {}

@@ -30,7 +30,8 @@ namespace fn
             HnuLimParams( TFile& tf, 
                     const std::map<std::string, double>& fid_weights,
                     const std::vector<std::string>& regions,
-                    int mass, bool fancyfit = false );
+                    int mass, double nsigma_width = 1.0,
+                    bool fancyfit = false );
 
             int get_mass() const;
             std::string get_chan() const;
@@ -58,6 +59,7 @@ namespace fn
             const std::map<std::string, double>& fid_weights_;
             const std::vector<std::string>& regions_;
             int mass_;
+            double nsigma_width_;
             bool fancy_fit_;
 
 
@@ -86,37 +88,61 @@ namespace fn
     class HnuLimResult
     {
         public:
+            double kaon_flux;
             double trig_eff;
-            double trig_err;
+            double raw_trig_err;
+            double raw_trig_sqerr;
             double background;
             double background_err;
             double dt_obs;;
             double acc_sig_ul;
             double orig_sig_ul;
             double rolke_orig_sig_ul;
+            double ul_mu;
             double ul_br;
             double ul_u2;
+
+            double ses_br;
+            double ses_u2;
 
             double sig_min;
             double sig_max;
 
+            double comb_sigma;
+
+            double high1_ul_mu;
             double high1_ul_br;
             double high1_ul_u2;
 
+            double low1_ul_mu;
             double low1_ul_br;
             double low1_ul_u2;
 
+            double high2_ul_mu;
             double high2_ul_br;
             double high2_ul_u2;
 
+            double low2_ul_mu;
             double low2_ul_br;
             double low2_ul_u2;
 
+            double high3_ul_mu;
+            double high3_ul_br;
+            double high3_ul_u2;
+
+            double low3_ul_mu;
+            double low3_ul_br;
+            double low3_ul_u2;
+
+            double dt_ul_mu;
             double dt_ul_br;
             double dt_ul_u2;
 
+            double dt_ll_mu;
             double dt_ll_br;
             double dt_ll_u2;
+
+            double dt_pull;
 
             std::map<std::string, double> error_budget;
     };
@@ -161,8 +187,12 @@ namespace fn
 
             HaloErrors( TFile& tfbg, TFile& tfhalolog );
             void set_halo_info( std::vector<halo_info> info );
+            void set_shape_error_factor( double shape_error_factor );
             double compute_halo_val_err( double sig_min, double sig_max ) const;
             double compute_halo_scale_err( double sig_min, double sig_max ) const;
+            double compute_halo_shape_err( double sig_min, double sig_max ) const;
+            double compute_halo_k3pi_err( double sig_min, double sig_max ) const;
+            double get_halo_val( double sig_min, double sig_max ) const;
 
             void print_mismatch( std::ostream & os ,
                     double sig_min, double sig_max,
@@ -178,6 +208,7 @@ namespace fn
             std::vector<halo_info> halo_info_sets_;
             std::vector<halo_resource> halo_resources_;
             std::vector<std::unique_ptr<TH1D>> hstore_;
+            boost::optional<double> shape_error_factor_;
     };
 
     //--------------------------------------------------
@@ -212,6 +243,9 @@ namespace fn
 
             double compute_halo_scale_err( double sig_min, double sig_max );
             double compute_halo_val_err( double sig_min, double sig_max );
+            double compute_halo_shape_err( double sig_min, double sig_max );
+            double compute_halo_k3pi_err( double sig_min, double sig_max );
+            double get_halo_val( double sig_min, double sig_max );
 
             double n_sigma_range_;
 

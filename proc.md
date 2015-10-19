@@ -31,7 +31,6 @@ STEPS TO FINAL LIMITS
       - run `/b/apps/hnureco -m input/reco/thesis/halo_control/yaml`
       - *job*: `halo_control`
 
-
 - ### Determine k3pi crosstalk
     - Run over P6 K- data
       - run `/b/apps/hnureco -m input/reco/thesis/k3pi_crosstalk.yaml`

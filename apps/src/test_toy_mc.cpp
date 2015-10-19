@@ -7,6 +7,7 @@
 #include "NA62Constants.hh"
 #include "logging.hh"
 #include "Counter.hh"
+#include "MuonScatterSim.hh"
 #include "easy_app.hh"
 
 using namespace toymc;
@@ -43,10 +44,45 @@ int main( int argc , char * argv[] )
         BOOST_LOG_SEV( slg , startup) << n_events << " events requested.";
     }
 
+
+    //--------------------------BUILD SIM and HISTS--------------------------
+
+    MuonScatterSim mss;
+
+    HistStore hs;
+    auto h_tx = hs.MakeTH1D(  "h_tx", "tx after scattering", 1000, 1, 0, "tx" );
+    auto h_x = hs.MakeTH1D(  "h_x", "dx after scattering", 1000, 1, 0, "x" );
+
+    auto h_ty = hs.MakeTH1D(  "h_ty", "ty after scattering", 1000, 1, 0, "ty" );
+    auto h_y = hs.MakeTH1D(  "h_y", "dy after scattering", 1000, 1, 0, "y" );
+
+    //------------------------------RUN SIM ------------------------------//
+    Counter counter( slg, n_events );
+
+    for ( int i = 0 ; i != n_events ; ++ i )
+    { 
+        counter.new_event();
+
+        double mom = 20;
+        double charge = +1;
+        double x0 =  0;
+        double y0 = 0;
+        double dxdz0 = 0;
+        double dydz0 = 0;
+
+        track_params initial_params{ mom, charge, x0, dxdz0, y0, dydz0, nc::zDch3 };
+        auto muv_position = mss.transfer(initial_params);
+        h_x->Fill( muv_position.first );
+        h_y->Fill( muv_position.second );
+    }
+
+    TFile tfout{ "output/test_toy_mc.root", "RECREATE" };
+    hs.Write();
+
+#if 0
     SmartRNG<std::mt19937> gen;
     ToyMCLibrary mc_lib;
 
-    //-----------------------------BUILD SIM -----------------------------
 
     //materials
     double dch_budget = 4e-3; //rad lengths
@@ -214,4 +250,5 @@ int main( int argc , char * argv[] )
     hs.Write();
 
     std::cout << "Final Z: " << z / double(n_events) << std::endl;
+#endif
 }

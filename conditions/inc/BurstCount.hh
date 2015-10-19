@@ -3,6 +3,7 @@
 #include "Analysis.hh"
 #include "Event.hh"
 #include "TTree.h"
+#include "root_help.hh"
 #if 0
 /*
  *  ____                 _    ____                  _
@@ -19,18 +20,6 @@ class TFile;
 
 namespace fn
 {
-    class SaveDirectory
-    {
-        public:
-            SaveDirectory();
-            ~SaveDirectory();
-
-        private:
-            TDirectory * td;
-            TFile * tf;
-    };
-
-    //--------------------------------------------------
     class K2piEventData;
 
     struct burst_info

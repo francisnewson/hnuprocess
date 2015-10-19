@@ -17,7 +17,56 @@ plots:
     - rk_like_selection_plots/h_m2m_kmu
     - signal_upper_plots/h_m2m_kmu
     - signal_lower_plots/h_m2m_kmu
+
     - signal_upper_muv_plots/h_m2m_kmu
     - signal_lower_muv_plots/h_m2m_kmu
+
     - ctrl_upper_muv_plots/h_z
-    - ctrl_lower_full_m2m_plots/h_m2m_kmu
+    - ctrl_upper_muv_plots/h_p
+    - ctrl_upper_muv_plots/h_t
+    - ctrl_upper_muv_plots/h_cda
+    - ctrl_upper_muv_plots/h_m2m_kmu
+
+    - ctrl_lower_neg_m2m_plots/h_z
+    - ctrl_lower_neg_m2m_plots/h_t
+    - ctrl_lower_neg_m2m_plots/h_p
+    - ctrl_lower_neg_m2m_plots/h_cda
+    - ctrl_lower_neg_m2m_plots/h_m2m_kmu
+    - ctrl_lower_neg_m2m_plots/h_p_m2m_kmu
+
+    - ctrl_lower_muv_plots/h_z
+    - ctrl_lower_muv_plots/h_t
+    - ctrl_lower_muv_plots/h_p
+    - ctrl_lower_muv_plots/h_cda
+    - ctrl_lower_muv_plots/h_m2m_kmu
+    - ctrl_lower_muv_plots/h_p_m2m_kmu
+
+    - signal_upper_check_plots/h_z
+    - signal_upper_check_plots/h_t
+    - signal_upper_check_plots/h_p
+    - signal_upper_check_plots/h_cda
+    - signal_upper_check_plots/h_m2m_kmu
+
+    - signal_lower_check_plots/h_z
+    - signal_lower_check_plots/h_t
+    - signal_lower_check_plots/h_p
+    - signal_lower_check_plots/h_cda
+    - signal_lower_check_plots/h_m2m_kmu
+
+    - signal_upper_check_muv_plots/h_z
+    - signal_upper_check_muv_plots/h_t
+    - signal_upper_check_muv_plots/h_p
+    - signal_upper_check_muv_plots/h_cda
+    - signal_upper_check_muv_plots/h_m2m_kmu
+
+    - signal_upper_alt_check_muv_plots/h_z
+    - signal_upper_alt_check_muv_plots/h_t
+    - signal_upper_alt_check_muv_plots/h_p
+    - signal_upper_alt_check_muv_plots/h_cda
+    - signal_upper_alt_check_muv_plots/h_m2m_kmu
+
+    - signal_lower_check_muv_plots/h_z
+    - signal_lower_check_muv_plots/h_t
+    - signal_lower_check_muv_plots/h_p
+    - signal_lower_check_muv_plots/h_cda
+    - signal_lower_check_muv_plots/h_m2m_kmu

@@ -117,7 +117,7 @@ namespace fn
                 ( proc_track_->corr_mom, proc_track_->rt, proc_track_->vert );
 
             //new track should start at midpoint with corrected direction
-            Track pt_track = get_bz_track( *proc_track_->rt );
+            Track pt_track = fn::get_bz_track( *proc_track_->rt );
             double mid_z = 0.5 * ( proc_track_->vert.point.Z() + na62const::bz_tracking );
             TVector3 mid_point = pt_track.extrapolate( mid_z );
 
@@ -245,6 +245,12 @@ namespace fn
         const fne::RecoTrack& rt = *proc_track_->rt;
         TVector3 dsmom{ rt.dxdz, rt.dydz, 1};
         return proc_track_->corr_mom  * dsmom.Unit();
+    }
+
+    Track BFSingleRecoTrack::get_bz_track() const
+    {
+        const fne::RecoTrack& rt = *proc_track_->rt;
+        return fn::get_bz_track( rt );
     }
 
     int BFSingleRecoTrack::get_compact_id() const

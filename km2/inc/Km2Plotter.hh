@@ -77,6 +77,7 @@ namespace fn
 
             TH1D * h_rcoll_;
             TH2D * h_z_rcoll_;
+            TH1D * h_z_shift_;
 
             TH1D * h_track_time_;
 
@@ -120,10 +121,15 @@ namespace fn
             ~Km2MiniPlots(){}
 
         private:
-            TH1D * h_p_;
-            TH1D * h_pnu_;
             TH1D * h_m2m_kmu_;
+            TH1D * h_p_;
+            TH1D * h_t_;
+            TH1D * h_z_;
+            TH1D * h_cda_;
+            TH1D * h_pnu_;
             TH1D * h_m2m_kpi_;
+            TH2D * h_p_m2m_kmu_;
+            TH2D * h_z_t_;
             HistStore hs_;
     };
 

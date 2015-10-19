@@ -1,0 +1,255 @@
+trig_effs:
+    -  { name: full_q11t_eff,
+    filename: tdata/staging/all.mass_plots.root,
+    numname: htrig_num,
+    denomname: htrig_denom,
+    selections: [
+        'pos/signal_upper_muv/h_m2m_kmu',
+        'pos/signal_upper_muv/h_m2m_kmu',
+        'pos/signal_lower_muv/h_m2m_kmu',
+        'pos/signal_lower_muv/h_m2m_kmu' ] }
+
+
+stacks:
+
+#--------------------------------------------------
+#         _ _
+#    __ _| | |_ _   _ _ __  _ __   ___ _ __
+#   / _` | | __| | | | '_ \| '_ \ / _ \ '__|
+#  | (_| | | |_| |_| | |_) | |_) |  __/ |
+#   \__,_|_|\__|\__,_| .__/| .__/ \___|_|
+#                    |_|   |_|
+#--------------------------------------------------
+
+    - { name: upper_signal_alt_check/h_z,
+    filename: tdata/staging/all.mass_plots.root,
+    halolog: tdata/staging/log/halo_sub_log.q11t.root,
+    #haloshapeerr: 1.0,
+    haloinfo: [
+         { bgpath: ctrl/pos/alt_upper_sig_muv_check/h_z/hnu_stack_hists/halo_pos,
+        scalepath: pos_check_upper, logpath: p6.halo.q11t.pos/signal_upper_alt_check_muv_plots/h_z},
+        ],
+    destfolder: upper_signal_alt_check/h_z,
+    errors: true,
+    selections: [
+        'ctrl/pos/alt_upper_sig_muv_check/h_z',
+        ] }
+
+    - { name: upper_signal_alt_check/h_p,
+    filename: tdata/staging/all.mass_plots.root,
+    halolog: tdata/staging/log/halo_sub_log.q11t.root,
+    #haloshapeerr: 1.0,
+    haloinfo: [
+         { bgpath: ctrl/pos/alt_upper_sig_muv_check/h_p/hnu_stack_hists/halo_pos,
+        scalepath: pos_check_upper, logpath: p6.halo.q11t.pos/signal_upper_alt_check_muv_plots/h_p},
+        ],
+    destfolder: upper_signal_alt_check/h_p,
+    errors: true,
+    selections: [
+        'ctrl/pos/alt_upper_sig_muv_check/h_p',
+        ] }
+
+    - { name: upper_signal_alt_check/h_t,
+    filename: tdata/staging/all.mass_plots.root,
+    #haloshapeerr: 1.0,
+    halolog: tdata/staging/log/halo_sub_log.q11t.root,
+    haloinfo: [
+         { bgpath: ctrl/pos/alt_upper_sig_muv_check/h_t/hnu_stack_hists/halo_pos,
+        scalepath: pos_check_upper, logpath: p6.halo.q11t.pos/signal_upper_alt_check_muv_plots/h_t},
+        ] ,
+    destfolder: upper_signal_alt_check/h_t,
+    errors: true,
+    selections: [
+        'ctrl/pos/alt_upper_sig_muv_check/h_t',
+        ] }
+
+    - { name: upper_signal_alt_check/h_cda,
+    filename: tdata/staging/all.mass_plots.root,
+    #haloshapeerr: 1.0,
+    halolog: tdata/staging/log/halo_sub_log.q11t.root,
+    haloinfo: [
+         { bgpath: ctrl/pos/alt_upper_sig_muv_check/h_cda/hnu_stack_hists/halo_pos,
+        scalepath: pos_check_upper, logpath: p6.halo.q11t.pos/signal_upper_alt_check_muv_plots/h_cda},
+        ] ,
+    destfolder: upper_signal_alt_check/h_cda,
+    errors: true,
+    selections: [
+        'ctrl/pos/alt_upper_sig_muv_check/h_cda',
+        ] }
+
+    - { name: upper_signal_alt_check/h_m2m_kmu,
+    filename: tdata/staging/all.mass_plots.root,
+    #haloshapeerr: 1.0,
+    halolog: tdata/staging/log/halo_sub_log.q11t.root,
+    haloinfo: [
+         { bgpath: ctrl/pos/alt_upper_sig_muv_check/h_m2m_kmu/hnu_stack_hists/halo_pos,
+        scalepath: pos_check_upper, logpath: p6.halo.q11t.pos/signal_upper_alt_check_muv_plots/h_m2m_kmu},
+        ] ,
+    destfolder: upper_signal_alt_check/h_m2m_kmu,
+    errors: true,
+    selections: [
+        'ctrl/pos/alt_upper_sig_muv_check/h_m2m_kmu',
+        ] }
+
+#--------------------------------------------------
+# | | _____      _____ _ __
+# | |/ _ \ \ /\ / / _ \ '__|
+# | | (_) \ V  V /  __/ |
+# |_|\___/ \_/\_/ \___|_|
+#--------------------------------------------------
+
+    - { name: lower_signal_check/h_z,
+    filename: tdata/staging/all.mass_plots.root,
+    halolog: tdata/staging/log/halo_sub_log.q11t.root,
+    #haloshapeerr: 0.5,
+    haloinfo: [
+         { bgpath: ctrl/pos/lower_sig_muv_check/h_z/hnu_stack_hists/halo_pos,
+        scalepath: pos_check_lower, logpath: p6.halo.q11t.pos/signal_lower_check_muv_plots/h_z}
+        ],
+    destfolder: lower_signal_check/h_z,
+    errors: true,
+    selections: [
+        'ctrl/pos/lower_sig_muv_check/h_z'
+        ] }
+
+    - { name: lower_signal_check/h_cda,
+    filename: tdata/staging/all.mass_plots.root,
+    halolog: tdata/staging/log/halo_sub_log.q11t.root,
+    #haloshapeerr: 0.5,
+    haloinfo: [
+         { bgpath: ctrl/pos/lower_sig_muv_check/h_cda/hnu_stack_hists/halo_pos,
+        scalepath: pos_check_lower, logpath: p6.halo.q11t.pos/signal_lower_check_muv_plots/h_cda}
+        ],
+    destfolder: lower_signal_check/h_cda,
+    errors: true,
+    selections: [
+        'ctrl/pos/lower_sig_muv_check/h_cda'
+        ] }
+
+    - { name: lower_signal_check/h_p,
+    filename: tdata/staging/all.mass_plots.root,
+    halolog: tdata/staging/log/halo_sub_log.q11t.root,
+    #haloshapeerr: 0.5,
+    haloinfo: [
+         { bgpath: ctrl/pos/lower_sig_muv_check/h_p/hnu_stack_hists/halo_pos,
+        scalepath: pos_check_lower, logpath: p6.halo.q11t.pos/signal_lower_check_muv_plots/h_p}
+        ],
+    destfolder: lower_signal_check/h_p,
+    errors: true,
+    selections: [
+        'ctrl/pos/lower_sig_muv_check/h_p'
+        ] }
+
+    - { name: lower_signal_check/h_t,
+    filename: tdata/staging/all.mass_plots.root,
+    #haloshapeerr: 0.5,
+    halolog: tdata/staging/log/halo_sub_log.q11t.root,
+    haloinfo: [
+         { bgpath: ctrl/pos/lower_sig_muv_check/h_t/hnu_stack_hists/halo_pos,
+        scalepath: pos_check_lower, logpath: p6.halo.q11t.pos/signal_lower_check_muv_plots/h_t}
+        ],
+    destfolder: lower_signal_check/h_t,
+    errors: true,
+    selections: [
+        'ctrl/pos/lower_sig_muv_check/h_t'
+        ] }
+
+    - { name: lower_signal_check/h_m2m_kmu,
+    filename: tdata/staging/all.mass_plots.root,
+    #haloshapeerr: 0.5,
+    halolog: tdata/staging/log/halo_sub_log.q11t.root,
+    haloinfo: [
+         { bgpath: ctrl/pos/lower_sig_muv_check/h_m2m_kmu/hnu_stack_hists/halo_pos,
+        scalepath: pos_check_lower, logpath: p6.halo.q11t.pos/signal_lower_check_muv_plots/h_m2m_kmu}
+        ],
+    destfolder: lower_signal_check/h_m2m_kmu,
+    errors: true,
+    selections: [
+        'ctrl/pos/lower_sig_muv_check/h_m2m_kmu'
+        ] }
+
+    - { name: signal_check/h_z,
+    filename: tdata/staging/all.mass_plots.root,
+    halolog: tdata/staging/log/halo_sub_log.q11t.root,
+    #haloshapeerr: 0.5,
+    haloinfo: [
+         { bgpath: ctrl/pos/lower_sig_muv_check/h_z/hnu_stack_hists/halo_pos,
+        scalepath: pos_check_lower, logpath: p6.halo.q11t.pos/signal_lower_check_muv_plots/h_z},
+         { bgpath: ctrl/pos/alt_upper_sig_muv_check/h_z/hnu_stack_hists/halo_pos,
+        scalepath: pos_check_upper, logpath: p6.halo.q11t.pos/signal_upper_alt_check_muv_plots/h_z}
+        ],
+    destfolder: signal_check/h_z,
+    errors: true,
+    selections: [
+        'ctrl/pos/lower_sig_muv_check/h_z',
+        'ctrl/pos/alt_upper_sig_muv_check/h_z'
+        ]  }
+
+    - { name: signal_check/h_p,
+    filename: tdata/staging/all.mass_plots.root,
+    halolog: tdata/staging/log/halo_sub_log.q11t.root,
+    #haloshapeerr: 0.5,
+    haloinfo: [
+         { bgpath: ctrl/pos/lower_sig_muv_check/h_p/hnu_stack_hists/halo_pos,
+        scalepath: pos_check_lower, logpath: p6.halo.q11t.pos/signal_lower_check_muv_plots/h_p},
+         { bgpath: ctrl/pos/alt_upper_sig_muv_check/h_p/hnu_stack_hists/halo_pos,
+        scalepath: pos_check_upper, logpath: p6.halo.q11t.pos/signal_upper_alt_check_muv_plots/h_p}
+        ],
+    destfolder: signal_check/h_p,
+    errors: true,
+    selections: [
+        'ctrl/pos/lower_sig_muv_check/h_p',
+        'ctrl/pos/alt_upper_sig_muv_check/h_p'
+        ]  }
+
+    - { name: signal_check/h_cda,
+    filename: tdata/staging/all.mass_plots.root,
+    halolog: tdata/staging/log/halo_sub_log.q11t.root,
+    #haloshapeerr: 0.5,
+    haloinfo: [
+         { bgpath: ctrl/pos/lower_sig_muv_check/h_cda/hnu_stack_hists/halo_pos,
+        scalepath: pos_check_lower, logpath: p6.halo.q11t.pos/signal_lower_check_muv_plots/h_cda},
+         { bgpath: ctrl/pos/alt_upper_sig_muv_check/h_cda/hnu_stack_hists/halo_pos,
+        scalepath: pos_check_upper, logpath: p6.halo.q11t.pos/signal_upper_alt_check_muv_plots/h_cda}
+        ],
+    destfolder: signal_check/h_cda,
+    errors: true,
+    selections: [
+        'ctrl/pos/lower_sig_muv_check/h_cda',
+        'ctrl/pos/alt_upper_sig_muv_check/h_cda'
+        ]  }
+
+
+    - { name: signal_check/h_m2m_kmu,
+    filename: tdata/staging/all.mass_plots.root,
+    halolog: tdata/staging/log/halo_sub_log.q11t.root,
+    #haloshapeerr: 0.5,
+    haloinfo: [
+         { bgpath: ctrl/pos/lower_sig_muv_check/h_m2m_kmu/hnu_stack_hists/halo_pos,
+        scalepath: pos_check_lower, logpath: p6.halo.q11t.pos/signal_lower_check_muv_plots/h_m2m_kmu},
+         { bgpath: ctrl/pos/alt_upper_sig_muv_check/h_m2m_kmu/hnu_stack_hists/halo_pos,
+        scalepath: pos_check_upper, logpath: p6.halo.q11t.pos/signal_upper_alt_check_muv_plots/h_m2m_kmu}
+        ],
+    destfolder: signal_check/h_m2m_kmu,
+    errors: true,
+    selections: [
+        'ctrl/pos/lower_sig_muv_check/h_m2m_kmu',
+        'ctrl/pos/alt_upper_sig_muv_check/h_m2m_kmu'
+        ]  }
+
+    - { name: signal_check/h_t,
+    filename: tdata/staging/all.mass_plots.root,
+    halolog: tdata/staging/log/halo_sub_log.q11t.root,
+    #haloshapeerr: 0.5,
+    haloinfo: [
+         { bgpath: ctrl/pos/lower_sig_muv_check/h_t/hnu_stack_hists/halo_pos,
+        scalepath: pos_check_lower, logpath: p6.halo.q11t.pos/signal_lower_check_muv_plots/h_t},
+         { bgpath: ctrl/pos/alt_upper_sig_muv_check/h_t/hnu_stack_hists/halo_pos,
+        scalepath: pos_check_upper, logpath: p6.halo.q11t.pos/signal_upper_alt_check_muv_plots/h_t}
+        ],
+    destfolder: signal_check/h_t,
+    errors: true,
+    selections: [
+        'ctrl/pos/lower_sig_muv_check/h_t',
+        'ctrl/pos/alt_upper_sig_muv_check/h_t'
+        ]  }

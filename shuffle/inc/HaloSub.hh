@@ -1,7 +1,7 @@
 #ifndef HALOSUB_HH
 #define HALOSUB_HH
 #include "yaml_help.hh"
-#include "MultiScaling.hh"
+#include "sample_scaler.hh"
 #include <iosfwd>
 #include <memory>
 #if 0
@@ -20,7 +20,7 @@ class TFile;
 namespace fn
 {
 
-    void print_scaling( MultiScaling& ms, std::ostream& os );
+    void print_scaling( SampleScaler& ms, std::ostream& os );
 
     class HaloSub
     {
@@ -37,8 +37,8 @@ namespace fn
             YAML::Node config_node_;
             std::map<std::string, double> brs_;
 
-            std::unique_ptr<MultiScaling> calib_km2_scaling_;
-            std::unique_ptr<MultiScaling> calib_k3pi_scaling_;
+            std::unique_ptr<SampleScaler> calib_km2_scaling_;
+            std::unique_ptr<SampleScaler> calib_k3pi_scaling_;
 
             double correction_factor_;
             TFile& tfout_;

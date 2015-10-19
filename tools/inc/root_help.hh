@@ -15,6 +15,8 @@
 
 namespace fn
 {
+    void de_zero_hist( TH1& h );
+
     template <class T> T * tclone( const T& h ){ return static_cast<T*>( h.Clone() ); }
     template <class T> T * tclone( const T& h, std::string s )
     { return static_cast<T*>( h.Clone(s.c_str()) ); }
@@ -53,32 +55,33 @@ namespace fn
     //SUM STACKS
     //Assumes container of THStack*
     template <class IT>
-    std::unique_ptr<OwningStack> sum_stacks( IT begin, IT end )
-    {
-        auto res =  make_unique<OwningStack>();
-
-        std::vector<THStack*> stacks;
-        std::vector<TList*> lists;
-
-        for ( auto hs = begin ; hs !=end ; ++hs )
+        std::unique_ptr<OwningStack> sum_stacks( IT begin, IT end, bool zero_hist = false )
         {
-            lists.push_back( (*hs)->GetHists() );
-        }
+            auto res =  make_unique<OwningStack>();
 
-        int nchan = lists[0]->GetSize();
+            std::vector<THStack*> stacks;
+            std::vector<TList*> lists;
 
-        for ( int ichan = 0 ; ichan != nchan ; ++ ichan )
-        {
-            for( auto& list: lists )
+            for ( auto hs = begin ; hs !=end ; ++hs )
             {
-                auto h = std::unique_ptr<TH1>{
-                    static_cast<TH1*>( list->At( ichan )->Clone() ) };
-                res->Add( std::move(h) );
+                lists.push_back( (*hs)->GetHists() );
             }
-        }
 
-        return res;
-    }
+            int nchan = lists[0]->GetSize();
+
+            for ( int ichan = 0 ; ichan != nchan ; ++ ichan )
+            {
+                for( auto& list: lists )
+                {
+                    auto h = std::unique_ptr<TH1>{
+                        static_cast<TH1*>( list->At( ichan )->Clone() ) };
+                    if ( zero_hist ){ de_zero_hist( *h ); }
+                    res->Add( std::move(h) );
+                }
+            }
+
+            return res;
+        }
 
     //--------------------------------------------------
 
@@ -138,34 +141,34 @@ namespace fn
     //--------------------------------------------------
 
     template <class T>
-    std::vector<std::unique_ptr<T>> extract_object_list
-    ( TFile& tf , std::vector<std::string> list )
-    {
-        std::vector<std::unique_ptr<T>> res;
-
-        for( auto s : list )
+        std::vector<std::unique_ptr<T>> extract_object_list
+        ( TFile& tf , std::vector<std::string> list )
         {
-            T * o = get_object<T>( tf, s );
-            res.push_back( std::unique_ptr<T>( o ) );
-        }
+            std::vector<std::unique_ptr<T>> res;
 
-        return res;
-    }
+            for( auto s : list )
+            {
+                T * o = get_object<T>( tf, s );
+                res.push_back( std::unique_ptr<T>( o ) );
+            }
+
+            return res;
+        }
 
     template <class T>
-    std::vector<std::unique_ptr<T>> extract_hist_list
-    ( TFile& tf , std::vector<std::string> list )
-    {
-        std::vector<std::unique_ptr<T>> res;
-
-        for( auto s : list )
+        std::vector<std::unique_ptr<T>> extract_hist_list
+        ( TFile& tf , std::vector<std::string> list )
         {
-            auto h = extract_hist<T>( tf, s );
-            res.push_back( std::move( h ) );
-        }
+            std::vector<std::unique_ptr<T>> res;
 
-        return res;
-    }
+            for( auto s : list )
+            {
+                auto h = extract_hist<T>( tf, s );
+                res.push_back( std::move( h ) );
+            }
+
+            return res;
+        }
 
     //STORE VALUES
     void store_value( std::string name, double value );
@@ -176,5 +179,24 @@ namespace fn
 
     std::ostream& operator<<
         ( std::ostream& os, const TLorentzVector &tv );
+
+    //--------------------------------------------------
+
+    double median(const TH1D * h1);
+
+    //--------------------------------------------------
+
+    //SAVE DIRECTORY
+    class SaveDirectory
+    {
+        public:
+            SaveDirectory();
+            ~SaveDirectory();
+
+        private:
+            TDirectory * td;
+            TFile * tf;
+    };
+
 }
 #endif

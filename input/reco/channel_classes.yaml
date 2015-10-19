@@ -1,16 +1,28 @@
 p6:
+    - p6.data.kless.q11t.km.v2.pos
     - p6.data.kless.q11t.v2
-    - p6.data.km.q11t.v2
-    - p6.data.kless.q1.v2
-    - p6.data.km.q1.v2
-    - p6.data.kless.q11t.v2.pos
-    - p6.data.km.q11t.v2.pos
-    - p6.data.kless.q1.v2.pos
-    - p6.data.km.q1.v2.pos
     - p6.data.kless.q11t.v2.neg
-    - p6.data.km.q11t.v2.neg
+    - p6.data.kless.q11t.v2.pos
+    - p6.data.kless.q1.km.v2.pos
+    - p6.data.kless.q1.km.v2.trigrun.pos
+    - p6.data.kless.q1.v2
     - p6.data.kless.q1.v2.neg
+    - p6.data.kless.q1.v2.pos
+    - p6.data.kless.q1.v2.trigrun.pos
+    - p6.data.km.q11t.km.v2.neg
+    - p6.data.km.q11t.km.v2.pos
+    - p6.data.km.q11t.v2
+    - p6.data.km.q11t.v2.neg
+    - p6.data.km.q11t.v2.pos
+    - p6.data.km.q1.km.v2.neg
+    - p6.data.km.q1.km.v2.pos
+    - p6.data.km.q1.km.v2.trigrun.neg
+    - p6.data.km.q1.km.v2.trigrun.pos
+    - p6.data.km.q1.v2
     - p6.data.km.q1.v2.neg
+    - p6.data.km.q1.v2.pos
+    - p6.data.km.q1.v2.trigrun.neg
+    - p6.data.km.q1.v2.trigrun.pos
     - p6.halo.kless.m-.ka+.b-
     - p6.halo.kless.m-.ka+.b+
     - p6.halo.kless.m-.pi+.b-
@@ -28,3 +40,14 @@ p6:
     - kless.m-.pi+.b+
     - klesspi+.5000
 
+trigrun:
+    - p5.data.q1.km.v4.trigrun.neg
+    - p5.data.q1.km.v4.trigrun.pos
+    - p5.data.q1.v4.trigrun.neg
+    - p5.data.q1.v4.trigrun.pos
+    - p6.data.kless.q1.km.v2.trigrun.pos
+    - p6.data.kless.q1.v2.trigrun.pos
+    - p6.data.km.q1.km.v2.trigrun.neg
+    - p6.data.km.q1.km.v2.trigrun.pos
+    - p6.data.km.q1.v2.trigrun.neg
+    - p6.data.km.q1.v2.trigrun.pos

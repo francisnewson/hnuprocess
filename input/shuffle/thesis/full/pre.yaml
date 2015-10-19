@@ -1,0 +1,168 @@
+var:
+    pos_halo: &poshalo p6.data.km.q11t.v2.pos
+    pos_data: &posdata p5.data.q11t.v3.pos
+    pos_trig_num: &postrignum p5.data.q1.v4.trigrun.pos
+    pos_trig_denom: &postrigdenom p5.data.q1.v4.pos
+    neg_halo: &neghalo p6.data.km.q11t.v2.neg
+    neg_data: &negdata p5.data.q11t.v3.neg
+    neg_trig_num: &negtrignum p5.data.q1.v4.trigrun.neg
+    neg_trig_denom: &negtrigdenom p5.data.q1.v4.neg
+
+sums:
+    halorksum:  &halorksum {
+        file: tdata/halo_control/all.halo_control.root,
+        pre: "", post: rk_like_selection_plots/h_m2m_kmu,
+        min: -0.3, max: -0.03 }
+
+    peakrksum:  &peakrksum {
+            file: tdata/halo_control/all.halo_control.root,
+            pre: "", post: rk_like_selection_plots/h_m2m_kmu,
+            min: -0.020, max: +0.020 } 
+
+    ctrllowersum:  &ctrllowersum {
+        file: tdata/halo_control/all.halo_control.root,
+        pre: "", post: ctrl_lower_full_m2m_plots/h_m2m_kmu,
+        min: -0.15, max: -0.05 } 
+
+    ctrluppersum:  &ctrluppersum {
+        file: tdata/halo_control/all.halo_control.root,
+        pre: "", post: ctrl_upper_muv_plots/h_z,
+        min: 3000, max: 5500 } 
+
+    fids: &fids { fid_file: use_root, root_file: 'tdata/halo_control/all.halo_control.root',
+        pre: "", post : "sample_burst_count/bursts", branch: "weight" }
+
+scaling:
+    - scaling_method:
+        name: pos_lower
+        strategy: flexi
+        peak: km2
+        fids: *fids
+
+        halo:
+            strat: mono
+            halo: { chan: *poshalo , sum: *ctrllowersum }
+            data: { chan: *posdata , sum: *ctrllowersum }
+
+        mc: &mcpos
+            strat: combo
+            halo: &posrkhalo
+                strat: mono
+                data: { chan: *posdata  , sum: *halorksum }
+                halo: { chan: *poshalo  , sum: *halorksum }
+            peak:
+                fids:  *fids
+                halo:  { chan:  *poshalo  , sum:  *peakrksum }
+                data:  { chan:  *posdata  , sum:  *peakrksum }
+                stack: { sum: *peakrksum ,  normchan: km2_pos,
+                        channels: [
+                            { chan: km2_pos , type: km2, fidname: p5.km2.v2.pos },
+                            { chan: k2pig_pos , type: k2pi, fidname: p5.k2pig.v2.pos }
+                            ] }
+   
+    - scaling_method:
+        name: neg_lower
+        strategy: flexi
+        peak: km2
+        fids: *fids
+
+        halo:
+            strat: mono
+            halo: { chan:  *neghalo  , sum: *ctrllowersum }
+            data: { chan:  *negdata  , sum: *ctrllowersum }
+
+        mc: &mcneg
+            strat: combo
+            halo: &negrkhalo
+                strat: mono
+                halo: { chan:  *neghalo  , sum: *halorksum }
+                data: { chan:  *negdata  , sum: *halorksum }
+
+            peak:
+                fids:  *fids
+                halo: { chan: *neghalo  , sum: *peakrksum }
+                data: { chan: *negdata  , sum: *peakrksum }
+                stack: {  sum: *peakrksum , normchan: km2_neg,
+                        channels: [
+                            { chan: km2_neg , type: km2, fidname: p5.km2.v2.neg },
+                            { chan: k2pig_neg , type: k2pi, fidname: p5.k2pig.v2.neg }
+                            ] }
+
+    - scaling_method:
+        name: pos_upper
+        strategy: flexi
+        peak: km2
+        fids: *fids
+
+        halo:
+            strat: mono
+            halo: { chan:  *poshalo , sum: *ctrluppersum }
+            data: { chan:  *posdata , sum: *ctrluppersum }
+
+        mc: *mcpos
+
+    - scaling_method:
+        name: neg_upper
+        strategy: flexi
+        peak: km2
+        fids: *fids
+
+        halo:
+            strat: mono
+            halo: { chan:  *neghalo , sum: *ctrluppersum }
+            data: { chan:  *negdata , sum: *ctrluppersum }
+
+        mc: *mcneg
+
+    - scaling_method: {
+        name: pos_rk, strategy : flexi, peak: km2, fids: *fids,
+        halo: *posrkhalo , mc: *mcpos }
+
+    - scaling_method: {
+        name: neg_rk, strategy : flexi, peak: km2, fids: *fids,
+        halo: *negrkhalo , mc: *mcneg }
+
+weights: *fids
+
+stacks:
+    stack: &posstack [
+        item: { name: halo_pos,  type: halo,  channels: [ *poshalo ] },
+        item: { name: k3pi_pos,  type: k3pi,  fid_weight: p5.k3pi.v2.pos,     channels: [ p5.k3pi.v2.pos ] },
+        item: { name: k2pi_pos,  type: k2pi,  fid_weight: p5.k2pig.v2.pos,    channels: [ p5.k2pig.v2.pos ] },
+        item: { name: k3pi0_pos, type: k3pi0, fid_weight: p5.k3pi0.v2.pos,    channels: [ p5.k3pi0.v2.pos ] },
+        item: { name: km3_pos,   type: km3,   fid_weight: p5.km3.v2.pos,      channels: [ p5.km3.v2.pos ] },
+        item: { name: ke3_pos,   type: ke3,   fid_weight: p5.ke3.v2.pos,      channels: [ p5.ke3.v2.pos ] },
+        item: { name: km2_pos,   type: km2,   fid_weight: p5.km2.v2.pos, channels: [ p5.km2.v2.pos ] } ]
+
+    stack: &negstack [
+        item: { name: halo_neg,  type: halo,  channels: [ *neghalo ] },
+        item: { name: k3pi_neg,  type: k3pi,  fid_weight: p5.k3pi.v2.neg,     channels: [ p5.k3pi.v2.neg ] },
+        item: { name: k2pi_neg,  type: k2pi,  fid_weight: p5.k2pig.v2.neg,    channels: [ p5.k2pig.v2.neg ] },
+        item: { name: k3pi0_neg, type: k3pi0, fid_weight: p5.k3pi0.v2.neg,    channels: [ p5.k3pi0.v2.neg ] },
+        item: { name: km3_neg,   type: km3,   fid_weight: p5.km3.v2.neg,      channels: [ p5.km3.v2.neg ] },
+        item: { name: ke3_neg,   type: ke3,   fid_weight: p5.ke3.v2.neg,      channels: [ p5.ke3.v2.neg ] },
+        item: { name: km2_neg,   type: km2,   fid_weight: p5.km2.v2.neg, channels: [ p5.km2.v2.neg ] } ]
+
+    doblind: &doblind { do_blind: false,  min_blind: 0.09, max_blind: 0.14 }
+
+output_list:
+    #UP POS
+    - {
+        input_file: tdata/halo_control/all.halo_control.root,
+    
+        plots:  [
+            { path: pre_pre_plots/h_m2m_kmu, name: pos/pre_pre/h_m2m_kmu, rebin: 20} ,
+            ],
+            data_plot: { channels: [ *posdata ] }, blinding: *doblind, stack_scaling: pos_upper, stack: *posstack 
+        }
+
+    #UP NEG
+    - {
+        input_file: tdata/halo_control/all.halo_control.root,
+    
+        plots:  [
+            { path: pre_pre_plots/h_m2m_kmu, name: neg/pre_pre/h_m2m_kmu, rebin: 20} ,
+            ],
+
+            data_plot: { channels: [ *negdata ] }, blinding: *doblind, stack_scaling: neg_upper, stack: *negstack
+        }

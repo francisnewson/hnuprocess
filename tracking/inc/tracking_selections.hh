@@ -214,6 +214,9 @@ namespace fn
             TrackPZ( const SingleTrack& st,
                     std::vector<rectangle> recs );
 
+            TrackPZ( const SingleTrack& st,
+                    std::vector<polygon_type> polys );
+
         private:
             bool do_check() const;
 

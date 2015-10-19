@@ -1,0 +1,33 @@
+#!/usr/bin/env python
+
+def mult_sel( sels, plots ):
+    for sel in sels:
+        for plot in plots:
+            print( '- {sel}/{plot}'.format( sel = sel, plot = plot ) )
+        print( '' )
+
+
+sels = [ 'signal_upper_plots'
+        , 'signal_lower_plots'
+        , 'signal_upper_loose_plots'
+        , 'signal_lower_loose_plots'
+        , 'signal_upper_hm2m_plots' 
+        , 'signal_lower_hm2m_plots'
+        , 'scaling_upper_plots'
+        , 'scaling_lower_plots'
+        , 'scaling_upper_negm2m_plots'
+        , 'scaling_lower_negm2m_plots'
+        , 'signal_upper_check_plots'
+        , 'signal_lower_check_plots'
+        , 'signal_upper_check_hm2m_plots'
+        , 'signal_lower_check_hm2m_plots'
+        , 'rk_like_plots'
+        , 'rk_like_hm2m_plots'
+
+
+        
+        ]
+plots = [ 'h_m2m_kmu', 'h_p', 'h_z', 'h_t', 'h_cda'  ]
+
+
+mult_sel( sels, plots )

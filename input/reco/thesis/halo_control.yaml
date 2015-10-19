@@ -75,6 +75,10 @@
 @include "input/reco/thesis/std/selections.inc.yaml"
 @include "input/reco/thesis/std/kine_regions.inc.yaml"
 
+- selection : { type : Q11TTrigger, name : q11t }
+
+- selection : { type : Q11TTrigger, name : q11t_auto, ignore_unless: [trigrun]  }
+
 ###################################################
 # SELECTIONS
 ###################################################
@@ -84,6 +88,7 @@
     type: CompositeSelection
     children:
         - weighted_data_sample
+        - q11t_auto
         - good_trk
         - pos_trk
         - quality_7
@@ -91,48 +96,64 @@
         - dch1_acc
         - dch4_acc
         - muv_acc
+        - rk_lkr_accep
         - rk_hot_lkr
         - rk_lkr_veto
         - rk_dcht
         - ddead_cell
 
-- selection: { name: pre_upper, type : CompositeSelection, children:   [pre_selection,  zt_up ]   }
+ #Preselection
+- selection: { name: pre_pre, type: CompositeSelection, children: [ weighted_data_sample, good_trk, pos_trk, quality_7 ] }
 
+  #Upper/lower regions
+- selection: { name: pre_upper, type : CompositeSelection, children: [ pre_selection, zt_up ] }
 - selection: { name: pre_lower, type : CompositeSelection, children: [ pre_selection, zt_dn ] }
 
+- selection: { name: pre_high_m2m_good, type: CompositeSelection, children: [ pre_selection, m2_high_good ] }
+- selection: { name: pre_high_m2m_bad, type: CompositeSelection, children: [ pre_selection, m2_high_bad ] }
 
-- selection: { name: ctrl_upper, type : CompositeSelection, children:  [ pre_selection, ctrl_upper_sel ]  }
+- selection: { name: pre_upper_high_m2m_good, type: CompositeSelection, children: [ pre_high_m2m_good, zt_up ] }
+- selection: { name: pre_lower_high_m2m_good, type: CompositeSelection, children: [ pre_high_m2m_good, zt_dn ] }
 
-- selection: { name: ctrl_lower, type : CompositeSelection, children:  [ pre_selection, ctrl_lower_sel ]  }
+- selection: { name: pre_upper_high_m2m_bad, type: CompositeSelection, children: [ pre_high_m2m_bad, zt_up ] }
+- selection: { name: pre_lower_high_m2m_bad, type: CompositeSelection, children: [ pre_high_m2m_bad, zt_dn ] }
 
-- selection: { name: ctrl_lower_full_m2m, type : CompositeSelection, children:  [ pre_selection, ctrl_lower_sel_full_m2m ]  }
-
-- selection: { name: ctrl_lower_neg_m2m, type : CompositeSelection, children:  [ pre_selection, ctrl_lower_sel_neg_m2m ]  }
-
-
+ #Control regions (for scaling)
+- selection: { name: ctrl_upper,     type : CompositeSelection, children:  [ pre_selection, ctrl_upper_sel ]  }
 - selection: { name: ctrl_upper_muv, type : CompositeSelection, children:  [ pre_selection, ctrl_upper_sel_muv ]  }
 
-- selection: { name: ctrl_lower_muv, type : CompositeSelection, children: [pre_selection, ctrl_lower_sel_muv ] }
+- selection: { name: ctrl_lower,     type : CompositeSelection, children:  [ pre_selection, ctrl_lower_sel ]  }
+- selection: { name: ctrl_lower_muv, type : CompositeSelection, children:  [ pre_selection, ctrl_lower_sel_muv ] }
 
+- selection: { name: ctrl_lower_neg_m2m,     type : CompositeSelection, children:  [ pre_selection, ctrl_lower_sel_neg_m2m ]  }
+- selection: { name: ctrl_lower_neg_m2m_muv, type : CompositeSelection, children:  [ pre_selection, ctrl_lower_sel_neg_m2m_muv ]  }
 
-- selection: { name: signal_upper, type : CompositeSelection, children:  [ pre_selection, signal_upper_sel ]  }
+  #Control region checking
+- selection: { name: ctrl_upper_scale_check, type : CompositeSelection, children:  [ pre_selection, ctrl_upper_sel_scale_check ]  }
 
-- selection: { name: signal_lower, type : CompositeSelection, children:  [ pre_selection, signal_lower_sel ]  }
-
+ #Signal selections
+- selection: { name: signal_upper,     type : CompositeSelection, children:  [ pre_selection, signal_upper_sel ]  }
 - selection: { name: signal_upper_muv, type : CompositeSelection, children:  [ pre_selection, signal_upper_sel, muon_req ]  }
 
+- selection: { name: signal_lower,     type : CompositeSelection, children:  [ pre_selection, signal_lower_sel ]  }
 - selection: { name: signal_lower_muv, type : CompositeSelection, children:  [ pre_selection, signal_lower_sel, muon_req ]  }
 
+  #Check signal selections
+- selection: { name: signal_upper_check, type : CompositeSelection, children:  [ pre_selection, signal_upper_check_sel ]  }
+- selection: { name: signal_upper_check_muv, type : CompositeSelection, children:  [ pre_selection, signal_upper_check_sel, muon_req ]  }
 
+- selection: { name: signal_upper_alt_check_muv, type : CompositeSelection, 
+    children:  [ pre_selection, alt_upper_check_sel, muon_req ]  }
+
+- selection: { name: signal_lower_check, type : CompositeSelection, children:  [ pre_selection, signal_lower_check_sel ]  }
+- selection: { name: signal_lower_check_muv, type : CompositeSelection, children:  [ pre_selection, signal_lower_check_sel, muon_req ]  }
+
+- selection: { name: signal_lower_alt_check_muv, type : CompositeSelection, 
+    children:  [ pre_selection, alt_lower_check_sel, muon_req ]  }
+
+  #rk like selections
 - selection: { name: rk_like_selection, type: CompositeSelection, children: [ pre_selection, rk_specific ] }
-
 - selection: { name: rk_like_high_m2m_selection, type: CompositeSelection, children: [ rk_like_selection, m2_high ] }
-
-- selection: { name: pre_high_m2m, type: CompositeSelection, children: [ pre_selection, m2_high ] }
-
-- selection: { name: pre_upper_high_m2m, type: CompositeSelection, children: [ pre_high_m2m, zt_up ] }
-
-- selection: { name: pre_lower_high_m2m, type: CompositeSelection, children: [ pre_high_m2m, zt_dn ] }
 
 ##################################################
 #
@@ -140,48 +161,90 @@
 #
 ##################################################
 
+  #Preselection
+- analysis : { type: Km2Plotter, name: pre_pre_plots, folder: pre_pre_plots,
+    tfile: tfout, selection: pre_pre, inputs: { km2event : km2_event } }
+
 - analysis : { type: Km2Plotter, name: pre_plots, folder: pre_plots,
     tfile: tfout, selection: pre_selection, inputs: { km2event : km2_event } }
 
+ #Upper/lower regions
 - analysis : { type: Km2Plotter, name: pre_upper_plots, folder: pre_upper_plots,
-    tfile: tfout, selection: pre_upper, inputs: { km2event : km2_event } }
+    mini: true, tfile: tfout, selection: pre_upper, inputs: { km2event : km2_event } }
 
 - analysis : { type: Km2Plotter, name: pre_lower_plots, folder: pre_lower_plots,
-    tfile: tfout, selection: pre_lower, inputs: { km2event : km2_event } }
+    mini: true, tfile: tfout, selection: pre_lower, inputs: { km2event : km2_event } }
+
+- analysis : { type: Km2Plotter, name: pre_upper_high_m2m_good_plots, folder: pre_upper_high_m2m_good_plots,
+    mini: true, tfile: tfout, selection: pre_upper_high_m2m_good, inputs: { km2event : km2_event } }
+
+- analysis : { type: Km2Plotter, name: pre_lower_high_m2m_good_plots, folder: pre_lower_high_m2m_good_plots,
+    mini: true, tfile: tfout, selection: pre_lower_high_m2m_good, inputs: { km2event : km2_event } }
+
+- analysis : { type: Km2Plotter, name: pre_upper_high_m2m_bad_plots, folder: pre_upper_high_m2m_bad_plots,
+    mini: true, tfile: tfout, selection: pre_upper_high_m2m_bad, inputs: { km2event : km2_event } }
+
+- analysis : { type: Km2Plotter, name: pre_lower_high_m2m_bad_plots, folder: pre_lower_high_m2m_bad_plots,
+    mini: true, tfile: tfout, selection: pre_lower_high_m2m_bad, inputs: { km2event : km2_event } }
 
 ########
 
+ #Control regions (for scaling)
 - analysis : { type: Km2Plotter, name: ctrl_upper_plots, folder: ctrl_upper_plots,
-    tfile: tfout, selection: ctrl_upper, inputs: { km2event : km2_event } }
+    mini: true, tfile: tfout, selection: ctrl_upper, inputs: { km2event : km2_event } }
 
 - analysis : { type: Km2Plotter, name: ctrl_upper_muv_plots, folder: ctrl_upper_muv_plots,
-    tfile: tfout, selection: ctrl_upper_muv, inputs: { km2event : km2_event } }
+    mini: true, tfile: tfout, selection: ctrl_upper_muv, inputs: { km2event : km2_event } }
 
 - analysis : { type: Km2Plotter, name: ctrl_lower_plots, folder: ctrl_lower_plots,
-    tfile: tfout, selection: ctrl_lower, inputs: { km2event : km2_event } }
-
-- analysis : { type: Km2Plotter, name: ctrl_lower_full_m2m_plots, folder: ctrl_lower_full_m2m_plots,
-    tfile: tfout, selection: ctrl_lower_full_m2m, inputs: { km2event : km2_event } }
-
-- analysis : { type: Km2Plotter, name: ctrl_lower_neg_m2m_plots, folder: ctrl_lower_neg_m2m_plots,
-    tfile: tfout, selection: ctrl_lower_neg_m2m, inputs: { km2event : km2_event } }
+    mini: true, tfile: tfout, selection: ctrl_lower, inputs: { km2event : km2_event } }
 
 - analysis : { type: Km2Plotter, name: ctrl_lower_muv_plots, folder: ctrl_lower_muv_plots,
-    tfile: tfout, selection: ctrl_lower_muv, inputs: { km2event : km2_event } }
+    mini: true, tfile: tfout, selection: ctrl_lower_muv, inputs: { km2event : km2_event } }
+
+- analysis : { type: Km2Plotter, name: ctrl_lower_neg_m2m_plots, folder: ctrl_lower_neg_m2m_plots,
+    mini: true, tfile: tfout, selection: ctrl_lower_neg_m2m, inputs: { km2event : km2_event } }
+
+- analysis : { type: Km2Plotter, name: ctrl_lower_neg_m2m_muv_plots, folder: ctrl_lower_neg_m2m_plots,
+    mini: true, tfile: tfout, selection: ctrl_lower_neg_m2m_muv, inputs: { km2event : km2_event } }
+
+  #Control region checking
+- analysis : { type: Km2Plotter, name: ctrl_upper_scale_check_plots, folder: ctrl_upper_scale_check_plots,
+    mini: true, tfile: tfout, selection: ctrl_upper_scale_check, inputs: { km2event : km2_event } }
 
 ##########
 
 - analysis : { type: Km2Plotter, name: signal_upper_plots, folder: signal_upper_plots,
-    tfile: tfout, selection: signal_upper, inputs: { km2event : km2_event } }
-
-- analysis : { type: Km2Plotter, name: signal_lower_plots, folder: signal_lower_plots,
-    tfile: tfout, selection: signal_lower, inputs: { km2event : km2_event } }
+    mini: true, tfile: tfout, selection: signal_upper, inputs: { km2event : km2_event } }
 
 - analysis : { type: Km2Plotter, name: signal_upper_muv_plots, folder: signal_upper_muv_plots,
-    tfile: tfout, selection: signal_upper_muv, inputs: { km2event : km2_event } }
+    mini: true, tfile: tfout, selection: signal_upper_muv, inputs: { km2event : km2_event } }
+
+- analysis : { type: Km2Plotter, name: signal_lower_plots, folder: signal_lower_plots,
+    mini: true, tfile: tfout, selection: signal_lower, inputs: { km2event : km2_event } }
 
 - analysis : { type: Km2Plotter, name: signal_lower_muv_plots, folder: signal_lower_muv_plots,
-    tfile: tfout, selection: signal_lower_muv, inputs: { km2event : km2_event } }
+    mini: true, tfile: tfout, selection: signal_lower_muv, inputs: { km2event : km2_event } }
+
+
+  #Check signal selections
+- analysis : { type: Km2Plotter, name: signal_upper_check_plots, folder: signal_upper_check_plots,
+    mini: true, tfile: tfout, selection: signal_upper_check, inputs: { km2event : km2_event } }
+
+- analysis : { type: Km2Plotter, name: signal_upper_check_muv_plots, folder: signal_upper_check_muv_plots,
+    mini: true, tfile: tfout, selection: signal_upper_check_muv, inputs: { km2event : km2_event } }
+
+- analysis : { type: Km2Plotter, name: signal_upper_alt_check_muv_plots, folder: signal_upper_alt_check_muv_plots,
+    mini: true, tfile: tfout, selection: signal_upper_alt_check_muv, inputs: { km2event : km2_event } }
+
+- analysis : { type: Km2Plotter, name: signal_lower_check_plots, folder: signal_lower_check_plots,
+    mini: true, tfile: tfout, selection: signal_lower_check, inputs: { km2event : km2_event } }
+
+- analysis : { type: Km2Plotter, name: signal_lower_check_muv_plots, folder: signal_lower_check_muv_plots,
+    mini: true, tfile: tfout, selection: signal_lower_check_muv, inputs: { km2event : km2_event } }
+
+- analysis : { type: Km2Plotter, name: signal_lower_alt_check_muv_plots, folder: signal_lower_alt_check_muv_plots,
+    mini: true, tfile: tfout, selection: signal_lower_alt_check_muv, inputs: { km2event : km2_event } }
 
 ##########
 
@@ -191,30 +254,19 @@
 - analysis : { type: Km2Plotter, name: rk_like_high_m2m_selection_plots, folder: rk_like_high_m2m_selection_plots,
     tfile: tfout, selection: rk_like_high_m2m_selection, inputs: { km2event : km2_event } }
 
-- analysis : { type: Km2Plotter, name: pre_high_m2m_plots, folder: pre_high_m2m_plots,
-    tfile: tfout, selection: pre_high_m2m, inputs: { km2event : km2_event } }
-
-- analysis : { type: Km2Plotter, name: pre_upper_high_m2m_plots, folder: pre_upper_high_m2m_plots,
-    tfile: tfout, selection: pre_upper_high_m2m, inputs: { km2event : km2_event } }
-
-- analysis : { type: Km2Plotter, name: pre_lower_high_m2m_plots, folder: pre_lower_high_m2m_plots,
-    tfile: tfout, selection: pre_lower_high_m2m, inputs: { km2event : km2_event } }
-
 - analysis : {name : full_summary, type: Summary, 
     base : passer, source : pre_selection, ostream: os_stats } 
 
 #############
 
-- selection : { type : Q11TTrigger, name : q11t }
-
 - analysis : { type : TriggerEffs, name : pre_trig_eff, folder : pre_trig_eff,
-    tfile: tfout, base: pre_selection, source: q11t, inputs : { km2event: km2_event } }
+    mini: true, tfile: tfout, base: pre_selection, source: q11t, inputs : { km2event: km2_event } }
 
 - analysis : { type : TriggerEffs, name : sig_up_trig_eff, folder : sig_up_trig_eff,
-    tfile: tfout, base: signal_upper_muv, source: q11t, inputs : { km2event: km2_event } }
+    mini: true, tfile: tfout, base: signal_upper_muv, source: q11t, inputs : { km2event: km2_event } }
 
 - analysis : { type : TriggerEffs, name : sig_dn_trig_eff, folder : sig_dn_trig_eff,
-    tfile: tfout, base: signal_lower_muv, source: q11t, inputs : { km2event: km2_event } }
+    mini: true, tfile: tfout, base: signal_lower_muv, source: q11t, inputs : { km2event: km2_event } }
 
 #############
 

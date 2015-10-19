@@ -45,6 +45,23 @@ namespace fn
 
     //--------------------------------------------------
 
+    class PassMuon : public SingleMuon
+    {
+        public:
+            PassMuon( const SingleTrack& st);
+            void new_event();
+            bool found() const { return true; }
+            double weight() const { return 1.0; }
+            double x() const{ return x_; }
+            double y() const{ return y_; }
+
+        private:
+            const SingleTrack& st_;
+            mutable double x_;
+            mutable double y_;
+    };
+
+
     //Uses raw RecoMuons from event.detector.muons
     class RawSingleMuon : public SingleMuon
     {

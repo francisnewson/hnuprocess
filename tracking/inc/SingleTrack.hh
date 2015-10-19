@@ -54,6 +54,8 @@ namespace fn
             virtual TVector3 extrapolate_us( double z) const = 0 ;
             virtual TVector3 get_us_mom() const = 0;
 
+            virtual Track get_bz_track() const = 0;
+
             //BF track
             virtual TVector3 extrapolate_bf( double z) const = 0 ;
 
@@ -113,7 +115,7 @@ namespace fn
 
         fne::RecoTrack rt_;
         fne::RecoTrack * rt;
-        fne::RecoTrack * orig_rt;
+        const fne::RecoTrack * orig_rt;
     };
 
     //--------------------------------------------------
@@ -154,6 +156,7 @@ namespace fn
             TVector3 get_unscattered_3mom() const;
             TVector3 get_us_mom() const;
             TVector3 get_ds_mom() const;
+            Track get_bz_track() const;
 
             int get_compact_id() const;
             int get_muon_id() const;

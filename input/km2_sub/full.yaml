@@ -1,0 +1,115 @@
+fid:  {
+    root_file: "tdata/full/all.full.root",
+    pre: "", post: "sample_burst_count/bursts", branch: "weight" }
+
+files:
+    input: "tdata/full/all.full.root"
+
+names:
+    ib: p5.km2.v2
+    intp: p5.km2.intp.v4
+    intm: p5.km2.intm.v4
+    sdp: p5.km2.sdp.v4
+    sdm: p5.km2.sdm.v4
+    full: p5.km2.full
+
+var:
+    myplots: &myplots
+        - signal_upper_plots/h_m2m_kmu
+        - signal_upper_plots/h_p
+        - signal_upper_plots/h_z
+        - signal_upper_plots/h_t
+        - signal_upper_plots/h_cda
+
+        - signal_lower_plots/h_m2m_kmu
+        - signal_lower_plots/h_p
+        - signal_lower_plots/h_z
+        - signal_lower_plots/h_t
+        - signal_lower_plots/h_cda
+
+        - signal_upper_loose_plots/h_m2m_kmu
+        - signal_upper_loose_plots/h_p
+        - signal_upper_loose_plots/h_z
+        - signal_upper_loose_plots/h_t
+        - signal_upper_loose_plots/h_cda
+
+        - signal_lower_loose_plots/h_m2m_kmu
+        - signal_lower_loose_plots/h_p
+        - signal_lower_loose_plots/h_z
+        - signal_lower_loose_plots/h_t
+        - signal_lower_loose_plots/h_cda
+
+        - signal_upper_hm2m_plots/h_m2m_kmu
+        - signal_upper_hm2m_plots/h_p
+        - signal_upper_hm2m_plots/h_z
+        - signal_upper_hm2m_plots/h_t
+        - signal_upper_hm2m_plots/h_cda
+
+        - signal_lower_hm2m_plots/h_m2m_kmu
+        - signal_lower_hm2m_plots/h_p
+        - signal_lower_hm2m_plots/h_z
+        - signal_lower_hm2m_plots/h_t
+        - signal_lower_hm2m_plots/h_cda
+
+        - scaling_upper_plots/h_m2m_kmu
+        - scaling_upper_plots/h_p
+        - scaling_upper_plots/h_z
+        - scaling_upper_plots/h_t
+        - scaling_upper_plots/h_cda
+
+        - scaling_lower_plots/h_m2m_kmu
+        - scaling_lower_plots/h_p
+        - scaling_lower_plots/h_z
+        - scaling_lower_plots/h_t
+        - scaling_lower_plots/h_cda
+
+        - scaling_upper_negm2m_plots/h_m2m_kmu
+        - scaling_upper_negm2m_plots/h_p
+        - scaling_upper_negm2m_plots/h_z
+        - scaling_upper_negm2m_plots/h_t
+        - scaling_upper_negm2m_plots/h_cda
+
+        - scaling_lower_negm2m_plots/h_m2m_kmu
+        - scaling_lower_negm2m_plots/h_p
+        - scaling_lower_negm2m_plots/h_z
+        - scaling_lower_negm2m_plots/h_t
+        - scaling_lower_negm2m_plots/h_cda
+
+        - signal_upper_check_plots/h_m2m_kmu
+        - signal_upper_check_plots/h_p
+        - signal_upper_check_plots/h_z
+        - signal_upper_check_plots/h_t
+        - signal_upper_check_plots/h_cda
+
+        - signal_lower_check_plots/h_m2m_kmu
+        - signal_lower_check_plots/h_p
+        - signal_lower_check_plots/h_z
+        - signal_lower_check_plots/h_t
+        - signal_lower_check_plots/h_cda
+
+        - signal_upper_check_hm2m_plots/h_m2m_kmu
+        - signal_upper_check_hm2m_plots/h_p
+        - signal_upper_check_hm2m_plots/h_z
+        - signal_upper_check_hm2m_plots/h_t
+        - signal_upper_check_hm2m_plots/h_cda
+
+        - signal_lower_check_hm2m_plots/h_m2m_kmu
+        - signal_lower_check_hm2m_plots/h_p
+        - signal_lower_check_hm2m_plots/h_z
+        - signal_lower_check_hm2m_plots/h_t
+        - signal_lower_check_hm2m_plots/h_cda
+
+        - rk_like_plots/h_m2m_kmu
+        - rk_like_plots/h_p
+        - rk_like_plots/h_z
+        - rk_like_plots/h_t
+        - rk_like_plots/h_cda
+
+        - rk_like_hm2m_plots/h_m2m_kmu
+        - rk_like_hm2m_plots/h_p
+        - rk_like_hm2m_plots/h_z
+        - rk_like_hm2m_plots/h_t
+        - rk_like_hm2m_plots/h_cda
+
+plots:
+    *myplots

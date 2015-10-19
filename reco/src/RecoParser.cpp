@@ -222,6 +222,27 @@ namespace fn
                 }
             }
 
+            if ( YAML::Node accept_class_node = instruct["ignore_unless"] )
+            {
+                std::vector<std::string> accept_classes = 
+                    accept_class_node.as<std::vector<std::string>>();
+
+                for ( auto& accept_class : accept_classes )
+                {
+                    BOOST_LOG_SEV( log_, always_print )
+                        << "Checking accept class: " << accept_class << " for "  << channel;
+
+                    std::vector<std::string> accept_channels = channel_classes_[accept_class];
+
+                    if ( contains( accept_channels , channel ) )
+                    {
+                        return false;
+                    }
+                }
+
+                return true;
+            }
+
             return false;
         }
 
@@ -355,7 +376,7 @@ namespace fn
         for( std::string line ; std::getline( ifs, line ); )
         {
 
-            if ( boost::algorithm::contains( line, "@include" ) )
+            if ( boost::algorithm::contains( line, "@include" ) && ! boost::algorithm::contains( line, "#" ) )
             {
                 std::vector<std::string> tokens;
                 boost::split( tokens, line, boost::is_any_of( "\" " ) , boost::token_compress_on );

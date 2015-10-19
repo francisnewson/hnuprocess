@@ -18,6 +18,7 @@
 extern"C" {
     void blue_tack_( int* nchar, float * tmom, float * Vxyz, float *vpnt, float *vdir );
     void user_blueinit_();
+    void print_field_( float * pos, float * bfld );
 }
 
 namespace fn

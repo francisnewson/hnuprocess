@@ -1,0 +1,6 @@
+./build_bham/apps/halo_subtract -m input/halo_sub/hsub.full.yaml -o tdata/staging/full/halo_sub.root -l tdata/staging/full/log_halo_sub.root
+./build_bham/apps/km2_subtract  -m input/km2_sub/full.yaml       -o tdata/staging/full/km2_sub.root -l tdata/staging/full/log_km2_sub.root
+hadd tdata/staging/full/all.plots.root tdata/full/all.full.root tdata/staging/full/halo_sub.root tdata/staging/full/km2_sub.root
+./build_bham/apps/shuffle -m input/shuffle/thesis/full/full.yaml -o tdata/staging/full/all.shuffle_plots.root
+./build_bham/apps/merge_stack -m input/merge/thesis/full.yaml -o tdata/staging/full/all.merge_plots.root
+./build_bham/apps/merge_stack -m input/merge/thesis/full_breakdown.yaml -o tdata/staging/full/all.breakdown_plots.root

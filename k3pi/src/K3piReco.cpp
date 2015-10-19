@@ -36,6 +36,7 @@ namespace fn
             double K3piRecoEvent::get_pt() const { return p4_total_.Vect().Perp( kaon_mom_ ); }
             double K3piRecoEvent::get_mom() const{ return p4_total_.P(); }
             double K3piRecoEvent::get_z_vertex() const{ return vertex_.Z(); }
+            TVector3 K3piRecoEvent::get_kaon_mom() const{ return kaon_mom_; }
 
             double K3piRecoEvent::get_invariant_mass2() const
             {
@@ -87,8 +88,13 @@ namespace fn
 
     bool K3piReco::process_event() const
     {
-        //require 1 vertex
+        std::cerr << "processing k3pi" << std::endl;
+        std::cerr << e_->detector.nvertexs << std::endl;
+
+        //require 1 verte8
         if ( e_->detector.nvertexs != 1 ){ return false; }
+
+        std::cerr << "found 1 vtx" << std::endl;
 
         fne::RecoVertex * rv = static_cast<fne::RecoVertex*>
             ( e_->detector.vertexs.At( 0 ) );
@@ -96,9 +102,13 @@ namespace fn
         //require 3 tracks
         if ( rv->nvertextracks != 3 ) {return false; }
 
+        std::cerr << "found 3 trkcs" << std::endl;
+
         //check charge
         int charge = rv->charge;
         if ( ( req_charge_) != 0 && (req_charge_ != charge) ){ return false; }
+
+        std::cerr << "good charge" << std::endl;
 
         //extract track momenta and dch impact points
         std::vector<TLorentzVector> momenta;
@@ -243,4 +253,34 @@ namespace fn
         {
             return get_sub<K3piReco>( instruct, rf, "k3pi_reco" );
         }
+
+
+    //--------------------------------------------------
+
+    processing_track  correct_track( 
+            const fne::RecoTrack * rt, const fne::Event * e, const KaonTrack& kt )
+    {
+        processing_track result;
+
+        result.rt_ = *rt;
+        result.rt = &result.rt_;
+        result.orig_rt = rt;
+
+        const double& alpha = e->conditions.alpha;
+        const double& beta = e->conditions.beta;
+        const double& dch_toffst = e->conditions.dch_toffst;
+
+        result.corr_mom = p_corr_ab( result.rt->p, result.rt->q, alpha, beta );
+        result.unscattered_mom  = result.corr_mom;
+        result.adjusted_time = result.rt->time - dch_toffst;
+
+        const Track& kaon_track = kt.get_kaon_track();
+        Track result_track = get_bz_track( *result.rt );
+        result.vert = compute_cda(result_track, kaon_track );
+
+        //UNFINISHED FUNCTION!!!!!!
+
+
+        return result;
+    }
 }

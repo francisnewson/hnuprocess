@@ -40,6 +40,35 @@
     enabled: true
 
 ###################################################
+# EXTRA KAONS
+###################################################
+
+- input:
+    name: kt_plus
+    type: KaonTrack
+    kaon_type: rawkp
+
+- input:
+    name: kt_minus
+    type: KaonTrack
+    kaon_type: rawkm
+
+- input:
+    name: kt_weighted_kp
+    type: KaonTrack
+    kaon_type: weightedK
+    pos_pol_file: 'input/reco/beam/p5.q11t.kp_prop_pos.dat'
+    neg_pol_file: 'input/reco/beam/p5.q11t.kp_prop_neg.dat'
+
+- input:
+    name: kt_weighted_km
+    type: KaonTrack
+    kaon_type: weightedK
+    pos_pol_file: 'input/reco/beam/p6.q11t.km_prop_pos.dat'
+    neg_pol_file: 'input/reco/beam/p6.q11t.km_prop_neg.dat'
+
+
+###################################################
 # DATA SAMPLE DEFINITION
 ###################################################
 
@@ -57,7 +86,7 @@
 - selection:
     name: good_muv_burst
     type: BadBurst
-    burst_list: "input/reco/conditions/bad_muv_burst.90.dat"
+    burst_list: "input/reco/conditions/bad_muv_bursts_95_90.dat"
 
 - selection:
     name: good_muv_burst_range

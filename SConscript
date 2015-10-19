@@ -26,7 +26,8 @@ my_libs = [
 'muons',
 'dch',
 'akl',
-'shuffle'
+'shuffle',
+'checkscales'
 ]
 
 #Call Sconscript for each library

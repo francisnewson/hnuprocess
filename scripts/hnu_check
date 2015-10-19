@@ -1,0 +1,5 @@
+#!/bin/bash
+for m in 000 050 100 150 200 225 250 275 300 310 320 330 340 350 360 370 380
+do
+    ./build_bham/apps/hnureco --auto -m input/reco/thesis/halo_control.yaml -c runlists/polroot/hnu/mc.p5.hnu.${m}.nodk.pos.list -p output/hnu/m.${m}.pos
+done

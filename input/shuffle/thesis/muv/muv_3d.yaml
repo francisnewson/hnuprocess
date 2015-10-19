@@ -1,0 +1,101 @@
+var:
+    pos_halo: &poshalo p6.data.km.q11t.v2.pos
+    pos_data: &posdata p5.data.q11t.v3.pos
+    pos_trig_num: &postrignum p5.data.q1.v4.trigrun.pos
+    pos_trig_denom: &postrigdenom p5.data.q1.v4.pos
+    neg_halo: &neghalo p6.data.km.q11t.v2.neg
+    neg_data: &negdata p5.data.q11t.v3.neg
+    neg_trig_num: &negtrignum p5.data.q1.v4.trigrun.neg
+    neg_trig_denom: &negtrigdenom p5.data.q1.v4.neg
+
+sums:
+    halorksum:  &halorksum {
+        file: tdata/muv_3d/all.muv_3d.root,
+        pre: "", post: km2_plots/h_m2m_kmu,
+        min: -0.3, max: -0.03 }
+
+    peakrksum:  &peakrksum {
+            file: tdata/muv_3d/all.muv_3d.root,
+            pre: "", post: km2_plots/h_m2m_kmu,
+            min: -0.020, max: +0.020 } 
+
+    fids: &fids { fid_file: use_root, root_file: 'tdata/muv_3d/all.muv_3d.root',
+        pre: "", post : "sample_burst_count/bursts", branch: "weight" }
+
+scaling:
+    - scaling_method:
+        name: pos
+        strategy: flexi
+        peak: km2
+        fids: *fids
+
+        halo:
+            strat: mono
+            halo: { chan: *poshalo , sum: *halorksum }
+            data: { chan: *posdata , sum: *halorksum }
+
+        mc: &mcpos
+            strat: combo
+            halo: &posrkhalo
+                strat: mono
+                data: { chan: *posdata  , sum: *halorksum }
+                halo: { chan: *poshalo  , sum: *halorksum }
+            peak:
+                fids:  *fids
+                halo:  { chan:  *poshalo  , sum:  *peakrksum }
+                data:  { chan:  *posdata  , sum:  *peakrksum }
+                stack: { sum: *peakrksum ,  normchan: km2_pos,
+                        channels: [
+                            { chan: km2_pos , type: km2, fidname: p5.km2.v2.pos },
+                            ] }
+   
+    - scaling_method:
+        name: neg
+        strategy: flexi
+        peak: km2
+        fids: *fids
+
+        halo:
+            strat: mono
+            halo: { chan:  *neghalo  , sum: *halorksum}
+            data: { chan:  *negdata  , sum: *halorksum }
+
+        mc: &mcneg
+            strat: combo
+            halo: &negrkhalo
+                strat: mono
+                halo: { chan:  *neghalo  , sum: *halorksum }
+                data: { chan:  *negdata  , sum: *halorksum }
+
+            peak:
+                fids:  *fids
+                halo: { chan: *neghalo  , sum: *peakrksum }
+                data: { chan: *negdata  , sum: *peakrksum }
+                stack: {  sum: *peakrksum , normchan: km2_neg,
+                        channels: [
+                            { chan: km2_neg , type: km2, fidname: p5.km2.v2.neg },
+                            ] }
+
+weights: *fids
+
+stacks:
+    stack: &posstack [
+        item: { name: halo_pos,  type: halo,  channels: [ *poshalo ] },
+        item: { name: km2_pos,   type: km2,   fid_weight: p5.km2.v2.pos, channels: [ p5.km2.v2.pos ] } ]
+
+    stack: &negstack [
+        item: { name: halo_neg,  type: halo,  channels: [ *neghalo ] },
+        item: { name: km2_neg,   type: km2,   fid_weight: p5.km2.v2.neg, channels: [ p5.km2.v2.neg ] } ]
+
+    doblind: &doblind { do_blind: false,  min_blind: 0.09, max_blind: 0.14 }
+
+output_list:
+    #UP POS
+    - {
+        input_file: tdata/muv_3d/all.muv_3d.root,
+    
+        plots:  [
+            { path: km2_plots_muv/h_m2m_kmu, name: km2_plots_muv/pos/h_m2m_kmu, rebin: 20} ,
+            ],
+            data_plot: { channels: [ *posdata ] }, blinding: *doblind, stack_scaling: pos, stack: *posstack 
+        }

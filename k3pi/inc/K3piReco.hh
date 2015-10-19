@@ -4,6 +4,7 @@
 #include "HistStore.hh"
 #include "TLorentzVector.h"
 #include "GetSubscriber.hh"
+#include "SingleTrack.hh"
 
 #if 0
 /*
@@ -42,6 +43,7 @@ namespace fn
             double get_mom() const;
             double get_invariant_mass2() const;
             double get_z_vertex() const;
+            TVector3 get_kaon_mom() const;
 
             void update( int charge, double chi2,
                     double min_dch1_sep, 
@@ -98,6 +100,12 @@ namespace fn
 
     template  <>
         K3piReco * get_sub<K3piReco>( YAML::Node& instruct, RecoFactory& rf);
+
+
+    //--------------------------------------------------
+
+    processing_track correct_track( 
+            const fne::RecoTrack * rt, const fne::Event * e );
 
 }
 #endif

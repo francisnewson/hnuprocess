@@ -1,0 +1,89 @@
+#!/usr/bin/env python
+import sys
+import yaml
+
+class dotdict(dict):
+     """dot.notation access to dictionary attributes"""
+     def __getattr__(self, attr):
+         return self.get(attr)
+     __setattr__= dict.__setitem__
+     __delattr__= dict.__delitem__
+
+class Merger:
+    def get_node(self,  name, infos ):
+        halo_info = [
+                {  'bgpath' : info['bgpath'], 'scalepath' : info['scalepath'],
+                    'logpath' : info['logpath' ] } for info in infos
+                ]
+
+        selections = [ info['sel']  for info in infos ]
+        result = { 
+                'name' : name,
+                'filename' : self.filename,
+                'halolog' : self.halolog ,
+                'haloinfo':  halo_info,
+                'destfolder' : name,
+                'errors' : True,
+                'selections' : selections
+                }
+
+        return result
+
+
+
+
+        #self.o.write( '''- {{
+        #name: {name}, 
+        #filename: {filename},
+        #halolog: {halolog},
+        #haloinfo: ['''.format( 
+        #    name = name, filename = self.filename, halolog = self.halolog ) )
+        #for info in infos:
+        #    infodot = dotdict( info )
+        #    self.o.write( '''
+        #    {{ bgpath: {bgpath},
+        #    scalepath: {scalepath}, logpath: {logpath} }},'''.format(
+        #            bgpath = infodot.bgpath, scalepath = infodot.scalepath,
+        #            logpath = infodot.logpath ) )
+        #self.o.write( ''' ] \n\tdestfolder: {destfolder},
+        #errors: true,
+        #selections: ['''.format(destfolder =  name )  )
+        #for info in infos:
+        #    infodot = dotdict( info )
+        #    self.o.write( "'{0}',\n".format( infodot.sel ) )
+        #self.o.write( '\t] }\n \t}' )
+            
+
+m = Merger()
+nodes = []
+
+m.o = sys.stdout
+m.filename = 'tdata/staging/full/all.shuffle_plots.root'
+m.halolog = 'tdata/staging/full/log_halo_sub.root'
+
+plots = ['h_m2m_kmu', 'h_z', 'h_p', 'h_cda', 'h_t' ]
+pols = [ ( 'pos', ['pos']) , ( 'neg', ['neg']) , ( 'both', [ 'pos', 'neg' ]) ]
+regs = [ 
+        ( 'upper', [ ('upper_hm2m', 'upper_check_hm2m', 'upper' )] ),
+        ( 'lower', [ ('lower_hm2m','lower_check_hm2m', 'lower'  ) ] ),
+        ( 'full', [ ('upper_hm2m', 'upper_check_hm2m', 'upper' ), ('lower_hm2m','lower_check_hm2m', 'lower'  ) ] )
+        ]
+
+#pos check lower
+for regtitle, reg in regs:
+    for polname, polsel in pols:
+        for plot in plots:
+            infos = [ 
+                { 'bgpath' : 'check/{regmerge}/{pol}/{plot}/hnu_stack_hists/halo_{pol}'.format( plot = plot , pol = pol, regmerge = regmerge ),
+                    'scalepath' : 'scalefactors/{pol}_check_{reglabel}'.format( pol = pol, reglabel = reglabel ),
+                    'logpath' : 'p6.halo.q11t.{pol}/signal_{regbg}_plots/{plot}'.format( plot = plot, pol = pol, regbg = regbg ),
+                    'sel' :'check/{regmerge}/{pol}/{plot}'.format( plot = plot, pol = pol, regmerge  = regmerge)
+                    }
+                for pol in polsel 
+                for regmerge, regbg, reglabel in reg
+                ]
+
+            nodes.append( m.get_node( '{polname}_check_{regtitle}/{plot}'.format( regtitle = regtitle,  polname  = polname, plot = plot ) , infos ) )
+
+result = { 'stacks' : nodes, 'trigeffs' : [] }
+sys.stdout.write( yaml.dump( result ) )

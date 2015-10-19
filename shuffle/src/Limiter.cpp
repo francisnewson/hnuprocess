@@ -20,9 +20,9 @@ namespace fn
     HnuLimParams::HnuLimParams( TFile& tf, 
             const std::map<std::string, double>& fid_weights,
             const std::vector<std::string>& regions,
-            int mass, bool fancyfit )
+            int mass, double nsigma_width, bool fancyfit )
         :tf_(tf), fid_weights_(fid_weights), regions_( regions ),
-        mass_( mass ), fancy_fit_( fancyfit )
+        mass_( mass ), nsigma_width_( nsigma_width), fancy_fit_( fancyfit )
     {
         chan_ = ( boost::format( "mc.p5.hnu.%1%.nodk") % mass_ ).str();
         build_totals();
@@ -83,7 +83,7 @@ namespace fn
     void HnuLimParams::build_totals()
     {
         std::vector<std::string> pols { "pos", "neg" };
-        std::vector<std::string> regs { "signal_upper_muv", "signal_lower_muv" };
+        //std::vector<std::string> regs { "signal_upper_muv", "signal_lower_muv" };
 
         std::vector<std::unique_ptr<TH1D>> hists;
         std::vector<double> this_fid_weight;
@@ -106,6 +106,8 @@ namespace fn
 
         fid_total_ = std::accumulate(
                 begin( this_fid_weight ), end( this_fid_weight ) , 0.0 );
+
+        std::cout << "hnu fid_weight: " << fid_total_ << std::endl;
 
         h_sig_ = sum_hists( begin( hists ), end( hists ) );
         sig_total_ = integral( *h_sig_, 0, 0.2 );
@@ -157,7 +159,8 @@ namespace fn
         int min_bin = bin_mean;
         int max_bin = bin_mean;
 
-        while ( cum_sum < 0.65 * sig_total_ )
+        //Find 1 sigma width
+        while ( cum_sum < 0.6827 * sig_total_ )
         {
             --min_bin;
             ++max_bin;
@@ -169,7 +172,15 @@ namespace fn
 
         width_ = width_up_edge_ - width_low_edge_;
 
-        width_total_ = cum_sum;
+        //stretch according to nsigma_width
+        width_ = nsigma_width_ * width_;
+        min_bin = h_sig_->GetXaxis()->FindBin( mean_ - width_ / 2 );
+        max_bin = h_sig_->GetXaxis()->FindBin( mean_ + width_ / 2 );
+        width_low_edge_ = h_sig_->GetXaxis()->GetBinLowEdge( min_bin );
+        width_up_edge_ = h_sig_->GetXaxis()->GetBinUpEdge( max_bin );
+
+        //width_total_ = cum_sum;
+        width_total_ = h_sig_->Integral( min_bin, max_bin );
         auto width_acc_err = eff_err( width_total_ , fid_total_) ;
         width_acc_ = width_acc_err.first;
         width_acc_err_ = width_acc_err.second;
@@ -220,7 +231,9 @@ namespace fn
     Limiter::Limiter( TFile& bg_file,  std::vector<std::string> regions )
         :bg_file_( bg_file ), pols_{ "pos", "neg" },regions_( regions )
         {
-            km2_flux_paths_ = std::vector<std::string> { "neg_lower","pos_lower" };
+            km2_flux_paths_ = std::vector<std::string> { 
+                "scalefactors/neg_ext_lower",
+                    "scalefactors/pos_ext_lower" };
         }
 
     HnuLimResult Limiter::get_limit( const HnuLimParams& params )
@@ -245,7 +258,7 @@ namespace fn
         //apply trigger efficiency
         auto trig_eff_err = get_trig_eff( sig_min, sig_max );
         double trig_eff = trig_eff_err.first;
-        double trig_err = trig_eff_err.second;
+        double raw_trig_err = trig_eff_err.second;
         background *= trig_eff;
 
         //**************************************************
@@ -254,15 +267,15 @@ namespace fn
         double sqr_background_err  = 0;
 
         //triggger eff
-        double sq_trig_eff_contrib = fn::sq( trig_err / trig_eff * background );
+        double sq_trig_eff_contrib = fn::sq( raw_trig_err / trig_eff * background );
+        res.raw_trig_sqerr = sq_trig_eff_contrib;
         sqr_background_err += sq_trig_eff_contrib;
-        res.error_budget["err_trig"] = sq_trig_eff_contrib;
 
         //scattering
         double sq_scat_contrib =  0;
         if ( scat_contrib_ )
         {
-            std::cerr << "DOING SCAT" << std::endl;
+            //std::cerr << "DOING SCAT" << std::endl;
             double scat = (*scat_contrib_)->get_rel_scatter_err( sig_min, sig_max );
             sq_scat_contrib = fn::sq(background * scat );
         }
@@ -292,6 +305,18 @@ namespace fn
         sqr_background_err +=  sq_halo_val_err;
         res.error_budget["err_hval"] = sq_halo_val_err;
 
+        double sq_halo_k3pi_err = fn::sq( compute_halo_k3pi_err( sig_min, sig_max ) );
+        sqr_background_err +=  sq_halo_k3pi_err;
+        res.error_budget["err_k3pi"] = sq_halo_k3pi_err;
+
+        //halo shape err
+        double sq_halo_shape_err = fn::sq( compute_halo_shape_err( sig_min, sig_max ) );
+        sqr_background_err += sq_halo_shape_err;
+        res.error_budget["err_hshape"] = sq_halo_shape_err;
+
+        //square here becuase we sqrt everyting later
+        res.error_budget["halototal" ] =fn::sq(get_halo_val( sig_min, sig_max ));
+
         //remember to square root
         double background_err = std::sqrt( sqr_background_err );
 
@@ -306,34 +331,101 @@ namespace fn
         double ul = rolke.GetUpperLimit();
 #endif
 
+#if 0
+        //Dodgy efficiency acceptance
+        double dodge_eff = trig_eff *  params.get_width_acceptance();
+        double dodge_eff_err = trig_err * params.get_width_acceptance();
+#endif
+
+        double acceptance = params.get_width_acceptance();
+
+        res.ses_br =  1 / (acceptance * km2_flux);
+
+        //std::cout << "bg before trig dodge: " << background << std::endl;
+        //std::cout << "bg_err before trig dodge: " << background_err << std::endl;
+        //std::cout << "sq_trig_eff_contrib before trig dodge: " << sq_trig_eff_contrib << std::endl;
+
+        //**************************************************
+        //Dodgy trig eff compensation
+        //**************************************************
+
+        //compute ul for signal at 90% CL without extra trig
+        {
+            TRolke raw_rolke_eff;
+            raw_rolke_eff.SetBounding(true);
+            raw_rolke_eff.SetCL( 0.9 );
+            raw_rolke_eff.SetGaussBkgKnownEff( background, background, background_err , params.get_width_acceptance() );
+            double raw_ul = raw_rolke_eff.GetUpperLimit();
+            double raw_ul_mu = raw_ul * acceptance;
+            double sq_extra_trig = fn::sq( raw_ul_mu  / ( 1  - raw_ul_mu  / background) * ( 1 - trig_eff ) );
+
+            sq_trig_eff_contrib += sq_extra_trig;
+            background_err = std::sqrt( sqr_background_err + sq_extra_trig );
+
+            res.error_budget["err_trig"] = sq_trig_eff_contrib;
+
+           // std::cout << "raw_ul: " <<  raw_ul << std::endl;
+           // std::cout << "raw_ul_mu: " <<  raw_ul_mu << std::endl;
+           // std::cout << "trig_rel_err: " <<  raw_ul_mu  / ( 1 - raw_ul_mu / background ) * ( 1 - trig_eff ) /background  << std::endl;
+           // std::cout << "sq_extra_trig: " << sq_extra_trig << std::endl;
+           // std::cout << "sq_trig_eff_contrib after trig dodge: " << sq_trig_eff_contrib << std::endl;
+           // std::cout << "bg_err after trig dodge: " << background_err << std::endl;
+        }
+
+        //**************************************************
+        //Compute limits included extra trigger error
+        //**************************************************
+
         //Rolke does the heavy lifting
         TRolke rolke_eff;
         rolke_eff.SetBounding(true);
         rolke_eff.SetCL( 0.9 );
         rolke_eff.SetGaussBkgKnownEff( background, background, background_err , params.get_width_acceptance() );
+        //rolke_eff.SetGaussBkgGaussEff( background, background, dodge_eff, dodge_eff_err,   background_err );
         double ul = rolke_eff.GetUpperLimit();
 
+        double comb_sigma = std::sqrt( background + fn::sq(background_err ) );
+
+        res.dt_pull = (data - background) / comb_sigma;
+
         //do brazil
-        double high1_background = background + std::sqrt( background );
+        double high1_background = background + std::sqrt( background + fn::sq(background_err ) );
         rolke_eff.SetGaussBkgKnownEff( high1_background, background, background_err , params.get_width_acceptance() );
+        //rolke_eff.SetGaussBkgGaussEff( high1_background, background, dodge_eff, dodge_eff_err,   background_err );
         double high1_ul = rolke_eff.GetUpperLimit();
 
-        double low1_background = background - std::sqrt( background );
+        double low1_background = background - std::sqrt( background  + fn::sq( background_err ) );
         rolke_eff.SetGaussBkgKnownEff( low1_background, background, background_err , params.get_width_acceptance() );
+        //rolke_eff.SetGaussBkgGaussEff( low1_background, background, dodge_eff, dodge_eff_err,   background_err );
         double low1_ul = rolke_eff.GetUpperLimit();
 
-        double high2_background = background + 2 *  std::sqrt( background );
+        double high2_background = background + 2 *  std::sqrt( background + fn::sq( background_err ) ) ;
         rolke_eff.SetGaussBkgKnownEff( high2_background, background, background_err , params.get_width_acceptance() );
+        //rolke_eff.SetGaussBkgGaussEff( high2_background, background, dodge_eff, dodge_eff_err,   background_err );
         double high2_ul = rolke_eff.GetUpperLimit();
 
-        double low2_background = background - 2 * std::sqrt( background );
+        double low2_background = background - 2 * std::sqrt( background + fn::sq( background_err ) );
         rolke_eff.SetGaussBkgKnownEff( low2_background, background, background_err , params.get_width_acceptance() );
+        //rolke_eff.SetGaussBkgGaussEff( low2_background, background, dodge_eff, dodge_eff_err,   background_err );
         double low2_ul = rolke_eff.GetUpperLimit();
+
+        double high3_background = background + 3 *  std::sqrt( background + fn::sq( background_err ) ) ;
+        rolke_eff.SetGaussBkgKnownEff( high3_background, background, background_err , params.get_width_acceptance() );
+        //rolke_eff.SetGaussBkgGaussEff( high3_background, background, dodge_eff, dodge_eff_err,   background_err );
+        double high3_ul = rolke_eff.GetUpperLimit();
+
+        double low3_background = background - 3 * std::sqrt( background + fn::sq( background_err ) );
+        rolke_eff.SetGaussBkgKnownEff( low3_background, background, background_err , params.get_width_acceptance() );
+        //rolke_eff.SetGaussBkgGaussEff( low3_background, background, dodge_eff, dodge_eff_err,   background_err );
+        double low3_ul = rolke_eff.GetUpperLimit();
 
         //do data
         rolke_eff.SetGaussBkgKnownEff( data, background, background_err , params.get_width_acceptance() );
+        //rolke_eff.SetGaussBkgGaussEff( data , background, dodge_eff, dodge_eff_err,   background_err );
         double dt_ul =  rolke_eff.GetUpperLimit();
         double dt_ll =  rolke_eff.GetLowerLimit();
+
+        res.ses_u2 = br_to_mix( res.ses_br, 0.001 * params.get_mass() );
 
         //Convert for literature
         double ul_br = ul / km2_flux;
@@ -351,39 +443,65 @@ namespace fn
         double low2_ul_br = low2_ul / km2_flux;
         double low2_ul_u2 = br_to_mix( low2_ul_br, 0.001 * params.get_mass()  ); //MeV -> GeV
 
+        double high3_ul_br = high3_ul / km2_flux;
+        double high3_ul_u3 = br_to_mix( high3_ul_br, 0.001 * params.get_mass()  ); //MeV -> GeV
+
+        double low3_ul_br = low3_ul / km2_flux;
+        double low3_ul_u3 = br_to_mix( low3_ul_br, 0.001 * params.get_mass()  ); //MeV -> GeV
+
         double dt_ul_br = dt_ul / km2_flux;
         double dt_ul_u2 = br_to_mix( dt_ul_br, 0.001 * params.get_mass()  ); //MeV -> GeV
 
         double dt_ll_br = dt_ll / km2_flux;
         double dt_ll_u2 = br_to_mix( dt_ll_br, 0.001 * params.get_mass()  ); //MeV -> GeV
 
+        res.kaon_flux = km2_flux;
+
         res.trig_eff = trig_eff;
-        res.trig_err = trig_err;
+        res.raw_trig_err = raw_trig_err;
         res.background = background;
         res.background_err = background_err ;
         res.dt_obs = data;
-        res.acc_sig_ul = ul;
-        res.orig_sig_ul = ul / params.get_width_acceptance();
+        res.acc_sig_ul = ul * params.get_width_acceptance();
+        res.orig_sig_ul = ul;
         res.rolke_orig_sig_ul = ul;
 
+
+        res.ul_mu =  ul * acceptance;
         res.ul_br =  ul_br;
         res.ul_u2 = ul_u2;
 
+        res.comb_sigma = comb_sigma;
+
+        res.high1_ul_mu = high1_ul * acceptance;
         res.high1_ul_br =  high1_ul_br;
         res.high1_ul_u2 = high1_ul_u2;
 
+        res.low1_ul_mu = low1_ul * acceptance;
         res.low1_ul_br =  low1_ul_br;
         res.low1_ul_u2 = low1_ul_u2;
 
+        res.high2_ul_mu = high2_ul * acceptance;
         res.high2_ul_br =  high2_ul_br;
         res.high2_ul_u2 = high2_ul_u2;
 
+        res.low2_ul_mu = low2_ul * acceptance ;
         res.low2_ul_br =  low2_ul_br;
         res.low2_ul_u2 = low2_ul_u2;
 
+        res.high3_ul_mu = high3_ul * acceptance;
+        res.high3_ul_br =  high3_ul_br;
+        res.high3_ul_u2 = high3_ul_u3;
+
+        res.low3_ul_mu = low3_ul * acceptance ;
+        res.low3_ul_br =  low3_ul_br;
+        res.low3_ul_u2 = low3_ul_u3;
+
+        res.dt_ul_mu = dt_ul * acceptance;
         res.dt_ul_br =  dt_ul_br;
         res.dt_ul_u2 = dt_ul_u2;
 
+        res.dt_ll_mu = dt_ll * acceptance;
         res.dt_ll_br =  dt_ll_br;
         res.dt_ll_u2 = dt_ll_u2;
 
@@ -538,6 +656,11 @@ namespace fn
         }
     }
 
+    void HaloErrors::set_shape_error_factor( double shape_error_factor )
+    {
+        shape_error_factor_ = shape_error_factor;
+    }
+
 
     double HaloErrors::compute_halo_scale_err( double sig_min, double sig_max ) const
     {
@@ -554,10 +677,8 @@ namespace fn
             auto h_halo = extract_hist<TH1D>( tfbg_, info.bg_path );
             double halo_contrib = integral( *h_halo, sig_min, sig_max );
             total_sqerr += fn::sq( halo_contrib * halo_scale_err / halo_scale );
-            total_sqerr += fn::sq( 0.1 * halo_contrib );
-
+            //total_sqerr += fn::sq( 0.1 * halo_contrib );
         }
-
         return std::sqrt( total_sqerr );
     }
 
@@ -570,7 +691,7 @@ namespace fn
             //double halo_scale = retrieve_value( tfbg_, path{ info.scale_path } / "halo_scale" ) ;
             double halo_scale = hr.halo_scale;
 
-           // double k3pi_scale = retrieve_value( tfhalolog_, path{info.halo_log_path} / "k3pi_scale_factor" );
+            // double k3pi_scale = retrieve_value( tfhalolog_, path{info.halo_log_path} / "k3pi_scale_factor" );
             double k3pi_scale = hr.k3pi_scale;
 
             path log_folder = hr.halo_log_path;
@@ -604,15 +725,82 @@ namespace fn
                         n_raw, n_corr, n_peak, k3pi_scale, n_check, n_final );
             }
 
-            double k3pi_scale_rel_err = 0.03;
+            double k3pi_scale_rel_err = 0.02 / 0.561;
 
             //now do the actual error calculation
-            total_sqerr += fn::sq(halo_scale) * 
-                ( n_raw  + fn::sq(k3pi_scale) * n_peak * ( n_peak * k3pi_scale_rel_err + 1.0 ) );
+            //total_sqerr += fn::sq(halo_scale) * 
+            //   ( n_raw  + fn::sq(k3pi_scale) * n_peak * ( n_peak * k3pi_scale_rel_err + 1.0 ) );
+
+            total_sqerr += fn::sq(halo_scale) * ( n_raw  + fn::sq(k3pi_scale) * n_peak );
+            //total_sqerr += fn::sq(halo_scale * k3pi_scale * n_peak * k3pi_scale_rel_err );
         }
 
         return std::sqrt(total_sqerr);
     }
+
+    double HaloErrors::compute_halo_k3pi_err( double sig_min, double sig_max ) const
+    {
+        double total_sqerr = 0;
+
+        for ( const auto& hr : halo_resources_ )
+        {
+            double halo_scale = hr.halo_scale;
+            double k3pi_scale = hr.k3pi_scale;
+            path log_folder = hr.halo_log_path;
+
+            auto h_raw = hr.h_raw;
+            auto h_corr = hr.h_corr;
+            auto h_peak = hr.h_peak;
+
+            double n_raw   = integral( *h_raw, sig_min, sig_max );
+            double n_corr  = integral( *h_corr, sig_min, sig_max );
+
+            //peak was already scaled by k3pi_scale
+            double n_peak  = integral( *h_peak, sig_min, sig_max ) / k3pi_scale;
+            double n_check  = halo_scale * ( n_raw - k3pi_scale * n_peak );
+
+            //compare with what is stored in the computed bg file
+            auto h_final = hr.h_final;
+            double n_final = integral( *h_final, sig_min, sig_max );
+
+            //If there is a mismatch print everything 
+            double prec = 0.00001;
+            if ( fabs(n_check - n_final) > prec * fabs( n_check + n_final) ) 
+            {
+                throw std::runtime_error( "Mismatch redoing halo calculation" );
+                print_mismatch( std::cerr, sig_min, sig_max, halo_scale,
+                        n_raw, n_corr, n_peak, k3pi_scale, n_check, n_final );
+            }
+
+            double k3pi_scale_rel_err = 0.02 / 0.561;
+            total_sqerr += fn::sq(halo_scale * k3pi_scale * n_peak * k3pi_scale_rel_err );
+        }
+
+        return std::sqrt(total_sqerr);
+    }
+
+    double HaloErrors::get_halo_val( double sig_min, double sig_max ) const
+    {
+        double total = 0;
+        for ( const auto& hr : halo_resources_ )
+        {
+            auto h_final = hr.h_final;
+            double n_final = integral( *h_final, sig_min, sig_max );
+            total += n_final;
+        }
+        return total;
+    }
+
+    double HaloErrors::compute_halo_shape_err( double sig_min, double sig_max ) const
+    {
+        if ( ! shape_error_factor_ )
+        {
+            return 0;
+        }
+
+        return get_halo_val( sig_min, sig_max ) * (*shape_error_factor_);
+    }
+
     void HaloErrors::print_mismatch( std::ostream & os ,
             double sig_min, double sig_max,
             double halo_scale, double n_raw,
@@ -656,6 +844,41 @@ namespace fn
         if ( halo_errors_ )
         {
             return (*halo_errors_)->compute_halo_val_err( sig_min, sig_max );
+        }
+        else
+        {
+            return 0;
+        }
+    }
+
+    double Limiter::compute_halo_k3pi_err( double sig_min, double sig_max )
+    {
+        if ( halo_errors_ )
+        {
+            return (*halo_errors_)->compute_halo_k3pi_err( sig_min, sig_max );
+        }
+        else
+        {
+            return 0;
+        }
+    }
+
+    double Limiter::compute_halo_shape_err( double sig_min, double sig_max )
+    {
+        if ( halo_errors_ )
+        {
+            return (*halo_errors_)->compute_halo_shape_err( sig_min, sig_max );
+        }
+        else
+        {
+            return 0;
+        }
+    }
+    double Limiter::get_halo_val( double sig_min, double sig_max )
+    {
+        if ( halo_errors_ )
+        {
+            return (*halo_errors_)->get_halo_val( sig_min, sig_max );
         }
         else
         {

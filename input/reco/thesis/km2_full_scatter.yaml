@@ -1,5 +1,5 @@
-#Apply scattering to full selectionon
-#so we can compare with km2_full.yaml
+#Full km2 selection for looking at hnu acceptance
+#and control for comparing to scattered
 #inputs:
 #km2event: km2_event
 ---
@@ -53,7 +53,6 @@
     mom_power: 3,
     inputs: { kt: kaon_track} }
 
-
 #----------km2 event
 - input: { name: km2_event, type: Km2Event,
     inputs: { ogt: bf_st, kt: kaon_track } }
@@ -89,7 +88,7 @@
         ogt: bf_st
 
 @include "input/reco/thesis/std/selections.inc.yaml"
-@include "input/reco/thesis/std/kine_regions.inc.yaml"
+@include "input/reco/thesis/std/full_kine_regions.inc.yaml"
 
 ###################################################
 # SELECTIONS
@@ -119,55 +118,52 @@
         - rk_dcht
         - ddead_cell
 
-- selection: { name: signal_upper_muv, type : CompositeSelection,
-    children:  [ pre_selection, signal_upper_sel, muon_req ]  }
+ #Signal selections
+- selection: { name: signal_upper,            type : CompositeSelection,  children:  [ pre_selection, signal_upper_sel ]  }
+- selection: { name: signal_lower,            type : CompositeSelection,  children:  [ pre_selection, signal_lower_sel ]  }
 
-- selection: { name: signal_lower_muv, type : CompositeSelection, 
-    children:  [ pre_selection, signal_lower_sel, muon_req ]  }
+- selection: { name: signal_loose_upper,      type : CompositeSelection,  children:  [ pre_selection, signal_upper_loose_sel ]  }
+- selection: { name: signal_loose_lower,      type : CompositeSelection,  children:  [ pre_selection, signal_lower_loose_sel ]  }
 
 - analysis : 
      name : up_summary
      type: Summary
      base : passer
-     source : signal_upper_muv 
+     source : signal_upper
      ostream: text_out
 
 - analysis : 
      name : dn_summary
      type: Summary
      base : passer
-     source : signal_lower_muv 
+     source : signal_lower
      ostream: text_out
 
 - analysis : 
      name : up_summary_file
      type: Summary
      base : passer
-     source : signal_upper_muv 
+     source : signal_upper
      ostream: stats_out
 
 - analysis : 
      name : dn_summary_file
      type: Summary
      base : passer
-     source : signal_lower_muv 
+     source : signal_lower
      ostream: stats_out
 
+  #Signal selections
+- analysis : { type: Km2Plotter, name: signal_upper_plots, folder: signal_upper_plots, 
+    tfile: tfout, selection: signal_upper,
+    inputs: &inp { km2event : km2_event } }
 
-- analysis :
-     type: Km2Plotter
-     name: km2_up_plots
-     folder: signal_upper_muv
-     tfile: tfout
-     selection: signal_upper_muv
-     inputs:
-         km2event: km2_event
 
-- analysis :
-     type: Km2Plotter
-     name: km2_dn_plots
-     folder: signal_lower_muv
-     tfile: tfout
-     selection: signal_lower_muv
-     inputs:
-         km2event: km2_event
+- analysis : { type: Km2Plotter, name: signal_lower_plots, folder: signal_lower_plots, 
+    tfile: tfout, selection: signal_lower, inputs: *inp }
+
+- analysis : { type: Km2Plotter, name: signal_upper_loose_plots, folder: signal_upper_loose_plots, 
+    tfile: tfout, selection: signal_loose_upper, inputs: *inp }
+
+- analysis : { type: Km2Plotter, name: signal_lower_loose_plots, folder: signal_lower_loose_plots, 
+    tfile: tfout, selection: signal_loose_lower, inputs: *inp }

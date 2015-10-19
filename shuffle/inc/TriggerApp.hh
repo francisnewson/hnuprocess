@@ -23,8 +23,10 @@ namespace fn
     {
         public:
             TriggerApp( TFile& tf );
+            void set_num_denom( std::string num_name, std::string denom_name );
             void set_sels( std::vector<std::string> sels );
             void init();
+
             void rebin( int r );
 
             const TH1D&  get_h_passed(){ return *h_passed_ ; }
@@ -42,6 +44,8 @@ namespace fn
             TFile& tf_;
             std::unique_ptr<TH1D> h_passed_;
             std::unique_ptr<TH1D> h_all_;
+            std::string num_name_;
+            std::string denom_name_;
     };
 
     std::pair<double,double> eff_err( double passed, double all );

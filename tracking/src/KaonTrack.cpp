@@ -25,7 +25,11 @@ namespace fn
     YAML::Node auto_kaon_track( YAML::Node& instruct, RecoFactory& rf )
     {
         std::string channel = rf.get_channel();
+        return auto_kaon_track( instruct, channel );
+    }
 
+    YAML::Node auto_kaon_track( const YAML::Node& instruct, std::string channel )
+    {
         YAML::Node config_node =
             YAML::LoadFile( get_yaml<std::string>(instruct, "beam_mapping" ) ) ;
 
@@ -63,19 +67,28 @@ namespace fn
         }
 
         YAML::Node result;
-        result["name"] = instruct["name"].as<std::string>();
-        result["type"] = instruct["type"].as<std::string>();
+
+
+        std::cerr << "Doing auto_kaon: for " << channel << std::endl;
 
         if ( found_period )
         {
-            result["kaon_type"] = "weightedK";
-            result["pos_pol_file"] = property_files[period]["pos"].as<std::string>();
-            result["neg_pol_file"] = property_files[period]["neg"].as<std::string>();
+            std::cerr << "Found period: " << period << std::endl;
+            result = property_files[period];
+            //result["kaon_type"] = "weightedK";
+            //result["pos_pol_file"] = property_files[period]["pos"].as<std::string>();
+            //result["neg_pol_file"] = property_files[period]["neg"].as<std::string>();
         }
         else
         {
+            std::cerr << "Period not found!" << std::endl;
             result["kaon_type"] = "rawkp";
         }
+
+        result["name"] = instruct["name"].as<std::string>();
+        result["type"] = instruct["type"].as<std::string>();
+
+        std::cerr << "auto_kaon result\n" << result << std::endl;
 
         return result;
     }
@@ -271,6 +284,8 @@ namespace fn
 
         //Load positive polarity data
         auto pos_pol_file = get_yaml<std::string>( instruct, "pos_pol_file");
+        BOOST_LOG_SEV( get_log(),  always_print )
+            << get_yaml<std::string>( instruct, "name") << "[pospol]: " << pos_pol_file;
         if ( ! boost::filesystem::exists( pos_pol_file ) )
         {
             throw Xcept<MissingFile>( pos_pol_file );
@@ -281,6 +296,8 @@ namespace fn
 
         //Load negative polarity data
         auto neg_pol_file = get_yaml<std::string>( instruct, "neg_pol_file");
+        BOOST_LOG_SEV( get_log(), always_print  )
+            << get_yaml<std::string>( instruct, "name") << "[negpol]: " << neg_pol_file;
         if ( ! boost::filesystem::exists( neg_pol_file ) )
         {
             throw Xcept<MissingFile>( neg_pol_file );
@@ -295,12 +312,16 @@ namespace fn
         int polarity = pf_.get_polarity( e_->header.run );
         int sample_key = e_->header.time_stamp % 10000;
 
+
+        //BOOST_LOG_SEV( get_log(), always_print )
+            //<< get_name() << " POL: " <<  e_->header.run << " " << polarity ;
+
         const kaon_properties& kp =  ( polarity > 0 ) 
             ? pos_pol_kaon_sampler_.get_value( sample_key)
             : neg_pol_kaon_sampler_.get_value( sample_key );
 
         kt_ = Track( kp.xoff, kp.yoff, 0, 
-                kp.dydz, kp.dydz, 1 );
+                kp.dxdz, kp.dydz, 1 );
 
         kmom_ = kp.pmag;
     }

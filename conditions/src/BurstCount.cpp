@@ -11,18 +11,6 @@
 namespace fn
 {
 
-    //--------------------------------------------------
-    SaveDirectory::SaveDirectory()
-        :td( gDirectory ), tf( gFile ){
-        }
-
-    SaveDirectory::~SaveDirectory()
-    {
-        gDirectory = td;
-        gFile = tf;
-    }
-
-    //--------------------------------------------------
 
     BurstCount::BurstCount( const Selection& sel,
             TFile& tfile, std::string folder, std::string codename,

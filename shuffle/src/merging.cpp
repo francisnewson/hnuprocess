@@ -20,7 +20,8 @@ namespace fn
             }
 
             auto stacks = extract_object_list<THStack>( tfin, stack_paths );
-            auto owning_stack_sum =  sum_stacks(begin( stacks ), end( stacks ) );
+            bool do_zero_hist = true;
+            auto owning_stack_sum =  sum_stacks(begin( stacks ), end( stacks ), do_zero_hist );
 
             auto data_hists = extract_hist_list<TH1D>( tfin, data_paths );
             auto data_sum = sum_hists( begin( data_hists), end( data_hists ) );
@@ -132,7 +133,7 @@ namespace fn
             double scat = ( *scat_contrib_ ) ->get_rel_scatter_err( sig_min, sig_max );
             if (  std::isnan(scat) || scat < 0 )
                 std::cerr << "scat:" << scat*background << std::endl;
-            sqerr += fn::sq( background * scat );
+            sqerr +=  fn::sq( background * scat );
         }
 
         if ( std::isnan( sqerr ) ) std::cerr << "NAN 2" << std::endl;
@@ -166,6 +167,10 @@ namespace fn
             sqerr += sq_halo_val_err;
 
             if ( std::isnan( sqerr ) ) std::cerr << "NAN 6" << std::endl;
+
+            double sq_halo_shape_err = fn::sq( (*halo_errors_)->compute_halo_shape_err( sig_min, sig_max ) );
+
+            sqerr += sq_halo_shape_err;
         }
 
         if ( std::isnan( sqerr ) )

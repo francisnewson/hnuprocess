@@ -10,6 +10,8 @@ lenv.AddLibs( [
 ] )
 lenv.SetYaml( yaml_dir, machine )
 
+lenv.Append( CPPPATH = '../km2/dict' )
+
 lenv.Append( CPPPATH = 'inc' )
 lenv.SharedLibrary(
         target = 'shuffle',

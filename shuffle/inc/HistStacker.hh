@@ -75,7 +75,6 @@ namespace fn
             std::vector<std::pair<std::string, double>> scale_factors;
     };
 
-    void de_zero_hist( TH1& h );
 
 }
 #endif

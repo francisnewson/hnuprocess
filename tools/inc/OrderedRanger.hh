@@ -3,6 +3,8 @@
 
 #include <vector>
 #include <stdexcept>
+#include <iostream>
+#include <iomanip>
 
 namespace fn
 {
@@ -55,6 +57,14 @@ namespace fn
                     }
                 }
                 return current_info_->val;
+            }
+
+            void print_info( std::ostream& os )
+            {
+                for ( auto& info : info_ )
+                {
+                    os << info.min << " " << info.max << " " << info.val << std::endl;
+                }
             }
 
             private:

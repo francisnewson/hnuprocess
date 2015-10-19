@@ -198,6 +198,15 @@
         km2event: km2_event
 
 - analysis:
+    type: Km2Plotter
+    name: km2_plots_muv
+    folder: km2_plots_muv
+    tfile: tfout
+    selection: muon_selection
+    inputs:
+        km2event: km2_event
+
+- analysis:
     type: Summary
     name: sum_muon_selection
     ostream: oscout

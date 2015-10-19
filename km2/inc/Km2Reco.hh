@@ -37,6 +37,7 @@ namespace fn
             double get_pt()  const;
             double get_kaon_mom() const;
             const SingleRecoTrack * get_reco_track() const;
+            const KaonTrack * get_kaon_track() const;
 
             TLorentzVector get_p4_miss_kmu() const;
             TLorentzVector get_p4_mu() const;

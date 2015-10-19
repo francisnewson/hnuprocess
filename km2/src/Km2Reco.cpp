@@ -91,6 +91,9 @@ namespace fn
     const SingleRecoTrack * Km2RecoEvent::get_reco_track() const
     { return srt_; }
 
+    const KaonTrack * Km2RecoEvent::get_kaon_track() const
+    { return kt_; }
+
     TLorentzVector Km2RecoEvent::get_p4_miss_kmu() const
     { return p4miss_kmu_; }
 

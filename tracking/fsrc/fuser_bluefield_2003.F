@@ -342,6 +342,20 @@ c
 *--------1---------2---------3---------4---------5---------6---------712.......8
 
 
+      SUBROUTINE Print_Field( pos, bfld)
+      IMPLICIT NONE
+      INTEGER    iframe, imap
+      REAL*4 bfld
+      DIMENSION bfld(3)
+      REAL*4 pos
+      DIMENSION pos(3)
+
+      iframe = 1
+      pos(3) = pos(3) + 12000.
+      Call BLUEFLD_GET( pos, bfld, iframe, imap )
+      pos(3) = pos(3) - 12000.
+      RETURN
+      END
 C
 C
 C   $Log: fuser_bluefield_2003.F,v $

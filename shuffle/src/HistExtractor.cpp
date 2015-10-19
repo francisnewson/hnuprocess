@@ -26,7 +26,9 @@ namespace fn
 
     ChannelHistExtractor::ChannelHistExtractor( FNTFile& fntf )
         :fntf_( fntf ), rebin_( 1 )
-    {}
+    {
+        reset_collapse();
+    }
 
     void ChannelHistExtractor::set_rebin( int rebin )
     { rebin_ = rebin; }

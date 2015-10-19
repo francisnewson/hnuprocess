@@ -29,6 +29,7 @@ namespace fn
     
     //Generate the appropriate yaml node based on channel
     YAML::Node auto_kaon_track( const YAML::Node& instruct, RecoFactory& rf );
+    YAML::Node auto_kaon_track( const YAML::Node& instruct, std::string chan );
 
     //--------------------------------------------------
 

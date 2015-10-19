@@ -1,0 +1,70 @@
+property_files:
+    kt_raw_kp:
+        name: auto_kt_plus
+        type: KaonTrack
+        kaon_type: rawkp
+
+    kt_raw_km:
+        name: auto_kt_minus
+        type: KaonTrack
+        kaon_type: rawkm
+
+    kt_wgt_kp:
+        name: auto_kt_weighted_kp
+        type: KaonTrack
+        kaon_type: weightedK
+        pos_pol_file: 'input/reco/beam/p5.q11t.kp_prop_pos.dat'
+        neg_pol_file: 'input/reco/beam/p5.q11t.kp_prop_neg.dat'
+
+    kt_wgt_km:
+        name: auto_kt_weighted_km
+        type: KaonTrack
+        kaon_type: weightedK
+        pos_pol_file: 'input/reco/beam/p6.q11t.km_prop_pos.dat'
+        neg_pol_file: 'input/reco/beam/p6.q11t.km_prop_neg.dat'
+
+
+channel_lists:
+    - period: kt_raw_kp
+      channels:
+        - p5.km2.v2.pos
+        - p5.km2.v2.neg
+        - p5.data.q11t.v3.pos
+        - p5.data.q11t.v3.neg
+        - p5.data.q1.v4.pos
+        - p5.data.q1.v4.neg
+        - p5.k3pi.v2.pos
+        - p5.k3pi.v2.neg
+
+    - period: kt_wgt_kp
+      channels:
+        - p6.data.kless.q11t.v2.pos
+        - p6.data.kless.q1.v2.pos
+        - p6.data.km.q11t.v2.pos
+        - p6.data.km.q11t.v2.neg
+        - p6.data.km.q1.v2.pos
+        - p6.data.km.q1.v2.neg
+        - p6.k3pi.v2.pos
+        - p6.k3pi.v2.neg
+
+    - period: kt_raw_km
+      channels:
+        - p6.km2.v2.pos
+        - p6.km2.v2.neg
+        - p6.data.km.q11t.km.v2.pos
+        - p6.data.km.q11t.km.v2.neg
+        - p6.data.km.q1.km.v2.pos
+        - p6.data.km.q1.km.v2.neg
+        - p6.k3pi.km.v2.pos
+        - p6.k3pi.km.v2.neg
+
+    - period: kt_wgt_km
+      channels:
+        - p6.data.kless.q11t.km.v2.pos
+        - p6.data.kless.q1.km.v2.pos
+        - p5.data.q11t.km.v3.pos
+        - p5.data.q11t.km.v3.neg
+        - p5.data.q1.km.v4.pos
+        - p5.data.q1.km.v4.neg
+        - p5.k3pi.km.v2.pos
+        - p5.k3pi.km.v2.neg

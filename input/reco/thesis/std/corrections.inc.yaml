@@ -8,7 +8,8 @@
     name: kaon_track
     type: KaonTrack
     kaon_type: auto
-    beam_mapping: input/reco/beam/beam_mapping.yaml
+    #beam_mapping: input/reco/beam/beam_mapping.yaml
+    beam_mapping: input/reco/beam/cross_talk_mapping.yaml
 
 #kaon weights
 - selection:

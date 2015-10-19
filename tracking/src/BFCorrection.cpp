@@ -38,7 +38,10 @@ namespace fn
 
         //New dir is the direction at the midpoint  of ( Z_raw, dch_bz )
         //where the uncorrected and corrected tracks are defined to meet
-
+        //here we return a track with the correct direction but
+        //based at z = bz_tracking.
+        //The calling code in SingleTrack.cpp just uses the direction.
+        
         return Track( TVector3( Vpnt[0], Vpnt[1], na62const::bz_tracking),
                 TVector3( Vdir[0], Vdir[1], 1 ) );
     }

@@ -22,6 +22,7 @@ lenv.AddLibs( [
             'akl',
             'shuffle',
             'k3pi',
+            'checkscales',
             ] )
 lenv.AddEvent( event_dir, 'event' )
 
@@ -37,6 +38,9 @@ lenv.Append( LIBS = ['gfortran'] )
 
 lenv.Append( LIBS = 'K2piEventData' )
 lenv.Append( CPPPATH = '../dch/dict' )
+
+lenv.Append( LIBS = 'Km2EventData' )
+lenv.Append( CPPPATH = '../km2/dict' )
 
 lenv.SetYaml( yaml_dir, machine )
 

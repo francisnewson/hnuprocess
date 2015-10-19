@@ -22,6 +22,7 @@ std::unique_ptr<TH3D> extract_3D_hist( TFile& tf, path channel, path hist_name )
     auto h_neg_result = extract_hist<TH3D>( tf, neg_channel / hist_name );
 
     h_result->Add( h_neg_result.get() );
+    //h_result->Rebin3D( 2, 2, 1 );
     return h_result;
 }
 
@@ -150,6 +151,7 @@ int main( int argc, char * argv[] )
     muveff::CutXY muv_xy_cut( muv_xy_cut_node );
 
     muveff::CutP high_mom_cut{ 30, 60 };
+    muveff::CutP clean_mom_cut{ 5, 70 };
 
     muveff::CompProcess high_mom_xy_cut{ {&muv_xy_cut, &high_mom_cut } };
 
@@ -173,6 +175,7 @@ int main( int argc, char * argv[] )
     //RAW HISTS
     //Just do npassed/ntotal for each xy bin
 
+
     //Do raw effs in xy
     std::cerr << "Doing raw hists" << std::endl;
     std::unique_ptr<TH2D> xy_eff_dt_raw = muveff::xy_eff( *h_dt_passed, *h_dt_total );
@@ -181,8 +184,43 @@ int main( int argc, char * argv[] )
     cd_p( tfout.get(), "raw" );
     xy_eff_dt_raw->SetTitle( "Raw xy efficiency (data)" );
     xy_eff_dt_raw->Write( "dt_xy_eff" );
-    xy_eff_mc_raw->SetTitle( "Rawy xy efficiency (MC)" );
+    xy_eff_mc_raw->SetTitle( "Raw xy efficiency (MC)" );
     xy_eff_mc_raw->Write( "mc_xy_eff" );
+
+    //CLEAN MOM HISTS
+    //Remove low p
+    auto h_dt_cp_total = uclone( h_dt_total );
+    auto h_dt_cp_passed = uclone( h_dt_passed );
+    auto h_mc_cp_total = uclone( h_mc_total );
+    auto h_mc_cp_passed = uclone( h_mc_passed );
+
+    std::cerr << "Processing high mom cut" << std::endl;
+    for ( auto h : { h_dt_cp_total.get(), h_dt_cp_passed.get(),
+            h_mc_cp_total.get(), h_mc_cp_passed.get() } )
+    {
+        muveff::process_hist( *h, clean_mom_cut );
+    }
+
+
+    //Do clean effs in xy
+    std::cerr << "Doing clean hists" << std::endl;
+    std::unique_ptr<TH2D> xy_eff_dt_cp = muveff::xy_eff( *h_dt_cp_passed, *h_dt_cp_total );
+    std::unique_ptr<TH2D> xy_eff_mc_cp = muveff::xy_eff( *h_mc_cp_passed, *h_mc_cp_total );
+    std::unique_ptr<TEfficiency> p_eff_dt_cp = muveff::p_eff( *h_dt_cp_passed, *h_dt_cp_total );
+    std::unique_ptr<TEfficiency> p_eff_mc_cp = muveff::p_eff( *h_mc_cp_passed, *h_mc_cp_total );
+
+    cd_p( tfout.get(), "clean" );
+    xy_eff_dt_cp->SetTitle( "Clean xy efficiency (data)" );
+    xy_eff_dt_cp->Write( "dt_xy_eff" );
+    xy_eff_mc_cp->SetTitle( "Clean xy efficiency (MC)" );
+    xy_eff_mc_cp->Write( "mc_xy_eff" );
+
+    p_eff_dt_cp->SetTitle( "Clean p efficiency (data)" );
+    p_eff_dt_cp->Write( "dt_p_eff" );
+    p_eff_mc_cp->SetTitle( "Clean p efficiency (MC)" );
+    p_eff_mc_cp->Write( "mc_p_eff" );
+
+    std::cerr << "Done" << std::endl;
 
     //------------------------------
 
@@ -256,7 +294,7 @@ int main( int argc, char * argv[] )
     //XY CUT HISTS ( full momentum )
     //Use the measured xy correction on the tight xy selection
     //Now we can measure efficiency vs p for all p
-    
+
     std::cerr << "\nCloning xy cut hists" << std::endl;
     auto h_dt_xycut_total = uclone( h_dt_total );
     auto h_dt_xycut_passed = uclone( h_dt_passed );

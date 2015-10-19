@@ -1,0 +1,482 @@
+stacks:
+- destfolder: pos_check_upper/h_m2m_kmu
+  errors: true
+  filename: tdata/staging/full/all.shuffle_plots.root
+  haloinfo:
+  - {bgpath: check/upper_hm2m/pos/h_m2m_kmu/hnu_stack_hists/halo_pos, logpath: p6.halo.q11t.pos/signal_upper_check_hm2m_plots/h_m2m_kmu,
+    scalepath: scalefactors/pos_check_upper}
+  halolog: tdata/staging/full/log_halo_sub.root
+  name: pos_check_upper/h_m2m_kmu
+  selections: [check/upper_hm2m/pos/h_m2m_kmu]
+- destfolder: pos_check_upper/h_z
+  errors: true
+  filename: tdata/staging/full/all.shuffle_plots.root
+  haloinfo:
+  - {bgpath: check/upper_hm2m/pos/h_z/hnu_stack_hists/halo_pos, logpath: p6.halo.q11t.pos/signal_upper_check_hm2m_plots/h_z,
+    scalepath: scalefactors/pos_check_upper}
+  halolog: tdata/staging/full/log_halo_sub.root
+  name: pos_check_upper/h_z
+  selections: [check/upper_hm2m/pos/h_z]
+- destfolder: pos_check_upper/h_p
+  errors: true
+  filename: tdata/staging/full/all.shuffle_plots.root
+  haloinfo:
+  - {bgpath: check/upper_hm2m/pos/h_p/hnu_stack_hists/halo_pos, logpath: p6.halo.q11t.pos/signal_upper_check_hm2m_plots/h_p,
+    scalepath: scalefactors/pos_check_upper}
+  halolog: tdata/staging/full/log_halo_sub.root
+  name: pos_check_upper/h_p
+  selections: [check/upper_hm2m/pos/h_p]
+- destfolder: pos_check_upper/h_cda
+  errors: true
+  filename: tdata/staging/full/all.shuffle_plots.root
+  haloinfo:
+  - {bgpath: check/upper_hm2m/pos/h_cda/hnu_stack_hists/halo_pos, logpath: p6.halo.q11t.pos/signal_upper_check_hm2m_plots/h_cda,
+    scalepath: scalefactors/pos_check_upper}
+  halolog: tdata/staging/full/log_halo_sub.root
+  name: pos_check_upper/h_cda
+  selections: [check/upper_hm2m/pos/h_cda]
+- destfolder: pos_check_upper/h_t
+  errors: true
+  filename: tdata/staging/full/all.shuffle_plots.root
+  haloinfo:
+  - {bgpath: check/upper_hm2m/pos/h_t/hnu_stack_hists/halo_pos, logpath: p6.halo.q11t.pos/signal_upper_check_hm2m_plots/h_t,
+    scalepath: scalefactors/pos_check_upper}
+  halolog: tdata/staging/full/log_halo_sub.root
+  name: pos_check_upper/h_t
+  selections: [check/upper_hm2m/pos/h_t]
+- destfolder: neg_check_upper/h_m2m_kmu
+  errors: true
+  filename: tdata/staging/full/all.shuffle_plots.root
+  haloinfo:
+  - {bgpath: check/upper_hm2m/neg/h_m2m_kmu/hnu_stack_hists/halo_neg, logpath: p6.halo.q11t.neg/signal_upper_check_hm2m_plots/h_m2m_kmu,
+    scalepath: scalefactors/neg_check_upper}
+  halolog: tdata/staging/full/log_halo_sub.root
+  name: neg_check_upper/h_m2m_kmu
+  selections: [check/upper_hm2m/neg/h_m2m_kmu]
+- destfolder: neg_check_upper/h_z
+  errors: true
+  filename: tdata/staging/full/all.shuffle_plots.root
+  haloinfo:
+  - {bgpath: check/upper_hm2m/neg/h_z/hnu_stack_hists/halo_neg, logpath: p6.halo.q11t.neg/signal_upper_check_hm2m_plots/h_z,
+    scalepath: scalefactors/neg_check_upper}
+  halolog: tdata/staging/full/log_halo_sub.root
+  name: neg_check_upper/h_z
+  selections: [check/upper_hm2m/neg/h_z]
+- destfolder: neg_check_upper/h_p
+  errors: true
+  filename: tdata/staging/full/all.shuffle_plots.root
+  haloinfo:
+  - {bgpath: check/upper_hm2m/neg/h_p/hnu_stack_hists/halo_neg, logpath: p6.halo.q11t.neg/signal_upper_check_hm2m_plots/h_p,
+    scalepath: scalefactors/neg_check_upper}
+  halolog: tdata/staging/full/log_halo_sub.root
+  name: neg_check_upper/h_p
+  selections: [check/upper_hm2m/neg/h_p]
+- destfolder: neg_check_upper/h_cda
+  errors: true
+  filename: tdata/staging/full/all.shuffle_plots.root
+  haloinfo:
+  - {bgpath: check/upper_hm2m/neg/h_cda/hnu_stack_hists/halo_neg, logpath: p6.halo.q11t.neg/signal_upper_check_hm2m_plots/h_cda,
+    scalepath: scalefactors/neg_check_upper}
+  halolog: tdata/staging/full/log_halo_sub.root
+  name: neg_check_upper/h_cda
+  selections: [check/upper_hm2m/neg/h_cda]
+- destfolder: neg_check_upper/h_t
+  errors: true
+  filename: tdata/staging/full/all.shuffle_plots.root
+  haloinfo:
+  - {bgpath: check/upper_hm2m/neg/h_t/hnu_stack_hists/halo_neg, logpath: p6.halo.q11t.neg/signal_upper_check_hm2m_plots/h_t,
+    scalepath: scalefactors/neg_check_upper}
+  halolog: tdata/staging/full/log_halo_sub.root
+  name: neg_check_upper/h_t
+  selections: [check/upper_hm2m/neg/h_t]
+- destfolder: both_check_upper/h_m2m_kmu
+  errors: true
+  filename: tdata/staging/full/all.shuffle_plots.root
+  haloinfo:
+  - {bgpath: check/upper_hm2m/pos/h_m2m_kmu/hnu_stack_hists/halo_pos, logpath: p6.halo.q11t.pos/signal_upper_check_hm2m_plots/h_m2m_kmu,
+    scalepath: scalefactors/pos_check_upper}
+  - {bgpath: check/upper_hm2m/neg/h_m2m_kmu/hnu_stack_hists/halo_neg, logpath: p6.halo.q11t.neg/signal_upper_check_hm2m_plots/h_m2m_kmu,
+    scalepath: scalefactors/neg_check_upper}
+  halolog: tdata/staging/full/log_halo_sub.root
+  name: both_check_upper/h_m2m_kmu
+  selections: [check/upper_hm2m/pos/h_m2m_kmu, check/upper_hm2m/neg/h_m2m_kmu]
+- destfolder: both_check_upper/h_z
+  errors: true
+  filename: tdata/staging/full/all.shuffle_plots.root
+  haloinfo:
+  - {bgpath: check/upper_hm2m/pos/h_z/hnu_stack_hists/halo_pos, logpath: p6.halo.q11t.pos/signal_upper_check_hm2m_plots/h_z,
+    scalepath: scalefactors/pos_check_upper}
+  - {bgpath: check/upper_hm2m/neg/h_z/hnu_stack_hists/halo_neg, logpath: p6.halo.q11t.neg/signal_upper_check_hm2m_plots/h_z,
+    scalepath: scalefactors/neg_check_upper}
+  halolog: tdata/staging/full/log_halo_sub.root
+  name: both_check_upper/h_z
+  selections: [check/upper_hm2m/pos/h_z, check/upper_hm2m/neg/h_z]
+- destfolder: both_check_upper/h_p
+  errors: true
+  filename: tdata/staging/full/all.shuffle_plots.root
+  haloinfo:
+  - {bgpath: check/upper_hm2m/pos/h_p/hnu_stack_hists/halo_pos, logpath: p6.halo.q11t.pos/signal_upper_check_hm2m_plots/h_p,
+    scalepath: scalefactors/pos_check_upper}
+  - {bgpath: check/upper_hm2m/neg/h_p/hnu_stack_hists/halo_neg, logpath: p6.halo.q11t.neg/signal_upper_check_hm2m_plots/h_p,
+    scalepath: scalefactors/neg_check_upper}
+  halolog: tdata/staging/full/log_halo_sub.root
+  name: both_check_upper/h_p
+  selections: [check/upper_hm2m/pos/h_p, check/upper_hm2m/neg/h_p]
+- destfolder: both_check_upper/h_cda
+  errors: true
+  filename: tdata/staging/full/all.shuffle_plots.root
+  haloinfo:
+  - {bgpath: check/upper_hm2m/pos/h_cda/hnu_stack_hists/halo_pos, logpath: p6.halo.q11t.pos/signal_upper_check_hm2m_plots/h_cda,
+    scalepath: scalefactors/pos_check_upper}
+  - {bgpath: check/upper_hm2m/neg/h_cda/hnu_stack_hists/halo_neg, logpath: p6.halo.q11t.neg/signal_upper_check_hm2m_plots/h_cda,
+    scalepath: scalefactors/neg_check_upper}
+  halolog: tdata/staging/full/log_halo_sub.root
+  name: both_check_upper/h_cda
+  selections: [check/upper_hm2m/pos/h_cda, check/upper_hm2m/neg/h_cda]
+- destfolder: both_check_upper/h_t
+  errors: true
+  filename: tdata/staging/full/all.shuffle_plots.root
+  haloinfo:
+  - {bgpath: check/upper_hm2m/pos/h_t/hnu_stack_hists/halo_pos, logpath: p6.halo.q11t.pos/signal_upper_check_hm2m_plots/h_t,
+    scalepath: scalefactors/pos_check_upper}
+  - {bgpath: check/upper_hm2m/neg/h_t/hnu_stack_hists/halo_neg, logpath: p6.halo.q11t.neg/signal_upper_check_hm2m_plots/h_t,
+    scalepath: scalefactors/neg_check_upper}
+  halolog: tdata/staging/full/log_halo_sub.root
+  name: both_check_upper/h_t
+  selections: [check/upper_hm2m/pos/h_t, check/upper_hm2m/neg/h_t]
+- destfolder: pos_check_lower/h_m2m_kmu
+  errors: true
+  filename: tdata/staging/full/all.shuffle_plots.root
+  haloinfo:
+  - {bgpath: check/lower_hm2m/pos/h_m2m_kmu/hnu_stack_hists/halo_pos, logpath: p6.halo.q11t.pos/signal_lower_check_hm2m_plots/h_m2m_kmu,
+    scalepath: scalefactors/pos_check_lower}
+  halolog: tdata/staging/full/log_halo_sub.root
+  name: pos_check_lower/h_m2m_kmu
+  selections: [check/lower_hm2m/pos/h_m2m_kmu]
+- destfolder: pos_check_lower/h_z
+  errors: true
+  filename: tdata/staging/full/all.shuffle_plots.root
+  haloinfo:
+  - {bgpath: check/lower_hm2m/pos/h_z/hnu_stack_hists/halo_pos, logpath: p6.halo.q11t.pos/signal_lower_check_hm2m_plots/h_z,
+    scalepath: scalefactors/pos_check_lower}
+  halolog: tdata/staging/full/log_halo_sub.root
+  name: pos_check_lower/h_z
+  selections: [check/lower_hm2m/pos/h_z]
+- destfolder: pos_check_lower/h_p
+  errors: true
+  filename: tdata/staging/full/all.shuffle_plots.root
+  haloinfo:
+  - {bgpath: check/lower_hm2m/pos/h_p/hnu_stack_hists/halo_pos, logpath: p6.halo.q11t.pos/signal_lower_check_hm2m_plots/h_p,
+    scalepath: scalefactors/pos_check_lower}
+  halolog: tdata/staging/full/log_halo_sub.root
+  name: pos_check_lower/h_p
+  selections: [check/lower_hm2m/pos/h_p]
+- destfolder: pos_check_lower/h_cda
+  errors: true
+  filename: tdata/staging/full/all.shuffle_plots.root
+  haloinfo:
+  - {bgpath: check/lower_hm2m/pos/h_cda/hnu_stack_hists/halo_pos, logpath: p6.halo.q11t.pos/signal_lower_check_hm2m_plots/h_cda,
+    scalepath: scalefactors/pos_check_lower}
+  halolog: tdata/staging/full/log_halo_sub.root
+  name: pos_check_lower/h_cda
+  selections: [check/lower_hm2m/pos/h_cda]
+- destfolder: pos_check_lower/h_t
+  errors: true
+  filename: tdata/staging/full/all.shuffle_plots.root
+  haloinfo:
+  - {bgpath: check/lower_hm2m/pos/h_t/hnu_stack_hists/halo_pos, logpath: p6.halo.q11t.pos/signal_lower_check_hm2m_plots/h_t,
+    scalepath: scalefactors/pos_check_lower}
+  halolog: tdata/staging/full/log_halo_sub.root
+  name: pos_check_lower/h_t
+  selections: [check/lower_hm2m/pos/h_t]
+- destfolder: neg_check_lower/h_m2m_kmu
+  errors: true
+  filename: tdata/staging/full/all.shuffle_plots.root
+  haloinfo:
+  - {bgpath: check/lower_hm2m/neg/h_m2m_kmu/hnu_stack_hists/halo_neg, logpath: p6.halo.q11t.neg/signal_lower_check_hm2m_plots/h_m2m_kmu,
+    scalepath: scalefactors/neg_check_lower}
+  halolog: tdata/staging/full/log_halo_sub.root
+  name: neg_check_lower/h_m2m_kmu
+  selections: [check/lower_hm2m/neg/h_m2m_kmu]
+- destfolder: neg_check_lower/h_z
+  errors: true
+  filename: tdata/staging/full/all.shuffle_plots.root
+  haloinfo:
+  - {bgpath: check/lower_hm2m/neg/h_z/hnu_stack_hists/halo_neg, logpath: p6.halo.q11t.neg/signal_lower_check_hm2m_plots/h_z,
+    scalepath: scalefactors/neg_check_lower}
+  halolog: tdata/staging/full/log_halo_sub.root
+  name: neg_check_lower/h_z
+  selections: [check/lower_hm2m/neg/h_z]
+- destfolder: neg_check_lower/h_p
+  errors: true
+  filename: tdata/staging/full/all.shuffle_plots.root
+  haloinfo:
+  - {bgpath: check/lower_hm2m/neg/h_p/hnu_stack_hists/halo_neg, logpath: p6.halo.q11t.neg/signal_lower_check_hm2m_plots/h_p,
+    scalepath: scalefactors/neg_check_lower}
+  halolog: tdata/staging/full/log_halo_sub.root
+  name: neg_check_lower/h_p
+  selections: [check/lower_hm2m/neg/h_p]
+- destfolder: neg_check_lower/h_cda
+  errors: true
+  filename: tdata/staging/full/all.shuffle_plots.root
+  haloinfo:
+  - {bgpath: check/lower_hm2m/neg/h_cda/hnu_stack_hists/halo_neg, logpath: p6.halo.q11t.neg/signal_lower_check_hm2m_plots/h_cda,
+    scalepath: scalefactors/neg_check_lower}
+  halolog: tdata/staging/full/log_halo_sub.root
+  name: neg_check_lower/h_cda
+  selections: [check/lower_hm2m/neg/h_cda]
+- destfolder: neg_check_lower/h_t
+  errors: true
+  filename: tdata/staging/full/all.shuffle_plots.root
+  haloinfo:
+  - {bgpath: check/lower_hm2m/neg/h_t/hnu_stack_hists/halo_neg, logpath: p6.halo.q11t.neg/signal_lower_check_hm2m_plots/h_t,
+    scalepath: scalefactors/neg_check_lower}
+  halolog: tdata/staging/full/log_halo_sub.root
+  name: neg_check_lower/h_t
+  selections: [check/lower_hm2m/neg/h_t]
+- destfolder: both_check_lower/h_m2m_kmu
+  errors: true
+  filename: tdata/staging/full/all.shuffle_plots.root
+  haloinfo:
+  - {bgpath: check/lower_hm2m/pos/h_m2m_kmu/hnu_stack_hists/halo_pos, logpath: p6.halo.q11t.pos/signal_lower_check_hm2m_plots/h_m2m_kmu,
+    scalepath: scalefactors/pos_check_lower}
+  - {bgpath: check/lower_hm2m/neg/h_m2m_kmu/hnu_stack_hists/halo_neg, logpath: p6.halo.q11t.neg/signal_lower_check_hm2m_plots/h_m2m_kmu,
+    scalepath: scalefactors/neg_check_lower}
+  halolog: tdata/staging/full/log_halo_sub.root
+  name: both_check_lower/h_m2m_kmu
+  selections: [check/lower_hm2m/pos/h_m2m_kmu, check/lower_hm2m/neg/h_m2m_kmu]
+- destfolder: both_check_lower/h_z
+  errors: true
+  filename: tdata/staging/full/all.shuffle_plots.root
+  haloinfo:
+  - {bgpath: check/lower_hm2m/pos/h_z/hnu_stack_hists/halo_pos, logpath: p6.halo.q11t.pos/signal_lower_check_hm2m_plots/h_z,
+    scalepath: scalefactors/pos_check_lower}
+  - {bgpath: check/lower_hm2m/neg/h_z/hnu_stack_hists/halo_neg, logpath: p6.halo.q11t.neg/signal_lower_check_hm2m_plots/h_z,
+    scalepath: scalefactors/neg_check_lower}
+  halolog: tdata/staging/full/log_halo_sub.root
+  name: both_check_lower/h_z
+  selections: [check/lower_hm2m/pos/h_z, check/lower_hm2m/neg/h_z]
+- destfolder: both_check_lower/h_p
+  errors: true
+  filename: tdata/staging/full/all.shuffle_plots.root
+  haloinfo:
+  - {bgpath: check/lower_hm2m/pos/h_p/hnu_stack_hists/halo_pos, logpath: p6.halo.q11t.pos/signal_lower_check_hm2m_plots/h_p,
+    scalepath: scalefactors/pos_check_lower}
+  - {bgpath: check/lower_hm2m/neg/h_p/hnu_stack_hists/halo_neg, logpath: p6.halo.q11t.neg/signal_lower_check_hm2m_plots/h_p,
+    scalepath: scalefactors/neg_check_lower}
+  halolog: tdata/staging/full/log_halo_sub.root
+  name: both_check_lower/h_p
+  selections: [check/lower_hm2m/pos/h_p, check/lower_hm2m/neg/h_p]
+- destfolder: both_check_lower/h_cda
+  errors: true
+  filename: tdata/staging/full/all.shuffle_plots.root
+  haloinfo:
+  - {bgpath: check/lower_hm2m/pos/h_cda/hnu_stack_hists/halo_pos, logpath: p6.halo.q11t.pos/signal_lower_check_hm2m_plots/h_cda,
+    scalepath: scalefactors/pos_check_lower}
+  - {bgpath: check/lower_hm2m/neg/h_cda/hnu_stack_hists/halo_neg, logpath: p6.halo.q11t.neg/signal_lower_check_hm2m_plots/h_cda,
+    scalepath: scalefactors/neg_check_lower}
+  halolog: tdata/staging/full/log_halo_sub.root
+  name: both_check_lower/h_cda
+  selections: [check/lower_hm2m/pos/h_cda, check/lower_hm2m/neg/h_cda]
+- destfolder: both_check_lower/h_t
+  errors: true
+  filename: tdata/staging/full/all.shuffle_plots.root
+  haloinfo:
+  - {bgpath: check/lower_hm2m/pos/h_t/hnu_stack_hists/halo_pos, logpath: p6.halo.q11t.pos/signal_lower_check_hm2m_plots/h_t,
+    scalepath: scalefactors/pos_check_lower}
+  - {bgpath: check/lower_hm2m/neg/h_t/hnu_stack_hists/halo_neg, logpath: p6.halo.q11t.neg/signal_lower_check_hm2m_plots/h_t,
+    scalepath: scalefactors/neg_check_lower}
+  halolog: tdata/staging/full/log_halo_sub.root
+  name: both_check_lower/h_t
+  selections: [check/lower_hm2m/pos/h_t, check/lower_hm2m/neg/h_t]
+- destfolder: pos_check_full/h_m2m_kmu
+  errors: true
+  filename: tdata/staging/full/all.shuffle_plots.root
+  haloinfo:
+  - {bgpath: check/upper_hm2m/pos/h_m2m_kmu/hnu_stack_hists/halo_pos, logpath: p6.halo.q11t.pos/signal_upper_check_hm2m_plots/h_m2m_kmu,
+    scalepath: scalefactors/pos_check_upper}
+  - {bgpath: check/lower_hm2m/pos/h_m2m_kmu/hnu_stack_hists/halo_pos, logpath: p6.halo.q11t.pos/signal_lower_check_hm2m_plots/h_m2m_kmu,
+    scalepath: scalefactors/pos_check_lower}
+  halolog: tdata/staging/full/log_halo_sub.root
+  name: pos_check_full/h_m2m_kmu
+  selections: [check/upper_hm2m/pos/h_m2m_kmu, check/lower_hm2m/pos/h_m2m_kmu]
+- destfolder: pos_check_full/h_z
+  errors: true
+  filename: tdata/staging/full/all.shuffle_plots.root
+  haloinfo:
+  - {bgpath: check/upper_hm2m/pos/h_z/hnu_stack_hists/halo_pos, logpath: p6.halo.q11t.pos/signal_upper_check_hm2m_plots/h_z,
+    scalepath: scalefactors/pos_check_upper}
+  - {bgpath: check/lower_hm2m/pos/h_z/hnu_stack_hists/halo_pos, logpath: p6.halo.q11t.pos/signal_lower_check_hm2m_plots/h_z,
+    scalepath: scalefactors/pos_check_lower}
+  halolog: tdata/staging/full/log_halo_sub.root
+  name: pos_check_full/h_z
+  selections: [check/upper_hm2m/pos/h_z, check/lower_hm2m/pos/h_z]
+- destfolder: pos_check_full/h_p
+  errors: true
+  filename: tdata/staging/full/all.shuffle_plots.root
+  haloinfo:
+  - {bgpath: check/upper_hm2m/pos/h_p/hnu_stack_hists/halo_pos, logpath: p6.halo.q11t.pos/signal_upper_check_hm2m_plots/h_p,
+    scalepath: scalefactors/pos_check_upper}
+  - {bgpath: check/lower_hm2m/pos/h_p/hnu_stack_hists/halo_pos, logpath: p6.halo.q11t.pos/signal_lower_check_hm2m_plots/h_p,
+    scalepath: scalefactors/pos_check_lower}
+  halolog: tdata/staging/full/log_halo_sub.root
+  name: pos_check_full/h_p
+  selections: [check/upper_hm2m/pos/h_p, check/lower_hm2m/pos/h_p]
+- destfolder: pos_check_full/h_cda
+  errors: true
+  filename: tdata/staging/full/all.shuffle_plots.root
+  haloinfo:
+  - {bgpath: check/upper_hm2m/pos/h_cda/hnu_stack_hists/halo_pos, logpath: p6.halo.q11t.pos/signal_upper_check_hm2m_plots/h_cda,
+    scalepath: scalefactors/pos_check_upper}
+  - {bgpath: check/lower_hm2m/pos/h_cda/hnu_stack_hists/halo_pos, logpath: p6.halo.q11t.pos/signal_lower_check_hm2m_plots/h_cda,
+    scalepath: scalefactors/pos_check_lower}
+  halolog: tdata/staging/full/log_halo_sub.root
+  name: pos_check_full/h_cda
+  selections: [check/upper_hm2m/pos/h_cda, check/lower_hm2m/pos/h_cda]
+- destfolder: pos_check_full/h_t
+  errors: true
+  filename: tdata/staging/full/all.shuffle_plots.root
+  haloinfo:
+  - {bgpath: check/upper_hm2m/pos/h_t/hnu_stack_hists/halo_pos, logpath: p6.halo.q11t.pos/signal_upper_check_hm2m_plots/h_t,
+    scalepath: scalefactors/pos_check_upper}
+  - {bgpath: check/lower_hm2m/pos/h_t/hnu_stack_hists/halo_pos, logpath: p6.halo.q11t.pos/signal_lower_check_hm2m_plots/h_t,
+    scalepath: scalefactors/pos_check_lower}
+  halolog: tdata/staging/full/log_halo_sub.root
+  name: pos_check_full/h_t
+  selections: [check/upper_hm2m/pos/h_t, check/lower_hm2m/pos/h_t]
+- destfolder: neg_check_full/h_m2m_kmu
+  errors: true
+  filename: tdata/staging/full/all.shuffle_plots.root
+  haloinfo:
+  - {bgpath: check/upper_hm2m/neg/h_m2m_kmu/hnu_stack_hists/halo_neg, logpath: p6.halo.q11t.neg/signal_upper_check_hm2m_plots/h_m2m_kmu,
+    scalepath: scalefactors/neg_check_upper}
+  - {bgpath: check/lower_hm2m/neg/h_m2m_kmu/hnu_stack_hists/halo_neg, logpath: p6.halo.q11t.neg/signal_lower_check_hm2m_plots/h_m2m_kmu,
+    scalepath: scalefactors/neg_check_lower}
+  halolog: tdata/staging/full/log_halo_sub.root
+  name: neg_check_full/h_m2m_kmu
+  selections: [check/upper_hm2m/neg/h_m2m_kmu, check/lower_hm2m/neg/h_m2m_kmu]
+- destfolder: neg_check_full/h_z
+  errors: true
+  filename: tdata/staging/full/all.shuffle_plots.root
+  haloinfo:
+  - {bgpath: check/upper_hm2m/neg/h_z/hnu_stack_hists/halo_neg, logpath: p6.halo.q11t.neg/signal_upper_check_hm2m_plots/h_z,
+    scalepath: scalefactors/neg_check_upper}
+  - {bgpath: check/lower_hm2m/neg/h_z/hnu_stack_hists/halo_neg, logpath: p6.halo.q11t.neg/signal_lower_check_hm2m_plots/h_z,
+    scalepath: scalefactors/neg_check_lower}
+  halolog: tdata/staging/full/log_halo_sub.root
+  name: neg_check_full/h_z
+  selections: [check/upper_hm2m/neg/h_z, check/lower_hm2m/neg/h_z]
+- destfolder: neg_check_full/h_p
+  errors: true
+  filename: tdata/staging/full/all.shuffle_plots.root
+  haloinfo:
+  - {bgpath: check/upper_hm2m/neg/h_p/hnu_stack_hists/halo_neg, logpath: p6.halo.q11t.neg/signal_upper_check_hm2m_plots/h_p,
+    scalepath: scalefactors/neg_check_upper}
+  - {bgpath: check/lower_hm2m/neg/h_p/hnu_stack_hists/halo_neg, logpath: p6.halo.q11t.neg/signal_lower_check_hm2m_plots/h_p,
+    scalepath: scalefactors/neg_check_lower}
+  halolog: tdata/staging/full/log_halo_sub.root
+  name: neg_check_full/h_p
+  selections: [check/upper_hm2m/neg/h_p, check/lower_hm2m/neg/h_p]
+- destfolder: neg_check_full/h_cda
+  errors: true
+  filename: tdata/staging/full/all.shuffle_plots.root
+  haloinfo:
+  - {bgpath: check/upper_hm2m/neg/h_cda/hnu_stack_hists/halo_neg, logpath: p6.halo.q11t.neg/signal_upper_check_hm2m_plots/h_cda,
+    scalepath: scalefactors/neg_check_upper}
+  - {bgpath: check/lower_hm2m/neg/h_cda/hnu_stack_hists/halo_neg, logpath: p6.halo.q11t.neg/signal_lower_check_hm2m_plots/h_cda,
+    scalepath: scalefactors/neg_check_lower}
+  halolog: tdata/staging/full/log_halo_sub.root
+  name: neg_check_full/h_cda
+  selections: [check/upper_hm2m/neg/h_cda, check/lower_hm2m/neg/h_cda]
+- destfolder: neg_check_full/h_t
+  errors: true
+  filename: tdata/staging/full/all.shuffle_plots.root
+  haloinfo:
+  - {bgpath: check/upper_hm2m/neg/h_t/hnu_stack_hists/halo_neg, logpath: p6.halo.q11t.neg/signal_upper_check_hm2m_plots/h_t,
+    scalepath: scalefactors/neg_check_upper}
+  - {bgpath: check/lower_hm2m/neg/h_t/hnu_stack_hists/halo_neg, logpath: p6.halo.q11t.neg/signal_lower_check_hm2m_plots/h_t,
+    scalepath: scalefactors/neg_check_lower}
+  halolog: tdata/staging/full/log_halo_sub.root
+  name: neg_check_full/h_t
+  selections: [check/upper_hm2m/neg/h_t, check/lower_hm2m/neg/h_t]
+- destfolder: both_check_full/h_m2m_kmu
+  errors: true
+  filename: tdata/staging/full/all.shuffle_plots.root
+  haloinfo:
+  - {bgpath: check/upper_hm2m/pos/h_m2m_kmu/hnu_stack_hists/halo_pos, logpath: p6.halo.q11t.pos/signal_upper_check_hm2m_plots/h_m2m_kmu,
+    scalepath: scalefactors/pos_check_upper}
+  - {bgpath: check/lower_hm2m/pos/h_m2m_kmu/hnu_stack_hists/halo_pos, logpath: p6.halo.q11t.pos/signal_lower_check_hm2m_plots/h_m2m_kmu,
+    scalepath: scalefactors/pos_check_lower}
+  - {bgpath: check/upper_hm2m/neg/h_m2m_kmu/hnu_stack_hists/halo_neg, logpath: p6.halo.q11t.neg/signal_upper_check_hm2m_plots/h_m2m_kmu,
+    scalepath: scalefactors/neg_check_upper}
+  - {bgpath: check/lower_hm2m/neg/h_m2m_kmu/hnu_stack_hists/halo_neg, logpath: p6.halo.q11t.neg/signal_lower_check_hm2m_plots/h_m2m_kmu,
+    scalepath: scalefactors/neg_check_lower}
+  halolog: tdata/staging/full/log_halo_sub.root
+  name: both_check_full/h_m2m_kmu
+  selections: [check/upper_hm2m/pos/h_m2m_kmu, check/lower_hm2m/pos/h_m2m_kmu, check/upper_hm2m/neg/h_m2m_kmu,
+    check/lower_hm2m/neg/h_m2m_kmu]
+- destfolder: both_check_full/h_z
+  errors: true
+  filename: tdata/staging/full/all.shuffle_plots.root
+  haloinfo:
+  - {bgpath: check/upper_hm2m/pos/h_z/hnu_stack_hists/halo_pos, logpath: p6.halo.q11t.pos/signal_upper_check_hm2m_plots/h_z,
+    scalepath: scalefactors/pos_check_upper}
+  - {bgpath: check/lower_hm2m/pos/h_z/hnu_stack_hists/halo_pos, logpath: p6.halo.q11t.pos/signal_lower_check_hm2m_plots/h_z,
+    scalepath: scalefactors/pos_check_lower}
+  - {bgpath: check/upper_hm2m/neg/h_z/hnu_stack_hists/halo_neg, logpath: p6.halo.q11t.neg/signal_upper_check_hm2m_plots/h_z,
+    scalepath: scalefactors/neg_check_upper}
+  - {bgpath: check/lower_hm2m/neg/h_z/hnu_stack_hists/halo_neg, logpath: p6.halo.q11t.neg/signal_lower_check_hm2m_plots/h_z,
+    scalepath: scalefactors/neg_check_lower}
+  halolog: tdata/staging/full/log_halo_sub.root
+  name: both_check_full/h_z
+  selections: [check/upper_hm2m/pos/h_z, check/lower_hm2m/pos/h_z, check/upper_hm2m/neg/h_z,
+    check/lower_hm2m/neg/h_z]
+- destfolder: both_check_full/h_p
+  errors: true
+  filename: tdata/staging/full/all.shuffle_plots.root
+  haloinfo:
+  - {bgpath: check/upper_hm2m/pos/h_p/hnu_stack_hists/halo_pos, logpath: p6.halo.q11t.pos/signal_upper_check_hm2m_plots/h_p,
+    scalepath: scalefactors/pos_check_upper}
+  - {bgpath: check/lower_hm2m/pos/h_p/hnu_stack_hists/halo_pos, logpath: p6.halo.q11t.pos/signal_lower_check_hm2m_plots/h_p,
+    scalepath: scalefactors/pos_check_lower}
+  - {bgpath: check/upper_hm2m/neg/h_p/hnu_stack_hists/halo_neg, logpath: p6.halo.q11t.neg/signal_upper_check_hm2m_plots/h_p,
+    scalepath: scalefactors/neg_check_upper}
+  - {bgpath: check/lower_hm2m/neg/h_p/hnu_stack_hists/halo_neg, logpath: p6.halo.q11t.neg/signal_lower_check_hm2m_plots/h_p,
+    scalepath: scalefactors/neg_check_lower}
+  halolog: tdata/staging/full/log_halo_sub.root
+  name: both_check_full/h_p
+  selections: [check/upper_hm2m/pos/h_p, check/lower_hm2m/pos/h_p, check/upper_hm2m/neg/h_p,
+    check/lower_hm2m/neg/h_p]
+- destfolder: both_check_full/h_cda
+  errors: true
+  filename: tdata/staging/full/all.shuffle_plots.root
+  haloinfo:
+  - {bgpath: check/upper_hm2m/pos/h_cda/hnu_stack_hists/halo_pos, logpath: p6.halo.q11t.pos/signal_upper_check_hm2m_plots/h_cda,
+    scalepath: scalefactors/pos_check_upper}
+  - {bgpath: check/lower_hm2m/pos/h_cda/hnu_stack_hists/halo_pos, logpath: p6.halo.q11t.pos/signal_lower_check_hm2m_plots/h_cda,
+    scalepath: scalefactors/pos_check_lower}
+  - {bgpath: check/upper_hm2m/neg/h_cda/hnu_stack_hists/halo_neg, logpath: p6.halo.q11t.neg/signal_upper_check_hm2m_plots/h_cda,
+    scalepath: scalefactors/neg_check_upper}
+  - {bgpath: check/lower_hm2m/neg/h_cda/hnu_stack_hists/halo_neg, logpath: p6.halo.q11t.neg/signal_lower_check_hm2m_plots/h_cda,
+    scalepath: scalefactors/neg_check_lower}
+  halolog: tdata/staging/full/log_halo_sub.root
+  name: both_check_full/h_cda
+  selections: [check/upper_hm2m/pos/h_cda, check/lower_hm2m/pos/h_cda, check/upper_hm2m/neg/h_cda,
+    check/lower_hm2m/neg/h_cda]
+- destfolder: both_check_full/h_t
+  errors: true
+  filename: tdata/staging/full/all.shuffle_plots.root
+  haloinfo:
+  - {bgpath: check/upper_hm2m/pos/h_t/hnu_stack_hists/halo_pos, logpath: p6.halo.q11t.pos/signal_upper_check_hm2m_plots/h_t,
+    scalepath: scalefactors/pos_check_upper}
+  - {bgpath: check/lower_hm2m/pos/h_t/hnu_stack_hists/halo_pos, logpath: p6.halo.q11t.pos/signal_lower_check_hm2m_plots/h_t,
+    scalepath: scalefactors/pos_check_lower}
+  - {bgpath: check/upper_hm2m/neg/h_t/hnu_stack_hists/halo_neg, logpath: p6.halo.q11t.neg/signal_upper_check_hm2m_plots/h_t,
+    scalepath: scalefactors/neg_check_upper}
+  - {bgpath: check/lower_hm2m/neg/h_t/hnu_stack_hists/halo_neg, logpath: p6.halo.q11t.neg/signal_lower_check_hm2m_plots/h_t,
+    scalepath: scalefactors/neg_check_lower}
+  halolog: tdata/staging/full/log_halo_sub.root
+  name: both_check_full/h_t
+  selections: [check/upper_hm2m/pos/h_t, check/lower_hm2m/pos/h_t, check/upper_hm2m/neg/h_t,
+    check/lower_hm2m/neg/h_t]
+trigeffs: []

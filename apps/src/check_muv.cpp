@@ -23,6 +23,16 @@ struct chan_group
     std::vector<chan_info> chans;
 };
 
+void zero_errors( TGraphAsymmErrors& g )
+{
+    Int_t n = g.GetN();
+    for ( Int_t ibin =  0 ; ibin != n ; ++ibin )
+    {
+        g.SetPointEYlow(ibin, 0 );
+        g.SetPointEYhigh(ibin, 0 );
+    }
+}
+
 TGraphAsymmErrors substract_graph(const TGraphAsymmErrors& eff_data ,
        const TGraphAsymmErrors&  eff_mc )
 {
@@ -145,9 +155,14 @@ int main( int argc , char * argv[] )
             results.insert( std::make_pair(cg.name , teff) );
 
             cd_p( tfout.get() ,  cg.name / sel_folder  );
+
+            if ( cg.name == "mc" )
+            {
+                zero_errors( teff );
+            }
+
             teff.Write( plot_name.name.c_str() );
         }
-
 
         const TGraphAsymmErrors& eff_data = results.at( "data" );
         const TGraphAsymmErrors& eff_mc = results.at( "mc" );

@@ -70,12 +70,33 @@ namespace fn
 
     double get_chan_integral( std::string chan, const sumdef& sum );
 
+    std::unique_ptr<TH1> get_chan_hist( std::string chan, const sumdef& sum );
+
     //--------------------------------------------------
 
     class MonoHaloScale : public FlexHaloScale
     {
         public:
             MonoHaloScale( const YAML::Node instruct );
+            void compute_scaling();
+            double  get_halo_scale();
+            double  get_halo_scale_error();
+
+        private:
+            double halo_scale_;
+            double halo_scale_error_;
+
+            std::string halo_chan_;
+            sumdef halo_sumdef_;
+
+            std::string data_chan_;
+            sumdef data_sumdef_;
+    };
+
+    class MonoHaloFit : public FlexHaloScale
+    {
+        public:
+            MonoHaloFit( const YAML::Node instruct );
             void compute_scaling();
             double  get_halo_scale();
             double  get_halo_scale_error();
@@ -170,6 +191,36 @@ namespace fn
 
             std::unique_ptr<FlexKaonFlux> kaon_flux_;
             std::unique_ptr<FlexHaloScale> halo_scale_;
+
+            std::map<std::string, double> fid_weights_;
+            std::map<std::string, double> brs_;
+    };
+
+    //--------------------------------------------------
+
+    class HardcodeScaling : public SampleScaler
+    {
+        public:
+            HardcodeScaling( const YAML::Node& instruct );
+
+            double scale_hist( TH1& h, const YAML::Node& instruct ) const ;
+            void compute_scaling() ;
+
+            double get_halo_scale() const;
+            double get_halo_scale_error() const;
+
+            double get_peak_scale() const { return 1.0; }
+            double get_peak_scale_error() const  { return 1.0; }
+
+            double get_fiducial_flux() const;
+            double get_fiducial_flux_error() const ;
+
+        private:
+            double fiducial_flux_;
+            double fiducial_flux_err_;
+
+            double halo_scale_;
+            double halo_scale_err_;
 
             std::map<std::string, double> fid_weights_;
             std::map<std::string, double> brs_;

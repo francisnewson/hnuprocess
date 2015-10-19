@@ -1,0 +1,16 @@
+#Autopass
+- selection:
+    name: passer
+    type : auto_pass
+
+- output:
+    name: tfout
+    type: tfile
+    filename: kaon_stats.root
+
+- analysis:
+    name: kaon_props
+    type: KaonProp
+    selection: passer
+    tfile:  tfout
+    folder: kaon_props

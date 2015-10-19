@@ -23,6 +23,12 @@ namespace fn
         h_p_ = hs_.MakeTH1D( "h_p", "Kaon momentum", 
                 1500, 0, 200, "p" );
 
+        h_dxdz_ = hs_.MakeTH1D( "h_dxdz", "Kaon dxdz", 
+                10000, -4e-4, 4e-4, "dxdz" );
+
+        h_dydz_ = hs_.MakeTH1D( "h_dydz", "Kaon dydz", 
+                10000, -4e-4, 4e-4, "dydz" );
+
         h_chi2_ = hs_.MakeTH1D( "h_chi2_", "Chi2", 
                 1000, 0, 100, "chi2" );
     }
@@ -37,6 +43,10 @@ namespace fn
         h_pt_->Fill( k3pi_re.get_pt(), wgt  );
         h_chi2_->Fill( k3pi_re.get_chi2(), wgt  );
         h_p_->Fill( k3pi_re.get_mom(), wgt  );
+
+        TVector3 kaon_3mom = k3pi_re.get_kaon_mom();
+        h_dxdz_->Fill( kaon_3mom.X()  / kaon_3mom.Z() );
+        h_dydz_->Fill( kaon_3mom.Y()  / kaon_3mom.Z() );
     }
 
     void K3piPlots::end_processing()

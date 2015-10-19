@@ -18,7 +18,7 @@ using boost::filesystem::path;
 namespace fn
 {
 
-    void print_scaling( MultiScaling& ms, std::ostream& os )
+    void print_scaling( SampleScaler& ms, std::ostream& os )
     {
         boost::io::ios_flags_saver fs( os );
         os.setf(std::ios::fixed, std::ios::floatfield);
@@ -53,14 +53,17 @@ namespace fn
         //estimate k- flux from km2
         const YAML::Node& calib_km2_node = calib_node[ "km2_method" ];
 
-        calib_km2_scaling_ =  make_unique<MultiScaling>( calib_km2_node, calib_fid_weights, brs_ ); 
+        //calib_km2_scaling_ =  make_unique<MultiScaling>( calib_km2_node, calib_fid_weights, brs_ ); 
+        calib_km2_scaling_ = get_sample_scaler( calib_km2_node, calib_fid_weights, brs_ );
+
         calib_km2_scaling_->compute_scaling();
         std::cout << "\nCALIBRATION: km2\n";
         print_scaling( *calib_km2_scaling_, std::cout );
 
         //estimate k- flux from k3pi
         const YAML::Node& calib_k3pi_node = calib_node[ "k3pi_method" ];
-        calib_k3pi_scaling_ = make_unique<MultiScaling>( calib_k3pi_node, calib_fid_weights, brs_ );
+        //calib_k3pi_scaling_ = make_unique<MultiScaling>( calib_k3pi_node, calib_fid_weights, brs_ );
+        calib_k3pi_scaling_ = get_sample_scaler( calib_k3pi_node, calib_fid_weights, brs_ );
 
         calib_k3pi_scaling_->compute_scaling();
         std::cout << "\nCALIBRATION: k3pi\n";
@@ -84,6 +87,7 @@ namespace fn
         TFile scale_tf( scale_input_file.string().c_str() );
         RootTFileWrapper scale_rtfw( scale_tf );
         ChannelHistExtractor scale_ce( scale_rtfw );
+        scale_ce.reset_collapse();
 
         //Get channel lists
         std::vector<std::string> scale_halo_channels 
@@ -159,15 +163,15 @@ namespace fn
 
             //estimate k- flux from km2
             YAML::Node scaling = sub_node["scaling"];
-            MultiScaling this_scaling = 
-                MultiScaling( scaling, sub_fid_weights, brs_ );
+            //MultiScaling this_scaling = MultiScaling( scaling, sub_fid_weights, brs_ );
+            auto this_scaling = get_sample_scaler( scaling, sub_fid_weights, brs_ );
 
-            this_scaling.compute_scaling();
+            this_scaling->compute_scaling();
             std::cout << "CALIBRATION: km2\n";
-            print_scaling( this_scaling, std::cout );
+            print_scaling( *this_scaling, std::cout );
 
             //use correction factor
-            double corrected_flux = correction_factor_ * this_scaling.get_fiducial_flux();
+            double corrected_flux = correction_factor_ * this_scaling->get_fiducial_flux();
             std::cout << "Corrected flux: " << corrected_flux << std::endl;
 
             //Set up input file
@@ -175,6 +179,7 @@ namespace fn
             TFile tf( input_file.string().c_str() );
             RootTFileWrapper rtfw( tf );
             ChannelHistExtractor ce( rtfw );
+            ce.reset_collapse();
 
             //Get channel lists
             std::vector<std::string> halo_channels 
@@ -218,6 +223,8 @@ namespace fn
                 store_value( "k3pi_scale_factor" , scale_factor );
 
                 //So subtraction!
+                hhalo->Sumw2();
+                hpeak->Sumw2();
                 hhalo->Add( hpeak.get() , -1 );
                 hhalo->Write( "hcorr" );
 

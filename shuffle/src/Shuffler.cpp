@@ -18,8 +18,8 @@ namespace fn
 
     void do_the_shuffle(const YAML::Node& output_node,
             TFile& output_file,
-           scaling_map& scaling_info
-           )
+            scaling_map& scaling_info
+            )
     {
         //Setup input
         path stack_input_file = get_yaml<std::string>( output_node, "input_file" );
@@ -116,6 +116,28 @@ namespace fn
 
             cd_p( &tfout, name );
             hdata->Write( "hdata" );
+
+            //Do trig eff plots
+            if ( output_node["trig_plot"] )
+            {
+                auto num_chan = get_yaml<std::vector<std::string>>(
+                        output_node["trig_plot"], "numchannels" );
+
+                auto denom_chan = get_yaml<std::vector<std::string>>(
+                        output_node["trig_plot"], "denomchannels" );
+
+            std::unique_ptr<TH1> hnum =  get_summed_histogram( ce_stack,
+                    begin( num_chan ), end( num_chan ) );
+
+            std::unique_ptr<TH1> hdenom =  get_summed_histogram( ce_stack,
+                    begin( denom_chan ), end( denom_chan ) );
+
+            cd_p( &tfout, name );
+            hnum->Write( "htrig_num") ;
+            hdenom->Write( "htrig_denom") ;
+            hnum->Divide( hdenom.get() );
+            hnum->Write( "htrig_rat" );
+            }
 
             std::cout  << std::setw(40) << "Peak integrals: "
                 << "bg: " << integral( *hs.get_total_copy(), -0.1, 0.01 ) 

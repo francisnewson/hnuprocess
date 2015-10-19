@@ -333,6 +333,7 @@
     name: raw_single_muon
     type: SingleMuon
     method: raw
+    multiplier: 10
     inputs:
         ogt: bf_st
 
@@ -340,6 +341,7 @@
     name: auto_single_muon
     type: SingleMuon
     method: auto
+    multiplier: 10
     inputs:
         ogt: bf_st
 

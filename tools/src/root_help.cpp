@@ -7,6 +7,18 @@
 
 namespace fn
 {
+    void de_zero_hist( TH1& h )
+    {
+        int nBins = h.GetNbinsX();
+
+        for ( int ibin = 0 ; ibin != nBins +1 ; ++ ibin )
+        {
+            double value = h.GetBinContent( ibin );
+            if ( value < 0 ){ h.SetBinContent( ibin, 0 );
+            }
+        }
+    }
+
     //COLORS
     RootColors::RootColors()
         :colors_{ 
@@ -179,5 +191,27 @@ namespace fn
         }
 
     //--------------------------------------------------
+
+    double median(const TH1D * h1) { 
+
+        int n = h1->GetXaxis()->GetNbins();  
+        std::vector<double>  x(n);
+        h1->GetXaxis()->GetCenter( &x[0] );
+        const double * y = h1->GetArray(); 
+        // exclude underflow/overflows from bin content array y
+        return TMath::Median(n, &x[0], &y[1]); 
+    }
+
+    //--------------------------------------------------
+
+    SaveDirectory::SaveDirectory()
+        :td( gDirectory ), tf( gFile ){
+        }
+
+    SaveDirectory::~SaveDirectory()
+    {
+        gDirectory = td;
+        gFile = tf;
+    }
 
 }

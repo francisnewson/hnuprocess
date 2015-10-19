@@ -115,6 +115,13 @@ int main( int argc, char * argv[] )
 
             auto& tfile = tfl.get_tfile_opt( filename, "" );
             auto trig_eff = make_unique<TriggerApp>( tfile );
+            if ( trig_node["numname"] )
+            {
+                trig_eff->set_num_denom( 
+                        get_yaml<std::string>( trig_node, "numname" ),
+                        get_yaml<std::string>( trig_node, "denomname" ) );
+
+            }
             trig_eff->set_sels( sels );
             trig_eff->init();
 
@@ -135,26 +142,11 @@ int main( int argc, char * argv[] )
     std::string bg_filename = "tdata/staging/all.mass_plots.root";
     TFile tfin_bg{ bg_filename.c_str() };
 
-    HaloErrors he{ tfin_bg, tf_halo_log };
-    he.set_halo_info( {
-            { "neg/signal_lower_muv/h_m2m_kmu/hnu_stack_hists/halo_neg", 
-            "neg_lower", "p6.halo.q11t.neg/signal_lower_muv_plots/h_m2m_kmu" },
-            { "pos/signal_lower_muv/h_m2m_kmu/hnu_stack_hists/halo_pos", 
-            "pos_lower", "p6.halo.q11t.pos/signal_lower_muv_plots/h_m2m_kmu" } ,
-            { "neg/signal_upper_muv/h_m2m_kmu/hnu_stack_hists/halo_neg", 
-            "neg_upper", "p6.halo.q11t.neg/signal_upper_muv_plots/h_m2m_kmu" },
-            { "pos/signal_upper_muv/h_m2m_kmu/hnu_stack_hists/halo_pos", 
-            "pos_upper", "p6.halo.q11t.pos/signal_upper_muv_plots/h_m2m_kmu" } } );
 
     //Scattering
     TFile tfin_scat { "tdata/staging/km2_scat.root"};
     TFile tfin_noscat { "tdata/staging/km2_noscat.root"};
     ScatterContrib sc{ tfin_noscat, tfin_scat };
-
-    HistErrors hist_errors{};
-    hist_errors.set_trigger( *trig_effs["full_q11t_eff"] ); 
-    hist_errors.set_scatter_contrib( sc );
-    hist_errors.set_halo_errors( he );
 
     //**************************************************
     //Merge stacks
@@ -164,6 +156,7 @@ int main( int argc, char * argv[] )
 
     for ( auto& stack_node : stack_nodes )
     {
+        //Load main files and paths
         std::string name = get_yaml<std::string>( stack_node , "name" );
         std::string filename = get_yaml<std::string>( stack_node, "filename" );
         std::string destfolder = get_yaml<std::string>( stack_node, "destfolder" );
@@ -174,18 +167,60 @@ int main( int argc, char * argv[] )
         std::vector<std::string> paths 
             = get_yaml<std::vector<std::string>>( stack_node, "selections" );
 
-        auto data_stack  = extract_data_stack( tfin, paths );
+        std::pair<std::unique_ptr<TH1>, std::unique_ptr<OwningStack>> 
+            data_stack  = extract_data_stack( tfin, paths );
 
         TH1 * hbg = static_cast<TH1*>( data_stack.second->Stack().GetStack()->Last() );
         hbg->SetLineColor( kBlack );
         hbg->SetFillStyle( 0 );
 
-
+        //save raw data and background plots
         cd_p( &tfout, destfolder );
         data_stack.first->Write("hdata");
         data_stack.second->Write("hstack");
         hbg->SetLineColor( kOrange + 2 );
         hbg->Write("hbg_raw");
+
+        //Set up errors
+        HistErrors hist_errors{};
+        std::unique_ptr<HaloErrors> he;
+        if ( stack_node["trigeff"] )
+        {
+            std::string trig_name = get_yaml<std::string>( stack_node, "trigeff" );
+            hist_errors.set_trigger( *trig_effs[trig_name] ); 
+        }
+        if ( stack_node["scattererr"] && stack_node["scattererr"].as<bool>() )
+        {
+            hist_errors.set_scatter_contrib( sc );
+        }
+        if ( stack_node["halolog"] )
+        {
+            std::string halo_logfile = get_yaml<std::string>( stack_node, "halolog" );
+            auto& tf_halo = tfl.get_tfile_opt( halo_logfile, "" );
+
+            he = make_unique<HaloErrors>( tfin, tf_halo);
+            std::vector<HaloErrors::halo_info> all_halo_info;
+
+            for ( auto new_info : stack_node["haloinfo"] )
+            {
+                HaloErrors::halo_info new_hi{
+                    get_yaml<std::string>( new_info, "bgpath" ),
+                        get_yaml<std::string>( new_info, "scalepath" ),
+                        get_yaml<std::string>( new_info, "logpath" ) };
+                all_halo_info.push_back( new_hi );
+            }
+
+            if ( stack_node["haloshapeerr"] )
+            {
+                double shape_err = get_yaml<double>( stack_node, "haloshapeerr" );
+                he->set_shape_error_factor( shape_err );
+            }
+
+            he->set_halo_info( all_halo_info );
+            hist_errors.set_halo_errors( *he );
+        }
+
+        cd_p( &tfout, destfolder );
 
         if ( stack_node["cumulative_check" ] && ! stack_node["trigeff"] )
         {
@@ -230,6 +265,9 @@ int main( int argc, char * argv[] )
             auto h_errors = hist_errors.compute_errors( *static_cast<TH1D*>( hbg ) );
             std::cerr << "Done!" << std::endl;
             h_errors->Write( "hbg_err" );
+            auto h_err_ratio = uclone(data_stack.first);
+            h_err_ratio->Divide( h_errors.get() );
+            h_err_ratio->Write( "h_err_ratio" );
         }
     }
 
