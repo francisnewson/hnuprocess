@@ -229,6 +229,20 @@
         - zvertex
         - m2m
         - max_pt2
+          
+- selection:
+    name: k3pi_wide
+    type: CompositeSelection
+    children:
+        - weighted_data_sample
+        - found_k3pi
+        - pos_vertex
+        - track_sep
+        - max_dy
+        - chi2 
+        - zvertex
+        - max_pt2
+
 
 
 ###################################################
@@ -241,6 +255,15 @@
     selection: k3pi_full
     tfile: tfout
     folder: k3pi_plots
+    inputs:
+        k3pi_reco: k3pi_event
+            
+- analysis:
+    name: k3pi_wide_plots
+    type: K3piPlots
+    selection: k3pi_wide
+    tfile: tfout
+    folder: k3pi_wide_plots
     inputs:
         k3pi_reco: k3pi_event
 

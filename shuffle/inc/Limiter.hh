@@ -94,7 +94,7 @@ namespace fn
             double raw_trig_sqerr;
             double background;
             double background_err;
-            double dt_obs;;
+            double dt_obs;
             double acc_sig_ul;
             double orig_sig_ul;
             double rolke_orig_sig_ul;
@@ -220,6 +220,9 @@ namespace fn
                     std::vector<std::string> regions );
 
             HnuLimResult get_limit( const HnuLimParams& params );
+            std::map<std::string, double> 
+                get_channel_backgrounds( const HnuLimParams& params);
+
             std::pair<double,double> get_signal_range( TH1D& h );
 
             void set_bg_channels( std::vector<std::string> bgchans );
@@ -235,6 +238,10 @@ namespace fn
                 ( std::string pol,  std::string region );
 
             double get_background( double sig_min, double sig_max );
+
+            std::map<std::string,double> 
+                get_channel_backgrounds( double sig_min, double sig_max );
+
             double get_data( double sig_min, double sig_max );
             std::pair<double,double>
                 get_trig_eff( double sig_min, double sig_max );
@@ -246,6 +253,7 @@ namespace fn
             double compute_halo_shape_err( double sig_min, double sig_max );
             double compute_halo_k3pi_err( double sig_min, double sig_max );
             double get_halo_val( double sig_min, double sig_max );
+            double compute_km3_br_err( double sig_min, double sig_max );
 
             double n_sigma_range_;
 

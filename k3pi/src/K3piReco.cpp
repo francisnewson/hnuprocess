@@ -88,13 +88,13 @@ namespace fn
 
     bool K3piReco::process_event() const
     {
-        std::cerr << "processing k3pi" << std::endl;
-        std::cerr << e_->detector.nvertexs << std::endl;
+        //std::cerr << "processing k3pi" << std::endl;
+        //std::cerr << e_->detector.nvertexs << std::endl;
 
         //require 1 verte8
         if ( e_->detector.nvertexs != 1 ){ return false; }
 
-        std::cerr << "found 1 vtx" << std::endl;
+        //std::cerr << "found 1 vtx" << std::endl;
 
         fne::RecoVertex * rv = static_cast<fne::RecoVertex*>
             ( e_->detector.vertexs.At( 0 ) );
@@ -102,13 +102,13 @@ namespace fn
         //require 3 tracks
         if ( rv->nvertextracks != 3 ) {return false; }
 
-        std::cerr << "found 3 trkcs" << std::endl;
+        //std::cerr << "found 3 trkcs" << std::endl;
 
         //check charge
         int charge = rv->charge;
         if ( ( req_charge_) != 0 && (req_charge_ != charge) ){ return false; }
 
-        std::cerr << "good charge" << std::endl;
+        //std::cerr << "good charge" << std::endl;
 
         //extract track momenta and dch impact points
         std::vector<TLorentzVector> momenta;

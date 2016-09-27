@@ -27,7 +27,7 @@ my_libs = [
 'dch',
 'akl',
 'shuffle',
-'checkscales'
+#'checkscales'
 ]
 
 #Call Sconscript for each library

@@ -14,6 +14,9 @@ namespace fn
         h_m2_ = hs_.MakeTH1D( "h_m2m", "Reconstructed kaon mass",
                 1000, 0.20, 0.30 , "m^{2}_{miss}" );
 
+        h_mk_ = hs_.MakeTH1D( "h_mK", "Reconstructed kaon mass",
+                1000, 0.40, 0.60 , "m_K" );
+
         h_dm2_ = hs_.MakeTH1D( "h_dm2m", "Delta reconstructed kaon mass",
                 1000, -0.2, 0.2 , "m^{2}_{miss}" );
 
@@ -39,6 +42,7 @@ namespace fn
         double wgt = get_weight();
 
         h_m2_->Fill( k3pi_re.get_invariant_mass2(), wgt );
+        h_mk_->Fill( std::sqrt(k3pi_re.get_invariant_mass2()), wgt );
         h_dm2_->Fill( k3pi_re.get_invariant_mass2() - na62const::mK2, wgt );
         h_pt_->Fill( k3pi_re.get_pt(), wgt  );
         h_chi2_->Fill( k3pi_re.get_chi2(), wgt  );

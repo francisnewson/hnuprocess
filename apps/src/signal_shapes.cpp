@@ -136,6 +136,7 @@ void print_headings( std::ostream& os )
         << std::setw(15) << "err_hval"
         << std::setw(15) << "err_k3pi"
         << std::setw(15) << "err_hshape"
+        << std::setw(15) << "err_km3"
         << std::endl;
 }
 
@@ -219,6 +220,7 @@ void print_flat_result( std::ostream& os, const HnuLimParams& hlp, const HnuLimR
         << std::setw(15) <<  hlr.error_budget.at("err_hval")
         << std::setw(15) <<  hlr.error_budget.at("err_k3pi")
         << std::setw(15) <<  hlr.error_budget.at("err_hshape")
+        << std::setw(15) <<  hlr.error_budget.at("err_km3")
         << std::endl;
 }
 
@@ -234,6 +236,9 @@ int main()
 
     std::string keystring = "";
     std::string output = "tgt_lim";
+
+    //std::string keystring = "";
+    //std::string output = "tgt_lim_unitrig";
 
     auto key = keystring.c_str();
     auto out = output.c_str();
@@ -295,6 +300,8 @@ int main()
             } );
     trig.init();
 
+    UniformTrigger unitrig( 0.899, 0.025 );
+
     lm.set_trigger( trig );
 
     //Scattering
@@ -339,6 +346,19 @@ int main()
     bool do_default = true;
     bool do_width_scan = false;
 
+    std::ofstream osbg( "output/bg_breakdown.txt" );
+    osbg << std::setw(10) << "mass";
+    for( const auto&  bgchan : background_channels )
+    {
+        osbg << std::setw(10) << bgchan;
+    }
+    osbg << std::setw(10) << "bg";
+    osbg << std::setw(10) << "bg_trig";
+    osbg << std::setw(10) << "error";
+    osbg << std::setw(10) << "stat";
+    osbg << "\n";
+
+
     for ( const auto& mass : masses )
     {
         std::cerr << mass << std::endl;
@@ -360,6 +380,25 @@ int main()
                 //Print limit results
                 print_result( os, hlp, limres );
                 print_flat_result( ofs, hlp, limres );
+
+                //print background breakdown
+                auto bg_breakdown = lm.get_channel_backgrounds( hlp );
+                double total_background = 0;
+
+                osbg.precision(4);
+                osbg << std::setw(10) << mass;
+                for( const auto&  bgchan : background_channels )
+                {
+                    double bg = bg_breakdown.at( bgchan );
+                    total_background += bg;
+                    osbg << std::setw(10) << bg;
+                }
+                osbg << std::setw(10) << total_background;
+                osbg << std::setw(10) << limres.background;
+                osbg << std::setw(10) << limres.background_err ;
+                osbg << std::setw(10) << std::sqrt(limres.background) ;
+
+                osbg << "\n";
             }
             catch (std::exception & e)
             {
@@ -397,7 +436,8 @@ int main()
 
                     grad_buf.push_back( grad );
 
-                    if ( std::all_of( begin( grad_buf ), end( grad_buf ), []( double grad ){ return grad > 0 ; } ) )
+                    if ( std::all_of( begin( grad_buf ), end( grad_buf ), []( double grad )
+                                { return grad > 0 ; } ) )
                     {
                         break;
                     }

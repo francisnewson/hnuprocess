@@ -23,25 +23,26 @@ namespace fn
     {
         public:
             TriggerApp( TFile& tf );
-            void set_num_denom( std::string num_name, std::string denom_name );
-            void set_sels( std::vector<std::string> sels );
-            void init();
+            TriggerApp(){}
+            virtual void set_num_denom( std::string num_name, std::string denom_name );
+            virtual void set_sels( std::vector<std::string> sels );
+            virtual void init();
 
-            void rebin( int r );
+            virtual void rebin( int r );
 
-            const TH1D&  get_h_passed(){ return *h_passed_ ; }
-            const TH1D&  get_h_all(){ return *h_all_ ; }
+            virtual const TH1D&  get_h_passed(){ return *h_passed_ ; }
+            virtual const TH1D&  get_h_all(){ return *h_all_ ; }
 
-            std::pair<double,double> 
+            virtual std::pair<double,double> 
                 get_eff_err( double sigmin, double sigmax ) const;
-            double get_eff( double sigmin, double sigmax );
-            double get_err( double sigmin, double sigmax );
+            virtual double get_eff( double sigmin, double sigmax );
+            virtual double get_err( double sigmin, double sigmax );
 
-            bool correct_hist( TH1& h );
+            virtual bool correct_hist( TH1& h );
 
         private:
             std::vector<std::string> sels_;
-            TFile& tf_;
+            TFile* tf_;
             std::unique_ptr<TH1D> h_passed_;
             std::unique_ptr<TH1D> h_all_;
             std::string num_name_;
@@ -49,5 +50,20 @@ namespace fn
     };
 
     std::pair<double,double> eff_err( double passed, double all );
+
+    class UniformTrigger  : public TriggerApp
+    {
+        public:
+        UniformTrigger( double eff, double err ): eff_( eff ), err_( err ){}
+        double get_eff( double sigmin, double sigmax ){ return eff_;}
+        double get_err( double sigmin, double sigmax ){ return err_;}
+        std::pair<double,double> 
+            get_eff_err( double sigmin, double sigmax ) const
+            { return std::pair<double,double>{ eff_, err_ } ;}
+
+        private:
+        double eff_;
+        double err_;
+    };
 }
 #endif

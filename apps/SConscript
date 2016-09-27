@@ -22,7 +22,7 @@ lenv.AddLibs( [
             'akl',
             'shuffle',
             'k3pi',
-            'checkscales',
+            #'checkscales',
             ] )
 lenv.AddEvent( event_dir, 'event' )
 

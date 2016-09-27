@@ -236,6 +236,16 @@ namespace fn
                     "scalefactors/pos_ext_lower" };
         }
 
+    std::map<std::string, double> Limiter::get_channel_backgrounds( const HnuLimParams& params )
+    {
+        //Deterimine signal region
+        double sig_min = params.get_width_min();
+        double sig_max = params.get_width_max();
+
+        return get_channel_backgrounds( sig_min, sig_max );
+    }
+
+
     HnuLimResult Limiter::get_limit( const HnuLimParams& params )
     {
         //Deterimine signal region
@@ -317,6 +327,10 @@ namespace fn
         //square here becuase we sqrt everyting later
         res.error_budget["halototal" ] =fn::sq(get_halo_val( sig_min, sig_max ));
 
+        double sq_km3_br_err = fn::sq( compute_km3_br_err(  sig_min,  sig_max ));
+        sqr_background_err += sq_km3_br_err;
+        res.error_budget["err_km3" ] =sq_km3_br_err;
+
         //remember to square root
         double background_err = std::sqrt( sqr_background_err );
 
@@ -364,12 +378,12 @@ namespace fn
 
             res.error_budget["err_trig"] = sq_trig_eff_contrib;
 
-           // std::cout << "raw_ul: " <<  raw_ul << std::endl;
-           // std::cout << "raw_ul_mu: " <<  raw_ul_mu << std::endl;
-           // std::cout << "trig_rel_err: " <<  raw_ul_mu  / ( 1 - raw_ul_mu / background ) * ( 1 - trig_eff ) /background  << std::endl;
-           // std::cout << "sq_extra_trig: " << sq_extra_trig << std::endl;
-           // std::cout << "sq_trig_eff_contrib after trig dodge: " << sq_trig_eff_contrib << std::endl;
-           // std::cout << "bg_err after trig dodge: " << background_err << std::endl;
+            // std::cout << "raw_ul: " <<  raw_ul << std::endl;
+            // std::cout << "raw_ul_mu: " <<  raw_ul_mu << std::endl;
+            // std::cout << "trig_rel_err: " <<  raw_ul_mu  / ( 1 - raw_ul_mu / background ) * ( 1 - trig_eff ) /background  << std::endl;
+            // std::cout << "sq_extra_trig: " << sq_extra_trig << std::endl;
+            // std::cout << "sq_trig_eff_contrib after trig dodge: " << sq_trig_eff_contrib << std::endl;
+            // std::cout << "bg_err after trig dodge: " << background_err << std::endl;
         }
 
         //**************************************************
@@ -522,6 +536,56 @@ namespace fn
                     auto h = get_bg_hist( chan, pol, region);
 
                     //treat negative values conservatively
+                    double contrib = integral( *h, sig_min, sig_max );
+                    chan_background +=  contrib;
+                }
+            }
+
+            if ( chan_background < 0 )
+            {
+                std::cerr << "Ignoring negative value for "
+                    << chan << std::endl;
+            }
+            else
+            {
+                total_background += chan_background;
+            }
+        }
+
+        return total_background;
+    }
+    double Limiter::compute_km3_br_err( double sig_min, double sig_max )
+    {
+        double total_background = 0;
+        std::string chan = "km3";
+        for ( auto& pol : pols_ )
+        {
+            for ( auto& region : regions_ )
+            {
+                auto h = get_bg_hist( chan, pol, region);
+                double contrib = integral( *h, sig_min, sig_max );
+                total_background +=  contrib;
+            }
+        }
+
+        return 0.01 * total_background;
+    }
+
+    std::map<std::string,double> Limiter::get_channel_backgrounds(double sig_min, double sig_max )
+    {
+        double total_background = 0;
+        std::map<std::string,double> result;
+
+        for ( auto& chan : bg_channels_ )
+        {
+            double chan_background = 0;
+            for ( auto& pol : pols_ )
+            {
+                for ( auto& region : regions_ )
+                {
+                    auto h = get_bg_hist( chan, pol, region);
+
+                    //treat negative values conservatively
 
                     double contrib = integral( *h, sig_min, sig_max );
 
@@ -535,10 +599,11 @@ namespace fn
                     << chan << std::endl;
             }
 
+            result.insert( std::make_pair( chan, chan_background ) );
             total_background += chan_background;
         }
 
-        return total_background;
+        return result;
     }
 
     double Limiter::get_data(double sig_min, double sig_max )
@@ -773,6 +838,8 @@ namespace fn
             }
 
             double k3pi_scale_rel_err = 0.02 / 0.561;
+            //double k3pi_scale_rel_err = 0.20 / 0.561;
+            //double k3pi_scale_rel_err = 0.06 / 0.561;
             total_sqerr += fn::sq(halo_scale * k3pi_scale * n_peak * k3pi_scale_rel_err );
         }
 

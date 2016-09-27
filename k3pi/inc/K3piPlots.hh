@@ -38,6 +38,7 @@ namespace fn
             HistStore hs_;
 
             TH1D * h_m2_;
+            TH1D * h_mk_;
             TH1D * h_dm2_;
             TH1D * h_pt_;
             TH1D * h_chi2_;

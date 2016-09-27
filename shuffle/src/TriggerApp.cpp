@@ -7,7 +7,7 @@
 namespace fn
 {
     TriggerApp::TriggerApp( TFile& tf )
-        :tf_( tf ){}
+        :tf_( &tf ){}
 
     void TriggerApp::set_num_denom( std::string num_name, std::string denom_name )
     {
@@ -28,9 +28,9 @@ namespace fn
         for ( auto sel : sels_ )
         {
             boost::filesystem::path folder {sel};
-            auto ih_passed = extract_hist<TH1D>(tf_,  folder / num_name_);
+            auto ih_passed = extract_hist<TH1D>(*tf_,  folder / num_name_);
             vh_passed.push_back( std::move(ih_passed ) ) ;
-            auto ih_all = extract_hist<TH1D>( tf_, folder / denom_name_ ); 
+            auto ih_all = extract_hist<TH1D>( *tf_, folder / denom_name_ ); 
             vh_all.push_back( std::move(ih_all ) ) ;
         }
 

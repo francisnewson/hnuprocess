@@ -134,6 +134,30 @@
     inputs:
         ogt: bf_st
 
+- selection: { name: mom10, type: TrackMomentum,
+    min: 5, max: 15 ,
+    inputs: { ogt: bf_st } }
+
+- selection: { name: mom20, type: TrackMomentum,
+    min: 15, max: 25 ,
+    inputs: { ogt: bf_st } }
+
+- selection: { name: mom30, type: TrackMomentum,
+    min: 25, max: 35 ,
+    inputs: { ogt: bf_st } }
+
+- selection: { name: mom40, type: TrackMomentum,
+    min: 35, max: 45 ,
+    inputs: { ogt: bf_st } }
+
+- selection: { name: mom50, type: TrackMomentum,
+    min: 45, max: 55 ,
+    inputs: { ogt: bf_st } }
+
+- selection: { name: mom60, type: TrackMomentum,
+    min: 55, max: 65 ,
+    inputs: { ogt: bf_st } }
+
 # 6] LKr Veto
 - input:
     name: rk_km2_clusters
@@ -320,6 +344,13 @@
         - tight_mass_full_mom
         - high_mom
 
+- selection: { name: tm_mom10, type: CompositeSelection, children: [ tight_mass_full_mom, mom10] }
+- selection: { name: tm_mom20, type: CompositeSelection, children: [ tight_mass_full_mom, mom20] }
+- selection: { name: tm_mom30, type: CompositeSelection, children: [ tight_mass_full_mom, mom30] }
+- selection: { name: tm_mom40, type: CompositeSelection, children: [ tight_mass_full_mom, mom40] }
+- selection: { name: tm_mom50, type: CompositeSelection, children: [ tight_mass_full_mom, mom50] }
+- selection: { name: tm_mom60, type: CompositeSelection, children: [ tight_mass_full_mom, mom60] }
+
 #tight muv full mom
 - selection:
     name: tight_muv_all_mass
@@ -410,6 +441,42 @@
     inputs:
         ogt: bf_st
         sm: auto_single_muon
+
+- Analysis: { name: check_multiplier_10, type: MuonMultiplierEfficiency,
+    tfile: tfout, folder: check_multiplier_10,
+    selection: tm_mom10,
+    multiplier_values: [ 0.0, 0.5, 1, 1.5,  2, 2.5, 3, 3.5, 4.0, 4.5, 5.0, 5.5, 6.0, 6.5, 7.0, 8.0, 9.0 ],
+    inputs: { ogt: bf_st, sm: auto_single_muon } }
+
+- Analysis: { name: check_multiplier_20, type: MuonMultiplierEfficiency,
+    tfile: tfout, folder: check_multiplier_20,
+    selection: tm_mom20,
+    multiplier_values: [ 0.0, 0.5, 1, 1.5,  2, 2.5, 3, 3.5, 4.0, 4.5, 5.0, 5.5, 6.0, 6.5, 7.0, 8.0, 9.0 ],
+    inputs: { ogt: bf_st, sm: auto_single_muon } }
+
+- Analysis: { name: check_multiplier_30, type: MuonMultiplierEfficiency,
+    tfile: tfout, folder: check_multiplier_30,
+    selection: tm_mom30,
+    multiplier_values: [ 0.0, 0.5, 1, 1.5,  2, 2.5, 3, 3.5, 4.0, 4.5, 5.0, 5.5, 6.0, 6.5, 7.0, 8.0, 9.0 ],
+    inputs: { ogt: bf_st, sm: auto_single_muon } }
+
+- Analysis: { name: check_multiplier_40, type: MuonMultiplierEfficiency,
+    tfile: tfout, folder: check_multiplier_40,
+    selection: tm_mom40,
+    multiplier_values: [ 0.0, 0.5, 1, 1.5,  2, 2.5, 3, 3.5, 4.0, 4.5, 5.0, 5.5, 6.0, 6.5, 7.0, 8.0, 9.0 ],
+    inputs: { ogt: bf_st, sm: auto_single_muon } }
+
+- Analysis: { name: check_multiplier_50, type: MuonMultiplierEfficiency,
+    tfile: tfout, folder: check_multiplier_50,
+    selection: tm_mom50,
+    multiplier_values: [ 0.0, 0.5, 1, 1.5,  2, 2.5, 3, 3.5, 4.0, 4.5, 5.0, 5.5, 6.0, 6.5, 7.0, 8.0, 9.0 ],
+    inputs: { ogt: bf_st, sm: auto_single_muon } }
+
+- Analysis: { name: check_multiplier_60, type: MuonMultiplierEfficiency,
+    tfile: tfout, folder: check_multiplier_60,
+    selection: tm_mom60,
+    multiplier_values: [ 0.0, 0.5, 1, 1.5,  2, 2.5, 3, 3.5, 4.0, 4.5, 5.0, 5.5, 6.0, 6.5, 7.0, 8.0, 9.0 ],
+    inputs: { ogt: bf_st, sm: auto_single_muon } }
 
 - analysis:
     type: Summary
